@@ -127,22 +127,32 @@ fn main() {
     open::that(url);
 }
 
+/// Run HKDF crypto.
+///
+/// # Arguments
+/// * length - Length of the derived key value that is returned.
+/// * ikm - The input keying material.
+/// * info - Optional context and application specific information to use.
+///
+/// # Returns
+/// The output keying material, with the length as as specified in the `length`
+/// argument.
 fn hkdf<'a>(
     length: usize,
     ikm: &[u8],
-    salt: Option<&[u8]>,
     info: Option<&[u8]>
 ) -> Vec<u8> {
-    // Get the salt and info parameters, use defaults if undefined
-    let salt = salt.unwrap_or(b"");
+    // Unwrap info or use empty info
     let info = info.unwrap_or(b"");
 
-    // Define the digest to use
+    // Construct the digest to use
     let digest = Sha256::new();
 
+    // Invoke HKDF extract, create a pseudo random key
     let mut pkr: Vec<u8> = vec![0u8; digest.output_bytes()];
-    hkdf_extract(digest, salt, ikm, &mut pkr);
+    hkdf_extract(digest, b"", ikm, &mut pkr);
 
+    // Invoke HKDF expand, create the output keying material
     let mut okm: Vec<u8> = vec![0u8; length];
     hkdf_expand(digest, &pkr, info, &mut okm);
 
@@ -150,12 +160,12 @@ fn hkdf<'a>(
 }
 
 fn derive_file_key(secret: &[u8]) -> Vec<u8> {
-    hkdf(16, secret, None, Some(b"encryption"))
+    hkdf(16, secret, Some(b"encryption"))
 }
 
 fn derive_auth_key(secret: &[u8], password: Option<String>, url: Option<String>) -> Vec<u8> {
     if password.is_none() {
-        hkdf(64, secret, None, Some(b"authentication"))
+        hkdf(64, secret, Some(b"authentication"))
     } else {
         // TODO: implement this
         unimplemented!();
@@ -163,18 +173,19 @@ fn derive_auth_key(secret: &[u8], password: Option<String>, url: Option<String>)
 }
 
 fn derive_meta_key(secret: &[u8]) -> Vec<u8> {
-    hkdf(16, secret, None, Some(b"metadata"))
+    hkdf(16, secret, Some(b"metadata"))
 }
 
+/// File metadata, which is send to the server.
 #[derive(Serialize)]
 struct Metadata {
-    /// The input vector
+    /// The input vector.
     iv: String,
 
-    /// The file name
+    /// The file name.
     name: String,
 
-    /// The file mimetype
+    /// The file mimetype.
     #[serde(rename="type")]
     mime: String,
 }
@@ -200,6 +211,11 @@ impl Metadata {
     }
 }
 
+/// A X-File-Metadata header for reqwest, that is used to pass encrypted
+/// metadata to the server.
+///
+/// The encrypted metadata (bytes) is base64 encoded when constructing this
+/// header using `from`.
 #[derive(Clone)]
 struct XFileMetadata {
     /// The metadata, as a base64 encoded string.
@@ -207,14 +223,11 @@ struct XFileMetadata {
 }
 
 impl XFileMetadata {
-    pub fn new(metadata: String) -> Self {
-        XFileMetadata {
-            metadata,
-        }
-    }
-
+    /// Construct the header from the given encrypted metadata.
     pub fn from(bytes: &[u8]) -> Self {
-        XFileMetadata::new(base64_encode(bytes))
+        XFileMetadata {
+            metadata: base64_encode(bytes),
+        }
     }
 }
 
@@ -234,12 +247,15 @@ impl Header for XFileMetadata {
     }
 }
 
-/// A file reader, that encrypts the file with the given cipher, and appends
-/// the raw cipher tag.
+/// A file reader, that encrypts the file that is read with the given
+/// `cipher`, and appends the cipher tag to the end of it.
 ///
-/// This reader is lazy, and reads/encrypts the file on the fly.
+/// This reader is not lazy, and loads the whole file in memory to
+/// encrypt it at once. Also, a buffer is created to copy the encrypted file
+/// into.
 ///
-/// TODO: the current implementation is not lazy
+/// This object requires about twice the memory as the size of the file that is
+/// encrypted when constructed.
 struct EncryptedFileReaderTagged {
     /// A cursor that reads encrypted file data.
     data: Cursor<Vec<u8>>,
@@ -249,18 +265,24 @@ struct EncryptedFileReaderTagged {
 }
 
 impl EncryptedFileReaderTagged {
-    /// Construct a new reader.
+    /// Construct a new reader for the given `file` with the given `cipher`.
+    ///
+    /// This method consumes twice the size of the file in memory while
+    /// constructing, and constructs a reader that has a size similar to the
+    /// file.
     pub fn new(mut file: File, mut cipher: AesGcm<'static>) -> Self {
-        // Get the file length
+        // Get the length of the file
         let len = file.metadata().unwrap().len() as usize;
 
-        // Create a file data buffer and an encrypted buffer
+        // Read the whole file in a data buffer
         let mut data = Vec::with_capacity(len);
         file.read_to_end(&mut data).unwrap();
-        let mut encrypted = vec![0u8; data.len()];
 
-        // Encrypt the data, get the tag
+        // Create an encrypted and tag buffer
+        let mut encrypted = vec![0u8; data.len()];
         let mut tag = vec![0u8; TAG_LEN];
+
+        // Encrypt the file, set the tag
         cipher.encrypt(&data, &mut encrypted, &mut tag);
 
         // Construct the reader and return
@@ -298,7 +320,7 @@ impl Read for EncryptedFileReaderTagged {
 /// include the required secret in the URL.
 #[derive(Debug, Deserialize)]
 struct UploadResponse {
-    /// The URL the file is reachable at.
+    /// unkhe URL the file is reachable at.
     /// This includes the file ID, but does not include the secret.
     url: String,
 
