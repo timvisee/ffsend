@@ -1,3 +1,4 @@
 .*.sw[po]
 /target
 **/*.rs.bk
+.idea/

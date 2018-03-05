@@ -4,6 +4,7 @@ extern crate crypto;
 extern crate hyper;
 extern crate mime_guess;
 extern crate open;
+extern crate openssl;
 extern crate rand;
 extern crate reqwest;
 #[macro_use]
@@ -12,7 +13,7 @@ extern crate serde_json;
 
 use std::fmt;
 use std::fs::File;
-use std::io::{self, Cursor, Read};
+use std::io::{self, BufReader, Cursor, Read};
 use std::path::Path;
 
 use clap::{App, Arg};
@@ -24,6 +25,11 @@ use crypto::hkdf::{hkdf_extract, hkdf_expand};
 use crypto::sha2::Sha256;
 use hyper::error::Error as HyperError;
 use mime_guess::Mime;
+use openssl::symm::{
+    Cipher,
+    Crypter,
+    Mode as CrypterMode,
+};
 use rand::{Rng, thread_rng};
 use reqwest::header::{
     Authorization,
@@ -77,9 +83,10 @@ fn main() {
     let auth_key = derive_auth_key(&secret, None, None);
     let meta_key = derive_meta_key(&secret);
 
-    // Generate a file and meta cipher
-    // TODO: use the proper key size here, and the proper aad
-    let file_cipher = AesGcm::new(KeySize::KeySize128, &encrypt_key, &iv, b"");
+    // Choose a file and meta cipher type
+    let cipher = Cipher::aes_128_gcm();
+
+    // Generate a meta cipher
     let mut meta_cipher = AesGcm::new(KeySize::KeySize128, &meta_key, &[0u8; 12], b"");
 
     // Guess the mimetype of the file
@@ -97,7 +104,15 @@ fn main() {
 
     // Open the file and create an encrypted file reader
     let file = File::open(path).unwrap();
-    let reader = EncryptedFileReaderTagged::new(file, file_cipher);
+    let reader = EncryptedFileReaderTagged::new(
+        file,
+        cipher,
+        &encrypt_key,
+        &iv,
+    );
+
+    // Buffer the encrypted reader
+    let reader = BufReader::new(reader);
 
     // Build the file part, configure the form to send
     let part = Part::reader(reader)
@@ -124,8 +139,11 @@ fn main() {
     println!("Download URL: {}", url);
 
     // Open the URL in the browser
-    open::that(url);
+    open::that(url).expect("failed to open URL");
 }
+
+// TODO: implement this some other way
+unsafe impl Send for EncryptedFileReaderTagged {}
 
 /// Run HKDF crypto.
 ///
@@ -163,7 +181,7 @@ fn derive_file_key(secret: &[u8]) -> Vec<u8> {
     hkdf(16, secret, Some(b"encryption"))
 }
 
-fn derive_auth_key(secret: &[u8], password: Option<String>, url: Option<String>) -> Vec<u8> {
+fn derive_auth_key(secret: &[u8], password: Option<String>, _url: Option<String>) -> Vec<u8> {
     if password.is_none() {
         hkdf(64, secret, Some(b"authentication"))
     } else {
@@ -247,21 +265,27 @@ impl Header for XFileMetadata {
     }
 }
 
-/// A file reader, that encrypts the file that is read with the given
-/// `cipher`, and appends the cipher tag to the end of it.
+/// A lazy file reader, that encrypts the file with the given `cipher`
+/// and appends the GCM tag to the end of it.
 ///
-/// This reader is not lazy, and loads the whole file in memory to
-/// encrypt it at once. Also, a buffer is created to copy the encrypted file
-/// into.
+/// This reader is lazy because the file data loaded from the system
+/// and encrypted when it is read from the reader.
+/// This greatly reduces memory usage for large files.
 ///
-/// This object requires about twice the memory as the size of the file that is
-/// encrypted when constructed.
+/// This reader encrypts the file data with an appended GCM tag.
 struct EncryptedFileReaderTagged {
-    /// A cursor that reads encrypted file data.
-    data: Cursor<Vec<u8>>,
+    /// The file to read.
+    file: File,
 
-    /// A tag cursor that reads the tag to append.
-    tag: Cursor<Vec<u8>>,
+    /// The cipher that is used for decryption.
+    cipher: Cipher,
+
+    /// The crypter used to encrypt the file data.
+    crypter: Crypter,
+
+    /// A tag cursor that reads the tag to append,
+    /// when the file is fully read and the tag is known.
+    tag: Option<Cursor<Vec<u8>>>,
 }
 
 impl EncryptedFileReaderTagged {
@@ -270,43 +294,78 @@ impl EncryptedFileReaderTagged {
     /// This method consumes twice the size of the file in memory while
     /// constructing, and constructs a reader that has a size similar to the
     /// file.
-    pub fn new(mut file: File, mut cipher: AesGcm<'static>) -> Self {
-        // Get the length of the file
-        let len = file.metadata().unwrap().len() as usize;
-
-        // Read the whole file in a data buffer
-        let mut data = Vec::with_capacity(len);
-        file.read_to_end(&mut data).unwrap();
-
-        // Create an encrypted and tag buffer
-        let mut encrypted = vec![0u8; data.len()];
-        let mut tag = vec![0u8; TAG_LEN];
-
-        // Encrypt the file, set the tag
-        cipher.encrypt(&data, &mut encrypted, &mut tag);
-
-        // Construct the reader and return
+    pub fn new(file: File, cipher: Cipher, key: &[u8], iv: &[u8]) -> Self {
+        // TODO: return proper errors from crypter
         EncryptedFileReaderTagged {
-            data: Cursor::new(encrypted),
-            tag: Cursor::new(tag),
+            file,
+            cipher,
+            crypter: Crypter::new(
+                cipher,
+                CrypterMode::Encrypt,
+                key,
+                Some(iv),
+            ).unwrap(),
+            tag: None,
         }
     }
 }
 
 impl Read for EncryptedFileReaderTagged {
     fn read(&mut self, buf: &mut [u8]) -> Result<usize, io::Error> {
-        // Read the data if we haven't started with the tag yet
-        if self.tag.position() == 0 {
-            // Read and return if something was read
-            let result = self.data.read(buf);
-            match result {
-                Ok(len) if len > 0 => return result,
-                _ => {},
-            }
+        // If the tag reader has been created, read from it
+        if let Some(ref mut tag) = self.tag {
+            return tag.read(buf);
         }
 
-        // Read the tag if it's empty
-        self.tag.read(buf)
+        // Get the block size
+        let block_size = self.cipher.block_size();
+
+        // Create a raw file buffer
+        let mut raw = vec![0u8; buf.len() - block_size];
+
+        // TODO: remove after debugging
+        println!("DEBUG: Reading raw: {} (buf size: {})", raw.len(), buf.len());
+
+        // Read from the file, and truncate the buffer
+        let len = self.file.read(&mut raw)?;
+        raw.truncate(len);
+
+        // Encrypt raw data if if something was read
+        if len > 0 {
+            // Encrypt the raw data
+            // TODO: store raw bytes that were not encrypted yet
+            let len_enc = self.crypter.update(&raw, buf).unwrap();
+
+            // TODO: remove after debugging
+            println!("DEBUG: Read: {}; Encrypted: {}", len, len_enc);
+
+            // Return the number of encrypted bytes
+            return Ok(len_enc);
+        }
+
+        // Create a buffer for data that might be returned when finalizing
+        let mut output = vec![0u8; block_size];
+
+        // Finalize the crypter, truncate the output
+        let len = self.crypter.finalize(&mut output).unwrap();
+        //output.truncate(len);
+
+        // TODO: remove after debugging
+        if len > 0 {
+            println!("DEBUG: Read {} more bytes when finalized!", len);
+        }
+
+        // Create a buffer for the tag
+        let mut tag = vec![0u8; TAG_LEN];
+
+        // Get the tag
+        self.crypter.get_tag(&mut tag).unwrap();
+
+        // Set the tag
+        self.tag = Some(Cursor::new(tag));
+
+        // Read again, to start reading the tag
+        self.read(buf)
     }
 }
 
