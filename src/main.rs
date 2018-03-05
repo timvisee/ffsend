@@ -12,7 +12,6 @@ use std::fmt;
 use std::fs::File;
 use std::io::{self, Cursor, Read};
 use std::path::Path;
-use std::sync::{Arc, Mutex};
 
 use crypto::aead::AeadEncryptor;
 use crypto::aes::KeySize;
@@ -101,71 +100,55 @@ const TAG_LEN: usize = 16;
 /// the raw cipher tag.
 ///
 /// This reader is lazy, and reads/encrypts the file on the fly.
-struct EncryptedFileReaderTagged<'a> {
-    /// The file that is being read.
-    file: File,
+///
+/// TODO: the current implementation is not lazy
+struct EncryptedFileReaderTagged {
+    /// A cursor that reads encrypted file data.
+    data: Cursor<Vec<u8>>,
 
-    /// The cipher to use.
-    cipher: Arc<Mutex<AesGcm<'a>>>,
-
-    /// The crypto tag.
-    tag: [u8; TAG_LEN],
-
-    /// A tag cursor, used as reader for the appended tag.
-    tag_cursor: Option<Cursor<Vec<u8>>>,
+    /// A tag cursor that reads the tag to append.
+    tag: Cursor<Vec<u8>>,
 }
 
-impl<'a: 'static> EncryptedFileReaderTagged<'a> {
+impl EncryptedFileReaderTagged {
     /// Construct a new reader.
-    // TODO: try to borrow here
-    pub fn new(file: File, cipher: AesGcm<'a>) -> Self {
+    pub fn new(mut file: File, mut cipher: AesGcm<'static>) -> Self {
+        // Get the file length
+        let len = file.metadata().unwrap().len() as usize;
+
+        // Create a file data buffer and an encrypted buffer
+        let mut data = Vec::with_capacity(len);
+        file.read_to_end(&mut data).unwrap();
+        let mut encrypted = vec![0u8; data.len()];
+
+        // Encrypt the data, get the tag
+        let mut tag = vec![0u8; TAG_LEN];
+        cipher.encrypt(&data, &mut encrypted, &mut tag);
+
+        // Construct the reader and return
         EncryptedFileReaderTagged {
-            file,
-            cipher: Arc::new(Mutex::new(cipher)),
-            tag: [0u8; TAG_LEN],
-            tag_cursor: None,
+            data: Cursor::new(encrypted),
+            tag: Cursor::new(tag),
         }
-    }
-
-    /// Get the length.
-    pub fn len(&self) -> Result<u64, io::Error> {
-        Ok(self.file.metadata()?.len() + TAG_LEN as u64)
     }
 }
 
-impl<'a: 'static> Read for EncryptedFileReaderTagged<'a> {
+impl Read for EncryptedFileReaderTagged {
     fn read(&mut self, buf: &mut [u8]) -> Result<usize, io::Error> {
-        // Create a buffer with the same size, for the raw data
-        let mut raw = vec![0u8; buf.len()];
-
-        // Read from the file
-        let len = self.file.read(&mut raw)?;
-
-        // Encrypt the read data
-        if len > 0 {
-            // Lock the cipher mutex
-            let mut cipher = self.cipher.lock().unwrap();
-
-            // Encrypt the raw slice, put it into the user buffer
-            println!("DEBUG: Tag (from): {:?}", self.tag);
-            cipher.encrypt(&raw[..len], buf, &mut self.tag);
-            println!("DEBUG: Tag (to): {:?}", self.tag);
-
-            Ok(len)
-        } else {
-            // Initialise the tag cursor
-            if self.tag_cursor.is_none() {
-                self.tag_cursor = Some(Cursor::new(self.tag.to_vec()));
+        // Read the data if we haven't started with the tag yet
+        if self.tag.position() == 0 {
+            // Read and return if something was read
+            let result = self.data.read(buf);
+            match result {
+                Ok(len) if len > 0 => return result,
+                _ => {},
             }
-
-            // Read from the tag cursor
-            self.tag_cursor.as_mut().unwrap().read(buf)
         }
+
+        // Read the tag if it's empty
+        self.tag.read(buf)
     }
 }
-
-// TODO: do not implement, make the reader send!
-unsafe impl<'a: 'static> ::std::marker::Send for EncryptedFileReaderTagged<'a> {}
 
 #[derive(Clone)]
 struct XFileMetadata {
@@ -190,7 +173,7 @@ impl Header for XFileMetadata {
         "X-File-Metadata"
     }
 
-    fn parse_header(raw: &Raw) -> Result<Self, HyperError> {
+    fn parse_header(_raw: &Raw) -> Result<Self, HyperError> {
         // TODO: implement this some time
         unimplemented!();
     }
