@@ -3,6 +3,7 @@ extern crate clap;
 extern crate crypto;
 extern crate hyper;
 extern crate mime_guess;
+extern crate open;
 extern crate rand;
 extern crate reqwest;
 #[macro_use]
@@ -121,6 +122,9 @@ fn main() {
     println!("Response: {:#?}", upload_res);
     println!("Secret key: {}", base64_encode(&secret));
     println!("Download URL: {}", url);
+
+    // Open the URL in the browser
+    open::that(url);
 }
 
 fn hkdf<'a>(
