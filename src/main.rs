@@ -3,6 +3,8 @@ extern crate rand;
 extern crate reqwest;
 
 //use bytes::BytesMut;
+use crypto::aes::KeySize;
+use crypto::aes_gcm::AesGcm;
 use crypto::digest::Digest;
 use crypto::hkdf::{hkdf_extract, hkdf_expand};
 use crypto::sha2::Sha256;
@@ -22,9 +24,14 @@ fn main() {
     thread_rng().fill_bytes(&mut iv);
 
     // Derive keys
-    let encryptKey = derive_file_key(&secret);
-    let authKey = derive_auth_key(&secret, None, None);
-    let metaKey = derive_meta_key(&secret);
+    let encrypt_key = derive_file_key(&secret);
+    let auth_key = derive_auth_key(&secret, None, None);
+    let meta_key = derive_meta_key(&secret);
+
+    // Generate a file and meta cipher
+    // TODO: use the proper key size here, and the proper aad
+    let mut file_cipher = AesGcm::new(KeySize::KeySize128, &encrypt_key, &iv, b"");
+    let mut meta_cipher = AesGcm::new(KeySize::KeySize128, &encrypt_key, &[0u8; 12], b"");
 
     let form = reqwest::multipart::Form::new()
         .file("data", path)
