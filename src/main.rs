@@ -107,7 +107,7 @@ fn main() {
 
     // Make the request
     let mut res = client.post("http://localhost:8080/api/upload")
-        .header(Authorization(format!("send-v1 {}", base64::encode(&auth_key))))
+        .header(Authorization(format!("send-v1 {}", base64_encode(&auth_key))))
         .header(XFileMetadata::from(&metadata_encrypted))
         .multipart(form)
         .send()
@@ -117,9 +117,10 @@ fn main() {
     let upload_res: UploadResponse = res.json().unwrap();
 
     // Print the response
+    let url = upload_res.download_url(&secret);
     println!("Response: {:#?}", upload_res);
-    println!("Secret key: {}", base64::encode(&secret));
-    println!("Download URL: {}", upload_res.download_url(&secret));
+    println!("Secret key: {}", base64_encode(&secret));
+    println!("Download URL: {}", url);
 }
 
 fn hkdf<'a>(
@@ -183,7 +184,7 @@ impl Metadata {
     /// * mime: file mimetype
     pub fn from(iv: &[u8], name: String, mime: Mime) -> Self {
         Metadata {
-            iv: base64::encode(iv),
+            iv: base64_encode(iv),
             name,
             mime: mime.to_string(),
         }
@@ -209,7 +210,7 @@ impl XFileMetadata {
     }
 
     pub fn from(bytes: &[u8]) -> Self {
-        XFileMetadata::new(base64::encode(bytes))
+        XFileMetadata::new(base64_encode(bytes))
     }
 }
 
@@ -309,6 +310,11 @@ impl UploadResponse {
     ///
     /// The secret bytes must be passed to `secret`.
     pub fn download_url(&self, secret: &[u8]) -> String {
-        format!("{}#{}", self.url, base64::encode(secret))
+        format!("{}#{}", self.url, base64_encode(secret))
     }
+}
+
+/// Encode the given byte slice using base64, in an URL-safe manner.
+fn base64_encode(input: &[u8]) -> String {
+    base64::encode_config(input, base64::URL_SAFE_NO_PAD)
 }
