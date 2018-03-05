@@ -1,18 +1,28 @@
+extern crate base64;
 extern crate crypto;
+extern crate mime_guess;
 extern crate rand;
 extern crate reqwest;
+#[macro_use]
+extern crate serde_derive;
+extern crate serde_json;
 
-//use bytes::BytesMut;
+use std::path::Path;
+
+use crypto::aead::AeadEncryptor;
 use crypto::aes::KeySize;
 use crypto::aes_gcm::AesGcm;
 use crypto::digest::Digest;
 use crypto::hkdf::{hkdf_extract, hkdf_expand};
 use crypto::sha2::Sha256;
+use mime_guess::Mime;
 use rand::{Rng, thread_rng};
 
 fn main() {
     // TODO: a fixed path for now, as upload test
-    let path = "/home/timvisee/Pictures/Avatar/1024x1024/Avatar.png";
+    let path = Path::new("/home/timvisee/Pictures/Avatar/1024x1024/Avatar.png");
+    let file_ext = path.extension().unwrap().to_str().unwrap();
+    let file_name = path.file_name().unwrap().to_str().unwrap().to_owned();
 
     // Create a new reqwest client
     let client = reqwest::Client::new();
@@ -31,7 +41,20 @@ fn main() {
     // Generate a file and meta cipher
     // TODO: use the proper key size here, and the proper aad
     let mut file_cipher = AesGcm::new(KeySize::KeySize128, &encrypt_key, &iv, b"");
-    let mut meta_cipher = AesGcm::new(KeySize::KeySize128, &encrypt_key, &[0u8; 12], b"");
+    let mut meta_cipher = AesGcm::new(KeySize::KeySize128, &meta_key, &[0u8; 12], b"");
+
+    // Guess the mimetype of the file
+    let file_mime = mime_guess::get_mime_type(file_ext);
+
+    // Construct the metadata
+    let metadata = Metadata::from(&iv, file_name, file_mime);
+
+    // Encrypt the metadata, append the tag
+    let metadata = metadata.to_json().into_bytes();
+    let mut metadata_tag = vec![0u8; 16];
+    let mut metadata_encrypted = vec![0u8; metadata.len()];
+    meta_cipher.encrypt(&metadata, &mut metadata_encrypted, &mut metadata_tag);
+    metadata_encrypted.append(&mut metadata_tag);
 
     let form = reqwest::multipart::Form::new()
         .file("data", path)
@@ -46,6 +69,40 @@ fn main() {
 
     // TODO: remove after debugging
     println!("TEXT: {}", text);
+}
+
+#[derive(Serialize)]
+struct Metadata {
+    /// The input vector
+    iv: String,
+
+    /// The file name
+    name: String,
+
+    /// The file mimetype
+    #[serde(rename="type")]
+    mime: String,
+}
+
+impl Metadata {
+    /// Construct metadata from the given properties.
+    ///
+    /// Parameters:
+    /// * iv: initialisation vector
+    /// * name: file name
+    /// * mime: file mimetype
+    pub fn from(iv: &[u8], name: String, mime: Mime) -> Self {
+        Metadata {
+            iv: base64::encode(iv),
+            name,
+            mime: mime.to_string(),
+        }
+    }
+
+    /// Convert this structure to a JSON string.
+    pub fn to_json(&self) -> String {
+        serde_json::to_string(&self).unwrap()
+    }
 }
 
 fn derive_file_key(secret: &[u8]) -> Vec<u8> {
@@ -76,7 +133,7 @@ fn hkdf<'a>(
     let info = info.unwrap_or(b"");
 
     // Define the digest to use
-    let mut digest = Sha256::new();
+    let digest = Sha256::new();
 
     let mut pkr: Vec<u8> = vec![0u8; digest.output_bytes()];
     hkdf_extract(digest, salt, ikm, &mut pkr);
