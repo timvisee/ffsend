@@ -1,4 +1,5 @@
 extern crate base64;
+extern crate clap;
 extern crate crypto;
 extern crate hyper;
 extern crate mime_guess;
@@ -13,6 +14,7 @@ use std::fs::File;
 use std::io::{self, Cursor, Read};
 use std::path::Path;
 
+use clap::{App, Arg};
 use crypto::aead::AeadEncryptor;
 use crypto::aes::KeySize;
 use crypto::aes_gcm::AesGcm;
@@ -34,8 +36,29 @@ use reqwest::multipart::Part;
 const TAG_LEN: usize = 16;
 
 fn main() {
+    // Handle CLI arguments
+    let matches = App::new("ffsend")
+        .version("0.1.0")
+        .author("Tim Visee <timvisee@gmail.com>")
+        .about("A simple Firefox Send CLI client")
+        .arg(Arg::with_name("file")
+             .short("f")
+             .long("file")
+             .value_name("PATH")
+             .help("The file to upload")
+             .required(true)
+             .multiple(false))
+        .get_matches();
+
+    // Get the path
+    let path = Path::new(matches.value_of("file").unwrap());
+
+    // Make sure the path is a file
+    if !path.is_file() {
+        panic!("The selected path is not a file");
+    }
+
     // TODO: a fixed path for now, as upload test
-    let path = Path::new("/home/timvisee/Pictures/Avatar/1024x1024/Avatar.png");
     let file_ext = path.extension().unwrap().to_str().unwrap();
     let file_name = path.file_name().unwrap().to_str().unwrap().to_owned();
 
