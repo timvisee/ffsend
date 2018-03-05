@@ -4,3 +4,6 @@ version = "0.1.0"
 authors = ["timvisee <timvisee@gmail.com>"]
 
 [dependencies]
+rand = "0.4"
+reqwest = "0.8"
+rust-crypto = "0.2"
