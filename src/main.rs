@@ -17,9 +17,6 @@ use std::io::{self, BufReader, Cursor, Read};
 use std::path::Path;
 
 use clap::{App, Arg};
-use crypto::aead::AeadEncryptor;
-use crypto::aes::KeySize;
-use crypto::aes_gcm::AesGcm;
 use crypto::digest::Digest;
 use crypto::hkdf::{hkdf_extract, hkdf_expand};
 use crypto::sha2::Sha256;
@@ -28,6 +25,7 @@ use mime_guess::Mime;
 use openssl::symm::{
     Cipher,
     Crypter,
+    encrypt_aead,
     Mode as CrypterMode,
 };
 use rand::{Rng, thread_rng};
@@ -83,24 +81,29 @@ fn main() {
     let auth_key = derive_auth_key(&secret, None, None);
     let meta_key = derive_meta_key(&secret);
 
-    // Choose a file and meta cipher type
-    let cipher = Cipher::aes_128_gcm();
-
-    // Generate a meta cipher
-    let mut meta_cipher = AesGcm::new(KeySize::KeySize128, &meta_key, &[0u8; 12], b"");
-
     // Guess the mimetype of the file
     let file_mime = mime_guess::get_mime_type(file_ext);
 
     // Construct the metadata
     let metadata = Metadata::from(&iv, file_name.clone(), file_mime);
 
-    // Encrypt the metadata, append the tag
+    // Convert the metadata to JSON bytes
     let metadata = metadata.to_json().into_bytes();
+
+    // Choose a file and meta cipher type
+    let cipher = Cipher::aes_128_gcm();
+
+    // Encrypt the metadata, and append the tag to it
     let mut metadata_tag = vec![0u8; 16];
-    let mut metadata_encrypted = vec![0u8; metadata.len()];
-    meta_cipher.encrypt(&metadata, &mut metadata_encrypted, &mut metadata_tag);
-    metadata_encrypted.append(&mut metadata_tag);
+    let mut metadata = encrypt_aead(
+        cipher,
+        &meta_key,
+        Some(&[0u8; 12]),
+        &[],
+        &metadata,
+        &mut metadata_tag,
+    ).unwrap();
+    metadata.append(&mut metadata_tag);
 
     // Open the file and create an encrypted file reader
     let file = File::open(path).unwrap();
@@ -124,7 +127,7 @@ fn main() {
     // Make the request
     let mut res = client.post("http://localhost:8080/api/upload")
         .header(Authorization(format!("send-v1 {}", base64_encode(&auth_key))))
-        .header(XFileMetadata::from(&metadata_encrypted))
+        .header(XFileMetadata::from(&metadata))
         .multipart(form)
         .send()
         .unwrap();
