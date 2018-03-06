@@ -114,7 +114,7 @@ fn main() {
         cipher,
         &encrypt_key,
         &iv,
-    );
+    ).unwrap();
 
     // Buffer the encrypted reader, and determine the length
     let reader_len = reader.len().unwrap();
@@ -265,13 +265,13 @@ impl Header for XFileMetadata {
 }
 
 /// A lazy file reader, that encrypts the file with the given `cipher`
-/// and appends the GCM tag to the end of it.
+/// and appends the cryptographic tag to the end of it.
 ///
 /// This reader is lazy because the file data loaded from the system
 /// and encrypted when it is read from the reader.
 /// This greatly reduces memory usage for large files.
 ///
-/// This reader encrypts the file data with an appended GCM tag.
+/// This reader encrypts the file data with an appended cryptographic tag.
 ///
 /// The reader uses a small internal buffer as data is encrypted in blocks,
 /// which may output more data than fits in the given buffer while reading.
@@ -302,24 +302,30 @@ impl EncryptedFileReaderTagged {
     /// This method consumes twice the size of the file in memory while
     /// constructing, and constructs a reader that has a size similar to the
     /// file.
-    pub fn new(file: File, cipher: Cipher, key: &[u8], iv: &[u8]) -> Self {
+    ///
+    /// It is recommended to wrap this reader in some sort of buffer, such as:
+    /// `std::io::BufReader`
+    pub fn new(file: File, cipher: Cipher, key: &[u8], iv: &[u8])
+        -> Result<Self, io::Error>
+    {
         // Build the crypter
-        // TODO: return proper errors from crypter
         let crypter = Crypter::new(
             cipher,
             CrypterMode::Encrypt,
             key,
             Some(iv),
-        ).unwrap();
+        )?;
 
         // Construct the encrypted reader
-        EncryptedFileReaderTagged {
-            file,
-            cipher,
-            crypter,
-            tag: None,
-            internal_buf: Vec::new(),
-        }
+        Ok(
+            EncryptedFileReaderTagged {
+                file,
+                cipher,
+                crypter,
+                tag: None,
+                internal_buf: Vec::new(),
+            }
+        )
     }
 
     /// Calculate the total length of the encrypted file with the appended
@@ -383,7 +389,7 @@ impl EncryptedFileReaderTagged {
         data.truncate(len);
 
         // Encrypt the data that was read
-        let len = self.crypter.update(&data, &mut encrypted).unwrap();
+        let len = self.crypter.update(&data, &mut encrypted)?;
 
         // Calculate how many bytes will be copied to the reader
         let out_len = min(buf.len(), len);
