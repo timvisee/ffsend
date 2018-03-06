@@ -1,6 +1,6 @@
 extern crate base64;
 extern crate clap;
-extern crate crypto;
+extern crate hkdf;
 extern crate hyper;
 extern crate mime_guess;
 extern crate open;
@@ -10,6 +10,7 @@ extern crate reqwest;
 #[macro_use]
 extern crate serde_derive;
 extern crate serde_json;
+extern crate sha2;
 
 use std::fmt;
 use std::fs::File;
@@ -17,9 +18,7 @@ use std::io::{self, BufReader, Cursor, Read};
 use std::path::Path;
 
 use clap::{App, Arg};
-use crypto::digest::Digest;
-use crypto::hkdf::{hkdf_extract, hkdf_expand};
-use crypto::sha2::Sha256;
+use hkdf::Hkdf;
 use hyper::error::Error as HyperError;
 use mime_guess::Mime;
 use openssl::symm::{
@@ -37,6 +36,7 @@ use reqwest::header::{
 };
 use reqwest::mime::APPLICATION_OCTET_STREAM;
 use reqwest::multipart::Part;
+use sha2::Sha256;
 
 const TAG_LEN: usize = 16;
 
@@ -148,7 +148,9 @@ fn main() {
 // TODO: implement this some other way
 unsafe impl Send for EncryptedFileReaderTagged {}
 
-/// Run HKDF crypto.
+/// Derive a HKDF key.
+///
+/// No _salt_ bytes are used in this function.
 ///
 /// # Arguments
 /// * length - Length of the derived key value that is returned.
@@ -161,23 +163,14 @@ unsafe impl Send for EncryptedFileReaderTagged {}
 fn hkdf<'a>(
     length: usize,
     ikm: &[u8],
-    info: Option<&[u8]>
+    info: Option<&[u8]>,
 ) -> Vec<u8> {
     // Unwrap info or use empty info
     let info = info.unwrap_or(b"");
 
-    // Construct the digest to use
-    let digest = Sha256::new();
-
-    // Invoke HKDF extract, create a pseudo random key
-    let mut pkr: Vec<u8> = vec![0u8; digest.output_bytes()];
-    hkdf_extract(digest, b"", ikm, &mut pkr);
-
-    // Invoke HKDF expand, create the output keying material
-    let mut okm: Vec<u8> = vec![0u8; length];
-    hkdf_expand(digest, &pkr, info, &mut okm);
-
-    okm
+    // Derive a HKDF key with the given length
+    Hkdf::<Sha256>::new(&ikm, &[])
+        .derive(&info, length)
 }
 
 fn derive_file_key(secret: &[u8]) -> Vec<u8> {
