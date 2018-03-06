@@ -114,11 +114,12 @@ fn main() {
         &iv,
     );
 
-    // Buffer the encrypted reader
+    // Buffer the encrypted reader, and determine the length
+    let reader_len = reader.len().unwrap();
     let reader = BufReader::new(reader);
 
     // Build the file part, configure the form to send
-    let part = Part::reader(reader)
+    let part = Part::reader_with_length(reader, reader_len)
         .file_name(file_name)
         .mime(APPLICATION_OCTET_STREAM);
     let form = reqwest::multipart::Form::new()
@@ -303,6 +304,12 @@ impl EncryptedFileReaderTagged {
             ).unwrap(),
             tag: None,
         }
+    }
+
+    /// Calculate the total length of the encrypted file with the appended
+    /// tag.
+    pub fn len(&self) -> Result<u64, io::Error> {
+        Ok(self.file.metadata()?.len() + TAG_LEN as u64)
     }
 }
 
