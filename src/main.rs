@@ -1,5 +1,4 @@
 extern crate clap;
-extern crate hkdf;
 extern crate hyper;
 extern crate mime_guess;
 extern crate open;
@@ -8,9 +7,9 @@ extern crate rand;
 extern crate reqwest;
 #[macro_use]
 extern crate serde_derive;
-extern crate sha2;
 
 mod b64;
+mod crypto;
 mod metadata;
 mod reader;
 
@@ -19,14 +18,13 @@ use std::io::BufReader;
 use std::path::Path;
 
 use clap::{App, Arg};
-use hkdf::Hkdf;
 use openssl::symm::{Cipher, encrypt_aead};
 use rand::{Rng, thread_rng};
 use reqwest::header::Authorization;
 use reqwest::mime::APPLICATION_OCTET_STREAM;
 use reqwest::multipart::Part;
-use sha2::Sha256;
 
+use crypto::{derive_auth_key, derive_file_key, derive_meta_key};
 use metadata::{Metadata, XFileMetadata};
 use reader::EncryptedFileReaderTagged;
 
@@ -138,48 +136,6 @@ fn main() {
 
 // TODO: implement this some other way
 unsafe impl Send for EncryptedFileReaderTagged {}
-
-/// Derive a HKDF key.
-///
-/// No _salt_ bytes are used in this function.
-///
-/// # Arguments
-/// * length - Length of the derived key value that is returned.
-/// * ikm - The input keying material.
-/// * info - Optional context and application specific information to use.
-///
-/// # Returns
-/// The output keying material, with the length as as specified in the `length`
-/// argument.
-fn hkdf<'a>(
-    length: usize,
-    ikm: &[u8],
-    info: Option<&[u8]>,
-) -> Vec<u8> {
-    // Unwrap info or use empty info
-    let info = info.unwrap_or(&[]);
-
-    // Derive a HKDF key with the given length
-    Hkdf::<Sha256>::new(&ikm, &[])
-        .derive(&info, length)
-}
-
-fn derive_file_key(secret: &[u8]) -> Vec<u8> {
-    hkdf(16, secret, Some(b"encryption"))
-}
-
-fn derive_auth_key(secret: &[u8], password: Option<String>, _url: Option<String>) -> Vec<u8> {
-    if password.is_none() {
-        hkdf(64, secret, Some(b"authentication"))
-    } else {
-        // TODO: implement this
-        unimplemented!();
-    }
-}
-
-fn derive_meta_key(secret: &[u8]) -> Vec<u8> {
-    hkdf(16, secret, Some(b"metadata"))
-}
 
 /// The response from the server after a file has been uploaded.
 /// This response contains the file ID and owner key, to manage the file.
