@@ -1,3 +1,5 @@
+use super::super::openssl::symm::Cipher;
+
 use b64;
 use crypto::{derive_auth_key, derive_file_key, derive_meta_key, rand_bytes};
 
@@ -97,5 +99,10 @@ impl KeySet {
     /// Get the metadata encryption key, if derived.
     pub fn meta_key(&self) -> Option<&Vec<u8>> {
         self.meta_key.as_ref()
+    }
+
+    /// Get the cipher type to use in combination with these keys.
+    pub fn cipher() -> Cipher {
+        Cipher::aes_128_gcm()
     }
 }

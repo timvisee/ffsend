@@ -10,7 +10,7 @@ use super::super::b64;
 /// The struct contains the file ID, the file URL, the key that is required
 /// in combination with the file, and the owner key.
 #[derive(Debug)]
-pub struct File {
+pub struct SendFile {
     /// The ID of the file on that server.
     id: String,
 
@@ -30,7 +30,7 @@ pub struct File {
     owner_key: String,
 }
 
-impl File {
+impl SendFile {
     /// Construct a new file.
     pub fn new(
         id: String,
@@ -40,7 +40,7 @@ impl File {
         secret: Vec<u8>,
         owner_key: String,
     ) -> Self {
-        File {
+        Self {
             id,
             time,
             host,

@@ -215,3 +215,6 @@ impl Read for EncryptedFileReaderTagged {
         Ok(self.read(buf)? + total)
     }
 }
+
+// TODO: implement this some other way
+unsafe impl Send for EncryptedFileReaderTagged {}
