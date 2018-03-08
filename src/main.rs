@@ -1,4 +1,3 @@
-extern crate base64;
 extern crate clap;
 extern crate hkdf;
 extern crate hyper;
@@ -12,6 +11,7 @@ extern crate serde_derive;
 extern crate serde_json;
 extern crate sha2;
 
+mod b64;
 mod reader;
 
 use std::fmt;
@@ -124,7 +124,7 @@ fn main() {
 
     // Make the request
     let mut res = client.post("http://localhost:8080/api/upload")
-        .header(Authorization(format!("send-v1 {}", base64_encode(&auth_key))))
+        .header(Authorization(format!("send-v1 {}", b64::encode(&auth_key))))
         .header(XFileMetadata::from(&metadata))
         .multipart(form)
         .send()
@@ -136,7 +136,7 @@ fn main() {
     // Print the response
     let url = upload_res.download_url(&secret);
     println!("Response: {:#?}", upload_res);
-    println!("Secret key: {}", base64_encode(&secret));
+    println!("Secret key: {}", b64::encode(&secret));
     println!("Download URL: {}", url);
 
     // Open the URL in the browser
@@ -285,11 +285,6 @@ impl UploadResponse {
     ///
     /// The secret bytes must be passed to `secret`.
     pub fn download_url(&self, secret: &[u8]) -> String {
-        format!("{}#{}", self.url, base64_encode(secret))
+        format!("{}#{}", self.url, b64::encode(secret))
     }
-}
-
-/// Encode the given byte slice using base64, in an URL-safe manner.
-fn base64_encode(input: &[u8]) -> String {
-    base64::encode_config(input, base64::URL_SAFE_NO_PAD)
 }
