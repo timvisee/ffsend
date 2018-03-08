@@ -1,3 +1,7 @@
+extern crate chrono;
+
+use self::chrono::{DateTime, Utc};
+
 use super::super::b64;
 
 /// A struct representing an uploaded file on a Send host.
@@ -9,10 +13,11 @@ pub struct File {
     /// The ID of the file on that server.
     id: String,
 
+    /// The time the file was uploaded at.
+    time: DateTime<Utc>,
+
     /// The host the file was uploaded to.
     host: String,
-
-    // TODO: a date the file was created at
 
     /// The file URL that was provided by the server.
     url: String,
@@ -28,6 +33,7 @@ impl File {
     /// Construct a new file.
     pub fn new(
         id: String,
+        time: DateTime<Utc>,
         host: String,
         url: String,
         secret: Vec<u8>,
@@ -35,6 +41,7 @@ impl File {
     ) -> Self {
         File {
             id,
+            time,
             host,
             url,
             secret,
@@ -52,6 +59,7 @@ impl File {
     ) -> Self {
         Self::new(
             id,
+            Utc::now(),
             host,
             url,
             secret,
