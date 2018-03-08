@@ -1,4 +1,3 @@
-extern crate base64;
 extern crate clap;
 extern crate hkdf;
 extern crate hyper;
@@ -9,32 +8,26 @@ extern crate rand;
 extern crate reqwest;
 #[macro_use]
 extern crate serde_derive;
-extern crate serde_json;
 extern crate sha2;
 
+mod b64;
+mod metadata;
 mod reader;
 
-use std::fmt;
 use std::fs::File;
 use std::io::BufReader;
 use std::path::Path;
 
 use clap::{App, Arg};
 use hkdf::Hkdf;
-use hyper::error::Error as HyperError;
-use mime_guess::Mime;
 use openssl::symm::{Cipher, encrypt_aead};
 use rand::{Rng, thread_rng};
-use reqwest::header::{
-    Authorization,
-    Formatter as HeaderFormatter,
-    Header,
-    Raw
-};
+use reqwest::header::Authorization;
 use reqwest::mime::APPLICATION_OCTET_STREAM;
 use reqwest::multipart::Part;
 use sha2::Sha256;
 
+use metadata::{Metadata, XFileMetadata};
 use reader::EncryptedFileReaderTagged;
 
 fn main() {
@@ -124,7 +117,7 @@ fn main() {
 
     // Make the request
     let mut res = client.post("http://localhost:8080/api/upload")
-        .header(Authorization(format!("send-v1 {}", base64_encode(&auth_key))))
+        .header(Authorization(format!("send-v1 {}", b64::encode(&auth_key))))
         .header(XFileMetadata::from(&metadata))
         .multipart(form)
         .send()
@@ -136,7 +129,7 @@ fn main() {
     // Print the response
     let url = upload_res.download_url(&secret);
     println!("Response: {:#?}", upload_res);
-    println!("Secret key: {}", base64_encode(&secret));
+    println!("Secret key: {}", b64::encode(&secret));
     println!("Download URL: {}", url);
 
     // Open the URL in the browser
@@ -188,77 +181,6 @@ fn derive_meta_key(secret: &[u8]) -> Vec<u8> {
     hkdf(16, secret, Some(b"metadata"))
 }
 
-/// File metadata, which is send to the server.
-#[derive(Serialize)]
-struct Metadata {
-    /// The input vector.
-    iv: String,
-
-    /// The file name.
-    name: String,
-
-    /// The file mimetype.
-    #[serde(rename="type")]
-    mime: String,
-}
-
-impl Metadata {
-    /// Construct metadata from the given properties.
-    ///
-    /// Parameters:
-    /// * iv: initialisation vector
-    /// * name: file name
-    /// * mime: file mimetype
-    pub fn from(iv: &[u8], name: String, mime: Mime) -> Self {
-        Metadata {
-            iv: base64_encode(iv),
-            name,
-            mime: mime.to_string(),
-        }
-    }
-
-    /// Convert this structure to a JSON string.
-    pub fn to_json(&self) -> String {
-        serde_json::to_string(&self).unwrap()
-    }
-}
-
-/// A X-File-Metadata header for reqwest, that is used to pass encrypted
-/// metadata to the server.
-///
-/// The encrypted metadata (bytes) is base64 encoded when constructing this
-/// header using `from`.
-#[derive(Clone)]
-struct XFileMetadata {
-    /// The metadata, as a base64 encoded string.
-    metadata: String,
-}
-
-impl XFileMetadata {
-    /// Construct the header from the given encrypted metadata.
-    pub fn from(bytes: &[u8]) -> Self {
-        XFileMetadata {
-            metadata: base64_encode(bytes),
-        }
-    }
-}
-
-impl Header for XFileMetadata {
-    fn header_name() -> &'static str {
-        "X-File-Metadata"
-    }
-
-    fn parse_header(_raw: &Raw) -> Result<Self, HyperError> {
-        // TODO: implement this some time
-        unimplemented!();
-    }
-
-    fn fmt_header(&self, f: &mut HeaderFormatter) -> fmt::Result {
-        // TODO: is this encoding base64 for us?
-        f.fmt_line(&self.metadata)
-    }
-}
-
 /// The response from the server after a file has been uploaded.
 /// This response contains the file ID and owner key, to manage the file.
 ///
@@ -285,11 +207,6 @@ impl UploadResponse {
     ///
     /// The secret bytes must be passed to `secret`.
     pub fn download_url(&self, secret: &[u8]) -> String {
-        format!("{}#{}", self.url, base64_encode(secret))
+        format!("{}#{}", self.url, b64::encode(secret))
     }
-}
-
-/// Encode the given byte slice using base64, in an URL-safe manner.
-fn base64_encode(input: &[u8]) -> String {
-    base64::encode_config(input, base64::URL_SAFE_NO_PAD)
 }
