@@ -177,15 +177,6 @@ version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
-name = "ffsend"
-version = "0.1.0"
-dependencies = [
- "clap 2.31.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "ffsend-api 0.1.0",
- "open 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[[package]]
 name = "ffsend-api"
 version = "0.1.0"
 dependencies = [
@@ -201,6 +192,15 @@ dependencies = [
  "serde_json 1.0.10 (registry+https://github.com/rust-lang/crates.io-index)",
  "sha2 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "url 1.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "ffsend-cli"
+version = "0.1.0"
+dependencies = [
+ "clap 2.31.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "ffsend-api 0.1.0",
+ "open 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]

@@ -1,0 +1,13 @@
+[package]
+name = "ffsend-cli"
+version = "0.1.0"
+authors = ["timvisee <timvisee@gmail.com>"]
+
+[[bin]]
+path = "src/main.rs"
+name = "ffsend"
+
+[dependencies]
+clap = "2.31"
+ffsend-api = { version = "*", path = "../api" }
+open = "1"

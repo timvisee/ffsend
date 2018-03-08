@@ -1,15 +1,5 @@
-[package]
-name = "ffsend"
-version = "0.1.0"
-authors = ["timvisee <timvisee@gmail.com>"]
-
-[[bin]]
-name = "ffsend"
-
 [workspace]
-members = ["api"]
-
-[dependencies]
-clap = "2.31"
-ffsend-api = { version = "*", path = "api" }
-open = "1"
+members = [
+    "api",
+    "cli",
+]
