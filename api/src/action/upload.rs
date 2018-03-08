@@ -1,13 +1,17 @@
 use std::fs::File;
-use std::io::BufReader;
+use std::io::{BufReader, Read};
 use std::path::Path;
 
-use mime_guess::get_mime_type;
+use mime_guess::{get_mime_type, Mime};
 use openssl::symm::encrypt_aead;
-use reqwest;
+use reqwest::{
+    Client, 
+    Error as ReqwestError,
+    Request,
+};
 use reqwest::header::Authorization;
 use reqwest::mime::APPLICATION_OCTET_STREAM;
-use reqwest::multipart::Part;
+use reqwest::multipart::{Form, Part};
 use url::Url;
 
 use crypto::key_set::KeySet;
@@ -36,84 +40,163 @@ impl Upload {
     }
 
     /// Invoke the upload action.
-    pub fn invoke(self) -> Result<SendFile> {
-        // Make sure the given path is a file
-        if !self.path.is_file() {
-            return Err(UploadError::NotAFile);
-        }
-
-        // Grab some file details
-        let file_ext = self.path.extension().unwrap().to_str().unwrap();
-        let file_name = self.path.file_name().unwrap().to_str().unwrap().to_owned();
-        let file_mime = get_mime_type(file_ext);
-
-        // Generate a key set
+    pub fn invoke(self, client: &Client) -> Result<SendFile> {
+        // Create file data, generate a key
+        let file = FileData::from(Box::new(&self.path))?;
         let key = KeySet::generate(true);
 
-        // Construct the metadata
-        let metadata = Metadata::from(key.iv(), file_name.clone(), file_mime)
-            .to_json()
-            .into_bytes();
+        // Create metadata and a file reader
+        let metadata = self.create_metadata(&key, &file)?;
+        let (reader, len) = self.create_reader(&key)?;
 
-        // Encrypt the metadata, and append the tag to it
+        // Create the request to send
+        let req = self.create_request(
+            client,
+            &key,
+            metadata,
+            reader,
+            len,
+        );
+
+        // Execute the request
+        self.execute_request(req, client, &key)
+    }
+
+    /// Create a blob of encrypted metadata.
+    fn create_metadata(&self, key: &KeySet, file: &FileData)
+        -> Result<Vec<u8>>
+    {
+        // Construct the metadata
+        let metadata = Metadata::from(
+            key.iv(),
+            file.name().to_owned(),
+            file.mime().clone(),
+        ) .to_json().into_bytes();
+
+        // Encrypt the metadata
         let mut metadata_tag = vec![0u8; 16];
-        let mut metadata = encrypt_aead(
+        let mut metadata = match encrypt_aead(
             KeySet::cipher(),
             key.meta_key().unwrap(),
             Some(&[0u8; 12]),
             &[],
             &metadata,
             &mut metadata_tag,
-        ).unwrap();
+        ) {
+            Ok(metadata) => metadata,
+            Err(_) => return Err(UploadError::EncryptionError),
+        };
+
+        // Append the encryption tag
         metadata.append(&mut metadata_tag);
 
-        // Open the file and create an encrypted file reader
-        let file = File::open(&self.path).unwrap();
-        let reader = EncryptedFileReaderTagged::new(
+        Ok(metadata)
+    }
+
+    /// Create a reader that reads the file as encrypted stream.
+    fn create_reader(&self, key: &KeySet)
+        -> Result<(BufReader<EncryptedFileReaderTagged>, u64)>
+    {
+        // Open the file
+        let file = match File::open(&self.path) {
+            Ok(file) => file,
+            Err(_) => return Err(UploadError::FileError),
+        };
+
+        // Create an encrypted reader
+        let reader = match EncryptedFileReaderTagged::new(
             file,
             KeySet::cipher(),
             key.file_key().unwrap(),
             key.iv(),
-        ).unwrap();
+        ) {
+            Ok(reader) => reader,
+            Err(_) => return Err(UploadError::EncryptionError),
+        };
 
         // Buffer the encrypted reader, and determine the length
-        let reader_len = reader.len().unwrap();
+        let len = match reader.len() {
+            Ok(len) => len,
+            Err(_) => return Err(UploadError::FileError),
+        };
         let reader = BufReader::new(reader);
 
-        // Build the file part, configure the form to send
-        let part = Part::reader_with_length(reader, reader_len)
-            .file_name(file_name)
+        Ok((reader, len))
+    }
+
+    /// Build the request that will be send to the server.
+    fn create_request<R>(
+        &self,
+        client: &Client,
+        key: &KeySet,
+        metadata: Vec<u8>,
+        reader: R,
+        len: u64,
+    ) -> Request
+        where
+            R: Read + Send + 'static
+    {
+        // Configure a form to send
+        let part = Part::reader_with_length(reader, len)
+            // .file_name(file.name())
             .mime(APPLICATION_OCTET_STREAM);
-        let form = reqwest::multipart::Form::new()
+        let form = Form::new()
             .part("data", part);
 
-        // Create a new reqwest client
-        let client = reqwest::Client::new();
-
-        // Make the request
-        // TODO: properly format an URL here
+        // Define the URL to call
         let url = self.host.join("api/upload").expect("invalid host");
-        let mut res = client.post(url.as_str())
-            .header(Authorization(format!("send-v1 {}", key.auth_key_encoded().unwrap())))
+
+        // Build the request
+        client.post(url.as_str())
+            .header(Authorization(
+                format!("send-v1 {}", key.auth_key_encoded().unwrap())
+            ))
             .header(XFileMetadata::from(&metadata))
             .multipart(form)
-            .send()
-            .unwrap();
+            .build()
+            .expect("failed to build an API request")
+    }
 
-        // Parse the response
-        let upload_res: UploadResponse = res.json().unwrap();
+    /// Execute the given request, and create a file object that represents the
+    /// uploaded file.
+    fn execute_request(&self, req: Request, client: &Client, key: &KeySet) 
+        -> Result<SendFile>
+    {
+        // Execute the request
+        let mut res = match client.execute(req) {
+            Ok(res) => res,
+            Err(err) => return Err(UploadError::RequestError(err)),
+        };
 
-        // Print the response
-        Ok(
-            upload_res.into_file(self.host, key.secret().to_vec())
-        )
+        // Decode the response
+        let res: UploadResponse = match res.json() {
+            Ok(res) => res,
+            Err(_) => return Err(UploadError::DecodeError),
+        };
+
+        // Transform the responce into a file object
+        Ok(res.into_file(self.host.clone(), &key))
     }
 }
 
+/// Errors that may occur in the upload action. 
 pub enum UploadError {
     /// The given file is not not an existing file.
     /// Maybe it is a directory, or maybe it doesn't exist.
     NotAFile,
+
+    /// An error occurred while opening or reading a file.
+    FileError,
+
+    /// An error occurred while encrypting the file.
+    EncryptionError,
+
+    /// An error occurred while while processing the request.
+    /// This also covers things like HTTP 404 errors.
+    RequestError(ReqwestError),
+
+    /// An error occurred while decoding the response data.
+    DecodeError,
 }
 
 /// The response from the server after a file has been uploaded.
@@ -125,7 +208,7 @@ pub enum UploadError {
 /// The download URL can be generated using `download_url()` which will
 /// include the required secret in the URL.
 #[derive(Debug, Deserialize)]
-pub struct UploadResponse {
+struct UploadResponse {
     /// The file ID.
     id: String,
 
@@ -140,14 +223,64 @@ pub struct UploadResponse {
 impl UploadResponse {
     /// Convert this response into a file object.
     ///
-    /// The `host` and `secret` must be given.
-    pub fn into_file(self, host: Url, secret: Vec<u8>) -> SendFile {
+    /// The `host` and `key` must be given.
+    pub fn into_file(self, host: Url, key: &KeySet) -> SendFile {
         SendFile::new_now(
             self.id,
             host,
             self.url,
-            secret,
+            key.secret().to_vec(),
             self.owner,
         )
+    }
+}
+
+/// A struct that holds various file properties, such as it's name and it's
+/// mime type.
+struct FileData<'a> {
+    /// The file name.
+    name: &'a str,
+
+    /// The file mime type.
+    mime: Mime,
+}
+
+impl<'a> FileData<'a> {
+    /// Create a file data object, from the file at the given path.
+    pub fn from(path: Box<&'a Path>) -> Result<Self> {
+        // Make sure the given path is a file
+        if !path.is_file() {
+            return Err(UploadError::NotAFile);
+        }
+
+        // Get the file name
+        let name = match path.file_name() {
+            Some(name) => name.to_str().expect("failed to convert string"),
+            None => return Err(UploadError::FileError),
+        };
+
+        // Get the file extention
+        // TODO: handle cases where the file doesn't have an extention
+        let ext = match path.extension() {
+            Some(ext) => ext.to_str().expect("failed to convert string"),
+            None => return Err(UploadError::FileError),
+        };
+
+        Ok(
+            Self {
+                name,
+                mime: get_mime_type(ext),
+            }
+        )
+    }
+
+    /// Get the file name.
+    pub fn name(&self) -> &str {
+        self.name
+    }
+
+    /// Get the file mime type.
+    pub fn mime(&self) -> &Mime {
+        &self.mime
     }
 }
