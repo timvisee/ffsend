@@ -1,6 +1,6 @@
 extern crate mime_guess;
 extern crate openssl;
-extern crate reqwest;
+pub extern crate reqwest;
 pub extern crate url;
 #[macro_use]
 extern crate serde_derive;

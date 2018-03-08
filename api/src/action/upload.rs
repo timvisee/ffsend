@@ -1,6 +1,6 @@
 use std::fs::File;
 use std::io::{BufReader, Read};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use mime_guess::{get_mime_type, Mime};
 use openssl::symm::encrypt_aead;
@@ -27,12 +27,12 @@ pub struct Upload {
     host: Url,
 
     /// The file to upload.
-    path: Box<Path>,
+    path: PathBuf,
 }
 
 impl Upload {
     /// Construct a new upload action.
-    pub fn new(host: Url, path: Box<Path>) -> Self {
+    pub fn new(host: Url, path: PathBuf) -> Self {
         Self {
             host,
             path,
@@ -98,7 +98,7 @@ impl Upload {
         -> Result<(BufReader<EncryptedFileReaderTagged>, u64)>
     {
         // Open the file
-        let file = match File::open(&self.path) {
+        let file = match File::open(self.path.as_path()) {
             Ok(file) => file,
             Err(_) => return Err(UploadError::FileError),
         };
@@ -180,6 +180,7 @@ impl Upload {
 }
 
 /// Errors that may occur in the upload action. 
+#[derive(Debug)]
 pub enum UploadError {
     /// The given file is not not an existing file.
     /// Maybe it is a directory, or maybe it doesn't exist.
