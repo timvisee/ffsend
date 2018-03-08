@@ -1,4 +1,3 @@
-extern crate clap;
 extern crate hyper;
 extern crate mime_guess;
 extern crate open;
@@ -9,6 +8,7 @@ extern crate reqwest;
 extern crate serde_derive;
 
 mod app;
+mod arg_handler;
 mod b64;
 mod crypto;
 mod metadata;
@@ -18,35 +18,23 @@ use std::fs::File;
 use std::io::BufReader;
 use std::path::Path;
 
-use clap::{App, Arg};
 use openssl::symm::{Cipher, encrypt_aead};
 use rand::{Rng, thread_rng};
 use reqwest::header::Authorization;
 use reqwest::mime::APPLICATION_OCTET_STREAM;
 use reqwest::multipart::Part;
 
-use app::*;
+use arg_handler::ArgHandler;
 use crypto::{derive_auth_key, derive_file_key, derive_meta_key};
 use metadata::{Metadata, XFileMetadata};
 use reader::EncryptedFileReaderTagged;
 
 fn main() {
-    // Handle CLI arguments
-    let matches = App::new(APP_NAME)
-            .version(APP_VERSION)
-            .author(APP_AUTHOR)
-            .about(APP_ABOUT)
-        .arg(Arg::with_name("file")
-            .short("f")
-            .long("file")
-            .value_name("PATH")
-            .help("The file to upload")
-            .required(true)
-            .multiple(false))
-        .get_matches();
+    // Parse CLI arguments
+    let arg_handler = ArgHandler::parse();
 
     // Get the path
-    let path = Path::new(matches.value_of("file").unwrap());
+    let path = Path::new(arg_handler.file());
 
     // Make sure the path is a file
     if !path.is_file() {
