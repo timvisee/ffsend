@@ -46,4 +46,9 @@ impl<'a: 'b, 'b> CmdUpload<'a> {
         self.matches.value_of("FILE")
             .expect("no file specified to upload")
     }
+
+    /// Get the host to upload to.
+    pub fn host(&'a self) -> &'a str {
+        self.matches.value_of("host").unwrap()
+    }
 }

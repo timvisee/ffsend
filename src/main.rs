@@ -8,12 +8,14 @@ extern crate reqwest;
 #[macro_use]
 extern crate serde_derive;
 
+mod action;
 mod app;
-mod cmd;
 mod b64;
+mod cmd;
 mod crypto;
 mod metadata;
 mod reader;
+mod send;
 
 use std::fs::File;
 use std::io::BufReader;
@@ -25,6 +27,7 @@ use reqwest::header::Authorization;
 use reqwest::mime::APPLICATION_OCTET_STREAM;
 use reqwest::multipart::Part;
 
+use action::upload::UploadResponse;
 use cmd::Handler;
 use cmd::cmd_upload::CmdUpload;
 use crypto::{derive_auth_key, derive_file_key, derive_meta_key};
@@ -58,8 +61,9 @@ fn invoke_action(handler: &Handler) {
 
 /// The upload action.
 fn action_upload(cmd_upload: &CmdUpload) {
-    // Get the path
+    // Get the path and host
     let path = Path::new(cmd_upload.file());
+    let host = cmd_upload.host();
 
     // Make sure the path is a file
     if !path.is_file() {
@@ -129,7 +133,9 @@ fn action_upload(cmd_upload: &CmdUpload) {
         .part("data", part);
 
     // Make the request
-    let mut res = client.post("http://localhost:8080/api/upload")
+    // TODO: properly format an URL here
+    let url = format!("{}/api/upload", host);
+    let mut res = client.post(&url)
         .header(Authorization(format!("send-v1 {}", b64::encode(&auth_key))))
         .header(XFileMetadata::from(&metadata))
         .multipart(form)
@@ -140,8 +146,9 @@ fn action_upload(cmd_upload: &CmdUpload) {
     let upload_res: UploadResponse = res.json().unwrap();
 
     // Print the response
-    let url = upload_res.download_url(&secret);
-    println!("Response: {:#?}", upload_res);
+    let file = upload_res.into_file(host.to_owned(), secret.to_vec());
+    let url = file.download_url();
+    println!("File: {:#?}", file);
     println!("Secret key: {}", b64::encode(&secret));
     println!("Download URL: {}", url);
 
@@ -151,33 +158,3 @@ fn action_upload(cmd_upload: &CmdUpload) {
 
 // TODO: implement this some other way
 unsafe impl Send for EncryptedFileReaderTagged {}
-
-/// The response from the server after a file has been uploaded.
-/// This response contains the file ID and owner key, to manage the file.
-///
-/// It also contains the download URL, although an additional secret is
-/// required.
-///
-/// The download URL can be generated using `download_url()` which will
-/// include the required secret in the URL.
-#[derive(Debug, Deserialize)]
-struct UploadResponse {
-    /// unkhe URL the file is reachable at.
-    /// This includes the file ID, but does not include the secret.
-    url: String,
-
-    /// The owner key, used to do further file modifications.
-    owner: String,
-
-    /// The file ID.
-    id: String,
-}
-
-impl UploadResponse {
-    /// Get the download URL, including the secret.
-    ///
-    /// The secret bytes must be passed to `secret`.
-    pub fn download_url(&self, secret: &[u8]) -> String {
-        format!("{}#{}", self.url, b64::encode(secret))
-    }
-}
