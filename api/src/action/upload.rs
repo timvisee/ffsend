@@ -10,10 +10,10 @@ use reqwest::mime::APPLICATION_OCTET_STREAM;
 use reqwest::multipart::Part;
 use url::Url;
 
-use super::key_set::KeySet;
-use super::metadata::{Metadata, XFileMetadata};
-use super::reader::EncryptedFileReaderTagged;
-use super::send_file::SendFile;
+use crypto::key_set::KeySet;
+use reader::EncryptedFileReaderTagged;
+use file::file::File as SendFile;
+use file::metadata::{Metadata, XFileMetadata};
 
 pub type Result<T> = ::std::result::Result<T, UploadError>;
 

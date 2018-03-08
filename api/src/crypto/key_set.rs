@@ -1,7 +1,7 @@
 use openssl::symm::Cipher;
 
-use b64;
-use crypto::{derive_auth_key, derive_file_key, derive_meta_key, rand_bytes};
+use super::{b64, rand_bytes};
+use super::hdkf::{derive_auth_key, derive_file_key, derive_meta_key};
 
 pub struct KeySet {
     /// A secret.

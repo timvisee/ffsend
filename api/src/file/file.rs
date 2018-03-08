@@ -3,14 +3,14 @@ extern crate chrono;
 use url::Url;
 use self::chrono::{DateTime, Utc};
 
-use b64;
+use crypto::b64;
 
 /// A struct representing an uploaded file on a Send host.
 ///
 /// The struct contains the file ID, the file URL, the key that is required
 /// in combination with the file, and the owner key.
 #[derive(Debug)]
-pub struct SendFile {
+pub struct File {
     /// The ID of the file on that server.
     id: String,
 
@@ -30,7 +30,7 @@ pub struct SendFile {
     owner_key: String,
 }
 
-impl SendFile {
+impl File {
     /// Construct a new file.
     pub fn new(
         id: String,

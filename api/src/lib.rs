@@ -5,10 +5,7 @@ pub extern crate url;
 #[macro_use]
 extern crate serde_derive;
 
-pub mod b64;
+pub mod action;
 pub mod crypto;
-pub mod key_set;
-pub mod metadata;
+pub mod file;
 pub mod reader;
-pub mod send_file;
-pub mod upload;

@@ -11,7 +11,7 @@ use reqwest::header::{
 };
 use self::hyper::error::Error as HyperError;
 
-use b64;
+use crypto::b64;
 
 /// File metadata, which is send to the server.
 #[derive(Serialize)]
