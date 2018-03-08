@@ -7,6 +7,7 @@ extern crate rand;
 extern crate reqwest;
 #[macro_use]
 extern crate serde_derive;
+extern crate url;
 
 mod action;
 mod app;
@@ -16,6 +17,7 @@ mod crypto;
 mod metadata;
 mod reader;
 mod send;
+mod util;
 
 use std::fs::File;
 use std::io::BufReader;
@@ -134,8 +136,8 @@ fn action_upload(cmd_upload: &CmdUpload) {
 
     // Make the request
     // TODO: properly format an URL here
-    let url = format!("{}/api/upload", host);
-    let mut res = client.post(&url)
+    let url = host.join("api/upload").expect("invalid host");
+    let mut res = client.post(url.as_str())
         .header(Authorization(format!("send-v1 {}", b64::encode(&auth_key))))
         .header(XFileMetadata::from(&metadata))
         .multipart(form)
@@ -146,7 +148,7 @@ fn action_upload(cmd_upload: &CmdUpload) {
     let upload_res: UploadResponse = res.json().unwrap();
 
     // Print the response
-    let file = upload_res.into_file(host.to_owned(), secret.to_vec());
+    let file = upload_res.into_file(host.into_string(), secret.to_vec());
     let url = file.download_url();
     println!("File: {:#?}", file);
     println!("Secret key: {}", b64::encode(&secret));

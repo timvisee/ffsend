@@ -1,6 +1,9 @@
+use super::super::url::{ParseError, Url};
+
 use super::clap::{App, Arg, ArgMatches, SubCommand};
 
 use app::SEND_DEF_HOST;
+use util::quit_error;
 
 /// The upload command.
 pub struct CmdUpload<'a> {
@@ -48,7 +51,31 @@ impl<'a: 'b, 'b> CmdUpload<'a> {
     }
 
     /// Get the host to upload to.
-    pub fn host(&'a self) -> &'a str {
-        self.matches.value_of("host").unwrap()
+    ///
+    /// This method parses the host into an `Url`.
+    /// If the given host is invalid,
+    /// the program will quit with an error message.
+    pub fn host(&'a self) -> Url {
+        // Get the host
+        let host = self.matches.value_of("host")
+            .expect("missing host");
+
+        // Parse the URL
+        match Url::parse(host) {
+            Ok(url) => url,
+            Err(ParseError::EmptyHost) =>
+                quit_error("emtpy host given"),
+            Err(ParseError::InvalidPort) =>
+                quit_error("invalid host port"),
+            Err(ParseError::InvalidIpv4Address) =>
+                quit_error("invalid IPv4 address in host"),
+            Err(ParseError::InvalidIpv6Address) =>
+                quit_error("invalid IPv6 address in host"),
+            Err(ParseError::InvalidDomainCharacter) =>
+                quit_error("host domains contains an invalid character"),
+            Err(ParseError::RelativeUrlWithoutBase) =>
+                quit_error("host domain doesn't contain a host"),
+            _ => quit_error("the given host is invalid"),
+        }
     }
 }

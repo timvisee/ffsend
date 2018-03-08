@@ -67,8 +67,18 @@ impl File {
         )
     }
 
+    /// Get the raw secret.
+    pub fn secret_raw(&self) -> &Vec<u8> {
+        &self.secret
+    }
+
+    /// Get the secret as base64 encoded string.
+    pub fn secret(&self) -> String {
+        b64::encode(self.secret_raw())
+    }
+
     /// Get the download URL of the file, with the secret key included.
     pub fn download_url(&self) -> String {
-        format!("{}#{}", self.url, b64::encode(&self.secret))
+        format!("{}#{}", self.url, self.secret())
     }
 }
