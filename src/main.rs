@@ -1,18 +1,8 @@
-extern crate hyper;
-extern crate mime_guess;
-extern crate open;
-extern crate openssl;
-extern crate reqwest;
-#[macro_use]
-extern crate serde_derive;
-extern crate url;
+extern crate ffsend_api;
 
 mod action;
 mod app;
-mod b64;
 mod cmd;
-mod crypto;
-mod send;
 mod util;
 
 use cmd::Handler;

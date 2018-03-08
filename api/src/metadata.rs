@@ -1,14 +1,15 @@
+extern crate hyper;
 extern crate serde_json;
 
 use std::fmt;
 
-use hyper::error::Error as HyperError;
 use mime_guess::Mime;
 use reqwest::header::{
     Formatter as HeaderFormatter,
     Header,
     Raw,
 };
+use self::hyper::error::Error as HyperError;
 
 use b64;
 

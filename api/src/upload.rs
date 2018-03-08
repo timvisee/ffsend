@@ -2,13 +2,13 @@ use std::fs::File;
 use std::io::BufReader;
 use std::path::Path;
 
-use super::super::mime_guess::get_mime_type;
-use super::super::openssl::symm::encrypt_aead;
-use super::super::reqwest;
-use super::super::reqwest::header::Authorization;
-use super::super::reqwest::mime::APPLICATION_OCTET_STREAM;
-use super::super::reqwest::multipart::Part;
-use super::super::url::Url;
+use mime_guess::get_mime_type;
+use openssl::symm::encrypt_aead;
+use reqwest;
+use reqwest::header::Authorization;
+use reqwest::mime::APPLICATION_OCTET_STREAM;
+use reqwest::multipart::Part;
+use url::Url;
 
 use super::key_set::KeySet;
 use super::metadata::{Metadata, XFileMetadata};

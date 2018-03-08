@@ -3,18 +3,13 @@ name = "ffsend"
 version = "0.1.0"
 authors = ["timvisee <timvisee@gmail.com>"]
 
+[[bin]]
+name = "ffsend"
+
+[workspace]
+members = ["api"]
+
 [dependencies]
-base64 = "0.9"
-chrono = "0.4"
 clap = "2.31"
-hkdf = "0.3"
-hyper = "0.11.9" # same as reqwest
-mime_guess = "2.0.0-alpha.2"
+ffsend-api = { version = "*", path = "api" }
 open = "1"
-openssl = "0.10"
-reqwest = "0.8"
-serde = "1.0"
-serde_derive = "1.0"
-serde_json = "1.0"
-sha2 = "0.7"
-url = "1.7"

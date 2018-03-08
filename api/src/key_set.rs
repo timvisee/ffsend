@@ -1,4 +1,4 @@
-use super::super::openssl::symm::Cipher;
+use openssl::symm::Cipher;
 
 use b64;
 use crypto::{derive_auth_key, derive_file_key, derive_meta_key, rand_bytes};

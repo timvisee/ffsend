@@ -1,4 +1,4 @@
-use super::super::url::{ParseError, Url};
+use ffsend_api::url::{ParseError, Url};
 
 use super::clap::{App, Arg, ArgMatches, SubCommand};
 

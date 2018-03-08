@@ -1,9 +1,9 @@
 extern crate chrono;
 
+use url::Url;
 use self::chrono::{DateTime, Utc};
-use super::super::url::Url;
 
-use super::super::b64;
+use b64;
 
 /// A struct representing an uploaded file on a Send host.
 ///
