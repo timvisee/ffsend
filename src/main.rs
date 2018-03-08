@@ -1,4 +1,5 @@
 extern crate hyper;
+extern crate lazy_static;
 extern crate mime_guess;
 extern crate open;
 extern crate openssl;
@@ -8,7 +9,7 @@ extern crate reqwest;
 extern crate serde_derive;
 
 mod app;
-mod arg_handler;
+mod cmd;
 mod b64;
 mod crypto;
 mod metadata;
@@ -24,17 +25,41 @@ use reqwest::header::Authorization;
 use reqwest::mime::APPLICATION_OCTET_STREAM;
 use reqwest::multipart::Part;
 
-use arg_handler::ArgHandler;
+use cmd::Handler;
+use cmd::cmd_upload::CmdUpload;
 use crypto::{derive_auth_key, derive_file_key, derive_meta_key};
 use metadata::{Metadata, XFileMetadata};
 use reader::EncryptedFileReaderTagged;
 
+/// Application entrypoint.
 fn main() {
     // Parse CLI arguments
-    let arg_handler = ArgHandler::parse();
+    let cmd_handler = Handler::parse();
 
+    // Invoke the proper action
+    invoke_action(&cmd_handler);
+}
+
+/// Invoke the proper action based on the CLI input.
+///
+/// If no proper action is selected, the program will quit with an error
+/// message.
+fn invoke_action(handler: &Handler) {
+    // Match the upload command
+    if let Some(cmd) = handler.upload() {
+        return action_upload(&cmd);
+    }
+
+    // No subcommand was selected, show general help
+    Handler::build()
+        .print_help()
+        .expect("failed to print command help");
+}
+
+/// The upload action.
+fn action_upload(cmd_upload: &CmdUpload) {
     // Get the path
-    let path = Path::new(arg_handler.file());
+    let path = Path::new(cmd_upload.file());
 
     // Make sure the path is a file
     if !path.is_file() {

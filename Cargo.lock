@@ -175,6 +175,7 @@ dependencies = [
  "clap 2.31.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "hkdf 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "hyper 0.11.22 (registry+https://github.com/rust-lang/crates.io-index)",
+ "lazy_static 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "mime_guess 2.0.0-alpha.4 (registry+https://github.com/rust-lang/crates.io-index)",
  "open 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "openssl 0.10.5 (registry+https://github.com/rust-lang/crates.io-index)",
