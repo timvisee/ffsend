@@ -1,6 +1,7 @@
 extern crate chrono;
 
 use self::chrono::{DateTime, Utc};
+use super::super::url::Url;
 
 use super::super::b64;
 
@@ -17,7 +18,7 @@ pub struct File {
     time: DateTime<Utc>,
 
     /// The host the file was uploaded to.
-    host: String,
+    host: Url,
 
     /// The file URL that was provided by the server.
     url: String,
@@ -34,7 +35,7 @@ impl File {
     pub fn new(
         id: String,
         time: DateTime<Utc>,
-        host: String,
+        host: Url,
         url: String,
         secret: Vec<u8>,
         owner_key: String,
@@ -52,7 +53,7 @@ impl File {
     /// Construct a new file, that was created at this exact time.
     pub fn new_now(
         id: String,
-        host: String,
+        host: Url,
         url: String,
         secret: Vec<u8>,
         owner_key: String,

@@ -4,6 +4,9 @@ extern crate sha2;
 use self::hkdf::Hkdf;
 use self::sha2::Sha256;
 
+// Reexport the cryptographically secure random bytes generator
+pub use super::openssl::rand::rand_bytes;
+
 /// Derive a HKDF key.
 ///
 /// No _salt_ bytes are used in this function.

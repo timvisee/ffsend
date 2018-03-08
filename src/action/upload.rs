@@ -1,3 +1,5 @@
+use super::super::url::Url;
+
 use super::super::send::file::File;
 
 /// The response from the server after a file has been uploaded.
@@ -25,7 +27,7 @@ impl UploadResponse {
     /// Convert this response into a file object.
     ///
     /// The `host` and `secret` must be given.
-    pub fn into_file(self, host: String, secret: Vec<u8>) -> File {
+    pub fn into_file(self, host: Url, secret: Vec<u8>) -> File {
         File::new_now(
             self.id,
             host,

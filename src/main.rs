@@ -3,7 +3,6 @@ extern crate lazy_static;
 extern crate mime_guess;
 extern crate open;
 extern crate openssl;
-extern crate rand;
 extern crate reqwest;
 #[macro_use]
 extern crate serde_derive;
@@ -24,7 +23,6 @@ use std::io::BufReader;
 use std::path::Path;
 
 use openssl::symm::{Cipher, encrypt_aead};
-use rand::{Rng, thread_rng};
 use reqwest::header::Authorization;
 use reqwest::mime::APPLICATION_OCTET_STREAM;
 use reqwest::multipart::Part;
@@ -32,9 +30,9 @@ use reqwest::multipart::Part;
 use action::upload::UploadResponse;
 use cmd::Handler;
 use cmd::cmd_upload::CmdUpload;
-use crypto::{derive_auth_key, derive_file_key, derive_meta_key};
 use metadata::{Metadata, XFileMetadata};
 use reader::EncryptedFileReaderTagged;
+use send::key_set::KeySet;
 
 /// Application entrypoint.
 fn main() {
@@ -79,22 +77,14 @@ fn action_upload(cmd_upload: &CmdUpload) {
     // Create a new reqwest client
     let client = reqwest::Client::new();
 
-    // Generate a secret and iv
-    let mut secret = [0u8; 16];
-    let mut iv = [0u8; 12];
-    thread_rng().fill_bytes(&mut secret);
-    thread_rng().fill_bytes(&mut iv);
-
-    // Derive keys
-    let encrypt_key = derive_file_key(&secret);
-    let auth_key = derive_auth_key(&secret, None, None);
-    let meta_key = derive_meta_key(&secret);
+    // Generate a key
+    let key = KeySet::generate(true);
 
     // Guess the mimetype of the file
     let file_mime = mime_guess::get_mime_type(file_ext);
 
     // Construct the metadata
-    let metadata = Metadata::from(&iv, file_name.clone(), file_mime);
+    let metadata = Metadata::from(key.iv(), file_name.clone(), file_mime);
 
     // Convert the metadata to JSON bytes
     let metadata = metadata.to_json().into_bytes();
@@ -106,7 +96,7 @@ fn action_upload(cmd_upload: &CmdUpload) {
     let mut metadata_tag = vec![0u8; 16];
     let mut metadata = encrypt_aead(
         cipher,
-        &meta_key,
+        key.meta_key().unwrap(),
         Some(&[0u8; 12]),
         &[],
         &metadata,
@@ -119,8 +109,8 @@ fn action_upload(cmd_upload: &CmdUpload) {
     let reader = EncryptedFileReaderTagged::new(
         file,
         cipher,
-        &encrypt_key,
-        &iv,
+        key.file_key().unwrap(),
+        key.iv(),
     ).unwrap();
 
     // Buffer the encrypted reader, and determine the length
@@ -138,7 +128,7 @@ fn action_upload(cmd_upload: &CmdUpload) {
     // TODO: properly format an URL here
     let url = host.join("api/upload").expect("invalid host");
     let mut res = client.post(url.as_str())
-        .header(Authorization(format!("send-v1 {}", b64::encode(&auth_key))))
+        .header(Authorization(format!("send-v1 {}", key.auth_key_encoded().unwrap())))
         .header(XFileMetadata::from(&metadata))
         .multipart(form)
         .send()
@@ -148,10 +138,10 @@ fn action_upload(cmd_upload: &CmdUpload) {
     let upload_res: UploadResponse = res.json().unwrap();
 
     // Print the response
-    let file = upload_res.into_file(host.into_string(), secret.to_vec());
+    let file = upload_res.into_file(host, key.secret().to_vec());
     let url = file.download_url();
     println!("File: {:#?}", file);
-    println!("Secret key: {}", b64::encode(&secret));
+    println!("Secret key: {}", key.secret_encoded());
     println!("Download URL: {}", url);
 
     // Open the URL in the browser

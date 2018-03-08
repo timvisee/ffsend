@@ -4,3 +4,4 @@
 //! to and from a secure Firefox Send server.
 
 pub mod file;
+pub mod key_set;
