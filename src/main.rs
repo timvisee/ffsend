@@ -8,6 +8,7 @@ extern crate reqwest;
 #[macro_use]
 extern crate serde_derive;
 
+mod app;
 mod b64;
 mod crypto;
 mod metadata;
@@ -24,23 +25,24 @@ use reqwest::header::Authorization;
 use reqwest::mime::APPLICATION_OCTET_STREAM;
 use reqwest::multipart::Part;
 
+use app::*;
 use crypto::{derive_auth_key, derive_file_key, derive_meta_key};
 use metadata::{Metadata, XFileMetadata};
 use reader::EncryptedFileReaderTagged;
 
 fn main() {
     // Handle CLI arguments
-    let matches = App::new("ffsend")
-        .version("0.1.0")
-        .author("Tim Visee <timvisee@gmail.com>")
-        .about("A simple Firefox Send CLI client")
+    let matches = App::new(APP_NAME)
+            .version(APP_VERSION)
+            .author(APP_AUTHOR)
+            .about(APP_ABOUT)
         .arg(Arg::with_name("file")
-             .short("f")
-             .long("file")
-             .value_name("PATH")
-             .help("The file to upload")
-             .required(true)
-             .multiple(false))
+            .short("f")
+            .long("file")
+            .value_name("PATH")
+            .help("The file to upload")
+            .required(true)
+            .multiple(false))
         .get_matches();
 
     // Get the path
