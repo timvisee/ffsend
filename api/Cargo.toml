@@ -2,6 +2,7 @@
 name = "ffsend-api"
 version = "0.1.0"
 authors = ["timvisee <timvisee@gmail.com>"]
+workspace = ".."
 
 [dependencies]
 base64 = "0.9"
