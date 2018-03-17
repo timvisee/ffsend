@@ -6,12 +6,8 @@ mod app;
 mod cmd;
 mod util;
 
-use std::path::Path;
-
+use action::upload::Upload;
 use cmd::Handler;
-use cmd::cmd_upload::CmdUpload;
-use ffsend_api::action::upload::Upload;
-use ffsend_api::reqwest::Client;
 
 /// Application entrypoint.
 fn main() {
@@ -29,30 +25,11 @@ fn main() {
 fn invoke_action(handler: &Handler) {
     // Match the upload command
     if let Some(cmd) = handler.upload() {
-        return action_upload(&cmd);
+        return Upload::new(&cmd).invoke();
     }
 
     // No subcommand was selected, show general help
     Handler::build()
         .print_help()
         .expect("failed to print command help");
-}
-
-/// The upload action.
-fn action_upload(cmd_upload: &CmdUpload) {
-    // // Get the path and host
-    let path = Path::new(cmd_upload.file()).to_path_buf();
-    let host = cmd_upload.host();
-
-    // Create a reqwest client
-    let client = Client::new();
-
-    // Create an upload action
-    let upload = Upload::new(host, path);
-    let file = upload.invoke(&client).unwrap();
-
-    // Open the URL in the browser
-    let url = file.download_url();
-    println!("Download URL: {}", url);
-    open::that(url).expect("failed to open URL");
 }
