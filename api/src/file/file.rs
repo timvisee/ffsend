@@ -21,7 +21,7 @@ pub struct File {
     host: Url,
 
     /// The file URL that was provided by the server.
-    url: String,
+    url: Url,
 
     /// The secret key that is required to download the file.
     secret: Vec<u8>,
@@ -36,7 +36,7 @@ impl File {
         id: String,
         time: DateTime<Utc>,
         host: Url,
-        url: String,
+        url: Url,
         secret: Vec<u8>,
         owner_key: String,
     ) -> Self {
@@ -54,7 +54,7 @@ impl File {
     pub fn new_now(
         id: String,
         host: Url,
-        url: String,
+        url: Url,
         secret: Vec<u8>,
         owner_key: String,
     ) -> Self {
@@ -79,7 +79,11 @@ impl File {
     }
 
     /// Get the download URL of the file, with the secret key included.
-    pub fn download_url(&self) -> String {
-        format!("{}#{}", self.url, self.secret())
+    pub fn download_url(&self) -> Url {
+        // Get the download URL, and add the secret fragment
+        let mut url = self.url.clone();
+        url.set_fragment(Some(&self.secret()));
+
+        url
     }
 }

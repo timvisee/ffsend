@@ -229,7 +229,8 @@ impl UploadResponse {
         SendFile::new_now(
             self.id,
             host,
-            self.url,
+            Url::parse(&self.url)
+                .expect("upload response URL parse error"),
             key.secret().to_vec(),
             self.owner,
         )

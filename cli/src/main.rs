@@ -1,5 +1,4 @@
 extern crate ffsend_api;
-extern crate open;
 
 mod action;
 mod app;

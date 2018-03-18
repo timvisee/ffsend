@@ -2,9 +2,9 @@ use std::path::Path;
 
 use ffsend_api::action::upload::Upload as ApiUpload;
 use ffsend_api::reqwest::Client;
-use open;
 
 use cmd::cmd_upload::CmdUpload;
+use util::open_url;
 
 /// A file upload action.
 pub struct Upload<'a> {
@@ -22,7 +22,7 @@ impl<'a> Upload<'a> {
     /// Invoke the upload action.
     // TODO: create a trait for this method
     pub fn invoke(&self) {
-        // Get API action parameters
+        // Get API parameters
         let path = Path::new(self.cmd.file()).to_path_buf();
         let host = self.cmd.host();
 
@@ -37,6 +37,6 @@ impl<'a> Upload<'a> {
         let url = file.download_url();
         println!("Download URL: {}", url);
         // TODO: do not expect, but return an error
-        open::that(url).expect("failed to open URL");
+        open_url(url).expect("failed to open URL");
     }
 }
