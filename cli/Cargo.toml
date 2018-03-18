@@ -10,5 +10,6 @@ name = "ffsend"
 
 [dependencies]
 clap = "2.31"
+clipboard = "0.4"
 ffsend-api = { version = "*", path = "../api" }
 open = "1"

@@ -4,7 +4,7 @@ use ffsend_api::action::upload::Upload as ApiUpload;
 use ffsend_api::reqwest::Client;
 
 use cmd::cmd_upload::CmdUpload;
-use util::open_url;
+use util::{set_clipboard, open_url};
 
 /// A file upload action.
 pub struct Upload<'a> {
@@ -33,10 +33,21 @@ impl<'a> Upload<'a> {
         // TODO: do not unwrap, but return an error
         let file = ApiUpload::new(host, path).invoke(&client).unwrap();
 
-        // Open the URL in the browser
+        // Get the download URL, and report it in the console
         let url = file.download_url();
         println!("Download URL: {}", url);
-        // TODO: do not expect, but return an error
-        open_url(url).expect("failed to open URL");
+
+        // Open the URL in the browser
+        if self.cmd.open() {
+            // TODO: do not expect, but return an error
+            open_url(url.clone()).expect("failed to open URL");
+        }
+
+        // Copy the URL in the user's clipboard
+        if self.cmd.copy() {
+            // TODO: do not expect, but return an error
+            set_clipboard(url.as_str().to_owned())
+                .expect("failed to put download URL in user clipboard");
+        }
     }
 }

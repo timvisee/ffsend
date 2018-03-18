@@ -1,8 +1,11 @@
+extern crate clipboard;
 extern crate open;
 
+use std::error::Error;
 use std::io::Error as IoError;
 use std::process::{exit, ExitStatus};
 
+use self::clipboard::{ClipboardContext, ClipboardProvider};
 use ffsend_api::url::Url;
 
 /// Quit the application with an error code,
@@ -25,4 +28,10 @@ pub fn open_url(url: Url) -> Result<ExitStatus, IoError> {
 /// The program exit statis is returned.
 pub fn open_path(path: &str) -> Result<ExitStatus, IoError> {
     open::that(path)
+}
+
+/// Set the clipboard of the user to the given `content` string.
+pub fn set_clipboard(content: String) -> Result<(), Box<Error>> {
+    let mut context: ClipboardContext = ClipboardProvider::new()?;
+    context.set_contents(content)
 }

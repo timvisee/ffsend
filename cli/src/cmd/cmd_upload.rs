@@ -32,7 +32,7 @@ impl<'a: 'b, 'b> CmdUpload<'a> {
                 .long("open")
                 .short("o")
                 .help("Open the share link in your browser"))
-            .arg(Arg::with_name("c")
+            .arg(Arg::with_name("copy")
                 .long("copy")
                 .short("c")
                 .help("Copy the share link to your clipboard"))
@@ -77,5 +77,15 @@ impl<'a: 'b, 'b> CmdUpload<'a> {
                 quit_error("host domain doesn't contain a host"),
             _ => quit_error("the given host is invalid"),
         }
+    }
+
+    /// Check whether to open the file URL in the user's browser.
+    pub fn open(&self) -> bool {
+        self.matches.is_present("open")
+    }
+
+    /// Check whether to copy the file URL in the user's clipboard.
+    pub fn copy(&self) -> bool {
+        self.matches.is_present("copy")
     }
 }
