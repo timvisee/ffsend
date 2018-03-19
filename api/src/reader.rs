@@ -1,6 +1,12 @@
 use std::cmp::min;
 use std::fs::File;
-use std::io::{self, Cursor, Read};
+use std::io::{
+    self,
+    BufReader,
+    Cursor,
+    Error as IoError,
+    Read,
+};
 
 use openssl::symm::{
     Cipher,
@@ -73,14 +79,6 @@ impl EncryptedFileReaderTagged {
                 internal_buf: Vec::new(),
             }
         )
-    }
-
-    /// Calculate the total length of the encrypted file with the appended
-    /// tag.
-    /// Useful in combination with some progress monitor, to determine how much
-    /// of the file is read or for example; sent over the network.
-    pub fn len(&self) -> Result<u64, io::Error> {
-        Ok(self.file.metadata()?.len() + TAG_LEN as u64)
     }
 
     /// Read data from the internal buffer if there is any data in it, into
@@ -181,6 +179,16 @@ impl EncryptedFileReaderTagged {
     }
 }
 
+impl ExactLengthReader for EncryptedFileReaderTagged {
+    /// Calculate the total length of the encrypted file with the appended
+    /// tag.
+    /// Useful in combination with some progress monitor, to determine how much
+    /// of the file is read or for example; sent over the network.
+    fn len(&self) -> Result<u64, io::Error> {
+        Ok(self.file.metadata()?.len() + TAG_LEN as u64)
+    }
+}
+
 /// The reader trait implementation.
 impl Read for EncryptedFileReaderTagged {
     /// Read from the encrypted file, and then the encryption tag.
@@ -218,3 +226,115 @@ impl Read for EncryptedFileReaderTagged {
 
 // TODO: implement this some other way
 unsafe impl Send for EncryptedFileReaderTagged {}
+
+/// A reader wrapper, that measures the reading process for a reader with a
+/// known length.
+///
+/// If the reader exceeds the initially specified length,
+/// the reader will continue to allow reads.
+/// The length property will grow accordingly.
+///
+/// The reader will only start producing `None` if the wrapped reader is doing
+/// so.
+pub struct ProgressReader<'a, R> {
+    /// The wrapped reader.
+    inner: R,
+
+    /// The total length of the reader.
+    len: u64,
+
+    /// The current reading progress.
+    progress: u64,
+
+    /// A reporter, to report the progress status to.
+    reporter: Option<&'a mut ProgressReporter>,
+}
+
+impl<'a, R: Read> ProgressReader<'a, R> {
+    /// Wrap the given reader with an exact length, in a progress reader.
+    pub fn new(inner: R) -> Result<Self, IoError>
+        where
+            R: ExactLengthReader
+    {
+        Ok(
+            Self {
+                len: inner.len()?,
+                inner,
+                progress: 0,
+                reporter: None,
+            }
+        )
+    }
+
+    /// Wrap the given reader with the given length in a progress reader.
+    pub fn from(inner: R, len: u64) -> Self {
+        Self {
+            inner,
+            len,
+            progress: 0,
+            reporter: None,
+        }
+    }
+
+    /// Set the reporter to report the status to.
+    pub fn set_reporter(&mut self, reporter: &'a mut ProgressReporter) {
+        self.reporter = Some(reporter);
+    }
+
+    /// Get the current progress.
+    pub fn progress(&self) -> u64 {
+        self.progress
+    }
+}
+
+impl<'a, R: Read> Read for ProgressReader<'a, R> {
+    /// Read from the encrypted file, and then the encryption tag.
+    fn read(&mut self, buf: &mut [u8]) -> Result<usize, io::Error> {
+        // Read from the wrapped reader, increase the progress
+        let len = self.inner.read(buf)?;
+        self.progress += len as u64;
+
+        // Keep the specified length in-bound
+        if self.progress > self.len {
+            self.len = self.progress;
+        }
+
+        // Report
+        if let Some(reporter) = self.reporter.as_mut() {
+            reporter.progress(self.progress);
+        }
+
+        Ok(len)
+    }
+}
+
+impl<'a, R: Read> ExactLengthReader for ProgressReader<'a, R> {
+    // Return the specified length.
+    fn len(&self) -> Result<u64, io::Error> {
+        Ok(self.len)
+    }
+}
+
+/// A progress reporter.
+pub trait ProgressReporter: Send {
+    /// Start the progress with the given total.
+    fn start(&mut self, total: u64);
+
+    /// A progress update.
+    fn progress(&mut self, progress: u64);
+
+    /// Finish the progress.
+    fn finish(&mut self);
+}
+
+/// A trait for readers, to get the exact length of a reader.
+pub trait ExactLengthReader: Read {
+    /// Get the exact length of the reader in bytes.
+    fn len(&self) -> Result<u64, io::Error>;
+}
+
+impl<R: ExactLengthReader> ExactLengthReader for BufReader<R> {
+    fn len(&self) -> Result<u64, io::Error> {
+        self.get_ref().len()
+    }
+}

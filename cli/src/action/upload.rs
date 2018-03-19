@@ -1,9 +1,11 @@
 use std::path::Path;
+use std::sync::Arc;
 
 use ffsend_api::action::upload::Upload as ApiUpload;
 use ffsend_api::reqwest::Client;
 
 use cmd::cmd_upload::CmdUpload;
+use progress::ProgressBar;
 use util::open_url;
 #[cfg(feature = "clipboard")]
 use util::set_clipboard;
@@ -31,9 +33,12 @@ impl<'a> Upload<'a> {
         // Create a reqwest client
         let client = Client::new();
 
+        // Create a progress bar reporter
+        let bar = Box::new(ProgressBar::new());
+
         // Execute an upload action
         // TODO: do not unwrap, but return an error
-        let file = ApiUpload::new(host, path).invoke(&client).unwrap();
+        let file = ApiUpload::new(host, path).invoke(&client, bar).unwrap();
 
         // Get the download URL, and report it in the console
         let url = file.download_url();

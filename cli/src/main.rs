@@ -3,6 +3,7 @@ extern crate ffsend_api;
 mod action;
 mod app;
 mod cmd;
+mod progress;
 mod util;
 
 use action::upload::Upload;

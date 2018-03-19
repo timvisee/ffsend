@@ -1,5 +1,5 @@
 use std::fs::File;
-use std::io::{BufReader, Read};
+use std::io::BufReader;
 use std::path::{Path, PathBuf};
 
 use mime_guess::{get_mime_type, Mime};
@@ -15,10 +15,17 @@ use reqwest::multipart::{Form, Part};
 use url::Url;
 
 use crypto::key_set::KeySet;
-use reader::EncryptedFileReaderTagged;
+use reader::{
+    EncryptedFileReaderTagged,
+    ExactLengthReader,
+    ProgressReader,
+    ProgressReporter,
+};
 use file::file::File as SendFile;
 use file::metadata::{Metadata, XFileMetadata};
 
+type EncryptedReader =
+    ProgressReader<'static, BufReader<EncryptedFileReaderTagged>>;
 pub type Result<T> = ::std::result::Result<T, UploadError>;
 
 /// A file upload action to a Send server.
@@ -40,14 +47,19 @@ impl Upload {
     }
 
     /// Invoke the upload action.
-    pub fn invoke(self, client: &Client) -> Result<SendFile> {
+    pub fn invoke(
+        self,
+        client: &Client,
+        reporter: Box<ProgressReporter + 'static>,
+    ) -> Result<SendFile> {
         // Create file data, generate a key
         let file = FileData::from(Box::new(&self.path))?;
         let key = KeySet::generate(true);
 
-        // Create metadata and a file reader
+        // Crpate metadata and a file reader
         let metadata = self.create_metadata(&key, &file)?;
-        let (reader, len) = self.create_reader(&key)?;
+        // TODO: do not use leak, as it might cause memory leaks
+        let reader = self.create_reader(&key, Box::leak(reporter))?;
 
         // Create the request to send
         let req = self.create_request(
@@ -55,11 +67,14 @@ impl Upload {
             &key,
             metadata,
             reader,
-            len,
         );
 
         // Execute the request
-        self.execute_request(req, client, &key)
+        let result = self.execute_request(req, client, &key);
+
+        // TODO: finish the progress bar
+
+        result
     }
 
     /// Create a blob of encrypted metadata.
@@ -71,7 +86,7 @@ impl Upload {
             key.iv(),
             file.name().to_owned(),
             file.mime().clone(),
-        ) .to_json().into_bytes();
+        ).to_json().into_bytes();
 
         // Encrypt the metadata
         let mut metadata_tag = vec![0u8; 16];
@@ -94,9 +109,11 @@ impl Upload {
     }
 
     /// Create a reader that reads the file as encrypted stream.
-    fn create_reader(&self, key: &KeySet)
-        -> Result<(BufReader<EncryptedFileReaderTagged>, u64)>
-    {
+    fn create_reader(
+        &self,
+        key: &KeySet,
+        reporter: &'static mut ProgressReporter,
+    ) -> Result<EncryptedReader> {
         // Open the file
         let file = match File::open(self.path.as_path()) {
             Ok(file) => file,
@@ -114,28 +131,31 @@ impl Upload {
             Err(_) => return Err(UploadError::EncryptionError),
         };
 
-        // Buffer the encrypted reader, and determine the length
-        let len = match reader.len() {
-            Ok(len) => len,
-            Err(_) => return Err(UploadError::FileError),
-        };
+        // Buffer the encrypted reader
         let reader = BufReader::new(reader);
 
-        Ok((reader, len))
+        // Wrap into the encrypted reader
+        let mut reader = ProgressReader::new(reader)
+            .expect("failed to create progress reader");
+
+        // Initialize and attach the reporter
+        reporter.start(reader.len().unwrap());
+        reader.set_reporter(&mut *reporter);
+
+        Ok(reader)
     }
 
     /// Build the request that will be send to the server.
-    fn create_request<R>(
+    fn create_request(
         &self,
         client: &Client,
         key: &KeySet,
         metadata: Vec<u8>,
-        reader: R,
-        len: u64,
-    ) -> Request
-        where
-            R: Read + Send + 'static
-    {
+        reader: EncryptedReader,
+    ) -> Request {
+        // Get the reader length
+        let len = reader.len().expect("failed to get reader length");
+
         // Configure a form to send
         let part = Part::reader_with_length(reader, len)
             // .file_name(file.name())

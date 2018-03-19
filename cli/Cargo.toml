@@ -16,3 +16,4 @@ clap = "2.31"
 clipboard = { version = "0.4", optional = true }
 ffsend-api = { version = "*", path = "../api" }
 open = "1"
+pbr = "1"
