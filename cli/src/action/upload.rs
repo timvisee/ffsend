@@ -1,5 +1,5 @@
 use std::path::Path;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 
 use ffsend_api::action::upload::Upload as ApiUpload;
 use ffsend_api::reqwest::Client;
@@ -34,7 +34,7 @@ impl<'a> Upload<'a> {
         let client = Client::new();
 
         // Create a progress bar reporter
-        let bar = Box::new(ProgressBar::new());
+        let bar = Arc::new(Mutex::new(ProgressBar::new()));
 
         // Execute an upload action
         // TODO: do not unwrap, but return an error

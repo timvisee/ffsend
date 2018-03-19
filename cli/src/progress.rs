@@ -42,7 +42,6 @@ impl ProgressReporter for ProgressBar {
     fn finish(&mut self) {
         self.bar.as_mut()
             .expect("progress bar not yet instantiated")
-            // TODO: print a proper message here
-            .finish_print("DONE");
+            .finish_print("File uploaded");
     }
 }

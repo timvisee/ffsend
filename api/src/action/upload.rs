@@ -1,6 +1,7 @@
 use std::fs::File;
 use std::io::BufReader;
 use std::path::{Path, PathBuf};
+use std::sync::{Arc, Mutex};
 
 use mime_guess::{get_mime_type, Mime};
 use openssl::symm::encrypt_aead;
@@ -24,8 +25,7 @@ use reader::{
 use file::file::File as SendFile;
 use file::metadata::{Metadata, XFileMetadata};
 
-type EncryptedReader =
-    ProgressReader<'static, BufReader<EncryptedFileReaderTagged>>;
+type EncryptedReader = ProgressReader<BufReader<EncryptedFileReaderTagged>>;
 pub type Result<T> = ::std::result::Result<T, UploadError>;
 
 /// A file upload action to a Send server.
@@ -50,7 +50,7 @@ impl Upload {
     pub fn invoke(
         self,
         client: &Client,
-        reporter: Box<ProgressReporter + 'static>,
+        reporter: Arc<Mutex<ProgressReporter>>,
     ) -> Result<SendFile> {
         // Create file data, generate a key
         let file = FileData::from(Box::new(&self.path))?;
@@ -58,8 +58,8 @@ impl Upload {
 
         // Crpate metadata and a file reader
         let metadata = self.create_metadata(&key, &file)?;
-        // TODO: do not use leak, as it might cause memory leaks
-        let reader = self.create_reader(&key, Box::leak(reporter))?;
+        let reader = self.create_reader(&key, reporter.clone())?;
+        let reader_len = reader.len().unwrap();
 
         // Create the request to send
         let req = self.create_request(
@@ -69,10 +69,18 @@ impl Upload {
             reader,
         );
 
+        // Start the reporter
+        reporter.lock()
+            .expect("unable to start progress, failed to get lock")
+            .start(reader_len);
+
         // Execute the request
         let result = self.execute_request(req, client, &key);
 
-        // TODO: finish the progress bar
+        // Mark the reporter as finished
+        reporter.lock()
+            .expect("unable to finish progress, failed to get lock")
+            .finish();
 
         result
     }
@@ -112,7 +120,7 @@ impl Upload {
     fn create_reader(
         &self,
         key: &KeySet,
-        reporter: &'static mut ProgressReporter,
+        reporter: Arc<Mutex<ProgressReporter>>,
     ) -> Result<EncryptedReader> {
         // Open the file
         let file = match File::open(self.path.as_path()) {
@@ -139,8 +147,7 @@ impl Upload {
             .expect("failed to create progress reader");
 
         // Initialize and attach the reporter
-        reporter.start(reader.len().unwrap());
-        reader.set_reporter(&mut *reporter);
+        reader.set_reporter(reporter);
 
         Ok(reader)
     }

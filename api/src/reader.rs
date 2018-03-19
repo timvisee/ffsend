@@ -7,6 +7,7 @@ use std::io::{
     Error as IoError,
     Read,
 };
+use std::sync::{Arc, Mutex};
 
 use openssl::symm::{
     Cipher,
@@ -236,7 +237,7 @@ unsafe impl Send for EncryptedFileReaderTagged {}
 ///
 /// The reader will only start producing `None` if the wrapped reader is doing
 /// so.
-pub struct ProgressReader<'a, R> {
+pub struct ProgressReader<R> {
     /// The wrapped reader.
     inner: R,
 
@@ -247,10 +248,10 @@ pub struct ProgressReader<'a, R> {
     progress: u64,
 
     /// A reporter, to report the progress status to.
-    reporter: Option<&'a mut ProgressReporter>,
+    reporter: Option<Arc<Mutex<ProgressReporter>>>,
 }
 
-impl<'a, R: Read> ProgressReader<'a, R> {
+impl<R: Read> ProgressReader<R> {
     /// Wrap the given reader with an exact length, in a progress reader.
     pub fn new(inner: R) -> Result<Self, IoError>
         where
@@ -277,7 +278,7 @@ impl<'a, R: Read> ProgressReader<'a, R> {
     }
 
     /// Set the reporter to report the status to.
-    pub fn set_reporter(&mut self, reporter: &'a mut ProgressReporter) {
+    pub fn set_reporter(&mut self, reporter: Arc<Mutex<ProgressReporter>>) {
         self.reporter = Some(reporter);
     }
 
@@ -287,7 +288,7 @@ impl<'a, R: Read> ProgressReader<'a, R> {
     }
 }
 
-impl<'a, R: Read> Read for ProgressReader<'a, R> {
+impl<R: Read> Read for ProgressReader<R> {
     /// Read from the encrypted file, and then the encryption tag.
     fn read(&mut self, buf: &mut [u8]) -> Result<usize, io::Error> {
         // Read from the wrapped reader, increase the progress
@@ -301,14 +302,16 @@ impl<'a, R: Read> Read for ProgressReader<'a, R> {
 
         // Report
         if let Some(reporter) = self.reporter.as_mut() {
-            reporter.progress(self.progress);
+            reporter.lock()
+                .expect("failed to update progress, unable to lock reproter")
+                .progress(self.progress);
         }
 
         Ok(len)
     }
 }
 
-impl<'a, R: Read> ExactLengthReader for ProgressReader<'a, R> {
+impl<R: Read> ExactLengthReader for ProgressReader<R> {
     // Return the specified length.
     fn len(&self) -> Result<u64, io::Error> {
         Ok(self.len)
