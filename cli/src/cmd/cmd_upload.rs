@@ -13,7 +13,9 @@ pub struct CmdUpload<'a> {
 impl<'a: 'b, 'b> CmdUpload<'a> {
     /// Build the sub command definition.
     pub fn build<'y, 'z>() -> App<'y, 'z> {
-        SubCommand::with_name("upload")
+        // Build the subcommand
+        #[allow(unused_mut)]
+        let mut cmd = SubCommand::with_name("upload")
             .about("Upload files")
             .visible_alias("u")
             .visible_alias("up")
@@ -31,11 +33,17 @@ impl<'a: 'b, 'b> CmdUpload<'a> {
             .arg(Arg::with_name("open")
                 .long("open")
                 .short("o")
-                .help("Open the share link in your browser"))
-            .arg(Arg::with_name("copy")
+                .help("Open the share link in your browser"));
+
+        // Optional clipboard support
+        #[cfg(feature = "clipboard")] {
+            cmd = cmd.arg(Arg::with_name("copy")
                 .long("copy")
                 .short("c")
-                .help("Copy the share link to your clipboard"))
+                .help("Copy the share link to your clipboard"));
+        }
+
+        cmd
     }
 
     /// Parse CLI arguments, from the given parent command matches.
@@ -85,6 +93,7 @@ impl<'a: 'b, 'b> CmdUpload<'a> {
     }
 
     /// Check whether to copy the file URL in the user's clipboard.
+    #[cfg(feature = "clipboard")]
     pub fn copy(&self) -> bool {
         self.matches.is_present("copy")
     }

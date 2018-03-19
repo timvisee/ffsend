@@ -1,10 +1,13 @@
+#[cfg(feature = "clipboard")]
 extern crate clipboard;
 extern crate open;
 
+#[cfg(feature = "clipboard")]
 use std::error::Error;
 use std::io::Error as IoError;
 use std::process::{exit, ExitStatus};
 
+#[cfg(feature = "clipboard")]
 use self::clipboard::{ClipboardContext, ClipboardProvider};
 use ffsend_api::url::Url;
 
@@ -31,6 +34,7 @@ pub fn open_path(path: &str) -> Result<ExitStatus, IoError> {
 }
 
 /// Set the clipboard of the user to the given `content` string.
+#[cfg(feature = "clipboard")]
 pub fn set_clipboard(content: String) -> Result<(), Box<Error>> {
     let mut context: ClipboardContext = ClipboardProvider::new()?;
     context.set_contents(content)

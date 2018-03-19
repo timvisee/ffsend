@@ -4,7 +4,9 @@ use ffsend_api::action::upload::Upload as ApiUpload;
 use ffsend_api::reqwest::Client;
 
 use cmd::cmd_upload::CmdUpload;
-use util::{set_clipboard, open_url};
+use util::open_url;
+#[cfg(feature = "clipboard")]
+use util::set_clipboard;
 
 /// A file upload action.
 pub struct Upload<'a> {
@@ -44,10 +46,13 @@ impl<'a> Upload<'a> {
         }
 
         // Copy the URL in the user's clipboard
-        if self.cmd.copy() {
-            // TODO: do not expect, but return an error
-            set_clipboard(url.as_str().to_owned())
-                .expect("failed to put download URL in user clipboard");
+        #[cfg(feature = "clipboard")]
+        {
+            if self.cmd.copy() {
+                // TODO: do not expect, but return an error
+                set_clipboard(url.as_str().to_owned())
+                    .expect("failed to put download URL in user clipboard");
+            }
         }
     }
 }
