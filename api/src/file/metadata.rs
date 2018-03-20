@@ -1,5 +1,4 @@
 extern crate hyper;
-extern crate serde_json;
 
 use std::fmt;
 
@@ -10,6 +9,7 @@ use reqwest::header::{
     Raw,
 };
 use self::hyper::error::Error as HyperError;
+use serde_json;
 
 use crypto::b64;
 
