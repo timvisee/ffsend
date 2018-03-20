@@ -1,7 +1,10 @@
 use std::path::Path;
 
 use mime_guess::{get_mime_type, Mime};
-use openssl::symm::{decrypt_aead, encrypt_aead};
+use openssl::hash::MessageDigest;
+use openssl::pkey::PKey;
+use openssl::sign::Signer;
+use openssl::symm::decrypt_aead;
 use reqwest::{
     Client, 
     Error as ReqwestError,
@@ -73,7 +76,7 @@ impl<'a> Download<'a> {
 
         // Get the authentication nonce
         // TODO: don't unwrap here, return an error
-        let nonce = b64::decode(
+        let nonce = b64::decode_standard(
             response.headers()
                 .get_raw(HEADER_AUTH_NONCE)
                 .expect("missing authenticate header") 
@@ -88,18 +91,16 @@ impl<'a> Download<'a> {
                 .expect("missing authentication nonce")
         ).expect("failed to decode authentication nonce");
 
-        // Determine the signature
-        // TODO: use a tag length const here
+        // Compute the cryptographic signature
         // TODO: do not unwrap, return an error
-        let mut sig = vec![0u8; 16];
-		encrypt_aead(
-			KeySet::cipher(),
-			key.auth_key().unwrap(),
-			None,
-			&[],
-			&nonce,
-			&mut sig,
-		).expect("failed to derive signature");
+        let pkey = PKey::hmac(key.auth_key().unwrap())
+            .expect("failed to build HMAC key for signing");
+        let mut signer = Signer::new(MessageDigest::sha256(), &pkey)
+            .expect("failed to build signer");
+        signer.update(&nonce)
+            .expect("failed to feed signer");
+        let sig: Vec<u8> = signer.sign_to_vec()
+            .expect("failed to compute signature");
         let sig_encoded = b64::encode(&sig);
 
         // Get the meta URL, fetch the metadata
@@ -121,7 +122,7 @@ impl<'a> Download<'a> {
 
         // Get the metadata nonce
         // TODO: don't unwrap here, return an error
-        let nonce = b64::decode(
+        let nonce = b64::decode_url(
             response.headers()
                 .get_raw(HEADER_AUTH_NONCE)
                 .expect("missing authenticate header") 
@@ -142,8 +143,6 @@ impl<'a> Download<'a> {
 
         // Decrypt the metadata
         let metadata = meta_response.decrypt_metadata(&key);
-
-        println!("GOT METADATA: {:?}", metadata);
 
         // // Crpate metadata and a file reader
         // let metadata = self.create_metadata(&key, &file)?;
@@ -336,7 +335,7 @@ impl MetadataResponse {
     // TODO: do not unwrap, return a proper error
     pub fn decrypt_metadata(&self, key_set: &KeySet) -> Result<Metadata> {
         // Decode the metadata
-        let raw = b64::decode(&self.meta)
+        let raw = b64::decode_url(&self.meta)
             .expect("failed to decode metadata from server");
 
         // Get the encrypted metadata, and it's tag
