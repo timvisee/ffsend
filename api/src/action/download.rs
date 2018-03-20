@@ -115,7 +115,7 @@ impl<'a> Download<'a> {
 
         // Get the metadata nonce
         // TODO: don't unwrap here, return an error
-        let nonce = b64::decode_url(
+        let nonce = b64::decode_standard(
             response.headers()
                 .get_raw(HEADER_AUTH_NONCE)
                 .expect("missing authenticate header") 

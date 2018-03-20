@@ -502,7 +502,7 @@ impl Write for EncryptedFileWriter {
         }
 
         // Compute how many bytes were written
-        Ok(file_bytes - file_buf.len() + min(tag_buf.len(), tag_bytes))
+        Ok(file_buf.len() + tag_buf.len())
     }
 
     fn flush(&mut self) -> Result<(), io::Error> {

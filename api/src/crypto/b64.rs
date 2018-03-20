@@ -25,5 +25,5 @@ pub fn decode_url(input: &str) -> Result<Vec<u8>, DecodeError> {
 
 /// Decode the given string as base64, with the standaard character set.
 pub fn decode_standard(input: &str) -> Result<Vec<u8>, DecodeError> {
-    decode(input, base64::STANDARD_NO_PAD)
+    decode(input, base64::STANDARD)
 }
