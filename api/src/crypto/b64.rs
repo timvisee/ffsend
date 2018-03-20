@@ -8,7 +8,8 @@ extern crate base64;
 
 pub use self::base64::{Config, DecodeError};
 
-/// Encode the given byte slice using base64, in an URL-safe manner.
+/// Encode the given byte slice using base64,
+/// in an URL-safe manner without padding.
 pub fn encode(input: &[u8]) -> String {
     base64::encode_config(input, base64::URL_SAFE_NO_PAD)
 }

@@ -135,10 +135,9 @@ impl EncryptedFileReader {
 
         // Create an encrypted buffer, truncate the data buffer
         let mut encrypted = vec![0u8; len + block_size];
-        data.truncate(len);
 
         // Encrypt the data that was read
-        let len = self.crypter.update(&data, &mut encrypted)?;
+        let len = self.crypter.update(&data[..len], &mut encrypted)?;
 
         // Calculate how many bytes will be copied to the reader
         let out_len = min(buf.len(), len);
@@ -472,10 +471,9 @@ impl Write for EncryptedFileWriter {
                 file_buf,
                 &mut decrypted,
             )?;
-            decrypted.truncate(len);
 
             // Write to the file
-            self.file.write_all(&decrypted)?;
+            self.file.write_all(&decrypted[..len])?;
         }
 
         // Read from the tag part to fill the tag buffer
@@ -494,15 +492,16 @@ impl Write for EncryptedFileWriter {
 
             // Finalize, write all remaining data
             let len = self.crypter.finalize(&mut extra)?;
-            extra.truncate(len);
-            self.file.write_all(&extra)?;
+            self.file.write_all(&extra[..len])?;
 
             // Set the verified flag
             self.verified = true;
         }
 
         // Compute how many bytes were written
-        Ok(file_buf.len() + tag_buf.len())
+        let len = file_buf.len() + min(tag_buf.len(), TAG_LEN);
+        self.cur += len;
+        Ok(len)
     }
 
     fn flush(&mut self) -> Result<(), io::Error> {
