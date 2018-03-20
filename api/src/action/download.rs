@@ -22,38 +22,82 @@ use reader::{
     ProgressReader,
     ProgressReporter,
 };
-use file::file::File as SendFile;
+use file::file::DownloadFile;
 use file::metadata::{Metadata, XFileMetadata};
 
 pub type Result<T> = ::std::result::Result<T, DownloadError>;
 
-/// A file upload action to a Send server.
-pub struct Download {
-    /// The Send host to upload the file to.
-    host: Url,
+/// The name of the header that is used for the authentication nonce.
+const HEADER_AUTH_NONCE: &'static str = "WWW-Authenticate";
 
-    /// The file to upload.
-    path: PathBuf,
+/// A file upload action to a Send server.
+pub struct Download<'a> {
+    /// The Send file to download.
+    file: &DownloadFile,
 }
 
-impl Download {
-    /// Construct a new upload action.
-    pub fn new(host: Url, path: PathBuf) -> Self {
+impl<'a> Download<'a> {
+    /// Construct a new download action for the given file.
+    pub fn new(file: &'a DownloadFile) -> Self {
         Self {
-            host,
-            path,
+            file,
         }
     }
 
-    /// Invoke the upload action.
+    /// Invoke the download action.
     pub fn invoke(
         self,
         client: &Client,
-        reporter: Arc<Mutex<ProgressReporter>>,
     ) -> Result<SendFile> {
-        // Create file data, generate a key
-        let file = FileData::from(Box::new(&self.path))?;
-        let key = KeySet::generate(true);
+        // Create a key set for the file
+        let key = KeySet::from(self.file);
+
+        // Build the meta cipher
+        // let mut metadata_tag = vec![0u8; 16];
+        // let mut meta_cipher = match encrypt_aead(
+        //     KeySet::cipher(),
+        //     self.meta_key().unwrap(),
+        //     self.iv,
+        //     &[],
+        //     &metadata,
+        //     &mut metadata_tag,
+        // ) {
+        //     Ok(cipher) => cipher,
+        //     Err(_) => // TODO: return error here,
+        // };
+
+        // Get the download url, and parse the nonce
+        // TODO: do not unwrap here, return error
+        let download_url = file.download_url(false);
+        let response = client.get(download_url)
+            .send()
+            .expect("failed to get nonce, failed to send file request");
+
+        // Validate the status code
+        // TODO: allow redirects here?
+        if !response.status().is_success() {
+            // TODO: return error here
+            panic!("failed to get nonce, request status is not successful");
+        }
+
+        // Get the authentication nonce
+        // TODO: don't unwrap here, return an error
+        let nonce = b64::decode(
+            response.headers()
+                .get_raw(HEADER_AUTH_NONCE)
+                .expect("missing authenticate header") 
+                .one()
+                .map(|line| String::from_utf8(line.to_vec())
+                    .expect("invalid authentication header contents")
+                )
+                .expect("authentication header is empty")
+                .split_terminator(" ")
+                .skip(1)
+                .next()
+                .expect("missing authentication nonce")
+        );
+
+        // TODO: set the input vector
 
         // Crpate metadata and a file reader
         let metadata = self.create_metadata(&key, &file)?;

@@ -41,7 +41,7 @@ impl<'a> Upload<'a> {
         let file = ApiUpload::new(host, path).invoke(&client, bar).unwrap();
 
         // Get the download URL, and report it in the console
-        let url = file.download_url();
+        let url = file.download_url(true);
         println!("Download URL: {}", url);
 
         // Open the URL in the browser

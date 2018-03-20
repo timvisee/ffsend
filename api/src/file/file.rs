@@ -85,6 +85,12 @@ impl File {
 
     /// Get the raw secret.
     pub fn secret_raw(&self) -> &Vec<u8> {
+        // A secret must have been set
+        if !self.has_secret() {
+            // TODO: don't panic, return an error instead
+            panic!("missing secret");
+        }
+
         &self.secret
     }
 
@@ -93,11 +99,22 @@ impl File {
         b64::encode(self.secret_raw())
     }
 
-    /// Get the download URL of the file, with the secret key included.
-    pub fn download_url(&self) -> Url {
+    /// Check whether a file secret is set.
+    /// This secret must be set to decrypt a downloaded Send file.
+    pub fn has_secret(&self) -> bool {
+        !self.secret.is_empty()
+    }
+
+    /// Get the download URL of the file.
+    /// Set `secret` to `true`, to include it in the URL if known.
+    pub fn download_url(&self, secret: bool) -> Url {
         // Get the download URL, and add the secret fragment
         let mut url = self.url.clone();
-        url.set_fragment(Some(&self.secret()));
+        if secret && self.has_secret() {
+            url.set_fragment(Some(&self.secret()));
+        } else {
+            url.set_fragment(None);
+        }
 
         url
     }
@@ -160,6 +177,7 @@ impl DownloadFile {
         let re_path = Regex::new(DOWNLOAD_PATH_PATTERN).unwrap();
         let id = re_path.captures(url.path())
             .ok_or(FileParseError::InvalidDownloadUrl)?[1]
+            .trim()
             .to_owned();
 
         // Get the file secret
@@ -170,7 +188,7 @@ impl DownloadFile {
                 .ok_or(FileParseError::InvalidSecret)?
                 .get(1)
             {
-                secret = b64::decode(raw.as_str())
+                secret = b64::decode(raw.as_str().trim())
                         .map_err(|_| FileParseError::InvalidSecret)?
             }
         }
@@ -184,6 +202,22 @@ impl DownloadFile {
         ))
     }
 
+    /// Get the raw secret.
+    pub fn secret_raw(&self) -> &Vec<u8> {
+        // A secret must have been set
+        if !self.has_secret() {
+            // TODO: don't panic, return an error instead
+            panic!("missing secret");
+        }
+
+        &self.secret
+    }
+
+    /// Get the secret as base64 encoded string.
+    pub fn secret(&self) -> String {
+        b64::encode(self.secret_raw())
+    }
+
     /// Check whether a file secret is set.
     /// This secret must be set to decrypt a downloaded Send file.
     pub fn has_secret(&self) -> bool {
@@ -194,6 +228,20 @@ impl DownloadFile {
     /// An empty vector will clear the secret.
     pub fn set_secret(&mut self, secret: Vec<u8>) {
         self.secret = secret;
+    }
+
+    /// Get the download URL of the file.
+    /// Set `secret` to `true`, to include it in the URL if known.
+    pub fn download_url(&self, secret: bool) -> Url {
+        // Get the download URL, and add the secret fragment
+        let mut url = self.url.clone();
+        if secret && self.has_secret() {
+            url.set_fragment(Some(&self.secret()));
+        } else {
+            url.set_fragment(None);
+        }
+
+        url
     }
 }
 

@@ -1,5 +1,6 @@
 use openssl::symm::Cipher;
 
+use file::file::DownloadFile;
 use super::{b64, rand_bytes};
 use super::hdkf::{derive_auth_key, derive_file_key, derive_meta_key};
 
@@ -51,56 +52,6 @@ impl KeySet {
         // Derive all keys
         set.derive();
 
-        // Build the meta cipher
-        // let mut metadata_tag = vec![0u8; 16];
-        // let mut meta_cipher = match encrypt_aead(
-        //     KeySet::cipher(),
-        //     self.meta_key().unwrap(),
-        //     self.iv,
-        //     &[],
-        //     &metadata,
-        //     &mut metadata_tag,
-        // ) {
-        //     Ok(cipher) => cipher,
-        //     Err(_) => // TODO: return error here,
-        // };
-
-        // Create a reqwest client
-        let client = Client::new();
-
-        // Get the download url, and parse the nonce
-        // TODO: do not unwrap here, return error
-        let download_url = file.download_url(false);
-        let response = client.get(download_url)
-            .send()
-            .expect("failed to get nonce, failed to send file request");
-
-        // Validate the status code
-        // TODO: allow redirects here?
-        if !response.status().is_success() {
-            // TODO: return error here
-            panic!("failed to get nonce, request status is not successful");
-        }
-
-        // Get the authentication nonce
-        // TODO: don't unwrap here, return an error
-        let nonce = b64::decode(
-            response.headers()
-                .get_raw("WWW-Authenticate")
-                .expect("missing authenticate header") 
-                .one()
-                .map(|line| String::from_utf8(line.to_vec())
-                    .expect("invalid authentication header contents")
-                )
-                .expect("authentication header is empty")
-                .split_terminator(" ")
-                .skip(1)
-                .next()
-                .expect("missing authentication nonce")
-        );
-
-        // TODO: set the input vector
-
         set
     }
 
@@ -131,6 +82,7 @@ impl KeySet {
     }
 
     /// Derive a file, authentication and metadata key.
+    // TODO: add support for deriving with a password and URL
     pub fn derive(&mut self) {
         self.file_key = Some(derive_file_key(&self.secret));
         self.auth_key = Some(derive_auth_key(&self.secret, None, None));
