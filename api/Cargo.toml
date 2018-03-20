@@ -11,6 +11,7 @@ hkdf = "0.3"
 hyper = "0.11.9" # same as reqwest
 mime_guess = "2.0.0-alpha.2"
 openssl = "0.10"
+regex = "0.2"
 reqwest = "0.8"
 serde = "1.0"
 serde_derive = "1.0"

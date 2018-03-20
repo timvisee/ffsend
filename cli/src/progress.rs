@@ -27,6 +27,7 @@ impl ProgressReporter for ProgressBar {
         // Initialize the progress bar
         let mut bar = Pbr::new(total);
         bar.set_units(Units::Bytes);
+        bar.message("Upload/encrypt ");
 
         self.bar = Some(bar);
     }
@@ -42,6 +43,6 @@ impl ProgressReporter for ProgressBar {
     fn finish(&mut self) {
         self.bar.as_mut()
             .expect("progress bar not yet instantiated")
-            .finish_print("File uploaded");
+            .finish_print("Upload complete");
     }
 }
