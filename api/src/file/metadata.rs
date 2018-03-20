@@ -46,6 +46,16 @@ impl Metadata {
     pub fn to_json(&self) -> String {
         serde_json::to_string(&self).unwrap()
     }
+
+    /// Get the input vector
+    // TODO: use an input vector length from a constant
+    pub fn iv(&self) -> [u8; 12] {
+        // Decode the input vector
+        let decoded = b64::decode_url(&self.iv).unwrap();
+
+        // Create a sized array
+        *array_ref!(decoded, 0, 12)
+    }
 }
 
 /// A X-File-Metadata header for reqwest, that is used to pass encrypted

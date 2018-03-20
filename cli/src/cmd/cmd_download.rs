@@ -2,7 +2,6 @@ use ffsend_api::url::{ParseError, Url};
 
 use super::clap::{App, Arg, ArgMatches, SubCommand};
 
-use app::SEND_DEF_HOST;
 use util::quit_error;
 
 /// The download command.

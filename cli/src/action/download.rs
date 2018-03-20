@@ -1,15 +1,8 @@
-use std::path::Path;
-use std::sync::{Arc, Mutex};
-
 use ffsend_api::action::download::Download as ApiDownload;
 use ffsend_api::file::file::DownloadFile;
 use ffsend_api::reqwest::Client;
 
 use cmd::cmd_download::CmdDownload;
-use progress::ProgressBar;
-use util::open_url;
-#[cfg(feature = "clipboard")]
-use util::set_clipboard;
 
 /// A file download action.
 pub struct Download<'a> {
@@ -41,26 +34,9 @@ impl<'a> Download<'a> {
         // TODO: do not unwrap, but return an error
         ApiDownload::new(&file).invoke(&client).unwrap();
 
-        // // Get the download URL, and report it in the console
-        // let url = file.download_url(true);
-        // println!("Download URL: {}", url);
+        // TODO: open the file, or it's location
+        // TODO: copy the file location
 
-        // // Open the URL in the browser
-        // if self.cmd.open() {
-        //     // TODO: do not expect, but return an error
-        //     open_url(url.clone()).expect("failed to open URL");
-        // }
-
-        // // Copy the URL in the user's clipboard
-        // #[cfg(feature = "clipboard")]
-        // {
-        //     if self.cmd.copy() {
-        //         // TODO: do not expect, but return an error
-        //         set_clipboard(url.as_str().to_owned())
-        //             .expect("failed to put download URL in user clipboard");
-        //     }
-        // }
-        
-        panic!("DONE");
+        println!("Download complete");
     }
 }

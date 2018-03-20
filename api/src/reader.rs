@@ -1,4 +1,4 @@
-use std::cmp::min;
+use std::cmp::{max, min};
 use std::fs::File;
 use std::io::{
     self,
@@ -6,6 +6,7 @@ use std::io::{
     Cursor,
     Error as IoError,
     Read,
+    Write,
 };
 use std::sync::{Arc, Mutex};
 
@@ -17,6 +18,8 @@ use openssl::symm::{
 
 /// The length in bytes of crytographic tags that are used.
 const TAG_LEN: usize = 16;
+
+// TODO: create a generic reader/writer wrapper for the the encryptor/decryptor.
 
 /// A lazy file reader, that encrypts the file with the given `cipher`
 /// and appends the cryptographic tag to the end of it.
@@ -30,7 +33,7 @@ const TAG_LEN: usize = 16;
 /// The reader uses a small internal buffer as data is encrypted in blocks,
 /// which may output more data than fits in the given buffer while reading.
 /// The excess data is then returned on the next read.
-pub struct EncryptedFileReaderTagged {
+pub struct EncryptedFileReader {
     /// The raw file that is read from.
     file: File,
 
@@ -50,7 +53,7 @@ pub struct EncryptedFileReaderTagged {
     internal_buf: Vec<u8>,
 }
 
-impl EncryptedFileReaderTagged {
+impl EncryptedFileReader {
     /// Construct a new reader for the given `file` with the given `cipher`.
     ///
     /// This method consumes twice the size of the file in memory while
@@ -72,7 +75,7 @@ impl EncryptedFileReaderTagged {
 
         // Construct the encrypted reader
         Ok(
-            EncryptedFileReaderTagged {
+            EncryptedFileReader {
                 file,
                 cipher,
                 crypter,
@@ -180,7 +183,7 @@ impl EncryptedFileReaderTagged {
     }
 }
 
-impl ExactLengthReader for EncryptedFileReaderTagged {
+impl ExactLengthReader for EncryptedFileReader {
     /// Calculate the total length of the encrypted file with the appended
     /// tag.
     /// Useful in combination with some progress monitor, to determine how much
@@ -191,7 +194,7 @@ impl ExactLengthReader for EncryptedFileReaderTagged {
 }
 
 /// The reader trait implementation.
-impl Read for EncryptedFileReaderTagged {
+impl Read for EncryptedFileReader {
     /// Read from the encrypted file, and then the encryption tag.
     fn read(&mut self, buf: &mut [u8]) -> Result<usize, io::Error> {
         // Read from the internal buffer, return full or splice to empty
@@ -226,7 +229,7 @@ impl Read for EncryptedFileReaderTagged {
 }
 
 // TODO: implement this some other way
-unsafe impl Send for EncryptedFileReaderTagged {}
+unsafe impl Send for EncryptedFileReader {}
 
 /// A reader wrapper, that measures the reading process for a reader with a
 /// known length.
@@ -339,5 +342,170 @@ pub trait ExactLengthReader: Read {
 impl<R: ExactLengthReader> ExactLengthReader for BufReader<R> {
     fn len(&self) -> Result<u64, io::Error> {
         self.get_ref().len()
+    }
+}
+
+/// A lazy file writer, that decrypt the file with the given `cipher`
+/// and verifies it with the tag appended to the end of the input data.
+///
+/// This writer is lazy because the input data is decrypted and written to the
+/// specified file on the fly, instead of buffering all the data first.
+/// This greatly reduces memory usage for large files.
+///
+/// The length of the input data (including the appended tag) must be given
+/// when this reader is initialized. When all data including the tag is read,
+/// the decrypted data is verified with the tag. If the tag doesn't match the
+/// decrypted data, a write error is returned on the last write.
+/// This writer will never write more bytes than the length initially
+/// specified.
+///
+/// This reader encrypts the input data with the given key and input vector.
+///
+/// A failed writing implies that no data could be written, or that the data
+/// wasn't successfully decrypted because of an decryption or tag matching
+/// error. Such a fail means that the file will be incomplete or corrupted,
+/// and should therefore be removed from the disk.
+///
+/// It is highly recommended to invoke the `verified()` method after writing
+/// the file, to ensure the written file is indeed complete and fully verified.
+pub struct EncryptedFileWriter {
+    /// The file to write the decrypted data to.
+    file: File,
+
+    /// The number of bytes that have currently been written to this writer.
+    cur: usize,
+
+    /// The length of all the data, which includes the file data and the
+    /// appended tag.
+    len: usize,
+
+    /// The cipher type used for decrypting.
+    cipher: Cipher,
+
+    /// The crypter used for decrypting the data.
+    crypter: Crypter,
+
+    /// A buffer for the tag.
+    tag_buf: Vec<u8>,
+
+    /// A boolean that defines whether the decrypted data has successfully
+    /// been verified.
+    verified: bool,
+}
+
+impl EncryptedFileWriter {
+    /// Construct a new encrypted file writer.
+    ///
+    /// The file to write to must be given to `file`, which must be open for
+    /// writing. The total length of the input data in bytes must be given to
+    /// `len`, which includes both the file bytes and the appended tag.
+    ///
+    /// For decryption, a `cipher`, `key` and `iv` must also be given.
+    pub fn new(file: File, len: usize, cipher: Cipher, key: &[u8], iv: &[u8])
+        -> Result<Self, io::Error>
+    {
+        // Build the crypter
+        let crypter = Crypter::new(
+            cipher,
+            CrypterMode::Decrypt,
+            key,
+            Some(iv),
+        )?;
+
+        // Construct the encrypted reader
+        Ok(
+            EncryptedFileWriter {
+                file,
+                cur: 0,
+                len,
+                cipher,
+                crypter,
+                tag_buf: Vec::with_capacity(TAG_LEN),
+                verified: false,
+            }
+        )
+    }
+
+    /// Check wheher the complete tag is buffered.
+    pub fn has_tag(&self) -> bool {
+        self.tag_buf.len() >= TAG_LEN
+    }
+
+    /// Check whether the decrypted data is succesfsully verified.
+    ///
+    /// If this method returns true the following is implied:
+    /// - The complete file has been written.
+    /// - The complete file was successfully decrypted.
+    /// - The included tag matches the decrypted file.
+    ///
+    /// It is highly recommended to invoke this method and check the
+    /// verification after writing the file using this writer.
+    pub fn verified(&self) -> bool {
+        self.verified
+    }
+}
+
+/// The writer trait implementation.
+impl Write for EncryptedFileWriter {
+    fn write(&mut self, buf: &[u8]) -> Result<usize, io::Error> {
+        // Do not write anything if the tag was already written
+        if self.verified() || self.has_tag() {
+            return Ok(0);
+        }
+
+        // Determine how many file and tag bytes we still need to process
+        let file_bytes = max(self.len - TAG_LEN - self.cur, 0);
+        let tag_bytes = TAG_LEN - self.tag_buf.len();
+
+        // Split the input buffer
+        let (file_buf, tag_buf) = buf.split_at(min(file_bytes, buf.len()));
+
+        // Read from the file buf
+        if !file_buf.is_empty() {
+            // Create a decrypted buffer, with the proper size
+            let block_size = self.cipher.block_size();
+            let mut decrypted = vec![0u8; file_bytes + block_size];
+
+            // Decrypt bytes
+            // TODO: catch error in below statement
+            let len = self.crypter.update(
+                file_buf,
+                &mut decrypted,
+            )?;
+            decrypted.truncate(len);
+
+            // Write to the file
+            self.file.write_all(&decrypted)?;
+        }
+
+        // Read from the tag part to fill the tag buffer
+        if !tag_buf.is_empty() {
+            self.tag_buf.extend(tag_buf.iter().take(tag_bytes));
+        }
+
+        // Verify the tag once it has been buffered completely
+        if self.has_tag() {
+            // Set the tag
+            self.crypter.set_tag(&self.tag_buf)?;
+
+            // Create a buffer for any remaining data
+            let block_size = self.cipher.block_size();
+            let mut extra = vec![0u8; block_size];
+
+            // Finalize, write all remaining data
+            let len = self.crypter.finalize(&mut extra)?;
+            extra.truncate(len);
+            self.file.write_all(&extra)?;
+
+            // Set the verified flag
+            self.verified = true;
+        }
+
+        // Compute how many bytes were written
+        Ok(file_bytes - file_buf.len() + min(tag_buf.len(), tag_bytes))
+    }
+
+    fn flush(&mut self) -> Result<(), io::Error> {
+        self.file.flush()
     }
 }

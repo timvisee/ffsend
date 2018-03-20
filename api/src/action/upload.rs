@@ -17,7 +17,7 @@ use url::Url;
 
 use crypto::key_set::KeySet;
 use reader::{
-    EncryptedFileReaderTagged,
+    EncryptedFileReader,
     ExactLengthReader,
     ProgressReader,
     ProgressReporter,
@@ -25,7 +25,7 @@ use reader::{
 use file::file::File as SendFile;
 use file::metadata::{Metadata, XFileMetadata};
 
-type EncryptedReader = ProgressReader<BufReader<EncryptedFileReaderTagged>>;
+type EncryptedReader = ProgressReader<BufReader<EncryptedFileReader>>;
 pub type Result<T> = ::std::result::Result<T, UploadError>;
 
 /// A file upload action to a Send server.
@@ -129,7 +129,7 @@ impl Upload {
         };
 
         // Create an encrypted reader
-        let reader = match EncryptedFileReaderTagged::new(
+        let reader = match EncryptedFileReader::new(
             file,
             KeySet::cipher(),
             key.file_key().unwrap(),

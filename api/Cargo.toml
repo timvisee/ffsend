@@ -5,6 +5,7 @@ authors = ["timvisee <timvisee@gmail.com>"]
 workspace = ".."
 
 [dependencies]
+arrayref = "0.3"
 base64 = "0.9"
 chrono = "0.4"
 hkdf = "0.3"

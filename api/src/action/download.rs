@@ -1,12 +1,13 @@
-use std::path::Path;
+use std::fs::File;
+use std::io;
 
-use mime_guess::{get_mime_type, Mime};
 use openssl::symm::decrypt_aead;
 use reqwest::{
     Client, 
     Error as ReqwestError,
 };
 use reqwest::header::Authorization;
+use reqwest::header::ContentLength;
 use serde_json;
 
 use crypto::b64;
@@ -14,6 +15,7 @@ use crypto::key_set::KeySet;
 use crypto::sign::signature_encoded;
 use file::file::DownloadFile;
 use file::metadata::Metadata;
+use reader::EncryptedFileWriter;
 
 pub type Result<T> = ::std::result::Result<T, DownloadError>;
 
@@ -42,7 +44,7 @@ impl<'a> Download<'a> {
         client: &Client,
     ) -> Result<()> {
         // Create a key set for the file
-        let key = KeySet::from(self.file);
+        let mut key = KeySet::from(self.file);
 
         // Build the meta cipher
         // let mut metadata_tag = vec![0u8; 16];
@@ -92,7 +94,7 @@ impl<'a> Download<'a> {
         // Compute the cryptographic signature
         // TODO: do not unwrap, return an error
         let sig = signature_encoded(key.auth_key().unwrap(), &nonce)
-            .expect("failed to compute signature");
+            .expect("failed to compute metadata signature");
 
         // Get the meta URL, fetch the metadata
         // TODO: do not unwrap here, return error
@@ -126,14 +128,63 @@ impl<'a> Download<'a> {
                 .skip(1)
                 .next()
                 .expect("missing metadata nonce")
-        );
+        ).expect("failed to decode metadata nonce");
 
         // Parse the metadata response
         let meta_response: MetadataResponse = response.json()
             .expect("failed to parse metadata response");
 
-        // Decrypt the metadata
-        let metadata = meta_response.decrypt_metadata(&key);
+        // Decrypt the metadata, set the input vector
+        let metadata = meta_response.decrypt_metadata(&key)
+            .expect("failed to decrypt metadata");
+        key.set_iv(metadata.iv());
+
+        // Compute the cryptographic signature
+        // TODO: do not unwrap, return an error
+        let sig = signature_encoded(key.auth_key().unwrap(), &nonce)
+            .expect("failed to compute file signature");
+
+        // Get the download URL, build the download request
+        // TODO: do not unwrap here, return error
+        let download_url = self.file.api_download_url();
+        let mut response = client.get(download_url)
+            .header(Authorization(
+                format!("send-v1 {}", sig)
+            ))
+            .send()
+            .expect("failed to fetch file, failed to send request");
+
+        // Validate the status code
+        // TODO: allow redirects here?
+        if !response.status().is_success() {
+            // TODO: return error here
+            panic!("failed to fetch file, request status is not successful");
+        }
+
+        // Get the content length
+        let response_len = response.headers().get::<ContentLength>()
+            .expect("failed to fetch file, missing content length header")
+            .0;
+
+        // Open a file to write to
+        // TODO: this should become a temporary file first
+        let out = File::create("downloaded.toml")
+            .expect("failed to open file");
+        let mut writer = EncryptedFileWriter::new(
+            out,
+            response_len as usize,
+            KeySet::cipher(),
+            key.file_key().unwrap(),
+            key.iv(),
+        ).expect("failed to create encrypted writer");
+
+        // Write to the output file
+        io::copy(&mut response, &mut writer)
+            .expect("failed to download and decrypt file");
+
+        // Verify the writer
+        // TODO: delete the file if verification failed, show a proper error
+        assert!(writer.verified(), "downloaded and decrypted file could not be verified");
 
         // // Crpate metadata and a file reader
         // let metadata = self.create_metadata(&key, &file)?;
@@ -160,6 +211,9 @@ impl<'a> Download<'a> {
         // reporter.lock()
         //     .expect("unable to finish progress, failed to get lock")
         //     .finish();
+        
+        // TODO: return the file path
+        // TODO: return the new remote state (does it still exist remote)
 
         Ok(())
     }
@@ -352,53 +406,3 @@ impl MetadataResponse {
         )
     }
 }
-
-// /// A struct that holds various file properties, such as it's name and it's
-// /// mime type.
-// struct FileData<'a> {
-//     /// The file name.
-//     name: &'a str,
-
-//     /// The file mime type.
-//     mime: Mime,
-// }
-
-// impl<'a> FileData<'a> {
-//     /// Create a file data object, from the file at the given path.
-//     pub fn from(path: Box<&'a Path>) -> Result<Self> {
-//         // Make sure the given path is a file
-//         if !path.is_file() {
-//             return Err(DownloadError::NotAFile);
-//         }
-
-//         // Get the file name
-//         let name = match path.file_name() {
-//             Some(name) => name.to_str().expect("failed to convert string"),
-//             None => return Err(DownloadError::FileError),
-//         };
-
-//         // Get the file extention
-//         // TODO: handle cases where the file doesn't have an extention
-//         let ext = match path.extension() {
-//             Some(ext) => ext.to_str().expect("failed to convert string"),
-//             None => return Err(DownloadError::FileError),
-//         };
-
-//         Ok(
-//             Self {
-//                 name,
-//                 mime: get_mime_type(ext),
-//             }
-//         )
-//     }
-
-//     /// Get the file name.
-//     pub fn name(&self) -> &str {
-//         self.name
-//     }
-
-//     /// Get the file mime type.
-//     pub fn mime(&self) -> &Mime {
-//         &self.mime
-//     }
-// }

@@ -246,6 +246,16 @@ impl DownloadFile {
 
         url
     }
+
+    /// Get the API download URL of the file.
+    pub fn api_download_url(&self) -> Url {
+        // Get the download URL, and add the secret fragment
+        let mut url = self.url.clone();
+        url.set_path(format!("/api/download/{}", self.id).as_str());
+        url.set_fragment(None);
+
+        url
+    }
 }
 
 #[derive(Debug)]

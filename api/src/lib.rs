@@ -1,3 +1,5 @@
+#[macro_use]
+extern crate arrayref;
 extern crate mime_guess;
 extern crate openssl;
 pub extern crate reqwest;

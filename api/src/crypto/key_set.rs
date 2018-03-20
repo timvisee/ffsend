@@ -104,6 +104,11 @@ impl KeySet {
         &self.iv
     }
 
+    /// Set the input vector.
+    pub fn set_iv(&mut self, iv: [u8; KEY_IV_LEN]) {
+        self.iv = iv;
+    }
+
     /// Get the file encryption key, if derived.
     pub fn file_key(&self) -> Option<&Vec<u8>> {
         self.file_key.as_ref()
