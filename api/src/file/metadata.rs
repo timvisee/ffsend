@@ -14,7 +14,7 @@ use serde_json;
 use crypto::b64;
 
 /// File metadata, which is send to the server.
-#[derive(Serialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Metadata {
     /// The input vector.
     iv: String,

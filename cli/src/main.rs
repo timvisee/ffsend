@@ -6,6 +6,7 @@ mod cmd;
 mod progress;
 mod util;
 
+use action::download::Download;
 use action::upload::Upload;
 use cmd::Handler;
 
@@ -26,6 +27,11 @@ fn invoke_action(handler: &Handler) {
     // Match the upload command
     if let Some(cmd) = handler.upload() {
         return Upload::new(&cmd).invoke();
+    }
+
+    // Match the download command
+    if let Some(cmd) = handler.download() {
+        return Download::new(&cmd).invoke();
     }
 
     // No subcommand was selected, show general help
