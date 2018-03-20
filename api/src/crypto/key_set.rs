@@ -3,12 +3,15 @@ use openssl::symm::Cipher;
 use super::{b64, rand_bytes};
 use super::hdkf::{derive_auth_key, derive_file_key, derive_meta_key};
 
+/// The length of an input vector.
+const KEY_IV_LEN: usize = 12;
+
 pub struct KeySet {
     /// A secret.
-    secret: [u8; 16],
+    secret: Vec<u8>,
 
     /// Input vector.
-    iv: [u8; 12],
+    iv: [u8; KEY_IV_LEN],
 
     /// A derived file encryption key.
     file_key: Option<Vec<u8>>,
@@ -22,7 +25,7 @@ pub struct KeySet {
 
 impl KeySet {
     /// Construct a new key, with the given `secret` and `iv`.
-    pub fn new(secret: [u8; 16], iv: [u8; 12]) -> Self {
+    pub fn new(secret: Vec<u8>, iv: [u8; 12]) -> Self {
         Self {
             secret,
             iv,
@@ -32,13 +35,82 @@ impl KeySet {
         }
     }
 
+    /// Create a key set from the given file ID and secret.
+    /// This method may be used to create a key set based on a Send download
+    /// URL.
+    // TODO: add a parameter for the password and URL
+    // TODO: return a result?
+    // TODO: supply a client instance as parameter
+    pub fn from(file: &DownloadFile) -> Self {
+        // Create a new key set instance
+        let mut set = Self::new(
+            file.secret_raw().clone(),
+            [0; 12],
+        );
+
+        // Derive all keys
+        set.derive();
+
+        // Build the meta cipher
+        // let mut metadata_tag = vec![0u8; 16];
+        // let mut meta_cipher = match encrypt_aead(
+        //     KeySet::cipher(),
+        //     self.meta_key().unwrap(),
+        //     self.iv,
+        //     &[],
+        //     &metadata,
+        //     &mut metadata_tag,
+        // ) {
+        //     Ok(cipher) => cipher,
+        //     Err(_) => // TODO: return error here,
+        // };
+
+        // Create a reqwest client
+        let client = Client::new();
+
+        // Get the download url, and parse the nonce
+        // TODO: do not unwrap here, return error
+        let download_url = file.download_url(false);
+        let response = client.get(download_url)
+            .send()
+            .expect("failed to get nonce, failed to send file request");
+
+        // Validate the status code
+        // TODO: allow redirects here?
+        if !response.status().is_success() {
+            // TODO: return error here
+            panic!("failed to get nonce, request status is not successful");
+        }
+
+        // Get the authentication nonce
+        // TODO: don't unwrap here, return an error
+        let nonce = b64::decode(
+            response.headers()
+                .get_raw("WWW-Authenticate")
+                .expect("missing authenticate header") 
+                .one()
+                .map(|line| String::from_utf8(line.to_vec())
+                    .expect("invalid authentication header contents")
+                )
+                .expect("authentication header is empty")
+                .split_terminator(" ")
+                .skip(1)
+                .next()
+                .expect("missing authentication nonce")
+        );
+
+        // TODO: set the input vector
+
+        set
+    }
+
     /// Generate a secure new key.
     ///
     /// If `derive` is `true`, file, authentication and metadata keys will be
     /// derived from the generated secret. 
     pub fn generate(derive: bool) -> Self {
         // Allocate two keys
-        let mut secret = [0u8; 16];
+        let mut secret = vec![0u8; 16];
         let mut iv = [0u8; 12];
 
         // Generate the secrets

@@ -14,7 +14,7 @@ use crypto::b64;
 // TODO: match any sub-path?
 // TODO: match URL-safe base64 chars for the file ID?
 // TODO: constrain the ID length?
-const DOWNLOAD_PATH_PATTERN: &'static str = r"$/?download/([[:alnum:]]+={0,3})/?^";
+const DOWNLOAD_PATH_PATTERN: &'static str = r"$/?download/([[:alnum:]]{8,}={0,3})/?^";
 
 /// A pattern for Send download URL fragments, capturing the file secret.
 // TODO: constrain the secret length?
@@ -140,7 +140,8 @@ impl DownloadFile {
     /// this does not check whether the host is a valid and online Send host.
     ///
     /// If the URL fragmet contains a file secret, it is also parsed.
-    /// If it does not, the secret is left empty and must be specified manually.
+    /// If it does not, the secret is left empty and must be specified
+    /// manually.
     pub fn parse_url(url: String) -> Result<DownloadFile, FileParseError> {
         // Try to parse as an URL
         let url = Url::parse(&url)
@@ -151,6 +152,9 @@ impl DownloadFile {
         host.set_fragment(None);
         host.set_query(None);
         host.set_path("");
+
+        // TODO: remove this after debugging
+        println!("DEBUG: Extracted host: {}", host);
 
         // Validate the path, get the file ID
         let re_path = Regex::new(DOWNLOAD_PATH_PATTERN).unwrap();

@@ -27,7 +27,7 @@ impl ProgressReporter for ProgressBar {
         // Initialize the progress bar
         let mut bar = Pbr::new(total);
         bar.set_units(Units::Bytes);
-        bar.message("Upload/encrypt ");
+        bar.message("Encrypt & Upload ");
 
         self.bar = Some(bar);
     }
