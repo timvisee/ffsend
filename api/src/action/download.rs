@@ -1,9 +1,6 @@
 use std::path::Path;
 
 use mime_guess::{get_mime_type, Mime};
-use openssl::hash::MessageDigest;
-use openssl::pkey::PKey;
-use openssl::sign::Signer;
 use openssl::symm::decrypt_aead;
 use reqwest::{
     Client, 
@@ -14,6 +11,7 @@ use serde_json;
 
 use crypto::b64;
 use crypto::key_set::KeySet;
+use crypto::sign::signature_encoded;
 use file::file::DownloadFile;
 use file::metadata::Metadata;
 
@@ -93,22 +91,15 @@ impl<'a> Download<'a> {
 
         // Compute the cryptographic signature
         // TODO: do not unwrap, return an error
-        let pkey = PKey::hmac(key.auth_key().unwrap())
-            .expect("failed to build HMAC key for signing");
-        let mut signer = Signer::new(MessageDigest::sha256(), &pkey)
-            .expect("failed to build signer");
-        signer.update(&nonce)
-            .expect("failed to feed signer");
-        let sig: Vec<u8> = signer.sign_to_vec()
+        let sig = signature_encoded(key.auth_key().unwrap(), &nonce)
             .expect("failed to compute signature");
-        let sig_encoded = b64::encode(&sig);
 
         // Get the meta URL, fetch the metadata
         // TODO: do not unwrap here, return error
         let meta_url = self.file.api_meta_url();
         let mut response = client.get(meta_url)
             .header(Authorization(
-                format!("send-v1 {}", sig_encoded)
+                format!("send-v1 {}", sig)
             ))
             .send()
             .expect("failed to fetch metadata, failed to send request");
@@ -344,7 +335,6 @@ impl MetadataResponse {
         assert_eq!(tag.len(), 16);
 
         // Decrypt the metadata
-        // TODO: is the tag verified here?
         // TODO: do not unwrap, return an error
 		let meta = decrypt_aead(
 			KeySet::cipher(),
@@ -353,7 +343,7 @@ impl MetadataResponse {
 			&[],
 			encrypted,
 			&tag,
-		).expect("failed to decrypt metadata");
+		).expect("failed to decrypt metadata, invalid tag?");
 
         // Parse the metadata, and return
         Ok(
@@ -363,52 +353,52 @@ impl MetadataResponse {
     }
 }
 
-/// A struct that holds various file properties, such as it's name and it's
-/// mime type.
-struct FileData<'a> {
-    /// The file name.
-    name: &'a str,
+// /// A struct that holds various file properties, such as it's name and it's
+// /// mime type.
+// struct FileData<'a> {
+//     /// The file name.
+//     name: &'a str,
 
-    /// The file mime type.
-    mime: Mime,
-}
+//     /// The file mime type.
+//     mime: Mime,
+// }
 
-impl<'a> FileData<'a> {
-    /// Create a file data object, from the file at the given path.
-    pub fn from(path: Box<&'a Path>) -> Result<Self> {
-        // Make sure the given path is a file
-        if !path.is_file() {
-            return Err(DownloadError::NotAFile);
-        }
+// impl<'a> FileData<'a> {
+//     /// Create a file data object, from the file at the given path.
+//     pub fn from(path: Box<&'a Path>) -> Result<Self> {
+//         // Make sure the given path is a file
+//         if !path.is_file() {
+//             return Err(DownloadError::NotAFile);
+//         }
 
-        // Get the file name
-        let name = match path.file_name() {
-            Some(name) => name.to_str().expect("failed to convert string"),
-            None => return Err(DownloadError::FileError),
-        };
+//         // Get the file name
+//         let name = match path.file_name() {
+//             Some(name) => name.to_str().expect("failed to convert string"),
+//             None => return Err(DownloadError::FileError),
+//         };
 
-        // Get the file extention
-        // TODO: handle cases where the file doesn't have an extention
-        let ext = match path.extension() {
-            Some(ext) => ext.to_str().expect("failed to convert string"),
-            None => return Err(DownloadError::FileError),
-        };
+//         // Get the file extention
+//         // TODO: handle cases where the file doesn't have an extention
+//         let ext = match path.extension() {
+//             Some(ext) => ext.to_str().expect("failed to convert string"),
+//             None => return Err(DownloadError::FileError),
+//         };
 
-        Ok(
-            Self {
-                name,
-                mime: get_mime_type(ext),
-            }
-        )
-    }
+//         Ok(
+//             Self {
+//                 name,
+//                 mime: get_mime_type(ext),
+//             }
+//         )
+//     }
 
-    /// Get the file name.
-    pub fn name(&self) -> &str {
-        self.name
-    }
+//     /// Get the file name.
+//     pub fn name(&self) -> &str {
+//         self.name
+//     }
 
-    /// Get the file mime type.
-    pub fn mime(&self) -> &Mime {
-        &self.mime
-    }
-}
+//     /// Get the file mime type.
+//     pub fn mime(&self) -> &Mime {
+//         &self.mime
+//     }
+// }
