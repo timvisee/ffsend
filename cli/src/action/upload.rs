@@ -34,7 +34,7 @@ impl<'a> Upload<'a> {
         let client = Client::new();
 
         // Create a progress bar reporter
-        let bar = Arc::new(Mutex::new(ProgressBar::new()));
+        let bar = Arc::new(Mutex::new(ProgressBar::new_upload()));
 
         // Execute an upload action
         // TODO: do not unwrap, but return an error

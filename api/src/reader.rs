@@ -304,9 +304,8 @@ impl<R: Read> Read for ProgressReader<R> {
 
         // Report
         if let Some(reporter) = self.reporter.as_mut() {
-            reporter.lock()
-                .expect("failed to update progress, unable to lock reproter")
-                .progress(self.progress);
+            let progress = self.progress;
+            let _ = reporter.lock().map(|mut r| r.progress(progress));
         }
 
         Ok(len)
@@ -333,12 +332,12 @@ pub trait ProgressReporter: Send {
 }
 
 /// A trait for readers, to get the exact length of a reader.
-pub trait ExactLengthReader: Read {
+pub trait ExactLengthReader {
     /// Get the exact length of the reader in bytes.
     fn len(&self) -> Result<u64, io::Error>;
 }
 
-impl<R: ExactLengthReader> ExactLengthReader for BufReader<R> {
+impl<R: ExactLengthReader + Read> ExactLengthReader for BufReader<R> {
     fn len(&self) -> Result<u64, io::Error> {
         self.get_ref().len()
     }
@@ -444,6 +443,12 @@ impl EncryptedFileWriter {
     }
 }
 
+impl ExactLengthReader for EncryptedFileWriter {
+    fn len(&self) -> Result<u64, IoError> {
+        Ok(self.len as u64)
+    }
+}
+
 /// The writer trait implementation.
 impl Write for EncryptedFileWriter {
     fn write(&mut self, buf: &[u8]) -> Result<usize, io::Error> {
@@ -506,5 +511,117 @@ impl Write for EncryptedFileWriter {
 
     fn flush(&mut self) -> Result<(), io::Error> {
         self.file.flush()
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/// A writer wrapper, that measures the reading process for a writer with a
+/// known length.
+///
+/// If the writer exceeds the initially specified length,
+/// the writer will continue to allow reads.
+/// The length property will grow accordingly.
+///
+/// The writer will only start producing `None` if the wrapped writer is doing
+/// so.
+pub struct ProgressWriter<W> {
+    /// The wrapped writer.
+    inner: W,
+
+    /// The total length of the writer.
+    len: u64,
+
+    /// The current reading progress.
+    progress: u64,
+
+    /// A reporter, to report the progress status to.
+    reporter: Option<Arc<Mutex<ProgressReporter>>>,
+}
+
+impl<W: Write> ProgressWriter<W> {
+    /// Wrap the given writer with an exact length, in a progress writer.
+    pub fn new(inner: W) -> Result<Self, IoError>
+        where
+            W: ExactLengthReader
+    {
+        Ok(
+            Self {
+                len: inner.len()?,
+                inner,
+                progress: 0,
+                reporter: None,
+            }
+        )
+    }
+
+    /// Wrap the given writer with the given length in a progress writer.
+    pub fn from(inner: W, len: u64) -> Self {
+        Self {
+            inner,
+            len,
+            progress: 0,
+            reporter: None,
+        }
+    }
+
+    /// Set the reporter to report the status to.
+    pub fn set_reporter(&mut self, reporter: Arc<Mutex<ProgressReporter>>) {
+        self.reporter = Some(reporter);
+    }
+
+    /// Get the current progress.
+    pub fn progress(&self) -> u64 {
+        self.progress
+    }
+
+    /// Unwrap the inner from the progress writer.
+    pub fn unwrap(self) -> W {
+        self.inner
+    }
+}
+
+impl<W: Write> Write for ProgressWriter<W> {
+    fn write(&mut self, buf: &[u8]) -> Result<usize, io::Error> {
+        // Write from the wrapped writer, increase the progress
+        let len = self.inner.write(buf)?;
+        self.progress += len as u64;
+
+        // Keep the specified length in-bound
+        if self.progress > self.len {
+            self.len = self.progress;
+        }
+
+        // Report
+        if let Some(reporter) = self.reporter.as_mut() {
+            let progress = self.progress;
+            let _ = reporter.lock().map(|mut r| r.progress(progress));
+        }
+
+        Ok(len)
+    }
+
+    fn flush(&mut self) -> Result<(), IoError> {
+        self.inner.flush()
+    }
+}
+
+impl<W: Write> ExactLengthReader for ProgressWriter<W> {
+    // Return the specified length.
+    fn len(&self) -> Result<u64, io::Error> {
+        Ok(self.len)
     }
 }

@@ -1,5 +1,6 @@
 use std::fs::File;
 use std::io;
+use std::sync::{Arc, Mutex};
 
 use openssl::symm::decrypt_aead;
 use reqwest::{
@@ -15,7 +16,7 @@ use crypto::key_set::KeySet;
 use crypto::sign::signature_encoded;
 use file::file::DownloadFile;
 use file::metadata::Metadata;
-use reader::EncryptedFileWriter;
+use reader::{EncryptedFileWriter, ProgressReporter, ProgressWriter};
 
 pub type Result<T> = ::std::result::Result<T, DownloadError>;
 
@@ -42,6 +43,7 @@ impl<'a> Download<'a> {
     pub fn invoke(
         self,
         client: &Client,
+        reporter: Arc<Mutex<ProgressReporter>>,
     ) -> Result<()> {
         // Create a key set for the file
         let mut key = KeySet::from(self.file);
@@ -166,25 +168,38 @@ impl<'a> Download<'a> {
             .expect("failed to fetch file, missing content length header")
             .0;
 
-        // Open a file to write to
+        // Open a file to write to, and build an encrypted writer
         // TODO: this should become a temporary file first
-        let out = File::create("downloaded.toml")
+        let out = File::create("downloaded.zip")
             .expect("failed to open file");
-        let mut writer = EncryptedFileWriter::new(
+        let writer = EncryptedFileWriter::new(
             out,
             response_len as usize,
             KeySet::cipher(),
             key.file_key().unwrap(),
             key.iv(),
         ).expect("failed to create encrypted writer");
+        let mut writer = ProgressWriter::new(writer)
+            .expect("failed to create encrypted writer");
+        writer.set_reporter(reporter.clone());
+
+        // Start the writer
+        reporter.lock()
+            .expect("unable to start progress, failed to get lock")
+            .start(response_len);
 
         // Write to the output file
         io::copy(&mut response, &mut writer)
             .expect("failed to download and decrypt file");
 
+        // Finish
+        reporter.lock()
+            .expect("unable to finish progress, failed to get lock")
+            .finish();
+
         // Verify the writer
         // TODO: delete the file if verification failed, show a proper error
-        assert!(writer.verified(), "downloaded and decrypted file could not be verified");
+        assert!(writer.unwrap().verified(), "downloaded and decrypted file could not be verified");
 
         // // Crpate metadata and a file reader
         // let metadata = self.create_metadata(&key, &file)?;

@@ -1,8 +1,11 @@
+use std::sync::{Arc, Mutex};
+
 use ffsend_api::action::download::Download as ApiDownload;
 use ffsend_api::file::file::DownloadFile;
 use ffsend_api::reqwest::Client;
 
 use cmd::cmd_download::CmdDownload;
+use progress::ProgressBar;
 
 /// A file download action.
 pub struct Download<'a> {
@@ -30,13 +33,14 @@ impl<'a> Download<'a> {
         let file = DownloadFile::parse_url(url)
             .expect("invalid download URL, could not parse file data");
 
+        // Create a progress bar reporter
+        let bar = Arc::new(Mutex::new(ProgressBar::new_download()));
+
         // Execute an download action
         // TODO: do not unwrap, but return an error
-        ApiDownload::new(&file).invoke(&client).unwrap();
+        ApiDownload::new(&file).invoke(&client, bar).unwrap();
 
         // TODO: open the file, or it's location
         // TODO: copy the file location
-
-        println!("Download complete");
     }
 }
