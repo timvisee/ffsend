@@ -181,7 +181,7 @@ impl DownloadFile {
                 .ok_or(FileParseError::InvalidSecret)?
                 .get(1)
             {
-                secret = b64::decode_url(raw.as_str().trim())
+                secret = b64::decode(raw.as_str().trim())
                         .map_err(|_| FileParseError::InvalidSecret)?
             }
         }

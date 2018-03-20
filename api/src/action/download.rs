@@ -76,7 +76,7 @@ impl<'a> Download<'a> {
 
         // Get the authentication nonce
         // TODO: don't unwrap here, return an error
-        let nonce = b64::decode_standard(
+        let nonce = b64::decode(
             response.headers()
                 .get_raw(HEADER_AUTH_NONCE)
                 .expect("missing authenticate header") 
@@ -115,7 +115,7 @@ impl<'a> Download<'a> {
 
         // Get the metadata nonce
         // TODO: don't unwrap here, return an error
-        let nonce = b64::decode_standard(
+        let nonce = b64::decode(
             response.headers()
                 .get_raw(HEADER_AUTH_NONCE)
                 .expect("missing authenticate header") 
@@ -380,7 +380,7 @@ impl MetadataResponse {
     // TODO: do not unwrap, return a proper error
     pub fn decrypt_metadata(&self, key_set: &KeySet) -> Result<Metadata> {
         // Decode the metadata
-        let raw = b64::decode_url(&self.meta)
+        let raw = b64::decode(&self.meta)
             .expect("failed to decode metadata from server");
 
         // Get the encrypted metadata, and it's tag

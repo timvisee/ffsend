@@ -51,7 +51,7 @@ impl Metadata {
     // TODO: use an input vector length from a constant
     pub fn iv(&self) -> [u8; 12] {
         // Decode the input vector
-        let decoded = b64::decode_url(&self.iv).unwrap();
+        let decoded = b64::decode(&self.iv).unwrap();
 
         // Create a sized array
         *array_ref!(decoded, 0, 12)

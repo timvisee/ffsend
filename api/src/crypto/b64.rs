@@ -13,17 +13,14 @@ pub fn encode(input: &[u8]) -> String {
     base64::encode_config(input, base64::URL_SAFE_NO_PAD)
 }
 
-/// Decode the given string as base64, with the given configuration.
-pub fn decode(input: &str, config: Config) -> Result<Vec<u8>, DecodeError> {
-    base64::decode_config(input, config)
-}
-
-/// Decode the given string as base64, in an URL-safe manner.
-pub fn decode_url(input: &str) -> Result<Vec<u8>, DecodeError> {
-    decode(input, base64::URL_SAFE_NO_PAD)
-}
-
-/// Decode the given string as base64, with the standaard character set.
-pub fn decode_standard(input: &str) -> Result<Vec<u8>, DecodeError> {
-    decode(input, base64::STANDARD)
+/// Decode the given string as base64.
+/// Standard and URL-safe character sets are both supported,
+/// padding is optional.
+pub fn decode(input: &str) -> Result<Vec<u8>, DecodeError> {
+    base64::decode_config(
+        input.replace('+', "-")
+            .replace('/', "_")
+            .trim_right_matches('='),
+        base64::URL_SAFE_NO_PAD,
+    )
 }
