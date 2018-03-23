@@ -1,11 +1,15 @@
 use std::fs::File;
-use std::io;
+use std::io::{
+    self,
+    Read,
+};
 use std::sync::{Arc, Mutex};
 
 use openssl::symm::decrypt_aead;
 use reqwest::{
     Client, 
     Error as ReqwestError,
+    Response,
 };
 use reqwest::header::Authorization;
 use reqwest::header::ContentLength;
@@ -48,20 +52,39 @@ impl<'a> Download<'a> {
         // Create a key set for the file
         let mut key = KeySet::from(self.file);
 
-        // Build the meta cipher
-        // let mut metadata_tag = vec![0u8; 16];
-        // let mut meta_cipher = match encrypt_aead(
-        //     KeySet::cipher(),
-        //     self.meta_key().unwrap(),
-        //     self.iv,
-        //     &[],
-        //     &metadata,
-        //     &mut metadata_tag,
-        // ) {
-        //     Ok(cipher) => cipher,
-        //     Err(_) => // TODO: return error here,
-        // };
+        // Fetch the authentication nonce
+        let auth_nonce = self.fetch_auth_nonce(client);
 
+        // Fetch the meta nonce, set the input vector
+        let meta_nonce = self.fetch_meta_nonce(&client, &mut key, auth_nonce);
+
+        // Open the file we will write to
+        // TODO: this should become a temporary file first
+        let out = File::create("downloaded.zip")
+            .expect("failed to open file");
+
+        // Create the file reader for downloading
+        let (reader, len) = self.create_file_reader(&key, meta_nonce, &client);
+
+        // Create the file writer
+        let writer = self.create_file_writer(
+            out,
+            len,
+            &key,
+            reporter.clone(),
+        );
+
+        // Download the file
+        self.download(reader, writer, len, reporter);
+
+        // TODO: return the file path
+        // TODO: return the new remote state (does it still exist remote)
+
+        Ok(())
+    }
+
+    /// Fetch the authentication nonce for the file from the Send server.
+    fn fetch_auth_nonce(&self, client: &Client) -> Vec<u8> {
         // Get the download url, and parse the nonce
         // TODO: do not unwrap here, return error
         let download_url = self.file.download_url(false);
@@ -78,7 +101,7 @@ impl<'a> Download<'a> {
 
         // Get the authentication nonce
         // TODO: don't unwrap here, return an error
-        let nonce = b64::decode(
+        b64::decode(
             response.headers()
                 .get_raw(HEADER_AUTH_NONCE)
                 .expect("missing authenticate header") 
@@ -91,17 +114,49 @@ impl<'a> Download<'a> {
                 .skip(1)
                 .next()
                 .expect("missing authentication nonce")
-        ).expect("failed to decode authentication nonce");
+        ).expect("failed to decode authentication nonce")
+    }
 
-        // Compute the cryptographic signature
+    /// Fetch the metadata nonce.
+    /// This method also sets the input vector on the given key set,
+    /// extracted from the metadata.
+    ///
+    /// The key set, along with the authentication nonce must be given.
+    /// The meta nonce is returned.
+    fn fetch_meta_nonce(
+        &self,
+        client: &Client,
+        key: &mut KeySet,
+        auth_nonce: Vec<u8>,
+    ) -> Vec<u8> {
+        // Fetch the metadata and the nonce
+        let (metadata, meta_nonce) = self.fetch_metadata(client, key, auth_nonce);
+
+        // Set the input vector, and return the nonce
+        key.set_iv(metadata.iv());
+        meta_nonce
+    }
+
+    /// Create a metadata nonce, and fetch the metadata for the file from the
+    /// Send server.
+    ///
+    /// The key set, along with the authentication nonce must be given.
+    ///
+    /// The metadata, with the meta nonce is returned.
+    fn fetch_metadata(
+        &self,
+        client: &Client,
+        key: &KeySet,
+        auth_nonce: Vec<u8>,
+    ) -> (Metadata, Vec<u8>) {
+        // Compute the cryptographic signature for authentication
         // TODO: do not unwrap, return an error
-        let sig = signature_encoded(key.auth_key().unwrap(), &nonce)
+        let sig = signature_encoded(key.auth_key().unwrap(), &auth_nonce)
             .expect("failed to compute metadata signature");
 
-        // Get the meta URL, fetch the metadata
+        // Buidl the request, fetch the encrypted metadata
         // TODO: do not unwrap here, return error
-        let meta_url = self.file.api_meta_url();
-        let mut response = client.get(meta_url)
+        let mut response = client.get(self.file.api_meta_url())
             .header(Authorization(
                 format!("send-v1 {}", sig)
             ))
@@ -132,24 +187,36 @@ impl<'a> Download<'a> {
                 .expect("missing metadata nonce")
         ).expect("failed to decode metadata nonce");
 
-        // Parse the metadata response
-        let meta_response: MetadataResponse = response.json()
-            .expect("failed to parse metadata response");
+        // Parse the metadata response, and decrypt it
+        (
+            response.json::<MetadataResponse>()
+                .expect("failed to parse metadata response")
+                .decrypt_metadata(&key)
+                .expect("failed to decrypt metadata"),
+            nonce,
+        )
+    }
 
-        // Decrypt the metadata, set the input vector
-        let metadata = meta_response.decrypt_metadata(&key)
-            .expect("failed to decrypt metadata");
-        key.set_iv(metadata.iv());
-
+    /// Make a download request, and create a reader that downloads the
+    /// encrypted file.
+    ///
+    /// The response representing the file reader is returned along with the
+    /// length of the reader content.
+    fn create_file_reader(
+        &self,
+        key: &KeySet,
+        meta_nonce: Vec<u8>,
+        client: &Client,
+    ) -> (Response, u64) {
         // Compute the cryptographic signature
+        // TODO: use the metadata nonce here?
         // TODO: do not unwrap, return an error
-        let sig = signature_encoded(key.auth_key().unwrap(), &nonce)
+        let sig = signature_encoded(key.auth_key().unwrap(), &meta_nonce)
             .expect("failed to compute file signature");
 
-        // Get the download URL, build the download request
+        // Build and send the download request
         // TODO: do not unwrap here, return error
-        let download_url = self.file.api_download_url();
-        let mut response = client.get(download_url)
+        let response = client.get(self.file.api_download_url())
             .header(Authorization(
                 format!("send-v1 {}", sig)
             ))
@@ -164,32 +231,59 @@ impl<'a> Download<'a> {
         }
 
         // Get the content length
-        let response_len = response.headers().get::<ContentLength>()
+        // TODO: make sure there is enough disk space
+        let len = response.headers().get::<ContentLength>()
             .expect("failed to fetch file, missing content length header")
             .0;
 
-        // Open a file to write to, and build an encrypted writer
-        // TODO: this should become a temporary file first
-        let out = File::create("downloaded.zip")
-            .expect("failed to open file");
-        let writer = EncryptedFileWriter::new(
-            out,
-            response_len as usize,
-            KeySet::cipher(),
-            key.file_key().unwrap(),
-            key.iv(),
+        (response, len)
+    }
+
+    /// Create a file writer.
+    ///
+    /// This writer will will decrypt the input on the fly, and writes the
+    /// decrypted data to the given file.
+    fn create_file_writer(
+        &self,
+        file: File,
+        len: u64,
+        key: &KeySet,
+        reporter: Arc<Mutex<ProgressReporter>>,
+    ) -> ProgressWriter<EncryptedFileWriter> {
+        // Build an encrypted writer
+        let mut writer = ProgressWriter::new(
+            EncryptedFileWriter::new(
+                file,
+                len as usize,
+                KeySet::cipher(),
+                key.file_key().unwrap(),
+                key.iv(),
+            ).expect("failed to create encrypted writer")
         ).expect("failed to create encrypted writer");
-        let mut writer = ProgressWriter::new(writer)
-            .expect("failed to create encrypted writer");
+
+        // Set the reporter
         writer.set_reporter(reporter.clone());
 
+        writer
+    }
+
+    /// Download the file from the reader, and write it to the writer.
+    /// The length of the file must also be given.
+    /// The status will be reported to the given progress reporter.
+    fn download<R: Read>(
+        &self,
+        mut reader: R,
+        mut writer: ProgressWriter<EncryptedFileWriter>,
+        len: u64,
+        reporter: Arc<Mutex<ProgressReporter>>,
+    ) {
         // Start the writer
         reporter.lock()
             .expect("unable to start progress, failed to get lock")
-            .start(response_len);
+            .start(len);
 
         // Write to the output file
-        io::copy(&mut response, &mut writer)
+        io::copy(&mut reader, &mut writer)
             .expect("failed to download and decrypt file");
 
         // Finish
@@ -200,158 +294,7 @@ impl<'a> Download<'a> {
         // Verify the writer
         // TODO: delete the file if verification failed, show a proper error
         assert!(writer.unwrap().verified(), "downloaded and decrypted file could not be verified");
-
-        // // Crpate metadata and a file reader
-        // let metadata = self.create_metadata(&key, &file)?;
-        // let reader = self.create_reader(&key, reporter.clone())?;
-        // let reader_len = reader.len().unwrap();
-
-        // // Create the request to send
-        // let req = self.create_request(
-        //     client,
-        //     &key,
-        //     metadata,
-        //     reader,
-        // );
-
-        // // Start the reporter
-        // reporter.lock()
-        //     .expect("unable to start progress, failed to get lock")
-        //     .start(reader_len);
-
-        // // Execute the request
-        // let result = self.execute_request(req, client, &key);
-
-        // // Mark the reporter as finished
-        // reporter.lock()
-        //     .expect("unable to finish progress, failed to get lock")
-        //     .finish();
-        
-        // TODO: return the file path
-        // TODO: return the new remote state (does it still exist remote)
-
-        Ok(())
     }
-
-    // /// Create a blob of encrypted metadata.
-    // fn create_metadata(&self, key: &KeySet, file: &FileData)
-    //     -> Result<Vec<u8>>
-    // {
-    //     // Construct the metadata
-    //     let metadata = Metadata::from(
-    //         key.iv(),
-    //         file.name().to_owned(),
-    //         file.mime().clone(),
-    //     ).to_json().into_bytes();
-
-    //     // Encrypt the metadata
-    //     let mut metadata_tag = vec![0u8; 16];
-    //     let mut metadata = match encrypt_aead(
-    //         KeySet::cipher(),
-    //         key.meta_key().unwrap(),
-    //         Some(&[0u8; 12]),
-    //         &[],
-    //         &metadata,
-    //         &mut metadata_tag,
-    //     ) {
-    //         Ok(metadata) => metadata,
-    //         Err(_) => return Err(DownloadError::EncryptionError),
-    //     };
-
-    //     // Append the encryption tag
-    //     metadata.append(&mut metadata_tag);
-
-    //     Ok(metadata)
-    // }
-
-    // /// Create a reader that reads the file as encrypted stream.
-    // fn create_reader(
-    //     &self,
-    //     key: &KeySet,
-    //     reporter: Arc<Mutex<ProgressReporter>>,
-    // ) -> Result<EncryptedReader> {
-    //     // Open the file
-    //     let file = match File::open(self.path.as_path()) {
-    //         Ok(file) => file,
-    //         Err(_) => return Err(DownloadError::FileError),
-    //     };
-
-    //     // Create an encrypted reader
-    //     let reader = match EncryptedFileReaderTagged::new(
-    //         file,
-    //         KeySet::cipher(),
-    //         key.file_key().unwrap(),
-    //         key.iv(),
-    //     ) {
-    //         Ok(reader) => reader,
-    //         Err(_) => return Err(DownloadError::EncryptionError),
-    //     };
-
-    //     // Buffer the encrypted reader
-    //     let reader = BufReader::new(reader);
-
-    //     // Wrap into the encrypted reader
-    //     let mut reader = ProgressReader::new(reader)
-    //         .expect("failed to create progress reader");
-
-    //     // Initialize and attach the reporter
-    //     reader.set_reporter(reporter);
-
-    //     Ok(reader)
-    // }
-
-    // /// Build the request that will be send to the server.
-    // fn create_request(
-    //     &self,
-    //     client: &Client,
-    //     key: &KeySet,
-    //     metadata: Vec<u8>,
-    //     reader: EncryptedReader,
-    // ) -> Request {
-    //     // Get the reader length
-    //     let len = reader.len().expect("failed to get reader length");
-
-    //     // Configure a form to send
-    //     let part = Part::reader_with_length(reader, len)
-    //         // .file_name(file.name())
-    //         .mime(APPLICATION_OCTET_STREAM);
-    //     let form = Form::new()
-    //         .part("data", part);
-
-    //     // Define the URL to call
-    //     let url = self.host.join("api/upload").expect("invalid host");
-
-    //     // Build the request
-    //     client.post(url.as_str())
-    //         .header(Authorization(
-    //             format!("send-v1 {}", key.auth_key_encoded().unwrap())
-    //         ))
-    //         .header(XFileMetadata::from(&metadata))
-    //         .multipart(form)
-    //         .build()
-    //         .expect("failed to build an API request")
-    // }
-
-    // /// Execute the given request, and create a file object that represents the
-    // /// uploaded file.
-    // fn execute_request(&self, req: Request, client: &Client, key: &KeySet) 
-    //     -> Result<SendFile>
-    // {
-    //     // Execute the request
-    //     let mut res = match client.execute(req) {
-    //         Ok(res) => res,
-    //         Err(err) => return Err(DownloadError::RequestError(err)),
-    //     };
-
-    //     // Decode the response
-    //     let res: DownloadResponse = match res.json() {
-    //         Ok(res) => res,
-    //         Err(_) => return Err(DownloadError::DecodeError),
-    //     };
-
-    //     // Transform the responce into a file object
-    //     Ok(res.into_file(self.host.clone(), &key))
-    // }
 }
 
 /// Errors that may occur in the upload action. 
