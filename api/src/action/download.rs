@@ -1,6 +1,7 @@
 use std::fs::File;
 use std::io::{
     self,
+    Error as IoError,
     Read,
 };
 use std::sync::{Arc, Mutex};
@@ -23,6 +24,7 @@ use file::metadata::Metadata;
 use reader::{EncryptedFileWriter, ProgressReporter, ProgressWriter};
 
 pub type Result<T> = ::std::result::Result<T, DownloadError>;
+type StdResult<T, E> = ::std::result::Result<T, E>;
 
 /// The name of the header that is used for the authentication nonce.
 const HEADER_AUTH_NONCE: &'static str = "WWW-Authenticate";
@@ -53,15 +55,17 @@ impl<'a> Download<'a> {
         let mut key = KeySet::from(self.file);
 
         // Fetch the authentication nonce
-        let auth_nonce = self.fetch_auth_nonce(client);
+        let auth_nonce = self.fetch_auth_nonce(client)
+            .map_err(|err| DownloadError::AuthError(err))?;
 
         // Fetch the meta nonce, set the input vector
-        let meta_nonce = self.fetch_meta_nonce(&client, &mut key, auth_nonce);
+        let meta_nonce = self.fetch_meta_nonce(&client, &mut key, auth_nonce)
+            .map_err(|err| DownloadError::MetaError(err))?;
 
         // Open the file we will write to
         // TODO: this should become a temporary file first
         let out = File::create("downloaded.zip")
-            .expect("failed to open file");
+            .map_err(|err| DownloadError::FileOpenError(err))?;
 
         // Create the file reader for downloading
         let (reader, len) = self.create_file_reader(&key, meta_nonce, &client);
@@ -84,37 +88,36 @@ impl<'a> Download<'a> {
     }
 
     /// Fetch the authentication nonce for the file from the Send server.
-    fn fetch_auth_nonce(&self, client: &Client) -> Vec<u8> {
+    fn fetch_auth_nonce(&self, client: &Client)
+        -> StdResult<Vec<u8>, AuthError>
+    {
         // Get the download url, and parse the nonce
-        // TODO: do not unwrap here, return error
         let download_url = self.file.download_url(false);
         let response = client.get(download_url)
             .send()
-            .expect("failed to get nonce, failed to send file request");
+            .map_err(|_| AuthError::NonceReqFail)?;
 
         // Validate the status code
         // TODO: allow redirects here?
         if !response.status().is_success() {
-            // TODO: return error here
-            panic!("failed to get nonce, request status is not successful");
+            return Err(AuthError::NonceReqStatusErr);
         }
 
         // Get the authentication nonce
-        // TODO: don't unwrap here, return an error
         b64::decode(
             response.headers()
                 .get_raw(HEADER_AUTH_NONCE)
-                .expect("missing authenticate header") 
+                .ok_or(AuthError::MissingNonceHeader)?
                 .one()
-                .map(|line| String::from_utf8(line.to_vec())
-                    .expect("invalid authentication header contents")
-                )
-                .expect("authentication header is empty")
+                .ok_or(AuthError::EmptyNonceHeader)
+                .and_then(|line| String::from_utf8(line.to_vec())
+                    .map_err(|_| AuthError::MalformedNonceHeader)
+                )?
                 .split_terminator(" ")
                 .skip(1)
                 .next()
-                .expect("missing authentication nonce")
-        ).expect("failed to decode authentication nonce")
+                .ok_or(AuthError::MissingNonceHeader)?
+        ).map_err(|_| AuthError::MalformedNonce)
     }
 
     /// Fetch the metadata nonce.
@@ -128,13 +131,13 @@ impl<'a> Download<'a> {
         client: &Client,
         key: &mut KeySet,
         auth_nonce: Vec<u8>,
-    ) -> Vec<u8> {
+    ) -> StdResult<Vec<u8>, MetaError> {
         // Fetch the metadata and the nonce
-        let (metadata, meta_nonce) = self.fetch_metadata(client, key, auth_nonce);
+        let (metadata, meta_nonce) = self.fetch_metadata(client, key, auth_nonce)?;
 
         // Set the input vector, and return the nonce
         key.set_iv(metadata.iv());
-        meta_nonce
+        Ok(meta_nonce)
     }
 
     /// Create a metadata nonce, and fetch the metadata for the file from the
@@ -148,53 +151,49 @@ impl<'a> Download<'a> {
         client: &Client,
         key: &KeySet,
         auth_nonce: Vec<u8>,
-    ) -> (Metadata, Vec<u8>) {
+    ) -> StdResult<(Metadata, Vec<u8>), MetaError> {
         // Compute the cryptographic signature for authentication
-        // TODO: do not unwrap, return an error
         let sig = signature_encoded(key.auth_key().unwrap(), &auth_nonce)
-            .expect("failed to compute metadata signature");
+            .map_err(|_| MetaError::ComputeSignatureFail)?;
 
         // Buidl the request, fetch the encrypted metadata
-        // TODO: do not unwrap here, return error
         let mut response = client.get(self.file.api_meta_url())
             .header(Authorization(
                 format!("send-v1 {}", sig)
             ))
             .send()
-            .expect("failed to fetch metadata, failed to send request");
+            .map_err(|_| MetaError::NonceReqFail)?;
 
         // Validate the status code
         // TODO: allow redirects here?
         if !response.status().is_success() {
-            // TODO: return error here
-            panic!("failed to fetch metadata, request status is not successful");
+            return Err(MetaError::NonceReqStatusErr);
         }
 
         // Get the metadata nonce
-        // TODO: don't unwrap here, return an error
         let nonce = b64::decode(
             response.headers()
                 .get_raw(HEADER_AUTH_NONCE)
-                .expect("missing authenticate header") 
+                .ok_or(MetaError::MissingNonceHeader)?
                 .one()
-                .map(|line| String::from_utf8(line.to_vec())
-                    .expect("invalid authentication header contents")
-                )
-                .expect("authentication header is empty")
+                .ok_or(MetaError::EmptyNonceHeader)
+                .and_then(|line| String::from_utf8(line.to_vec())
+                    .map_err(|_| MetaError::MalformedNonceHeader)
+                )?
                 .split_terminator(" ")
                 .skip(1)
                 .next()
-                .expect("missing metadata nonce")
-        ).expect("failed to decode metadata nonce");
+                .ok_or(MetaError::MissingNonceHeader)?
+        ).map_err(|_| MetaError::MalformedNonce)?;
 
         // Parse the metadata response, and decrypt it
-        (
+        Ok((
             response.json::<MetadataResponse>()
-                .expect("failed to parse metadata response")
+                .map_err(|_| MetaError::MalformedMetadata)?
                 .decrypt_metadata(&key)
-                .expect("failed to decrypt metadata"),
+                .map_err(|_| MetaError::DecryptMetadataFail)?,
             nonce,
-        )
+        ))
     }
 
     /// Make a download request, and create a reader that downloads the
@@ -300,6 +299,15 @@ impl<'a> Download<'a> {
 /// Errors that may occur in the upload action. 
 #[derive(Debug)]
 pub enum DownloadError {
+    /// An authentication related error.
+    AuthError(AuthError),
+
+    /// An metadata related error.
+    MetaError(MetaError),
+
+    /// An error occurred while opening the file for writing.
+    FileOpenError(IoError),
+
     /// The given file is not not an existing file.
     /// Maybe it is a directory, or maybe it doesn't exist.
     NotAFile,
@@ -316,6 +324,29 @@ pub enum DownloadError {
 
     /// An error occurred while decoding the response data.
     DecodeError,
+}
+
+#[derive(Debug)]
+pub enum AuthError {
+    NonceReqFail,
+    NonceReqStatusErr,
+    MissingNonceHeader,
+    EmptyNonceHeader,
+    MalformedNonceHeader,
+    MalformedNonce,
+}
+
+#[derive(Debug)]
+pub enum MetaError {
+    ComputeSignatureFail,
+    NonceReqFail,
+    NonceReqStatusErr,
+    MissingNonceHeader,
+    EmptyNonceHeader,
+    MalformedNonceHeader,
+    MalformedNonce,
+    MalformedMetadata,
+    DecryptMetadataFail,
 }
 
 /// The metadata response from the server, when fetching the data through
