@@ -25,6 +25,9 @@ use reader::{EncryptedFileWriter, ProgressReporter, ProgressWriter};
 /// The name of the header that is used for the authentication nonce.
 const HEADER_AUTH_NONCE: &'static str = "WWW-Authenticate";
 
+/// The HTTP status code that is returned for expired files.
+const FILE_EXPIRED_STATUS: StatusCode = StatusCode::NotFound;
+
 /// A file upload action to a Send server.
 pub struct Download<'a> {
     /// The Send file to download.
@@ -49,8 +52,7 @@ impl<'a> Download<'a> {
         let mut key = KeySet::from(self.file);
 
         // Fetch the authentication nonce
-        let auth_nonce = self.fetch_auth_nonce(client)
-            .map_err(|err| Error::Request(RequestError::Auth(err)))?;
+        let auth_nonce = self.fetch_auth_nonce(client)?;
 
         // Fetch the meta nonce, set the input vector
         let meta_nonce = self.fetch_meta_nonce(&client, &mut key, auth_nonce)
@@ -86,7 +88,7 @@ impl<'a> Download<'a> {
 
     /// Fetch the authentication nonce for the file from the Send server.
     fn fetch_auth_nonce(&self, client: &Client)
-        -> Result<Vec<u8>, AuthError>
+        -> Result<Vec<u8>, Error>
     {
         // Get the download url, and parse the nonce
         let download_url = self.file.download_url(false);
@@ -97,7 +99,12 @@ impl<'a> Download<'a> {
         // Validate the status code
         let status = response.status();
         if !status.is_success() {
-            return Err(AuthError::NonceReqStatus(status, status.err_text()));
+            // Handle expired files
+            if status == FILE_EXPIRED_STATUS {
+                return Err(Error::Expired);
+            } else {
+                return Err(AuthError::NonceReqStatus(status, status.err_text()).into());
+            }
         }
 
         // Get the authentication nonce
@@ -114,7 +121,7 @@ impl<'a> Download<'a> {
                 .skip(1)
                 .next()
                 .ok_or(AuthError::MalformedNonce)?
-        ).map_err(|_| AuthError::MalformedNonce)
+        ).map_err(|_| AuthError::MalformedNonce.into())
     }
 
     /// Fetch the metadata nonce.
@@ -282,7 +289,6 @@ impl<'a> Download<'a> {
             .finish();
 
         // Verify the writer
-        // TODO: delete the file if verification failed, show a proper error
         if writer.unwrap().verified() {
             Ok(())
         } else {
@@ -308,7 +314,6 @@ impl MetadataResponse {
     ///
     /// The decrypted data is verified using an included tag.
     /// If verification failed, an error is returned.
-    // TODO: do not unwrap, return a proper error
     pub fn decrypt_metadata(&self, key_set: &KeySet) -> Result<Metadata, FailureError> {
         // Decode the metadata
         let raw = b64::decode(&self.meta)?;
@@ -319,7 +324,6 @@ impl MetadataResponse {
         assert_eq!(tag.len(), 16);
 
         // Decrypt the metadata
-        // TODO: do not unwrap, return an error
 		let meta = decrypt_aead(
 			KeySet::cipher(),
 			key_set.meta_key().unwrap(),
@@ -344,7 +348,6 @@ pub enum Error {
 
     /// The given Send file has expired, or did never exist in the first place.
     /// Therefore the file could not be downloaded.
-    // TODO: return this error when the file is expired
     #[fail(display = "The file has expired or did never exist")]
     Expired,
 
@@ -356,10 +359,16 @@ pub enum Error {
     #[fail(display = "Failed to decrypt the downloaded file")]
     Decrypt,
 
-    // TODO: add description
+    /// An error occurred while opening or writing to the target file.
     // TODO: show what file this is about
     #[fail(display = "Could not open the file for writing")]
     File(#[cause] FileError),
+}
+
+impl From<AuthError> for Error {
+    fn from(err: AuthError) -> Error {
+        Error::Request(RequestError::Auth(err))
+    }
 }
 
 #[derive(Fail, Debug)]
