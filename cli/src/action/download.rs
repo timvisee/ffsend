@@ -6,6 +6,7 @@ use ffsend_api::reqwest::Client;
 
 use cmd::cmd_download::CmdDownload;
 use progress::ProgressBar;
+use util::quit_error;
 
 /// A file download action.
 pub struct Download<'a> {
@@ -38,7 +39,9 @@ impl<'a> Download<'a> {
 
         // Execute an download action
         // TODO: do not unwrap, but return an error
-        ApiDownload::new(&file).invoke(&client, bar).unwrap();
+        if let Err(err) = ApiDownload::new(&file).invoke(&client, bar) {
+            quit_error(err);
+        }
 
         // TODO: open the file, or it's location
         // TODO: copy the file location

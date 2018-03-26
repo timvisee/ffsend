@@ -1,3 +1,5 @@
+// TODO: define redirect policy
+
 use std::fs::File;
 use std::io::{
     self,
@@ -6,12 +8,9 @@ use std::io::{
 };
 use std::sync::{Arc, Mutex};
 
+use failure::Error as FailureError;
 use openssl::symm::decrypt_aead;
-use reqwest::{
-    Client, 
-    Error as ReqwestError,
-    Response,
-};
+use reqwest::{Client, Response, StatusCode};
 use reqwest::header::Authorization;
 use reqwest::header::ContentLength;
 use serde_json;
@@ -23,13 +22,11 @@ use file::file::DownloadFile;
 use file::metadata::Metadata;
 use reader::{EncryptedFileWriter, ProgressReporter, ProgressWriter};
 
-pub type Result<T> = ::std::result::Result<T, DownloadError>;
-type StdResult<T, E> = ::std::result::Result<T, E>;
-
 /// The name of the header that is used for the authentication nonce.
 const HEADER_AUTH_NONCE: &'static str = "WWW-Authenticate";
 
-// TODO: experiment with `iv` of `None` in decrypt logic
+/// The HTTP status code that is returned for expired files.
+const FILE_EXPIRED_STATUS: StatusCode = StatusCode::NotFound;
 
 /// A file upload action to a Send server.
 pub struct Download<'a> {
@@ -50,25 +47,26 @@ impl<'a> Download<'a> {
         self,
         client: &Client,
         reporter: Arc<Mutex<ProgressReporter>>,
-    ) -> Result<()> {
+    ) -> Result<(), Error> {
         // Create a key set for the file
         let mut key = KeySet::from(self.file);
 
         // Fetch the authentication nonce
-        let auth_nonce = self.fetch_auth_nonce(client)
-            .map_err(|err| DownloadError::AuthError(err))?;
+        let auth_nonce = self.fetch_auth_nonce(client)?;
 
         // Fetch the meta nonce, set the input vector
         let meta_nonce = self.fetch_meta_nonce(&client, &mut key, auth_nonce)
-            .map_err(|err| DownloadError::MetaError(err))?;
+            .map_err(|err| Error::Request(RequestError::Meta(err)))?;
 
         // Open the file we will write to
         // TODO: this should become a temporary file first
+        // TODO: use the uploaded file name as default
         let out = File::create("downloaded.zip")
-            .map_err(|err| DownloadError::FileOpenError(err))?;
+            .map_err(|err| Error::File(FileError::Create(err)))?;
 
         // Create the file reader for downloading
-        let (reader, len) = self.create_file_reader(&key, meta_nonce, &client);
+        let (reader, len) = self.create_file_reader(&key, meta_nonce, &client)
+            .map_err(|err| Error::Download(err))?;
 
         // Create the file writer
         let writer = self.create_file_writer(
@@ -76,10 +74,11 @@ impl<'a> Download<'a> {
             len,
             &key,
             reporter.clone(),
-        );
+        ).map_err(|err| Error::File(err))?;
 
         // Download the file
-        self.download(reader, writer, len, reporter);
+        self.download(reader, writer, len, reporter)
+            .map_err(|err| Error::Download(err))?;
 
         // TODO: return the file path
         // TODO: return the new remote state (does it still exist remote)
@@ -89,35 +88,40 @@ impl<'a> Download<'a> {
 
     /// Fetch the authentication nonce for the file from the Send server.
     fn fetch_auth_nonce(&self, client: &Client)
-        -> StdResult<Vec<u8>, AuthError>
+        -> Result<Vec<u8>, Error>
     {
         // Get the download url, and parse the nonce
         let download_url = self.file.download_url(false);
         let response = client.get(download_url)
             .send()
-            .map_err(|_| AuthError::NonceReqFail)?;
+            .map_err(|_| AuthError::NonceReq)?;
 
         // Validate the status code
-        // TODO: allow redirects here?
-        if !response.status().is_success() {
-            return Err(AuthError::NonceReqStatusErr);
+        let status = response.status();
+        if !status.is_success() {
+            // Handle expired files
+            if status == FILE_EXPIRED_STATUS {
+                return Err(Error::Expired);
+            } else {
+                return Err(AuthError::NonceReqStatus(status, status.err_text()).into());
+            }
         }
 
         // Get the authentication nonce
         b64::decode(
             response.headers()
                 .get_raw(HEADER_AUTH_NONCE)
-                .ok_or(AuthError::MissingNonceHeader)?
+                .ok_or(AuthError::NoNonceHeader)?
                 .one()
-                .ok_or(AuthError::EmptyNonceHeader)
+                .ok_or(AuthError::MalformedNonce)
                 .and_then(|line| String::from_utf8(line.to_vec())
-                    .map_err(|_| AuthError::MalformedNonceHeader)
+                    .map_err(|_| AuthError::MalformedNonce)
                 )?
                 .split_terminator(" ")
                 .skip(1)
                 .next()
-                .ok_or(AuthError::MissingNonceHeader)?
-        ).map_err(|_| AuthError::MalformedNonce)
+                .ok_or(AuthError::MalformedNonce)?
+        ).map_err(|_| AuthError::MalformedNonce.into())
     }
 
     /// Fetch the metadata nonce.
@@ -131,7 +135,7 @@ impl<'a> Download<'a> {
         client: &Client,
         key: &mut KeySet,
         auth_nonce: Vec<u8>,
-    ) -> StdResult<Vec<u8>, MetaError> {
+    ) -> Result<Vec<u8>, MetaError> {
         // Fetch the metadata and the nonce
         let (metadata, meta_nonce) = self.fetch_metadata(client, key, auth_nonce)?;
 
@@ -151,47 +155,47 @@ impl<'a> Download<'a> {
         client: &Client,
         key: &KeySet,
         auth_nonce: Vec<u8>,
-    ) -> StdResult<(Metadata, Vec<u8>), MetaError> {
+    ) -> Result<(Metadata, Vec<u8>), MetaError> {
         // Compute the cryptographic signature for authentication
         let sig = signature_encoded(key.auth_key().unwrap(), &auth_nonce)
-            .map_err(|_| MetaError::ComputeSignatureFail)?;
+            .map_err(|_| MetaError::ComputeSignature)?;
 
-        // Buidl the request, fetch the encrypted metadata
+        // Build the request, fetch the encrypted metadata
         let mut response = client.get(self.file.api_meta_url())
             .header(Authorization(
                 format!("send-v1 {}", sig)
             ))
             .send()
-            .map_err(|_| MetaError::NonceReqFail)?;
+            .map_err(|_| MetaError::NonceReq)?;
 
         // Validate the status code
-        // TODO: allow redirects here?
-        if !response.status().is_success() {
-            return Err(MetaError::NonceReqStatusErr);
+        let status = response.status();
+        if !status.is_success() {
+            return Err(MetaError::NonceReqStatus(status, status.err_text()));
         }
 
         // Get the metadata nonce
         let nonce = b64::decode(
             response.headers()
                 .get_raw(HEADER_AUTH_NONCE)
-                .ok_or(MetaError::MissingNonceHeader)?
+                .ok_or(MetaError::NoNonceHeader)?
                 .one()
-                .ok_or(MetaError::EmptyNonceHeader)
+                .ok_or(MetaError::MalformedNonce)
                 .and_then(|line| String::from_utf8(line.to_vec())
-                    .map_err(|_| MetaError::MalformedNonceHeader)
+                    .map_err(|_| MetaError::MalformedNonce)
                 )?
                 .split_terminator(" ")
                 .skip(1)
                 .next()
-                .ok_or(MetaError::MissingNonceHeader)?
+                .ok_or(MetaError::MalformedNonce)?
         ).map_err(|_| MetaError::MalformedNonce)?;
 
         // Parse the metadata response, and decrypt it
         Ok((
             response.json::<MetadataResponse>()
-                .map_err(|_| MetaError::MalformedMetadata)?
+                .map_err(|_| MetaError::Malformed)?
                 .decrypt_metadata(&key)
-                .map_err(|_| MetaError::DecryptMetadataFail)?,
+                .map_err(|_| MetaError::Decrypt)?,
             nonce,
         ))
     }
@@ -206,36 +210,31 @@ impl<'a> Download<'a> {
         key: &KeySet,
         meta_nonce: Vec<u8>,
         client: &Client,
-    ) -> (Response, u64) {
+    ) -> Result<(Response, u64), DownloadError> {
         // Compute the cryptographic signature
-        // TODO: use the metadata nonce here?
-        // TODO: do not unwrap, return an error
         let sig = signature_encoded(key.auth_key().unwrap(), &meta_nonce)
-            .expect("failed to compute file signature");
+            .map_err(|_| DownloadError::ComputeSignature)?;
 
         // Build and send the download request
-        // TODO: do not unwrap here, return error
         let response = client.get(self.file.api_download_url())
             .header(Authorization(
                 format!("send-v1 {}", sig)
             ))
             .send()
-            .expect("failed to fetch file, failed to send request");
+            .map_err(|_| DownloadError::Request)?;
 
         // Validate the status code
-        // TODO: allow redirects here?
-        if !response.status().is_success() {
-            // TODO: return error here
-            panic!("failed to fetch file, request status is not successful");
+        let status = response.status();
+        if !status.is_success() {
+            return Err(DownloadError::RequestStatus(status, status.err_text()));
         }
 
         // Get the content length
         // TODO: make sure there is enough disk space
         let len = response.headers().get::<ContentLength>()
-            .expect("failed to fetch file, missing content length header")
-            .0;
+            .ok_or(DownloadError::NoLength)?.0;
 
-        (response, len)
+        Ok((response, len))
     }
 
     /// Create a file writer.
@@ -248,7 +247,7 @@ impl<'a> Download<'a> {
         len: u64,
         key: &KeySet,
         reporter: Arc<Mutex<ProgressReporter>>,
-    ) -> ProgressWriter<EncryptedFileWriter> {
+    ) -> Result<ProgressWriter<EncryptedFileWriter>, FileError> {
         // Build an encrypted writer
         let mut writer = ProgressWriter::new(
             EncryptedFileWriter::new(
@@ -257,13 +256,13 @@ impl<'a> Download<'a> {
                 KeySet::cipher(),
                 key.file_key().unwrap(),
                 key.iv(),
-            ).expect("failed to create encrypted writer")
-        ).expect("failed to create encrypted writer");
+            ).map_err(|_| FileError::EncryptedWriter)?
+        ).map_err(|_| FileError::EncryptedWriter)?;
 
         // Set the reporter
         writer.set_reporter(reporter.clone());
 
-        writer
+        Ok(writer)
     }
 
     /// Download the file from the reader, and write it to the writer.
@@ -275,78 +274,27 @@ impl<'a> Download<'a> {
         mut writer: ProgressWriter<EncryptedFileWriter>,
         len: u64,
         reporter: Arc<Mutex<ProgressReporter>>,
-    ) {
+    ) -> Result<(), DownloadError> {
         // Start the writer
         reporter.lock()
-            .expect("unable to start progress, failed to get lock")
+            .map_err(|_| DownloadError::Progress)?
             .start(len);
 
         // Write to the output file
-        io::copy(&mut reader, &mut writer)
-            .expect("failed to download and decrypt file");
+        io::copy(&mut reader, &mut writer).map_err(|_| DownloadError::Download)?;
 
         // Finish
         reporter.lock()
-            .expect("unable to finish progress, failed to get lock")
+            .map_err(|_| DownloadError::Progress)?
             .finish();
 
         // Verify the writer
-        // TODO: delete the file if verification failed, show a proper error
-        assert!(writer.unwrap().verified(), "downloaded and decrypted file could not be verified");
+        if writer.unwrap().verified() {
+            Ok(())
+        } else {
+            Err(DownloadError::Verify)
+        }
     }
-}
-
-/// Errors that may occur in the upload action. 
-#[derive(Debug)]
-pub enum DownloadError {
-    /// An authentication related error.
-    AuthError(AuthError),
-
-    /// An metadata related error.
-    MetaError(MetaError),
-
-    /// An error occurred while opening the file for writing.
-    FileOpenError(IoError),
-
-    /// The given file is not not an existing file.
-    /// Maybe it is a directory, or maybe it doesn't exist.
-    NotAFile,
-
-    /// An error occurred while opening or reading a file.
-    FileError,
-
-    /// An error occurred while encrypting the file.
-    EncryptionError,
-
-    /// An error occurred while while processing the request.
-    /// This also covers things like HTTP 404 errors.
-    RequestError(ReqwestError),
-
-    /// An error occurred while decoding the response data.
-    DecodeError,
-}
-
-#[derive(Debug)]
-pub enum AuthError {
-    NonceReqFail,
-    NonceReqStatusErr,
-    MissingNonceHeader,
-    EmptyNonceHeader,
-    MalformedNonceHeader,
-    MalformedNonce,
-}
-
-#[derive(Debug)]
-pub enum MetaError {
-    ComputeSignatureFail,
-    NonceReqFail,
-    NonceReqStatusErr,
-    MissingNonceHeader,
-    EmptyNonceHeader,
-    MalformedNonceHeader,
-    MalformedNonce,
-    MalformedMetadata,
-    DecryptMetadataFail,
 }
 
 /// The metadata response from the server, when fetching the data through
@@ -366,11 +314,9 @@ impl MetadataResponse {
     ///
     /// The decrypted data is verified using an included tag.
     /// If verification failed, an error is returned.
-    // TODO: do not unwrap, return a proper error
-    pub fn decrypt_metadata(&self, key_set: &KeySet) -> Result<Metadata> {
+    pub fn decrypt_metadata(&self, key_set: &KeySet) -> Result<Metadata, FailureError> {
         // Decode the metadata
-        let raw = b64::decode(&self.meta)
-            .expect("failed to decode metadata from server");
+        let raw = b64::decode(&self.meta)?;
 
         // Get the encrypted metadata, and it's tag
         let (encrypted, tag) = raw.split_at(raw.len() - 16);
@@ -378,7 +324,6 @@ impl MetadataResponse {
         assert_eq!(tag.len(), 16);
 
         // Decrypt the metadata
-        // TODO: do not unwrap, return an error
 		let meta = decrypt_aead(
 			KeySet::cipher(),
 			key_set.meta_key().unwrap(),
@@ -386,12 +331,177 @@ impl MetadataResponse {
 			&[],
 			encrypted,
 			&tag,
-		).expect("failed to decrypt metadata, invalid tag?");
+		)?;
 
         // Parse the metadata, and return
-        Ok(
-            serde_json::from_slice(&meta)
-                .expect("failed to parse decrypted metadata as JSON")
-        )
+        Ok(serde_json::from_slice(&meta)?)
+    }
+}
+
+#[derive(Fail, Debug)]
+pub enum Error {
+    /// A general error occurred while requesting the file data.
+    /// This may be because authentication failed, because decrypting the
+    /// file metadata didn't succeed, or due to some other reason.
+    #[fail(display = "failed to request file data")]
+    Request(#[cause] RequestError),
+
+    /// The given Send file has expired, or did never exist in the first place.
+    /// Therefore the file could not be downloaded.
+    #[fail(display = "the file has expired or did never exist")]
+    Expired,
+
+    /// An error occurred while downloading the file.
+    #[fail(display = "failed to download the file")]
+    Download(#[cause] DownloadError),
+
+    /// An error occurred while decrypting the downloaded file.
+    #[fail(display = "failed to decrypt the downloaded file")]
+    Decrypt,
+
+    /// An error occurred while opening or writing to the target file.
+    // TODO: show what file this is about
+    #[fail(display = "could not open the file for writing")]
+    File(#[cause] FileError),
+}
+
+impl From<AuthError> for Error {
+    fn from(err: AuthError) -> Error {
+        Error::Request(RequestError::Auth(err))
+    }
+}
+
+#[derive(Fail, Debug)]
+pub enum RequestError {
+    /// Failed authenticating, in order to fetch the file data.
+    #[fail(display = "failed to authenticate")]
+    Auth(#[cause] AuthError),
+
+    /// Failed to retrieve the file metadata.
+    #[fail(display = "failed to retrieve file metadata")]
+    Meta(#[cause] MetaError),
+}
+
+#[derive(Fail, Debug)]
+pub enum AuthError {
+    /// Sending the request to gather the authentication encryption nonce
+    /// failed.
+    #[fail(display = "failed to request authentication nonce")]
+    NonceReq,
+
+    /// The response for fetching the authentication encryption nonce
+    /// indicated an error and wasn't successful.
+    #[fail(display = "bad HTTP response '{}' while requesting authentication nonce", _1)]
+    NonceReqStatus(StatusCode, String),
+
+    /// No authentication encryption nonce was included in the response
+    /// from the server, it was missing.
+    #[fail(display = "missing authentication nonce in server response")]
+    NoNonceHeader,
+
+    /// The authentication encryption nonce from the response malformed or
+    /// empty.
+    /// Maybe the server responded with a new format that isn't supported yet
+    /// by this client.
+    #[fail(display = "received malformed authentication nonce")]
+    MalformedNonce,
+}
+
+#[derive(Fail, Debug)]
+pub enum MetaError {
+    /// An error occurred while computing the cryptographic signature used for
+    /// decryption.
+    #[fail(display = "failed to compute cryptographic signature")]
+    ComputeSignature,
+
+    /// Sending the request to gather the metadata encryption nonce failed.
+    #[fail(display = "failed to request metadata nonce")]
+    NonceReq,
+
+    /// The response for fetching the metadata encryption nonce indicated an
+    /// error and wasn't successful.
+    #[fail(display = "bad HTTP response '{}' while requesting metadata nonce", _1)]
+    NonceReqStatus(StatusCode, String),
+
+    /// No metadata encryption nonce was included in the response from the
+    /// server, it was missing.
+    #[fail(display = "missing metadata nonce in server response")]
+    NoNonceHeader,
+
+    /// The metadata encryption nonce from the response malformed or empty.
+    /// Maybe the server responded with a new format that isn't supported yet
+    /// by this client.
+    #[fail(display = "received malformed metadata nonce")]
+    MalformedNonce,
+
+    /// The received metadata is malformed, and couldn't be decoded or
+    /// interpreted.
+    #[fail(display = "received malformed metadata")]
+    Malformed,
+
+    /// Failed to decrypt the received metadata.
+    #[fail(display = "failed to decrypt received metadata")]
+    Decrypt,
+}
+
+#[derive(Fail, Debug)]
+pub enum DownloadError {
+    /// An error occurred while computing the cryptographic signature used for
+    /// downloading the file.
+    #[fail(display = "failed to compute cryptographic signature")]
+    ComputeSignature,
+
+    /// Sending the request to gather the metadata encryption nonce failed.
+    #[fail(display = "failed to request file download")]
+    Request,
+
+    /// The response for downloading the indicated an error and wasn't successful.
+    #[fail(display = "bad HTTP response '{}' while requesting file download", _1)]
+    RequestStatus(StatusCode, String),
+
+    /// The length of the file is missing, thus the length of the file to download
+    /// couldn't be determined.
+    #[fail(display = "couldn't determine file download length, missing property")]
+    NoLength,
+
+    /// Failed to start or update the downloading progress, because of this the
+    /// download can't continue.
+    #[fail(display = "failed to update download progress")]
+    Progress,
+
+    /// The actual download and decryption process the server.
+    /// This covers reading the file from the server, decrypting the file,
+    /// and writing it to the file system.
+    #[fail(display = "failed to download the file")]
+    Download,
+
+    /// Verifiying the downloaded file failed.
+    #[fail(display = "file verification failed")]
+    Verify,
+}
+
+#[derive(Fail, Debug)]
+pub enum FileError {
+    /// An error occurred while creating or opening the file to write to.
+    #[fail(display = "failed to create or open file")]
+    Create(#[cause] IoError),
+
+    /// Failed to create an encrypted writer for the file, which is used to
+    /// decrypt the downloaded file.
+    #[fail(display = "failed to create file decryptor")]
+    EncryptedWriter,
+}
+
+/// Reqwest status code extention, to easily retrieve an error message.
+trait StatusCodeExt {
+    /// Build a basic error message based on the status code.
+    fn err_text(&self) -> String;
+}
+
+impl StatusCodeExt for StatusCode {
+    fn err_text(&self) -> String {
+        self.canonical_reason()
+            .map(|text| text.to_owned())
+            .unwrap_or(format!("{}", self.as_u16()))
     }
 }
