@@ -2,7 +2,7 @@ use ffsend_api::url::{ParseError, Url};
 
 use super::clap::{App, Arg, ArgMatches, SubCommand};
 
-use util::quit_error;
+use util::quit_error_msg;
 
 /// The download command.
 pub struct CmdDownload<'a> {
@@ -47,18 +47,18 @@ impl<'a: 'b, 'b> CmdDownload<'a> {
         match Url::parse(url) {
             Ok(url) => url,
             Err(ParseError::EmptyHost) =>
-                quit_error("emtpy host given"),
+                quit_error_msg("emtpy host given"),
             Err(ParseError::InvalidPort) =>
-                quit_error("invalid host port"),
+                quit_error_msg("invalid host port"),
             Err(ParseError::InvalidIpv4Address) =>
-                quit_error("invalid IPv4 address in host"),
+                quit_error_msg("invalid IPv4 address in host"),
             Err(ParseError::InvalidIpv6Address) =>
-                quit_error("invalid IPv6 address in host"),
+                quit_error_msg("invalid IPv6 address in host"),
             Err(ParseError::InvalidDomainCharacter) =>
-                quit_error("host domains contains an invalid character"),
+                quit_error_msg("host domains contains an invalid character"),
             Err(ParseError::RelativeUrlWithoutBase) =>
-                quit_error("host domain doesn't contain a host"),
-            _ => quit_error("the given host is invalid"),
+                quit_error_msg("host domain doesn't contain a host"),
+            _ => quit_error_msg("the given host is invalid"),
         }
     }
 }
