@@ -5,6 +5,11 @@ rust:
   - stable
   - beta
   - nightly
+addons:
+  apt:
+    packages:
+      - libssl-dev
+      - xorg-dev
 
 # Main build
 script:
