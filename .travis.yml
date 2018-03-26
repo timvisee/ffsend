@@ -1,0 +1,14 @@
+# Configuration for Travis CI
+language: rust
+sudo: false
+rust:
+  - stable
+  - beta
+  - nightly
+
+# Main build
+script:
+- |
+  cargo build &&
+  cargo test &&
+  cargo doc
