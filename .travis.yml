@@ -1,0 +1,19 @@
+# Configuration for Travis CI
+language: rust
+sudo: false
+rust:
+  - stable
+  - beta
+  - nightly
+addons:
+  apt:
+    packages:
+      - libssl-dev
+      - xorg-dev
+
+# Main build
+script:
+- cargo build --verbose --all
+- cargo build --no-default-features --verbose --all
+- cargo test --verbose --all
+- cargo doc
