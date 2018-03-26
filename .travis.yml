@@ -13,7 +13,6 @@ addons:
 
 # Main build
 script:
-- |
-  cargo build &&
-  cargo test &&
-  cargo doc
+- cargo build --verbose --all
+- cargo test --verbose --all
+- cargo doc
