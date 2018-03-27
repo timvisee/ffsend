@@ -1,13 +1,12 @@
 use std::sync::{Arc, Mutex};
 
-use failure::Fail;
 use ffsend_api::action::download::Download as ApiDownload;
 use ffsend_api::file::file::DownloadFile;
 use ffsend_api::reqwest::Client;
 
 use cmd::cmd_download::CmdDownload;
+use error::ActionError;
 use progress::ProgressBar;
-use util::quit_error;
 
 /// A file download action.
 pub struct Download<'a> {
@@ -24,7 +23,7 @@ impl<'a> Download<'a> {
 
     /// Invoke the download action.
     // TODO: create a trait for this method
-    pub fn invoke(&self) {
+    pub fn invoke(&self) -> Result<(), ActionError> {
         // Get the download URL
         let url = self.cmd.url();
 
@@ -40,11 +39,12 @@ impl<'a> Download<'a> {
 
         // Execute an download action
         // TODO: do not unwrap, but return an error
-        if let Err(err) = ApiDownload::new(&file).invoke(&client, bar) {
-            quit_error(err.context("Failed to download the requested file"));
-        }
+        ApiDownload::new(&file).invoke(&client, bar)
+            .map_err(|err| ActionError::Download(err))?;
 
         // TODO: open the file, or it's location
         // TODO: copy the file location
+
+        Ok(())
     }
 }

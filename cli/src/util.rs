@@ -18,14 +18,21 @@ use ffsend_api::url::Url;
 /// Print the given error in a proper format for the user,
 /// with it's causes.
 pub fn print_error<E: Fail>(err: E) {
-    // Print the main error
-    eprintln!("{} {}", "error:".red().bold(), err);
+    // Report each printable error, count them
+    let count = err.causes()
+        .map(|err| format!("{}", err))
+        .filter(|err| !err.is_empty())
+        .enumerate()
+        .map(|(i, err)| if i == 0 {
+            eprintln!("{} {}", "error:".red().bold(), err);
+        } else {
+            eprintln!("{} {}", "caused by:".red().bold(), err);
+        })
+        .count();
 
-    // Print the causes
-    let mut cause = err.cause();
-    while let Some(err) = cause {
-        eprintln!("{} {}", "caused by:".red().bold(), err);
-        cause = err.cause();
+    // Fall back to a basic message
+    if count == 0 {
+        eprintln!("{} {}", "error:".red().bold(), "An undefined error occurred");
     }
 }
 

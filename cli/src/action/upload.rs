@@ -5,6 +5,7 @@ use ffsend_api::action::upload::Upload as ApiUpload;
 use ffsend_api::reqwest::Client;
 
 use cmd::cmd_upload::CmdUpload;
+use error::ActionError;
 use progress::ProgressBar;
 use util::open_url;
 #[cfg(feature = "clipboard")]
@@ -25,7 +26,7 @@ impl<'a> Upload<'a> {
 
     /// Invoke the upload action.
     // TODO: create a trait for this method
-    pub fn invoke(&self) {
+    pub fn invoke(&self) -> Result<(), ActionError> {
         // Get API parameters
         let path = Path::new(self.cmd.file()).to_path_buf();
         let host = self.cmd.host();
@@ -59,5 +60,7 @@ impl<'a> Upload<'a> {
                     .expect("failed to put download URL in user clipboard");
             }
         }
+
+        Ok(())
     }
 }
