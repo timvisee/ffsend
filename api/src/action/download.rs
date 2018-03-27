@@ -61,8 +61,9 @@ impl<'a> Download<'a> {
         // Open the file we will write to
         // TODO: this should become a temporary file first
         // TODO: use the uploaded file name as default
-        let out = File::create("downloaded.zip")
-            .map_err(|err| Error::File(FileError::Create(err)))?;
+        let path = "downloaded.zip";
+        let out = File::create(path)
+            .map_err(|err| Error::File(path.into(), FileError::Create(err)))?;
 
         // Create the file reader for downloading
         let (reader, len) = self.create_file_reader(&key, meta_nonce, &client)
@@ -74,7 +75,7 @@ impl<'a> Download<'a> {
             len,
             &key,
             reporter.clone(),
-        ).map_err(|err| Error::File(err))?;
+        ).map_err(|err| Error::File(path.into(), err))?;
 
         // Download the file
         self.download(reader, writer, len, reporter)
@@ -361,8 +362,8 @@ pub enum Error {
 
     /// An error occurred while opening or writing to the target file.
     // TODO: show what file this is about
-    #[fail(display = "Couldn't use the target file")]
-    File(#[cause] FileError),
+    #[fail(display = "Couldn't use the target file at '{}'", _0)]
+    File(String, #[cause] FileError),
 }
 
 impl From<AuthError> for Error {
