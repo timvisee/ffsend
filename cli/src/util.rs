@@ -30,14 +30,7 @@ pub fn quit_error_msg<S>(err: S) -> !
     where
         S: AsRef<str> + Display + Debug + Sync + Send + 'static
 {
-    // TODO: forward the error the `quit_error` here
-    // quit_error(failure::err_msg(err));
-
-    // Print the error message
-    eprintln!("error: {}", err);
-
-    // Quit
-    exit(1);
+    quit_error(failure::err_msg(err).compat());
 }
 
 /// Open the given URL in the users default browser.
