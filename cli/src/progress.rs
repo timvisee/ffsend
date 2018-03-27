@@ -10,7 +10,7 @@ use self::pbr::{
 };
 
 /// The refresh rate of the progress bar, in milliseconds.
-const PROGRESS_BAR_FPS_MILLIS: u64 = 500;
+const PROGRESS_BAR_FPS_MILLIS: u64 = 200;
 
 /// A progress bar reporter.
 pub struct ProgressBar<'a> {
