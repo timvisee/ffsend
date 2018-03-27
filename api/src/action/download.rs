@@ -343,25 +343,25 @@ pub enum Error {
     /// A general error occurred while requesting the file data.
     /// This may be because authentication failed, because decrypting the
     /// file metadata didn't succeed, or due to some other reason.
-    #[fail(display = "failed to request file data")]
+    #[fail(display = "Failed to request file data")]
     Request(#[cause] RequestError),
 
     /// The given Send file has expired, or did never exist in the first place.
     /// Therefore the file could not be downloaded.
-    #[fail(display = "the file has expired or did never exist")]
+    #[fail(display = "The file has expired or did never exist")]
     Expired,
 
     /// An error occurred while downloading the file.
-    #[fail(display = "failed to download the file")]
+    #[fail(display = "Failed to download the file")]
     Download(#[cause] DownloadError),
 
     /// An error occurred while decrypting the downloaded file.
-    #[fail(display = "failed to decrypt the downloaded file")]
+    #[fail(display = "Failed to decrypt the downloaded file")]
     Decrypt,
 
     /// An error occurred while opening or writing to the target file.
     // TODO: show what file this is about
-    #[fail(display = "could not open the file for writing")]
+    #[fail(display = "Couldn't use the target file")]
     File(#[cause] FileError),
 }
 
@@ -374,11 +374,11 @@ impl From<AuthError> for Error {
 #[derive(Fail, Debug)]
 pub enum RequestError {
     /// Failed authenticating, in order to fetch the file data.
-    #[fail(display = "failed to authenticate")]
+    #[fail(display = "Failed to authenticate")]
     Auth(#[cause] AuthError),
 
     /// Failed to retrieve the file metadata.
-    #[fail(display = "failed to retrieve file metadata")]
+    #[fail(display = "Failed to retrieve file metadata")]
     Meta(#[cause] MetaError),
 }
 
@@ -386,24 +386,24 @@ pub enum RequestError {
 pub enum AuthError {
     /// Sending the request to gather the authentication encryption nonce
     /// failed.
-    #[fail(display = "failed to request authentication nonce")]
+    #[fail(display = "Failed to request authentication nonce")]
     NonceReq,
 
     /// The response for fetching the authentication encryption nonce
     /// indicated an error and wasn't successful.
-    #[fail(display = "bad HTTP response '{}' while requesting authentication nonce", _1)]
+    #[fail(display = "Bad HTTP response '{}' while requesting authentication nonce", _1)]
     NonceReqStatus(StatusCode, String),
 
     /// No authentication encryption nonce was included in the response
     /// from the server, it was missing.
-    #[fail(display = "missing authentication nonce in server response")]
+    #[fail(display = "Missing authentication nonce in server response")]
     NoNonceHeader,
 
     /// The authentication encryption nonce from the response malformed or
     /// empty.
     /// Maybe the server responded with a new format that isn't supported yet
     /// by this client.
-    #[fail(display = "received malformed authentication nonce")]
+    #[fail(display = "Received malformed authentication nonce")]
     MalformedNonce,
 }
 
@@ -411,36 +411,36 @@ pub enum AuthError {
 pub enum MetaError {
     /// An error occurred while computing the cryptographic signature used for
     /// decryption.
-    #[fail(display = "failed to compute cryptographic signature")]
+    #[fail(display = "Failed to compute cryptographic signature")]
     ComputeSignature,
 
     /// Sending the request to gather the metadata encryption nonce failed.
-    #[fail(display = "failed to request metadata nonce")]
+    #[fail(display = "Failed to request metadata nonce")]
     NonceReq,
 
     /// The response for fetching the metadata encryption nonce indicated an
     /// error and wasn't successful.
-    #[fail(display = "bad HTTP response '{}' while requesting metadata nonce", _1)]
+    #[fail(display = "Bad HTTP response '{}' while requesting metadata nonce", _1)]
     NonceReqStatus(StatusCode, String),
 
     /// No metadata encryption nonce was included in the response from the
     /// server, it was missing.
-    #[fail(display = "missing metadata nonce in server response")]
+    #[fail(display = "Missing metadata nonce in server response")]
     NoNonceHeader,
 
     /// The metadata encryption nonce from the response malformed or empty.
     /// Maybe the server responded with a new format that isn't supported yet
     /// by this client.
-    #[fail(display = "received malformed metadata nonce")]
+    #[fail(display = "Received malformed metadata nonce")]
     MalformedNonce,
 
     /// The received metadata is malformed, and couldn't be decoded or
     /// interpreted.
-    #[fail(display = "received malformed metadata")]
+    #[fail(display = "Received malformed metadata")]
     Malformed,
 
     /// Failed to decrypt the received metadata.
-    #[fail(display = "failed to decrypt received metadata")]
+    #[fail(display = "Failed to decrypt received metadata")]
     Decrypt,
 }
 
@@ -448,47 +448,47 @@ pub enum MetaError {
 pub enum DownloadError {
     /// An error occurred while computing the cryptographic signature used for
     /// downloading the file.
-    #[fail(display = "failed to compute cryptographic signature")]
+    #[fail(display = "Failed to compute cryptographic signature")]
     ComputeSignature,
 
     /// Sending the request to gather the metadata encryption nonce failed.
-    #[fail(display = "failed to request file download")]
+    #[fail(display = "Failed to request file download")]
     Request,
 
     /// The response for downloading the indicated an error and wasn't successful.
-    #[fail(display = "bad HTTP response '{}' while requesting file download", _1)]
+    #[fail(display = "Bad HTTP response '{}' while requesting file download", _1)]
     RequestStatus(StatusCode, String),
 
     /// The length of the file is missing, thus the length of the file to download
     /// couldn't be determined.
-    #[fail(display = "couldn't determine file download length, missing property")]
+    #[fail(display = "Couldn't determine file download length, missing property")]
     NoLength,
 
     /// Failed to start or update the downloading progress, because of this the
     /// download can't continue.
-    #[fail(display = "failed to update download progress")]
+    #[fail(display = "Failed to update download progress")]
     Progress,
 
     /// The actual download and decryption process the server.
     /// This covers reading the file from the server, decrypting the file,
     /// and writing it to the file system.
-    #[fail(display = "failed to download the file")]
+    #[fail(display = "Failed to download the file")]
     Download,
 
     /// Verifiying the downloaded file failed.
-    #[fail(display = "file verification failed")]
+    #[fail(display = "File verification failed")]
     Verify,
 }
 
 #[derive(Fail, Debug)]
 pub enum FileError {
     /// An error occurred while creating or opening the file to write to.
-    #[fail(display = "failed to create or open file")]
+    #[fail(display = "Failed to create or replace the file")]
     Create(#[cause] IoError),
 
     /// Failed to create an encrypted writer for the file, which is used to
     /// decrypt the downloaded file.
-    #[fail(display = "failed to create file decryptor")]
+    #[fail(display = "Failed to create file decryptor")]
     EncryptedWriter,
 }
 

@@ -1,5 +1,6 @@
 use std::sync::{Arc, Mutex};
 
+use failure::Fail;
 use ffsend_api::action::download::Download as ApiDownload;
 use ffsend_api::file::file::DownloadFile;
 use ffsend_api::reqwest::Client;
@@ -40,7 +41,7 @@ impl<'a> Download<'a> {
         // Execute an download action
         // TODO: do not unwrap, but return an error
         if let Err(err) = ApiDownload::new(&file).invoke(&client, bar) {
-            quit_error(err);
+            quit_error(err.context("Failed to download the requested file"));
         }
 
         // TODO: open the file, or it's location

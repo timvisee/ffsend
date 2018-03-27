@@ -1,3 +1,4 @@
+extern crate failure;
 extern crate ffsend_api;
 
 mod action;

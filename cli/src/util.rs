@@ -1,6 +1,6 @@
 #[cfg(feature = "clipboard")]
 extern crate clipboard;
-extern crate failure;
+extern crate colored;
 extern crate open;
 
 #[cfg(feature = "clipboard")]
@@ -11,14 +11,33 @@ use std::process::{exit, ExitStatus};
 
 #[cfg(feature = "clipboard")]
 use self::clipboard::{ClipboardContext, ClipboardProvider};
-use self::failure::{Fail};
+use self::colored::*;
+use failure::{self, Fail};
 use ffsend_api::url::Url;
+
+/// Print the given error in a proper format for the user,
+/// with it's causes.
+pub fn print_error<E: Fail>(err: E) {
+    // Print the main error
+    eprintln!("{} {}", "error:".red().bold(), err);
+
+    // Print the causes
+    let mut cause = err.cause();
+    while let Some(err) = cause {
+        eprintln!("{} {}", "caused by:".red().bold(), err);
+        cause = err.cause();
+    }
+}
 
 /// Quit the application with an error code,
 /// and print the given error.
 pub fn quit_error<E: Fail>(err: E) -> ! {
-    // Print the error message
-    eprintln!("error: {}", err);
+    // Print the error
+    print_error(err);
+
+    // Print some additional information
+    eprintln!("\nFor detailed errors try '{}'", "--verbose".yellow());
+    eprintln!("For more information try '{}'", "--help".yellow());
 
     // Quit
     exit(1);
