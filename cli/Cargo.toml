@@ -10,6 +10,7 @@ name = "ffsend"
 
 [features]
 default = ["clipboard"]
+no-color = ["colored/no-color"]
 
 [dependencies]
 clap = "2.31"
