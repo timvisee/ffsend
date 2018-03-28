@@ -23,16 +23,16 @@ use url::{
 };
 
 use crypto::key_set::KeySet;
+use ext::status_code::StatusCodeExt;
+use file::file::File as SendFile;
+use file::metadata::{Metadata, XFileMetadata};
 use reader::{
     EncryptedFileReader,
     ExactLengthReader,
     ProgressReader,
     ProgressReporter,
 };
-use file::file::File as SendFile;
-use file::metadata::{Metadata, XFileMetadata};
 
-// TODO: remove these specified types
 type EncryptedReader = ProgressReader<BufReader<EncryptedFileReader>>;
 
 /// A file upload action to a Send server.
@@ -416,19 +416,4 @@ pub enum UploadError {
     /// Failed to parse the retrieved URL from the upload response.
     #[fail(display = "Failed to parse received URL")]
     ParseUrl(#[cause] UrlParseError),
-}
-
-/// Reqwest status code extention, to easily retrieve an error message.
-// TODO: implement this globally somewhere
-trait StatusCodeExt {
-    /// Build a basic error message based on the status code.
-    fn err_text(&self) -> String;
-}
-
-impl StatusCodeExt for StatusCode {
-    fn err_text(&self) -> String {
-        self.canonical_reason()
-            .map(|text| text.to_owned())
-            .unwrap_or(format!("{}", self.as_u16()))
-    }
 }

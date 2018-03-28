@@ -10,6 +10,8 @@ name = "ffsend"
 
 [features]
 default = ["clipboard"]
+
+# Compile without colored output support
 no-color = ["colored/no-color"]
 
 [dependencies]

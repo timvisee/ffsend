@@ -18,6 +18,7 @@ use serde_json;
 use crypto::b64;
 use crypto::key_set::KeySet;
 use crypto::sign::signature_encoded;
+use ext::status_code::StatusCodeExt;
 use file::file::DownloadFile;
 use file::metadata::Metadata;
 use reader::{EncryptedFileWriter, ProgressReporter, ProgressWriter};
@@ -491,19 +492,4 @@ pub enum FileError {
     /// decrypt the downloaded file.
     #[fail(display = "Failed to create file decryptor")]
     EncryptedWriter,
-}
-
-/// Reqwest status code extention, to easily retrieve an error message.
-// TODO: implement this globally somewhere
-trait StatusCodeExt {
-    /// Build a basic error message based on the status code.
-    fn err_text(&self) -> String;
-}
-
-impl StatusCodeExt for StatusCode {
-    fn err_text(&self) -> String {
-        self.canonical_reason()
-            .map(|text| text.to_owned())
-            .unwrap_or(format!("{}", self.as_u16()))
-    }
 }
