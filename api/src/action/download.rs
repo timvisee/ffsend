@@ -298,7 +298,7 @@ impl<'a> Download<'a> {
 
 /// The metadata response from the server, when fetching the data through
 /// the API.
-/// 
+///
 /// This metadata is required to successfully download and decrypt the
 /// corresponding file.
 #[derive(Debug, Deserialize)]
@@ -486,7 +486,7 @@ pub enum DownloadError {
     #[fail(display = "Failed to download the file")]
     Download,
 
-    /// Verifiying the downloaded file failed.
+    /// Verifying the downloaded file failed.
     #[fail(display = "File verification failed")]
     Verify,
 }

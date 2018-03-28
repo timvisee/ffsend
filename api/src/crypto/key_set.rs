@@ -1,4 +1,5 @@
 use openssl::symm::Cipher;
+use url::Url;
 
 use file::file::DownloadFile;
 use super::{b64, rand_bytes};
@@ -87,6 +88,16 @@ impl KeySet {
         self.file_key = Some(derive_file_key(&self.secret));
         self.auth_key = Some(derive_auth_key(&self.secret, None, None));
         self.meta_key = Some(derive_meta_key(&self.secret));
+    }
+
+    /// Derive an authentication key, with the given password and file URL.
+    /// This method does not derive a (new) file and metadata key.
+    pub fn derive_auth_password(&mut self, pass: &str, url: &Url) {
+        self.auth_key = Some(derive_auth_key(
+            &self.secret,
+            Some(pass),
+            Some(url),
+        ));
     }
 
     /// Get the secret key.

@@ -53,7 +53,7 @@ pub fn derive_meta_key(secret: &[u8]) -> Vec<u8> {
 ///
 /// A `password` and `url` may be given for special key deriving.
 /// At this time this is not implemented however.
-pub fn derive_auth_key(secret: &[u8], password: Option<String>, url: Option<Url>) -> Vec<u8> {
+pub fn derive_auth_key(secret: &[u8], password: Option<&str>, url: Option<&Url>) -> Vec<u8> {
     // Nothing, or both a password and URL must be given
     assert_eq!(
         password.is_none(),

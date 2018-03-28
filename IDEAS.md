@@ -1,4 +1,5 @@
 # Ideas
+- Rename DownloadFile to RemoteFile
 - Box errors
 - Implement error handling everywhere properly
 - `-y` flag for assume yes
@@ -6,18 +7,25 @@
 - Quick upload/download without `upload` or `download` subcommands.
 - Set file password
 - Set file download count
+- Flag to explicitly delete file after download
+- Check remote version and heartbeat using `/__version__`
+- Check whether the file still exists everywhere
+- API actions contain duplicate code, create centralized functions
 - Download to a temporary location first
 - Soft limit uploads to 1GB and 2GB
 - Allow piping input/output files
 - Allow file renaming on upload
 - Allow file/directory archiving on upload
 - Allow unarchiving on download 
+- Allow hiding the progress bar, and/or showing simple progress
 - Enter password through pinetry
 - Remember all uploaded files, make files listable
 - Incognito mode, to not remember files `--incognito`
+- Document all code components
 - Dotfile for default properties
 - Host configuration file for host tags, to easily upload to other hosts
 - Generate manual pages
 - Automated releases through CI
 - Release binaries on GitHub
 - Ubuntu PPA package
+- Move API URL generator methods out of remote file class
