@@ -1,0 +1,16 @@
+# Ideas
+- `-y` flag for assume yes
+- `-f` flag for forcing (no interact?)
+- Set file password
+- Set file download count.
+- Allow piping input/output files
+- Allow file renaming on upload
+- Allow file/directory archiving on upload
+- Allow unarchiving on download 
+- Enter password through pinetry.
+- Remember all uploaded files, make files listable.
+- Dotfile for default properties
+- Host configuration file for host tags, to easily upload to other hosts.
+- Automated releases through CI
+- Release binaries on GitHub
+- Ubuntu PPA package
