@@ -56,8 +56,7 @@ impl<'a> Download<'a> {
         let auth_nonce = self.fetch_auth_nonce(client)?;
 
         // Fetch the meta nonce, set the input vector
-        let meta_nonce = self.fetch_meta_nonce(&client, &mut key, auth_nonce)
-            .map_err(|err| Error::Request(RequestError::Meta(err)))?;
+        let meta_nonce = self.fetch_meta_nonce(&client, &mut key, auth_nonce)?;
 
         // Open the file we will write to
         // TODO: this should become a temporary file first
@@ -67,8 +66,7 @@ impl<'a> Download<'a> {
             .map_err(|err| Error::File(path.into(), FileError::Create(err)))?;
 
         // Create the file reader for downloading
-        let (reader, len) = self.create_file_reader(&key, meta_nonce, &client)
-            .map_err(|err| Error::Download(err))?;
+        let (reader, len) = self.create_file_reader(&key, meta_nonce, &client)?;
 
         // Create the file writer
         let writer = self.create_file_writer(
@@ -79,8 +77,7 @@ impl<'a> Download<'a> {
         ).map_err(|err| Error::File(path.into(), err))?;
 
         // Download the file
-        self.download(reader, writer, len, reporter)
-            .map_err(|err| Error::Download(err))?;
+        self.download(reader, writer, len, reporter)?;
 
         // TODO: return the file path
         // TODO: return the new remote state (does it still exist remote)
@@ -370,6 +367,18 @@ pub enum Error {
 impl From<AuthError> for Error {
     fn from(err: AuthError) -> Error {
         Error::Request(RequestError::Auth(err))
+    }
+}
+
+impl From<MetaError> for Error {
+    fn from(err: MetaError) -> Error {
+        Error::Request(RequestError::Meta(err))
+    }
+}
+
+impl From<DownloadError> for Error {
+    fn from(err: DownloadError) -> Error {
+        Error::Download(err)
     }
 }
 

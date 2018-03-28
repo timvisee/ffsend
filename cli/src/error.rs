@@ -8,6 +8,12 @@ pub enum Error {
     Action(#[cause] ActionError),
 }
 
+impl From<ActionError> for Error {
+    fn from(err: ActionError) -> Error {
+        Error::Action(err)
+    }
+}
+
 #[derive(Debug, Fail)]
 pub enum ActionError {
     /// An error occurred while invoking the upload action.
@@ -18,4 +24,16 @@ pub enum ActionError {
     /// An error occurred while invoking the download action.
     #[fail(display = "Failed to download the requested file")]
     Download(#[cause] DownloadError),
+}
+
+impl From<DownloadError> for ActionError {
+    fn from(err: DownloadError) -> ActionError {
+        ActionError::Download(err)
+    }
+}
+
+impl From<UploadError> for ActionError {
+    fn from(err: UploadError) -> ActionError {
+        ActionError::Upload(err)
+    }
 }

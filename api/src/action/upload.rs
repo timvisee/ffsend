@@ -221,7 +221,6 @@ impl Upload {
         };
 
         // Transform the responce into a file object
-        // TODO: do some error handling in this into_file method
         Ok(response.into_file(self.host.clone(), &key)?)
     }
 }
@@ -258,8 +257,7 @@ impl UploadResponse {
             SendFile::new_now(
                 self.id,
                 host,
-                Url::parse(&self.url)
-                    .map_err(|err| UploadError::ParseUrl(err))?,
+                Url::parse(&self.url)?,
                 key.secret().to_vec(),
                 self.owner,
             )
@@ -319,7 +317,7 @@ pub enum Error {
     /// An error occurred while opening, reading or using the file that
     /// the should be uploaded.
     // TODO: maybe append the file path here for further information
-    #[fail(display = "Failed to use the file to upload")]
+    #[fail(display = "")]
     File(#[cause] FileError),
 
     /// An error occurred while uploading the file.
@@ -385,7 +383,7 @@ pub enum ReaderError {
 #[derive(Fail, Debug)]
 pub enum FileError {
     /// The given path, is not not a file or doesn't exist.
-    #[fail(display = "The path is not an existing file")]
+    #[fail(display = "The given path is not an existing file")]
     NotAFile,
 
     /// Failed to open the file that must be uploaded for reading.
@@ -416,4 +414,10 @@ pub enum UploadError {
     /// Failed to parse the retrieved URL from the upload response.
     #[fail(display = "Failed to parse received URL")]
     ParseUrl(#[cause] UrlParseError),
+}
+
+impl From<UrlParseError> for UploadError {
+    fn from(err: UrlParseError) -> UploadError {
+        UploadError::ParseUrl(err)
+    }
 }

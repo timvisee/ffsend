@@ -31,6 +31,7 @@ impl<'a> Download<'a> {
         let client = Client::new();
 
         // Parse the file based on the URL
+        // TODO: handle error here
         let file = DownloadFile::parse_url(url)
             .expect("invalid download URL, could not parse file data");
 
@@ -39,8 +40,7 @@ impl<'a> Download<'a> {
 
         // Execute an download action
         // TODO: do not unwrap, but return an error
-        ApiDownload::new(&file).invoke(&client, bar)
-            .map_err(|err| ActionError::Download(err))?;
+        ApiDownload::new(&file).invoke(&client, bar)?;
 
         // TODO: open the file, or it's location
         // TODO: copy the file location

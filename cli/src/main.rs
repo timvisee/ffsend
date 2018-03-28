@@ -35,13 +35,13 @@ fn invoke_action(handler: &Handler) -> Result<(), Error> {
     // Match the upload command
     if let Some(cmd) = handler.upload() {
         return Upload::new(&cmd).invoke()
-            .map_err(|err| Error::Action(err));
+            .map_err(|err| err.into());
     }
 
     // Match the download command
     if let Some(cmd) = handler.download() {
         return Download::new(&cmd).invoke()
-            .map_err(|err| Error::Action(err));
+            .map_err(|err| err.into());
     }
 
     // No subcommand was selected, show general help

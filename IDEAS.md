@@ -1,16 +1,23 @@
 # Ideas
+- Box errors
+- Implement error handling everywhere properly
 - `-y` flag for assume yes
 - `-f` flag for forcing (no interact?)
+- Quick upload/download without `upload` or `download` subcommands.
 - Set file password
-- Set file download count.
+- Set file download count
+- Download to a temporary location first
+- Soft limit uploads to 1GB and 2GB
 - Allow piping input/output files
 - Allow file renaming on upload
 - Allow file/directory archiving on upload
 - Allow unarchiving on download 
-- Enter password through pinetry.
-- Remember all uploaded files, make files listable.
+- Enter password through pinetry
+- Remember all uploaded files, make files listable
+- Incognito mode, to not remember files `--incognito`
 - Dotfile for default properties
-- Host configuration file for host tags, to easily upload to other hosts.
+- Host configuration file for host tags, to easily upload to other hosts
+- Generate manual pages
 - Automated releases through CI
 - Release binaries on GitHub
 - Ubuntu PPA package
