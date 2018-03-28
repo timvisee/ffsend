@@ -2,7 +2,17 @@ extern crate hkdf;
 extern crate sha2;
 
 use self::hkdf::Hkdf;
+use openssl::hash::MessageDigest;
+use openssl::pkcs5::pbkdf2_hmac;
 use self::sha2::Sha256;
+use url::Url;
+
+/// The length of the derived authentication key in bytes.
+const KEY_AUTH_SIZE: usize = 64;
+
+/// The number of iterations to do for deriving a passworded authentication
+/// key.
+const KEY_AUTH_ITERATIONS: usize = 100;
 
 /// Derive a HKDF key.
 ///
@@ -43,11 +53,29 @@ pub fn derive_meta_key(secret: &[u8]) -> Vec<u8> {
 ///
 /// A `password` and `url` may be given for special key deriving.
 /// At this time this is not implemented however.
-pub fn derive_auth_key(secret: &[u8], password: Option<String>, _url: Option<String>) -> Vec<u8> {
+pub fn derive_auth_key(secret: &[u8], password: Option<String>, url: Option<Url>) -> Vec<u8> {
+    // Nothing, or both a password and URL must be given
+    assert_eq!(
+        password.is_none(),
+        url.is_none(),
+        "unable to derive authentication key, missing password or URL",
+    );
+
+    // Derive a key without a password
     if password.is_none() {
-        hkdf(64, secret, Some(b"authentication"))
-    } else {
-        // TODO: implement this
-        unimplemented!();
+        return hkdf(KEY_AUTH_SIZE, secret, Some(b"authentication"));
     }
+
+    // Derive a key with a password and URL
+    // TODO: do not expect/unwrap here
+    let mut key = vec![0u8; KEY_AUTH_SIZE];
+    pbkdf2_hmac(
+        password.unwrap().as_bytes(),
+        url.unwrap().as_str().as_bytes(),
+        KEY_AUTH_ITERATIONS,
+        MessageDigest::sha256(),
+        &mut key,
+    ).expect("failed to derive passworded authentication key");
+
+    key
 }
