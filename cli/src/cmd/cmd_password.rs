@@ -28,7 +28,15 @@ impl<'a: 'b, 'b> CmdPassword<'a> {
                 .short("p")
                 .alias("pass")
                 .value_name("PASSWORD")
-                .help("Specify a password, do not prompt"));
+                .help("Specify a password, do not prompt"))
+            .arg(Arg::with_name("owner")
+                .long("owner")
+                .short("o")
+                .alias("own")
+                .alias("owner-token")
+                .alias("token")
+                .value_name("TOKEN")
+                .help("File owner token"));
 
         cmd
     }
@@ -67,6 +75,13 @@ impl<'a: 'b, 'b> CmdPassword<'a> {
                 quit_error_msg("Host domain doesn't contain a host"),
             _ => quit_error_msg("The given host is invalid"),
         }
+    }
+
+    /// Get the owner token.
+    pub fn owner(&'a self) -> Option<String> {
+        // TODO: validate the owner token if set
+        self.matches.value_of("owner")
+            .map(|token| token.to_owned())
     }
 
     /// Get the password.

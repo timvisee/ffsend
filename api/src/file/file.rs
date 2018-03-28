@@ -117,6 +117,11 @@ impl File {
         !self.secret.is_empty()
     }
 
+    /// Get the owner token if set.
+    pub fn owner_token(&self) -> Option<&String> {
+        Some(&self.owner_key)
+    }
+
     /// Get the download URL of the file.
     /// Set `secret` to `true`, to include it in the URL if known.
     pub fn download_url(&self, secret: bool) -> Url {
@@ -243,6 +248,11 @@ impl DownloadFile {
     /// Get the owner token if set.
     pub fn owner_token(&self) -> Option<&String> {
         self.owner_token.as_ref()
+    }
+
+    /// Set the owner token.
+    pub fn set_owner_token(&mut self, token: Option<String>) {
+        self.owner_token = token;
     }
 
     /// Get the download URL of the file.

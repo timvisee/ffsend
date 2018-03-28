@@ -44,6 +44,7 @@ impl<'a> Upload<'a> {
         // Get the download URL, and report it in the console
         let url = file.download_url(true);
         println!("Download URL: {}", url);
+        println!("Owner token: {}", file.owner_token().unwrap());
 
         // Open the URL in the browser
         if self.cmd.open() {

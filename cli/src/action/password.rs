@@ -30,9 +30,15 @@ impl<'a> Password<'a> {
 
         // Parse the file based on the URL
         // TODO: handle error here
-        // TODO: set the owner token
-        let file = DownloadFile::parse_url(url)
+        let mut file = DownloadFile::parse_url(url)
             .expect("invalid share URL, could not parse file data");
+
+        // Set the owner token
+        if let Some(token) = self.cmd.owner() {
+            file.set_owner_token(Some(token));
+        }
+
+        // TODO: show an informative error if the owner token isn't set
 
         // Execute an password action
         ApiPassword::new(&file, &self.cmd.password(), None).invoke(&client)?;
