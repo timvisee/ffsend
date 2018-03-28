@@ -3,7 +3,7 @@ use std::io::BufReader;
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex};
 
-use mime_guess::{get_mime_type, Mime};
+use mime_guess::{guess_mime_type, Mime};
 use openssl::symm::encrypt_aead;
 use reqwest::{
     Client, 
@@ -284,21 +284,14 @@ impl<'a> FileData<'a> {
 
         // Get the file name
         let name = match path.file_name() {
-            Some(name) => name.to_str().expect("failed to convert string"),
-            None => return Err(UploadError::FileError),
-        };
-
-        // Get the file extention
-        // TODO: handle cases where the file doesn't have an extention
-        let ext = match path.extension() {
-            Some(ext) => ext.to_str().expect("failed to convert string"),
-            None => return Err(UploadError::FileError),
+            Some(name) => name.to_str().unwrap_or("file"),
+            None => "file",
         };
 
         Ok(
             Self {
                 name,
-                mime: get_mime_type(ext),
+                mime: guess_mime_type(path),
             }
         )
     }
