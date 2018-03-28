@@ -17,13 +17,11 @@ pub struct Password<'a> {
     /// The uploaded file to change the password for.
     file: &'a DownloadFile,
 
-    /// The new password.
+    /// The new password to use for the file.
     password: &'a str,
 
-    /// The key set
-    key: &'a mut KeySet,
-
-    /// The file upload nonce
+    /// The authentication nonce.
+    /// May be an empty vector if the nonce is unknown.
     nonce: Vec<u8>,
 }
 
@@ -32,31 +30,38 @@ impl<'a> Password<'a> {
     pub fn new(
         file: &'a DownloadFile,
         password: &'a str,
-        key: &'a mut KeySet,
-        nonce: Vec<u8>,
+        nonce: Option<Vec<u8>>,
     ) -> Self {
         Self {
             file,
             password,
-            key,
-            nonce,
+            nonce: nonce.unwrap_or(Vec::new()),
         }
     }
 
     /// Invoke the password action.
     pub fn invoke(mut self, client: &Client) -> Result<(), Error> {
+        // Create a key set for the file
+        let mut key = KeySet::from(self.file);
+
+        // Fetch the authentication nonce if not set yet
+        if self.nonce.is_empty() {
+            self.nonce = self.fetch_auth_nonce(client)?;
+        }
+
         // Compute a signature
-        let sig = signature_encoded(self.key.auth_key().unwrap(), &self.nonce)
+        let sig = signature_encoded(key.auth_key().unwrap(), &self.nonce)
             .map_err(|_| PrepareError::ComputeSignature)?;
 
         // Derive a new authentication key
-        self.key.derive_auth_password(self.password, &self.file.download_url(true));
+        key.derive_auth_password(self.password, &self.file.download_url(true));
 
         // Build the password data
-        let password_data = PasswordData::from(self.file, &self.key);
+        let data = PasswordData::from(self.file, &key)?;
 
         // Send the request to change the password
-        self.change_password(client, password_data, sig).map_err(|err| err.into())
+        self.change_password(client, data, sig)
+            .map_err(|err| err.into())
     }
 
     /// Fetch the authentication nonce for the file from the Send server.
@@ -102,13 +107,13 @@ impl<'a> Password<'a> {
     fn change_password(
         &self,
         client: &Client,
-        password_data: PasswordData,
+        data: PasswordData,
         sig: String,
     ) -> Result<(), ChangeError> {
         // Get the password URL, and send the change
         let url = self.file.api_password_url();
         let response = client.post(url)
-            .json(&password_data)
+            .json(&data)
             .header(Authorization(
                 format!("send-v1 {}", sig)
             ))
@@ -138,12 +143,17 @@ struct PasswordData {
 
 impl PasswordData {
     /// Create the password data object from the given key set.
-    pub fn from(file: &DownloadFile, key: &KeySet) -> PasswordData {
-        PasswordData {
-            // TODO: do not unwrap here
-            owner_token: file.owner_token().unwrap().to_owned(),
-            auth: key.auth_key_encoded().unwrap(),
-        }
+    pub fn from(file: &DownloadFile, key: &KeySet)
+        -> Result<PasswordData, PrepareError>
+    {
+        Ok(
+            PasswordData {
+                owner_token: file.owner_token()
+                    .ok_or(PrepareError::NoOwnerToken)?
+                    .to_owned(),
+                auth: key.auth_key_encoded().unwrap(),
+            }
+        )
     }
 }
 
@@ -191,6 +201,10 @@ pub enum PrepareError {
     /// An error occurred while computing the cryptographic signature.
     #[fail(display = "Failed to compute cryptographic signature")]
     ComputeSignature,
+
+    /// The owner token was missing from the file, and is required.
+    #[fail(display = "Missing owner token, must be specified")]
+    NoOwnerToken,
 }
 
 #[derive(Fail, Debug)]

@@ -30,11 +30,12 @@ impl<'a> Password<'a> {
 
         // Parse the file based on the URL
         // TODO: handle error here
+        // TODO: set the owner token
         let file = DownloadFile::parse_url(url)
             .expect("invalid share URL, could not parse file data");
 
         // Execute an password action
-        ApiPassword::new(&file, &self.cmd.password()).invoke(&client)?;
+        ApiPassword::new(&file, &self.cmd.password(), None).invoke(&client)?;
 
         // Print a success message
         print_success("Password set");
