@@ -108,6 +108,7 @@ impl<'a: 'b, 'b> CmdUpload<'a> {
     }
 
     /// Get the password.
+    /// `None` is returned if no password was specified.
     pub fn password(&'a self) -> Option<String> {
         // Return none if the property was not set
         if !self.matches.is_present("password") {
@@ -121,6 +122,7 @@ impl<'a: 'b, 'b> CmdUpload<'a> {
 
         // Prompt for the password
         // TODO: don't unwrap/expect
+        // TODO: create utility function for this
         Some(
             prompt_password_stderr("Password: ")
                 .expect("failed to read password from stdin")

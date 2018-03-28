@@ -93,6 +93,7 @@ impl<'a: 'b, 'b> CmdPassword<'a> {
 
         // Prompt for the password
         // TODO: don't unwrap/expect
+        // TODO: create utility function for this
         prompt_password_stderr("New password: ")
             .expect("failed to read password from stdin")
     }

@@ -33,13 +33,17 @@ const FILE_EXPIRED_STATUS: StatusCode = StatusCode::NotFound;
 pub struct Download<'a> {
     /// The Send file to download.
     file: &'a DownloadFile,
+
+    /// An optional password to decrypt a protected file.
+    password: Option<String>,
 }
 
 impl<'a> Download<'a> {
     /// Construct a new download action for the given file.
-    pub fn new(file: &'a DownloadFile) -> Self {
+    pub fn new(file: &'a DownloadFile, password: Option<String>) -> Self {
         Self {
             file,
+            password,
         }
     }
 
@@ -50,7 +54,7 @@ impl<'a> Download<'a> {
         reporter: Arc<Mutex<ProgressReporter>>,
     ) -> Result<(), Error> {
         // Create a key set for the file
-        let mut key = KeySet::from(self.file);
+        let mut key = KeySet::from(self.file, self.password.as_ref());
 
         // Fetch the authentication nonce
         let auth_nonce = self.fetch_auth_nonce(client)?;

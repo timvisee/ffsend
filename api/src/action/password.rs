@@ -42,7 +42,7 @@ impl<'a> Password<'a> {
     /// Invoke the password action.
     pub fn invoke(mut self, client: &Client) -> Result<(), Error> {
         // Create a key set for the file
-        let mut key = KeySet::from(self.file);
+        let mut key = KeySet::from(self.file, None);
 
         // Fetch the authentication nonce if not set yet
         if self.nonce.is_empty() {

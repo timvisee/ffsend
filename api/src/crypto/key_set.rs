@@ -43,7 +43,7 @@ impl KeySet {
     // TODO: add a parameter for the password and URL
     // TODO: return a result?
     // TODO: supply a client instance as parameter
-    pub fn from(file: &DownloadFile) -> Self {
+    pub fn from(file: &DownloadFile, password: Option<&String>) -> Self {
         // Create a new key set instance
         let mut set = Self::new(
             file.secret_raw().clone(),
@@ -52,6 +52,11 @@ impl KeySet {
 
         // Derive all keys
         set.derive();
+
+        // Derive a pasworded key
+        if let Some(password) = password {
+            set.derive_auth_password(password, &file.download_url(true));
+        }
 
         set
     }

@@ -1,6 +1,7 @@
 use ffsend_api::url::{ParseError, Url};
 
 use super::clap::{App, Arg, ArgMatches, SubCommand};
+use rpassword::prompt_password_stderr;
 
 use util::quit_error_msg;
 
@@ -21,7 +22,15 @@ impl<'a: 'b, 'b> CmdDownload<'a> {
             .arg(Arg::with_name("URL")
                 .help("The share URL")
                 .required(true)
-                .multiple(false));
+                .multiple(false))
+            .arg(Arg::with_name("password")
+                .long("password")
+                .short("p")
+                .alias("pass")
+                .value_name("PASSWORD")
+                .min_values(0)
+                .max_values(1)
+                .help("Unlock a password protected file"));
 
         cmd
     }
@@ -60,5 +69,27 @@ impl<'a: 'b, 'b> CmdDownload<'a> {
                 quit_error_msg("Host domain doesn't contain a host"),
             _ => quit_error_msg("The given host is invalid"),
         }
+    }
+
+    /// Get the password.
+    /// `None` is returned if no password was specified.
+    pub fn password(&'a self) -> Option<String> {
+        // Return none if the property was not set
+        if !self.matches.is_present("password") {
+            return None;
+        }
+
+        // Get the password from the arguments
+        if let Some(password) = self.matches.value_of("password") {
+            return Some(password.into());
+        }
+
+        // Prompt for the password
+        // TODO: don't unwrap/expect
+        // TODO: create utility function for this
+        Some(
+            prompt_password_stderr("Password: ")
+                .expect("failed to read password from stdin")
+        )
     }
 }

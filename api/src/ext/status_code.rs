@@ -9,7 +9,7 @@ pub trait StatusCodeExt {
 impl StatusCodeExt for StatusCode {
     fn err_text(&self) -> String {
         self.canonical_reason()
-            .map(|text| text.to_owned())
+            .map(|text| format!("{} {}", self.as_u16(), text))
             .unwrap_or(format!("{}", self.as_u16()))
     }
 }

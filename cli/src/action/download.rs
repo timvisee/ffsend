@@ -39,7 +39,8 @@ impl<'a> Download<'a> {
         let bar = Arc::new(Mutex::new(ProgressBar::new_download()));
 
         // Execute an download action
-        ApiDownload::new(&file).invoke(&client, bar)?;
+        ApiDownload::new(&file, self.cmd.password())
+            .invoke(&client, bar)?;
 
         // TODO: open the file, or it's location
         // TODO: copy the file location
