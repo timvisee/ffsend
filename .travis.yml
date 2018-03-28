@@ -16,4 +16,3 @@ script:
 - cargo build --verbose --all
 - cargo build --no-default-features --verbose --all
 - cargo test --verbose --all
-- cargo doc
