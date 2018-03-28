@@ -1,6 +1,10 @@
 use std::fs::File;
-use std::io::BufReader;
-use std::path::{Path, PathBuf};
+use std::io::{
+    BufReader,
+    Error as IoError,
+};
+use std::path::PathBuf;
+use std::result::Result as StdResult;
 use std::sync::{Arc, Mutex};
 
 use mime_guess::{guess_mime_type, Mime};
@@ -9,11 +13,15 @@ use reqwest::{
     Client, 
     Error as ReqwestError,
     Request,
+    StatusCode,
 };
 use reqwest::header::Authorization;
 use reqwest::mime::APPLICATION_OCTET_STREAM;
 use reqwest::multipart::{Form, Part};
-use url::Url;
+use url::{
+    ParseError as UrlParseError,
+    Url,
+};
 
 use crypto::key_set::KeySet;
 use reader::{
@@ -25,6 +33,7 @@ use reader::{
 use file::file::File as SendFile;
 use file::metadata::{Metadata, XFileMetadata};
 
+// TODO: remove these specified types
 type EncryptedReader = ProgressReader<BufReader<EncryptedFileReader>>;
 pub type Result<T> = ::std::result::Result<T, UploadError>;
 
@@ -51,12 +60,12 @@ impl Upload {
         self,
         client: &Client,
         reporter: Arc<Mutex<ProgressReporter>>,
-    ) -> Result<SendFile> {
+    ) -> StdResult<SendFile, Error> {
         // Create file data, generate a key
-        let file = FileData::from(Box::new(&self.path))?;
+        let file = FileData::from(&self.path)?;
         let key = KeySet::generate(true);
 
-        // Crpate metadata and a file reader
+        // Create metadata and a file reader
         let metadata = self.create_metadata(&key, &file)?;
         let reader = self.create_reader(&key, reporter.clone())?;
         let reader_len = reader.len().unwrap();
@@ -71,15 +80,16 @@ impl Upload {
 
         // Start the reporter
         reporter.lock()
-            .expect("unable to start progress, failed to get lock")
+            .map_err(|_| UploadError::Progress)?
             .start(reader_len);
 
         // Execute the request
-        let result = self.execute_request(req, client, &key);
+        let result = self.execute_request(req, client, &key)
+            .map_err(|err| err.into());
 
         // Mark the reporter as finished
         reporter.lock()
-            .expect("unable to finish progress, failed to get lock")
+            .map_err(|_| UploadError::Progress)?
             .finish();
 
         result
@@ -87,7 +97,7 @@ impl Upload {
 
     /// Create a blob of encrypted metadata.
     fn create_metadata(&self, key: &KeySet, file: &FileData)
-        -> Result<Vec<u8>>
+        -> StdResult<Vec<u8>, MetaError>
     {
         // Construct the metadata
         let metadata = Metadata::from(
@@ -107,7 +117,7 @@ impl Upload {
             &mut metadata_tag,
         ) {
             Ok(metadata) => metadata,
-            Err(_) => return Err(UploadError::EncryptionError),
+            Err(_) => return Err(MetaError::Encrypt),
         };
 
         // Append the encryption tag
@@ -121,11 +131,11 @@ impl Upload {
         &self,
         key: &KeySet,
         reporter: Arc<Mutex<ProgressReporter>>,
-    ) -> Result<EncryptedReader> {
+    ) -> StdResult<EncryptedReader, Error> {
         // Open the file
         let file = match File::open(self.path.as_path()) {
             Ok(file) => file,
-            Err(_) => return Err(UploadError::FileError),
+            Err(err) => return Err(FileError::Open(err).into()),
         };
 
         // Create an encrypted reader
@@ -136,7 +146,7 @@ impl Upload {
             key.iv(),
         ) {
             Ok(reader) => reader,
-            Err(_) => return Err(UploadError::EncryptionError),
+            Err(_) => return Err(ReaderError::Encrypt.into()),
         };
 
         // Buffer the encrypted reader
@@ -144,7 +154,7 @@ impl Upload {
 
         // Wrap into the encrypted reader
         let mut reader = ProgressReader::new(reader)
-            .expect("failed to create progress reader");
+            .map_err(|_| ReaderError::Progress)?;
 
         // Initialize and attach the reporter
         reader.set_reporter(reporter);
@@ -165,13 +175,15 @@ impl Upload {
 
         // Configure a form to send
         let part = Part::reader_with_length(reader, len)
-            // .file_name(file.name())
+            // TODO: keep this here? .file_name(file.name())
             .mime(APPLICATION_OCTET_STREAM);
         let form = Form::new()
             .part("data", part);
 
         // Define the URL to call
-        let url = self.host.join("api/upload").expect("invalid host");
+        // TODO: create an error for this unwrap
+        let url = self.host.join("api/upload")
+            .expect("invalid host");
 
         // Build the request
         client.post(url.as_str())
@@ -187,44 +199,33 @@ impl Upload {
     /// Execute the given request, and create a file object that represents the
     /// uploaded file.
     fn execute_request(&self, req: Request, client: &Client, key: &KeySet) 
-        -> Result<SendFile>
+        -> StdResult<SendFile, UploadError>
     {
         // Execute the request
-        let mut res = match client.execute(req) {
-            Ok(res) => res,
-            Err(err) => return Err(UploadError::RequestError(err)),
+        let mut response = match client.execute(req) {
+            Ok(response) => response,
+            // TODO: attach the error context
+            Err(_) => return Err(UploadError::Request),
         };
 
+        // Validate the status code
+        let status = response.status();
+        if !status.is_success() {
+            return Err(
+                UploadError::RequestStatus(status, status.err_text())
+            );
+        }
+
         // Decode the response
-        let res: UploadResponse = match res.json() {
-            Ok(res) => res,
-            Err(_) => return Err(UploadError::DecodeError),
+        let response: UploadResponse = match response.json() {
+            Ok(response) => response,
+            Err(err) => return Err(UploadError::Decode(err)),
         };
 
         // Transform the responce into a file object
-        Ok(res.into_file(self.host.clone(), &key))
+        // TODO: do some error handling in this into_file method
+        Ok(response.into_file(self.host.clone(), &key)?)
     }
-}
-
-/// Errors that may occur in the upload action. 
-#[derive(Debug)]
-pub enum UploadError {
-    /// The given file is not not an existing file.
-    /// Maybe it is a directory, or maybe it doesn't exist.
-    NotAFile,
-
-    /// An error occurred while opening or reading a file.
-    FileError,
-
-    /// An error occurred while encrypting the file.
-    EncryptionError,
-
-    /// An error occurred while while processing the request.
-    /// This also covers things like HTTP 404 errors.
-    RequestError(ReqwestError),
-
-    /// An error occurred while decoding the response data.
-    DecodeError,
 }
 
 /// The response from the server after a file has been uploaded.
@@ -252,14 +253,18 @@ impl UploadResponse {
     /// Convert this response into a file object.
     ///
     /// The `host` and `key` must be given.
-    pub fn into_file(self, host: Url, key: &KeySet) -> SendFile {
-        SendFile::new_now(
-            self.id,
-            host,
-            Url::parse(&self.url)
-                .expect("upload response URL parse error"),
-            key.secret().to_vec(),
-            self.owner,
+    pub fn into_file(self, host: Url, key: &KeySet)
+        -> StdResult<SendFile, UploadError>
+    {
+        Ok(
+            SendFile::new_now(
+                self.id,
+                host,
+                Url::parse(&self.url)
+                    .map_err(|err| UploadError::ParseUrl(err))?,
+                key.secret().to_vec(),
+                self.owner,
+            )
         )
     }
 }
@@ -276,10 +281,10 @@ struct FileData<'a> {
 
 impl<'a> FileData<'a> {
     /// Create a file data object, from the file at the given path.
-    pub fn from(path: Box<&'a Path>) -> Result<Self> {
+    pub fn from(path: &'a PathBuf) -> StdResult<Self, FileError> {
         // Make sure the given path is a file
         if !path.is_file() {
-            return Err(UploadError::NotAFile);
+            return Err(FileError::NotAFile);
         }
 
         // Get the file name
@@ -304,5 +309,128 @@ impl<'a> FileData<'a> {
     /// Get the file mime type.
     pub fn mime(&self) -> &Mime {
         &self.mime
+    }
+}
+
+#[derive(Fail, Debug)]
+pub enum Error {
+    /// An error occurred while preparing a file for uploading.
+    #[fail(display = "Failed to prepare uploading the file")]
+    Prepare(#[cause] PrepareError),
+
+    /// An error occurred while opening, reading or using the file that
+    /// the should be uploaded.
+    // TODO: maybe append the file path here for further information
+    #[fail(display = "Failed to use the file to upload")]
+    File(#[cause] FileError),
+
+    /// An error occurred while uploading the file.
+    #[fail(display = "Failed to upload the file")]
+    Upload(#[cause] UploadError),
+}
+
+impl From<MetaError> for Error {
+    fn from(err: MetaError) -> Error {
+        Error::Prepare(PrepareError::Meta(err))
+    }
+}
+
+impl From<FileError> for Error {
+    fn from(err: FileError) -> Error {
+        Error::File(err)
+    }
+}
+
+impl From<ReaderError> for Error {
+    fn from(err: ReaderError) -> Error {
+        Error::Prepare(PrepareError::Reader(err))
+    }
+}
+
+impl From<UploadError> for Error {
+    fn from(err: UploadError) -> Error {
+        Error::Upload(err)
+    }
+}
+
+#[derive(Fail, Debug)]
+pub enum PrepareError {
+    /// Failed to prepare the file metadata for uploading.
+    #[fail(display = "Failed to prepare file metadata")]
+    Meta(#[cause] MetaError),
+
+    /// Failed to create an encrypted file reader, that encrypts
+    /// the file on the fly when it is read.
+    #[fail(display = "Failed to access the file to upload")]
+    Reader(#[cause] ReaderError),
+}
+
+#[derive(Fail, Debug)]
+pub enum MetaError {
+    /// An error occurred while encrypting the file metadata.
+    #[fail(display = "Failed to encrypt file metadata")]
+    Encrypt,
+}
+
+#[derive(Fail, Debug)]
+pub enum ReaderError {
+    /// An error occurred while creating the file encryptor.
+    #[fail(display = "Failed to create file encryptor")]
+    Encrypt,
+
+    /// Failed to create the progress reader, attached to the file reader,
+    /// to measure the uploading progress.
+    #[fail(display = "Failed to create progress reader")]
+    Progress,
+}
+
+#[derive(Fail, Debug)]
+pub enum FileError {
+    /// The given path, is not not a file or doesn't exist.
+    #[fail(display = "The path is not an existing file")]
+    NotAFile,
+
+    /// Failed to open the file that must be uploaded for reading.
+    #[fail(display = "Failed to open the file to upload")]
+    Open(#[cause] IoError),
+}
+
+#[derive(Fail, Debug)]
+pub enum UploadError {
+    /// Failed to start or update the uploading progress, because of this the
+    /// upload can't continue.
+    #[fail(display = "Failed to update upload progress")]
+    Progress,
+
+    /// Sending the request to upload the file failed.
+    #[fail(display = "Failed to request file upload")]
+    Request,
+
+    /// The response for downloading the indicated an error and wasn't successful.
+    #[fail(display = "Bad HTTP response '{}' while requesting file upload", _1)]
+    RequestStatus(StatusCode, String),
+
+    /// Decoding the upload response from the server.
+    /// Maybe the server responded with data from a newer API version.
+    #[fail(display = "Failed to decode upload response")]
+    Decode(#[cause] ReqwestError),
+
+    /// Failed to parse the retrieved URL from the upload response.
+    #[fail(display = "Failed to parse received URL")]
+    ParseUrl(#[cause] UrlParseError),
+}
+
+/// Reqwest status code extention, to easily retrieve an error message.
+// TODO: implement this globally somewhere
+trait StatusCodeExt {
+    /// Build a basic error message based on the status code.
+    fn err_text(&self) -> String;
+}
+
+impl StatusCodeExt for StatusCode {
+    fn err_text(&self) -> String {
+        self.canonical_reason()
+            .map(|text| text.to_owned())
+            .unwrap_or(format!("{}", self.as_u16()))
     }
 }

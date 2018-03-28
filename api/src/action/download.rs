@@ -452,7 +452,7 @@ pub enum DownloadError {
     #[fail(display = "Failed to compute cryptographic signature")]
     ComputeSignature,
 
-    /// Sending the request to gather the metadata encryption nonce failed.
+    /// Sending the request to download the file failed.
     #[fail(display = "Failed to request file download")]
     Request,
 
@@ -494,6 +494,7 @@ pub enum FileError {
 }
 
 /// Reqwest status code extention, to easily retrieve an error message.
+// TODO: implement this globally somewhere
 trait StatusCodeExt {
     /// Build a basic error message based on the status code.
     fn err_text(&self) -> String;
