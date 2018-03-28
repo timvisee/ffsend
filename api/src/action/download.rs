@@ -304,7 +304,7 @@ impl<'a> Download<'a> {
 #[derive(Debug, Deserialize)]
 struct MetadataResponse {
     /// The encrypted metadata.
-    #[serde(rename="metadata")]
+    #[serde(rename = "metadata")]
     meta: String,
 }
 

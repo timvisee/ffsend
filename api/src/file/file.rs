@@ -42,6 +42,7 @@ pub struct File {
     secret: Vec<u8>,
 
     /// The owner key, that can be used to manage the file on the server.
+    // TODO: rename this to owner token
     owner_key: String,
 }
 
@@ -80,6 +81,17 @@ impl File {
             url,
             secret,
             owner_key,
+        )
+    }
+
+    // TODO: this should be removed when merging the two file types
+    pub fn to_download_file(&self) -> DownloadFile {
+        DownloadFile::new(
+            self.id.clone(),
+            self.host.clone(),
+            self.url.clone(),
+            self.secret.clone(),
+            Some(self.owner_key.clone()),
         )
     }
 
@@ -133,6 +145,8 @@ pub struct DownloadFile {
 
     /// The secret key that is required to download the file.
     secret: Vec<u8>,
+
+    owner_token: Option<String>,
 }
 
 impl DownloadFile {
@@ -142,12 +156,14 @@ impl DownloadFile {
         host: Url,
         url: Url,
         secret: Vec<u8>,
+        owner_token: Option<String>,
     ) -> Self {
         Self {
             id,
             host,
             url,
             secret,
+            owner_token,
         }
     }
 
@@ -192,6 +208,7 @@ impl DownloadFile {
             host,
             url,
             secret,
+            None,
         ))
     }
 
@@ -221,6 +238,11 @@ impl DownloadFile {
     /// An empty vector will clear the secret.
     pub fn set_secret(&mut self, secret: Vec<u8>) {
         self.secret = secret;
+    }
+
+    /// Get the owner token if set.
+    pub fn owner_token(&self) -> Option<&String> {
+        self.owner_token.as_ref()
     }
 
     /// Get the download URL of the file.
