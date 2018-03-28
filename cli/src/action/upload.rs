@@ -1,6 +1,8 @@
+use std::error::Error as StdError;
 use std::path::Path;
 use std::sync::{Arc, Mutex};
 
+use failure::{err_msg, Fail};
 use ffsend_api::action::upload::Upload as ApiUpload;
 use ffsend_api::reqwest::Client;
 
@@ -9,7 +11,7 @@ use error::ActionError;
 use progress::ProgressBar;
 use util::open_url;
 #[cfg(feature = "clipboard")]
-use util::set_clipboard;
+use util::{print_error, set_clipboard};
 
 /// A file upload action.
 pub struct Upload<'a> {
@@ -47,17 +49,23 @@ impl<'a> Upload<'a> {
 
         // Open the URL in the browser
         if self.cmd.open() {
-            // TODO: do not expect, but return an error
-            open_url(url.clone()).expect("failed to open URL");
+            if let Err(err) = open_url(url.clone()) {
+                print_error(
+                    err.context("Failed to open the URL in the browser")
+                );
+            };
         }
 
         // Copy the URL in the user's clipboard
         #[cfg(feature = "clipboard")]
         {
             if self.cmd.copy() {
-                // TODO: do not expect, but return an error
-                set_clipboard(url.as_str().to_owned())
-                    .expect("failed to put download URL in user clipboard");
+                if set_clipboard(url.as_str().to_owned()).is_err() {
+                    print_error(
+                        err_msg("Failed to copy the URL to the clipboard")
+                            .compat()
+                    );
+                }
             }
         }
 

@@ -4,7 +4,6 @@ use std::io::{
     Error as IoError,
 };
 use std::path::PathBuf;
-use std::result::Result as StdResult;
 use std::sync::{Arc, Mutex};
 
 use mime_guess::{guess_mime_type, Mime};
@@ -35,7 +34,6 @@ use file::metadata::{Metadata, XFileMetadata};
 
 // TODO: remove these specified types
 type EncryptedReader = ProgressReader<BufReader<EncryptedFileReader>>;
-pub type Result<T> = ::std::result::Result<T, UploadError>;
 
 /// A file upload action to a Send server.
 pub struct Upload {
@@ -60,7 +58,7 @@ impl Upload {
         self,
         client: &Client,
         reporter: Arc<Mutex<ProgressReporter>>,
-    ) -> StdResult<SendFile, Error> {
+    ) -> Result<SendFile, Error> {
         // Create file data, generate a key
         let file = FileData::from(&self.path)?;
         let key = KeySet::generate(true);
@@ -97,7 +95,7 @@ impl Upload {
 
     /// Create a blob of encrypted metadata.
     fn create_metadata(&self, key: &KeySet, file: &FileData)
-        -> StdResult<Vec<u8>, MetaError>
+        -> Result<Vec<u8>, MetaError>
     {
         // Construct the metadata
         let metadata = Metadata::from(
@@ -131,7 +129,7 @@ impl Upload {
         &self,
         key: &KeySet,
         reporter: Arc<Mutex<ProgressReporter>>,
-    ) -> StdResult<EncryptedReader, Error> {
+    ) -> Result<EncryptedReader, Error> {
         // Open the file
         let file = match File::open(self.path.as_path()) {
             Ok(file) => file,
@@ -199,7 +197,7 @@ impl Upload {
     /// Execute the given request, and create a file object that represents the
     /// uploaded file.
     fn execute_request(&self, req: Request, client: &Client, key: &KeySet) 
-        -> StdResult<SendFile, UploadError>
+        -> Result<SendFile, UploadError>
     {
         // Execute the request
         let mut response = match client.execute(req) {
@@ -254,7 +252,7 @@ impl UploadResponse {
     ///
     /// The `host` and `key` must be given.
     pub fn into_file(self, host: Url, key: &KeySet)
-        -> StdResult<SendFile, UploadError>
+        -> Result<SendFile, UploadError>
     {
         Ok(
             SendFile::new_now(
@@ -281,7 +279,7 @@ struct FileData<'a> {
 
 impl<'a> FileData<'a> {
     /// Create a file data object, from the file at the given path.
-    pub fn from(path: &'a PathBuf) -> StdResult<Self, FileError> {
+    pub fn from(path: &'a PathBuf) -> Result<Self, FileError> {
         // Make sure the given path is a file
         if !path.is_file() {
             return Err(FileError::NotAFile);
