@@ -17,7 +17,7 @@ use serde_json;
 
 use crypto::b64;
 use crypto::key_set::KeySet;
-use crypto::sign::signature_encoded;
+use crypto::sig::signature_encoded;
 use ext::status_code::StatusCodeExt;
 use file::file::DownloadFile;
 use file::metadata::Metadata;
