@@ -1,5 +1,6 @@
 use ffsend_api::url::{ParseError, Url};
 
+use rpassword::prompt_password_stderr;
 use super::clap::{App, Arg, ArgMatches, SubCommand};
 
 use app::SEND_DEF_HOST;
@@ -23,6 +24,14 @@ impl<'a: 'b, 'b> CmdUpload<'a> {
                 .help("The file to upload")
                 .required(true)
                 .multiple(false))
+            .arg(Arg::with_name("password")
+                .long("password")
+                .short("p")
+                .alias("pass")
+                .value_name("PASSWORD")
+                .min_values(0)
+                .max_values(1)
+                .help("Protect file with a password"))
             .arg(Arg::with_name("host")
                 .long("host")
                 .short("h")
@@ -96,5 +105,25 @@ impl<'a: 'b, 'b> CmdUpload<'a> {
     #[cfg(feature = "clipboard")]
     pub fn copy(&self) -> bool {
         self.matches.is_present("copy")
+    }
+
+    /// Get the password.
+    pub fn password(&'a self) -> Option<String> {
+        // Return none if the property was not set
+        if !self.matches.is_present("password") {
+            return None;
+        }
+
+        // Get the password from the arguments
+        if let Some(password) = self.matches.value_of("password") {
+            return Some(password.into());
+        }
+
+        // Prompt for the password
+        // TODO: don't unwrap/expect
+        Some(
+            prompt_password_stderr("Password: ")
+                .expect("failed to read password from stdin")
+        )
     }
 }

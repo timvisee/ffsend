@@ -32,3 +32,4 @@
 - Ubuntu PPA package
 - Move API URL generator methods out of remote file class
 - Prompt if a file download password is required
+- Do not allow empty passwords (must force with `-f`)

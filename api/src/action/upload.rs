@@ -22,6 +22,7 @@ use url::{
     Url,
 };
 
+use crypto::b64;
 use crypto::key_set::KeySet;
 use ext::status_code::StatusCodeExt;
 use file::file::File as SendFile;
@@ -32,8 +33,15 @@ use reader::{
     ProgressReader,
     ProgressReporter,
 };
+use super::password::{
+    Error as PasswordError,
+    Password,
+};
 
 type EncryptedReader = ProgressReader<BufReader<EncryptedFileReader>>;
+
+/// The name of the header that is used for the authentication nonce.
+const HEADER_AUTH_NONCE: &'static str = "WWW-Authenticate";
 
 /// A file upload action to a Send server.
 pub struct Upload {
@@ -42,14 +50,18 @@ pub struct Upload {
 
     /// The file to upload.
     path: PathBuf,
+
+    /// An optional password to protect the file with.
+    password: Option<String>,
 }
 
 impl Upload {
     /// Construct a new upload action.
-    pub fn new(host: Url, path: PathBuf) -> Self {
+    pub fn new(host: Url, path: PathBuf, password: Option<String>) -> Self {
         Self {
             host,
             path,
+            password,
         }
     }
 
@@ -82,15 +94,24 @@ impl Upload {
             .start(reader_len);
 
         // Execute the request
-        let result = self.execute_request(req, client, &key)
-            .map_err(|err| err.into());
+        // TODO: don't fail on nonce error, just don't use it
+        let (result, nonce) = self.execute_request(req, client, &key)?;
 
         // Mark the reporter as finished
         reporter.lock()
             .map_err(|_| UploadError::Progress)?
             .finish();
 
-        result
+        // Change the password if set
+        if let Some(password) = self.password {
+            Password::new(
+                &result.to_download_file(),
+                &password,
+                nonce,
+            ).invoke(client)?;
+        }
+
+        Ok(result)
     }
 
     /// Create a blob of encrypted metadata.
@@ -197,7 +218,7 @@ impl Upload {
     /// Execute the given request, and create a file object that represents the
     /// uploaded file.
     fn execute_request(&self, req: Request, client: &Client, key: &KeySet) 
-        -> Result<SendFile, UploadError>
+        -> Result<(SendFile, Option<Vec<u8>>), UploadError>
     {
         // Execute the request
         let mut response = match client.execute(req) {
@@ -214,6 +235,16 @@ impl Upload {
             );
         }
 
+        // Try to get the nonce, don't error on failure
+        let nonce = response.headers()
+            .get_raw(HEADER_AUTH_NONCE)
+            .and_then(|h| h.one())
+            .and_then(|line| String::from_utf8(line.to_vec()).ok())
+            .and_then(|line| line.split_terminator(" ").skip(1).next()
+                .map(|line| line.to_owned())
+            )
+            .and_then(|nonce| b64::decode(&nonce).ok());
+
         // Decode the response
         let response: UploadResponse = match response.json() {
             Ok(response) => response,
@@ -221,7 +252,10 @@ impl Upload {
         };
 
         // Transform the responce into a file object
-        Ok(response.into_file(self.host.clone(), &key)?)
+        Ok((
+            response.into_file(self.host.clone(), &key)?,
+            nonce,
+        ))
     }
 }
 
@@ -323,6 +357,10 @@ pub enum Error {
     /// An error occurred while uploading the file.
     #[fail(display = "Failed to upload the file")]
     Upload(#[cause] UploadError),
+
+    /// An error occurred while setting the password.
+    #[fail(display = "Failed to set the password")]
+    Password(#[cause] PasswordError),
 }
 
 impl From<MetaError> for Error {
@@ -346,6 +384,12 @@ impl From<ReaderError> for Error {
 impl From<UploadError> for Error {
     fn from(err: UploadError) -> Error {
         Error::Upload(err)
+    }
+}
+
+impl From<PasswordError> for Error {
+    fn from(err: PasswordError) -> Error {
+        Error::Password(err)
     }
 }
 

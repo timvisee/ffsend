@@ -39,7 +39,8 @@ impl<'a> Upload<'a> {
         let bar = Arc::new(Mutex::new(ProgressBar::new_upload()));
 
         // Execute an upload action
-        let file = ApiUpload::new(host, path).invoke(&client, bar)?;
+        let file = ApiUpload::new(host, path, self.cmd.password())
+            .invoke(&client, bar)?;
 
         // Get the download URL, and report it in the console
         let url = file.download_url(true);
