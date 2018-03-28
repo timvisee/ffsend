@@ -1,38 +1,45 @@
 use ffsend_api::url::{ParseError, Url};
 
 use super::clap::{App, Arg, ArgMatches, SubCommand};
+use rpassword::prompt_password_stderr;
 
 use util::quit_error_msg;
 
-/// The download command.
-pub struct CmdDownload<'a> {
+/// The password command.
+pub struct CmdPassword<'a> {
     matches: &'a ArgMatches<'a>,
 }
 
-impl<'a: 'b, 'b> CmdDownload<'a> {
+impl<'a: 'b, 'b> CmdPassword<'a> {
     /// Build the sub command definition.
     pub fn build<'y, 'z>() -> App<'y, 'z> {
         // Build the subcommand
         #[allow(unused_mut)]
-        let mut cmd = SubCommand::with_name("download")
-            .about("Download files.")
-            .visible_alias("d")
-            .visible_alias("down")
+        let mut cmd = SubCommand::with_name("password")
+            .about("Change the password of a shared file.")
+            .visible_alias("p")
+            .visible_alias("pass")
             .arg(Arg::with_name("URL")
                 .help("The share URL")
                 .required(true)
-                .multiple(false));
+                .multiple(false))
+            .arg(Arg::with_name("password")
+                .long("password")
+                .short("p")
+                .alias("pass")
+                .value_name("PASSWORD")
+                .help("Specify a password, do not prompt"));
 
         cmd
     }
 
     /// Parse CLI arguments, from the given parent command matches.
-    pub fn parse(parent: &'a ArgMatches<'a>) -> Option<CmdDownload<'a>> {
-        parent.subcommand_matches("download")
-            .map(|matches| CmdDownload { matches })
+    pub fn parse(parent: &'a ArgMatches<'a>) -> Option<CmdPassword<'a>> {
+        parent.subcommand_matches("password")
+            .map(|matches| CmdPassword { matches })
     }
 
-    /// Get the file share URL, to download the file from.
+    /// Get the file share URL.
     ///
     /// This method parses the URL into an `Url`.
     /// If the given URL is invalid,
@@ -60,5 +67,18 @@ impl<'a: 'b, 'b> CmdDownload<'a> {
                 quit_error_msg("Host domain doesn't contain a host"),
             _ => quit_error_msg("The given host is invalid"),
         }
+    }
+
+    /// Get the password.
+    pub fn password(&'a self) -> String {
+        // Get the password from the arguments
+        if let Some(password) = self.matches.value_of("password") {
+            return password.into();
+        }
+
+        // Prompt for the password
+        // TODO: don't unwrap/expect
+        prompt_password_stderr("New password: ")
+            .expect("failed to read password from stdin")
     }
 }

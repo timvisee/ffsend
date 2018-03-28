@@ -2,6 +2,7 @@ extern crate failure;
 #[macro_use]
 extern crate failure_derive;
 extern crate ffsend_api;
+extern crate rpassword;
 
 mod action;
 mod app;
@@ -11,6 +12,7 @@ mod progress;
 mod util;
 
 use action::download::Download;
+use action::password::Password;
 use action::upload::Upload;
 use cmd::Handler;
 use error::Error;
@@ -41,6 +43,12 @@ fn invoke_action(handler: &Handler) -> Result<(), Error> {
     // Match the download command
     if let Some(cmd) = handler.download() {
         return Download::new(&cmd).invoke()
+            .map_err(|err| err.into());
+    }
+
+    // Match the password command
+    if let Some(cmd) = handler.password() {
+        return Password::new(&cmd).invoke()
             .map_err(|err| err.into());
     }
 

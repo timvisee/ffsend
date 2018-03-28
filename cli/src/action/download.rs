@@ -24,7 +24,7 @@ impl<'a> Download<'a> {
     /// Invoke the download action.
     // TODO: create a trait for this method
     pub fn invoke(&self) -> Result<(), ActionError> {
-        // Get the download URL
+        // Get the share URL
         let url = self.cmd.url();
 
         // Create a reqwest client
@@ -33,13 +33,12 @@ impl<'a> Download<'a> {
         // Parse the file based on the URL
         // TODO: handle error here
         let file = DownloadFile::parse_url(url)
-            .expect("invalid download URL, could not parse file data");
+            .expect("invalid share URL, could not parse file data");
 
         // Create a progress bar reporter
         let bar = Arc::new(Mutex::new(ProgressBar::new_download()));
 
         // Execute an download action
-        // TODO: do not unwrap, but return an error
         ApiDownload::new(&file).invoke(&client, bar)?;
 
         // TODO: open the file, or it's location

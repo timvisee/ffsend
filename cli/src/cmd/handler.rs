@@ -3,6 +3,7 @@ use super::clap::{App, ArgMatches};
 use app::*;
 
 use super::cmd_download::CmdDownload;
+use super::cmd_password::CmdPassword;
 use super::cmd_upload::CmdUpload;
 
 /// CLI argument handler.
@@ -20,6 +21,7 @@ impl<'a: 'b, 'b> Handler<'a> {
             .about(APP_ABOUT)
             .subcommand(CmdUpload::build().display_order(1))
             .subcommand(CmdDownload::build().display_order(2))
+            .subcommand(CmdPassword::build())
     }
 
     /// Parse CLI arguments.
@@ -38,5 +40,10 @@ impl<'a: 'b, 'b> Handler<'a> {
     /// Get the download sub command, if matched.
     pub fn download(&'a self) -> Option<CmdDownload<'a>> {
         CmdDownload::parse(&self.matches)
+    }
+
+    /// Get the password sub command, if matched.
+    pub fn password(&'a self) -> Option<CmdPassword<'a>> {
+        CmdPassword::parse(&self.matches)
     }
 }

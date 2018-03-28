@@ -15,6 +15,11 @@ use self::colored::*;
 use failure::{self, Fail};
 use ffsend_api::url::Url;
 
+/// Print a success message.
+pub fn print_success(msg: &str) {
+    println!("{}", msg.green());
+}
+
 /// Print the given error in a proper format for the user,
 /// with it's causes.
 pub fn print_error<E: Fail>(err: E) {

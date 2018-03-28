@@ -1,6 +1,7 @@
 # Ideas
 - Rename DownloadFile to RemoteFile
 - Box errors
+- Info endpoint, to view file info
 - Implement error handling everywhere properly
 - `-y` flag for assume yes
 - `-f` flag for forcing (no interact?)
@@ -29,3 +30,4 @@
 - Release binaries on GitHub
 - Ubuntu PPA package
 - Move API URL generator methods out of remote file class
+- Prompt if a file download password is required

@@ -1,26 +1,16 @@
 // TODO: define redirect policy
 
-use std::io::{
-    self,
-    Error as IoError,
-    Read,
-};
-use std::sync::{Arc, Mutex};
-
-use failure::Error as FailureError;
-use openssl::symm::decrypt_aead;
-use reqwest::{Client, Response, StatusCode};
+use reqwest::{Client, StatusCode};
 use reqwest::header::Authorization;
-use reqwest::header::ContentLength;
-use serde_json;
 
 use crypto::b64;
 use crypto::key_set::KeySet;
 use crypto::sig::signature_encoded;
 use ext::status_code::StatusCodeExt;
 use file::file::DownloadFile;
-use file::metadata::Metadata;
-use reader::{EncryptedFileWriter, ProgressReporter, ProgressWriter};
+
+/// The name of the header that is used for the authentication nonce.
+const HEADER_AUTH_NONCE: &'static str = "WWW-Authenticate";
 
 /// An action to change a password of an uploaded Send file.
 pub struct Password<'a> {
@@ -33,7 +23,7 @@ pub struct Password<'a> {
 
 impl<'a> Password<'a> {
     /// Construct a new password action for the given file.
-    pub fn new(file: &'a DownloadFile, password: &'a str) -> Self {
+    pub fn new(file: &'a DownloadFile, password: &'a sts) -> Self {
         Self {
             file,
             password,
@@ -50,14 +40,14 @@ impl<'a> Password<'a> {
         let auth_nonce = self.fetch_auth_nonce(client)?;
 
         // Compute a signature
-        let sig = signature_encoded(key.auth_key().unwrap(), &auth_nonce)
+        let sig = signature_encoded(key.auth_key().unwrap(), &nonce)
             .map_err(|_| PrepareError::ComputeSignature)?;
 
         // Derive a new authentication key
-        key.derive_auth_password(self.password, self.file.download_url(true));
+        key.derive_auth_password(self.password, &self.file.download_url(true));
 
         // Send the request to change the password
-        change_password(client, &key, sig)
+        self.change_password(client, &key, sig).map_err(|err| err.into())
     }
 
     /// Fetch the authentication nonce for the file from the Send server.
@@ -105,11 +95,11 @@ impl<'a> Password<'a> {
         client: &Client,
         key: &KeySet,
         sig: String,
-    ) -> Result<Vec<u8>, ChangeError> {
+    ) -> Result<(), ChangeError> {
         // Get the password URL, and send the change
         let url = self.file.api_password_url();
         let response = client.post(url)
-            .json(PasswordData::from(&key))
+            .json(&PasswordData::from(&key))
             .header(Authorization(
                 format!("send-v1 {}", sig)
             ))
@@ -128,7 +118,7 @@ impl<'a> Password<'a> {
 
 /// The data object to send to the password endpoint,
 /// which sets the file password.
-#[derive(Debug, Serializable)]
+#[derive(Debug, Serialize)]
 struct PasswordData {
     /// The authentication key
     auth: String,
@@ -159,6 +149,24 @@ pub enum Error {
     /// the server.
     #[fail(display = "Failed to send the password change request")]
     Change(#[cause] ChangeError),
+}
+
+impl From<PrepareError> for Error {
+    fn from(err: PrepareError) -> Error {
+        Error::Prepare(err)
+    }
+}
+
+impl From<AuthError> for Error {
+    fn from(err: AuthError) -> Error {
+        PrepareError::Auth(err).into()
+    }
+}
+
+impl From<ChangeError> for Error {
+    fn from(err: ChangeError) -> Error {
+        Error::Change(err)
+    }
 }
 
 #[derive(Fail, Debug)]

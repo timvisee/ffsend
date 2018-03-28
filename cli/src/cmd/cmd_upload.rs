@@ -16,7 +16,7 @@ impl<'a: 'b, 'b> CmdUpload<'a> {
         // Build the subcommand
         #[allow(unused_mut)]
         let mut cmd = SubCommand::with_name("upload")
-            .about("Upload files")
+            .about("Upload files.")
             .visible_alias("u")
             .visible_alias("up")
             .arg(Arg::with_name("FILE")
@@ -72,18 +72,18 @@ impl<'a: 'b, 'b> CmdUpload<'a> {
         match Url::parse(host) {
             Ok(url) => url,
             Err(ParseError::EmptyHost) =>
-                quit_error_msg("emtpy host given"),
+                quit_error_msg("Emtpy host given"),
             Err(ParseError::InvalidPort) =>
-                quit_error_msg("invalid host port"),
+                quit_error_msg("Invalid host port"),
             Err(ParseError::InvalidIpv4Address) =>
-                quit_error_msg("invalid IPv4 address in host"),
+                quit_error_msg("Invalid IPv4 address in host"),
             Err(ParseError::InvalidIpv6Address) =>
-                quit_error_msg("invalid IPv6 address in host"),
+                quit_error_msg("Invalid IPv6 address in host"),
             Err(ParseError::InvalidDomainCharacter) =>
-                quit_error_msg("host domains contains an invalid character"),
+                quit_error_msg("Host domains contains an invalid character"),
             Err(ParseError::RelativeUrlWithoutBase) =>
-                quit_error_msg("host domain doesn't contain a host"),
-            _ => quit_error_msg("the given host is invalid"),
+                quit_error_msg("Host domain doesn't contain a host"),
+            _ => quit_error_msg("The given host is invalid"),
         }
     }
 

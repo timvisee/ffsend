@@ -1,4 +1,5 @@
 use ffsend_api::action::download::Error as DownloadError;
+use ffsend_api::action::password::Error as PasswordError;
 use ffsend_api::action::upload::Error as UploadError;
 
 #[derive(Fail, Debug)]
@@ -24,11 +25,21 @@ pub enum ActionError {
     /// An error occurred while invoking the download action.
     #[fail(display = "Failed to download the requested file")]
     Download(#[cause] DownloadError),
+
+    /// An error occurred while invoking the password action.
+    #[fail(display = "Failed to change the password")]
+    Password(#[cause] PasswordError),
 }
 
 impl From<DownloadError> for ActionError {
     fn from(err: DownloadError) -> ActionError {
         ActionError::Download(err)
+    }
+}
+
+impl From<PasswordError> for ActionError {
+    fn from(err: PasswordError) -> ActionError {
+        ActionError::Password(err)
     }
 }
 
