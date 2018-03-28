@@ -10,27 +10,27 @@ use self::regex::Regex;
 
 use crypto::b64;
 
-/// A pattern for Send download URL paths, capturing the file ID.
+/// A pattern for share URL paths, capturing the file ID.
 // TODO: match any sub-path?
 // TODO: match URL-safe base64 chars for the file ID?
 // TODO: constrain the ID length?
-const DOWNLOAD_PATH_PATTERN: &'static str = r"^/?download/([[:alnum:]]{8,}={0,3})/?$";
+const SHARE_PATH_PATTERN: &'static str = r"^/?download/([[:alnum:]]{8,}={0,3})/?$";
 
-/// A pattern for Send download URL fragments, capturing the file secret.
+/// A pattern for share URL fragments, capturing the file secret.
 // TODO: constrain the secret length?
-const DOWNLOAD_FRAGMENT_PATTERN: &'static str = r"^([a-zA-Z0-9-_+/]+)?\s*$";
+const SHARE_FRAGMENT_PATTERN: &'static str = r"^([a-zA-Z0-9-_+/]+)?\s*$";
 
 /// A struct representing an uploaded file on a Send host.
 ///
 /// The struct contains the file ID, the file URL, the key that is required
 /// in combination with the file, and the owner key.
 #[derive(Debug)]
-pub struct File {
+pub struct RemoteFile {
     /// The ID of the file on that server.
     id: String,
 
-    /// The time the file was uploaded at.
-    time: DateTime<Utc>,
+    /// The time the file was uploaded at, if known.
+    time: Option<DateTime<Utc>>,
 
     /// The host the file was uploaded to.
     host: Url,
@@ -42,19 +42,18 @@ pub struct File {
     secret: Vec<u8>,
 
     /// The owner key, that can be used to manage the file on the server.
-    // TODO: rename this to owner token
-    owner_key: String,
+    owner_token: Option<String>,
 }
 
-impl File {
+impl RemoteFile {
     /// Construct a new file.
     pub fn new(
         id: String,
-        time: DateTime<Utc>,
+        time: Option<DateTime<Utc>>,
         host: Url,
         url: Url,
         secret: Vec<u8>,
-        owner_key: String,
+        owner_token: Option<String>,
     ) -> Self {
         Self {
             id,
@@ -62,7 +61,7 @@ impl File {
             host,
             url,
             secret,
-            owner_key,
+            owner_token,
         }
     }
 
@@ -72,115 +71,31 @@ impl File {
         host: Url,
         url: Url,
         secret: Vec<u8>,
-        owner_key: String,
+        owner_token: Option<String>,
     ) -> Self {
         Self::new(
             id,
-            Utc::now(),
-            host,
-            url,
-            secret,
-            owner_key,
-        )
-    }
-
-    // TODO: this should be removed when merging the two file types
-    pub fn to_download_file(&self) -> DownloadFile {
-        DownloadFile::new(
-            self.id.clone(),
-            self.host.clone(),
-            self.url.clone(),
-            self.secret.clone(),
-            Some(self.owner_key.clone()),
-        )
-    }
-
-    /// Get the raw secret.
-    pub fn secret_raw(&self) -> &Vec<u8> {
-        // A secret must have been set
-        if !self.has_secret() {
-            // TODO: don't panic, return an error instead
-            panic!("missing secret");
-        }
-
-        &self.secret
-    }
-
-    /// Get the secret as base64 encoded string.
-    pub fn secret(&self) -> String {
-        b64::encode(self.secret_raw())
-    }
-
-    /// Check whether a file secret is set.
-    /// This secret must be set to decrypt a downloaded Send file.
-    pub fn has_secret(&self) -> bool {
-        !self.secret.is_empty()
-    }
-
-    /// Get the owner token if set.
-    pub fn owner_token(&self) -> Option<&String> {
-        Some(&self.owner_key)
-    }
-
-    /// Get the download URL of the file.
-    /// Set `secret` to `true`, to include it in the URL if known.
-    pub fn download_url(&self, secret: bool) -> Url {
-        // Get the download URL, and add the secret fragment
-        let mut url = self.url.clone();
-        if secret && self.has_secret() {
-            url.set_fragment(Some(&self.secret()));
-        } else {
-            url.set_fragment(None);
-        }
-
-        url
-    }
-}
-
-// TODO: merge this struct with `File`.
-pub struct DownloadFile {
-    /// The ID of the file on that server.
-    id: String,
-
-    /// The host the file was uploaded to.
-    host: Url,
-
-    /// The file URL that was provided by the server.
-    url: Url,
-
-    /// The secret key that is required to download the file.
-    secret: Vec<u8>,
-
-    owner_token: Option<String>,
-}
-
-impl DownloadFile {
-    /// Construct a new instance.
-    pub fn new(
-        id: String,
-        host: Url,
-        url: Url,
-        secret: Vec<u8>,
-        owner_token: Option<String>,
-    ) -> Self {
-        Self {
-            id,
+            Some(Utc::now()),
             host,
             url,
             secret,
             owner_token,
-        }
+        )
     }
 
-    /// Try to parse the given Send download URL.
+    /// Try to parse the given share URL.
     ///
-    /// The given URL is matched against a Send download URL pattern,
-    /// this does not check whether the host is a valid and online Send host.
+    /// The given URL is matched against a share URL pattern,
+    /// this does not check whether the host is a valid and online host.
     ///
     /// If the URL fragmet contains a file secret, it is also parsed.
     /// If it does not, the secret is left empty and must be specified
     /// manually.
-    pub fn parse_url(url: Url) -> Result<DownloadFile, FileParseError> {
+    ///
+    /// An optional owner token may be given.
+    pub fn parse_url(url: Url, owner_token: Option<String>)
+        -> Result<RemoteFile, FileParseError>
+    {
         // Build the host
         let mut host = url.clone();
         host.set_fragment(None);
@@ -188,16 +103,16 @@ impl DownloadFile {
         host.set_path("");
 
         // Validate the path, get the file ID
-        let re_path = Regex::new(DOWNLOAD_PATH_PATTERN).unwrap();
+        let re_path = Regex::new(SHARE_PATH_PATTERN).unwrap();
         let id = re_path.captures(url.path())
-            .ok_or(FileParseError::InvalidDownloadUrl)?[1]
+            .ok_or(FileParseError::InvalidUrl)?[1]
             .trim()
             .to_owned();
 
         // Get the file secret
         let mut secret = Vec::new();
         if let Some(fragment) = url.fragment() {
-            let re_fragment = Regex::new(DOWNLOAD_FRAGMENT_PATTERN).unwrap();
+            let re_fragment = Regex::new(SHARE_FRAGMENT_PATTERN).unwrap();
             if let Some(raw) = re_fragment.captures(fragment)
                 .ok_or(FileParseError::InvalidSecret)?
                 .get(1)
@@ -210,10 +125,11 @@ impl DownloadFile {
         // Construct the file
         Ok(Self::new(
             id,
+            None,
             host,
             url,
             secret,
-            None,
+            owner_token,
         ))
     }
 
@@ -239,12 +155,6 @@ impl DownloadFile {
         !self.secret.is_empty()
     }
 
-    /// Set the secret for this file.
-    /// An empty vector will clear the secret.
-    pub fn set_secret(&mut self, secret: Vec<u8>) {
-        self.secret = secret;
-    }
-
     /// Get the owner token if set.
     pub fn owner_token(&self) -> Option<&String> {
         self.owner_token.as_ref()
@@ -255,10 +165,11 @@ impl DownloadFile {
         self.owner_token = token;
     }
 
-    /// Get the download URL of the file.
+    /// Get the download URL of the file
+    /// This URL is identical to the share URL, a term used in this API.
     /// Set `secret` to `true`, to include it in the URL if known.
     pub fn download_url(&self, secret: bool) -> Url {
-        // Get the download URL, and add the secret fragment
+        // Get the share URL, and add the secret fragment
         let mut url = self.url.clone();
         if secret && self.has_secret() {
             url.set_fragment(Some(&self.secret()));
@@ -271,7 +182,7 @@ impl DownloadFile {
 
     /// Get the API metadata URL of the file.
     pub fn api_meta_url(&self) -> Url {
-        // Get the download URL, and add the secret fragment
+        // Get the share URL, and add the secret fragment
         let mut url = self.url.clone();
         url.set_path(format!("/api/metadata/{}", self.id).as_str());
         url.set_fragment(None);
@@ -281,7 +192,7 @@ impl DownloadFile {
 
     /// Get the API download URL of the file.
     pub fn api_download_url(&self) -> Url {
-        // Get the download URL, and add the secret fragment
+        // Get the share URL, and add the secret fragment
         let mut url = self.url.clone();
         url.set_path(format!("/api/download/{}", self.id).as_str());
         url.set_fragment(None);
@@ -291,7 +202,7 @@ impl DownloadFile {
 
     /// Get the API password URL of the file.
     pub fn api_password_url(&self) -> Url {
-        // Get the download URL, and add the secret fragment
+        // Get the share URL, and add the secret fragment
         let mut url = self.url.clone();
         url.set_path(format!("/api/password/{}", self.id).as_str());
         url.set_fragment(None);
@@ -300,14 +211,17 @@ impl DownloadFile {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Fail)]
 pub enum FileParseError {
     /// An URL format error.
-    UrlFormatError(UrlParseError),
+    #[fail(display = "Failed to parse remote file, invalid URL format")]
+    UrlFormatError(#[cause] UrlParseError),
 
-    /// An error for an invalid download URL format.
-    InvalidDownloadUrl,
+    /// An error for an invalid share URL format.
+    #[fail(display = "Failed to parse remote file, invalid URL")]
+    InvalidUrl,
 
     /// An error for an invalid secret format, if an URL fragmet exists.
+    #[fail(display = "Failed to parse remote file, invalid secret in URL")]
     InvalidSecret,
 }

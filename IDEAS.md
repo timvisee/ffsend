@@ -2,6 +2,7 @@
 - Rename DownloadFile to RemoteFile
 - Box errors
 - Info endpoint, to view file info
+- On download, mention a wrong or missing password with a HTTP 401 response
 - Automatically get owner token, from file history when setting password
 - Implement error handling everywhere properly
 - `-y` flag for assume yes

@@ -25,7 +25,7 @@ use url::{
 use crypto::b64;
 use crypto::key_set::KeySet;
 use ext::status_code::StatusCodeExt;
-use file::file::File as SendFile;
+use file::remote_file::RemoteFile;
 use file::metadata::{Metadata, XFileMetadata};
 use reader::{
     EncryptedFileReader,
@@ -70,7 +70,7 @@ impl Upload {
         self,
         client: &Client,
         reporter: Arc<Mutex<ProgressReporter>>,
-    ) -> Result<SendFile, Error> {
+    ) -> Result<RemoteFile, Error> {
         // Create file data, generate a key
         let file = FileData::from(&self.path)?;
         let key = KeySet::generate(true);
@@ -105,7 +105,7 @@ impl Upload {
         // Change the password if set
         if let Some(password) = self.password {
             Password::new(
-                &result.to_download_file(),
+                &result,
                 &password,
                 nonce,
             ).invoke(client)?;
@@ -218,7 +218,7 @@ impl Upload {
     /// Execute the given request, and create a file object that represents the
     /// uploaded file.
     fn execute_request(&self, req: Request, client: &Client, key: &KeySet) 
-        -> Result<(SendFile, Option<Vec<u8>>), UploadError>
+        -> Result<(RemoteFile, Option<Vec<u8>>), UploadError>
     {
         // Execute the request
         let mut response = match client.execute(req) {
@@ -285,15 +285,15 @@ impl UploadResponse {
     ///
     /// The `host` and `key` must be given.
     pub fn into_file(self, host: Url, key: &KeySet)
-        -> Result<SendFile, UploadError>
+        -> Result<RemoteFile, UploadError>
     {
         Ok(
-            SendFile::new_now(
+            RemoteFile::new_now(
                 self.id,
                 host,
                 Url::parse(&self.url)?,
                 key.secret().to_vec(),
-                self.owner,
+                Some(self.owner),
             )
         )
     }

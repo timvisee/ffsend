@@ -1,5 +1,5 @@
 use ffsend_api::action::password::Password as ApiPassword;
-use ffsend_api::file::file::DownloadFile;
+use ffsend_api::file::remote_file::RemoteFile;
 use ffsend_api::reqwest::Client;
 
 use cmd::cmd_password::CmdPassword;
@@ -28,15 +28,9 @@ impl<'a> Password<'a> {
         // Create a reqwest client
         let client = Client::new();
 
-        // Parse the file based on the URL
+        // Parse the remote file based on the share URL
         // TODO: handle error here
-        let mut file = DownloadFile::parse_url(url)
-            .expect("invalid share URL, could not parse file data");
-
-        // Set the owner token
-        if let Some(token) = self.cmd.owner() {
-            file.set_owner_token(Some(token));
-        }
+        let file = RemoteFile::parse_url(url, self.cmd.owner())?;
 
         // TODO: show an informative error if the owner token isn't set
 

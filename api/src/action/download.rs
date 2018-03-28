@@ -19,8 +19,8 @@ use crypto::b64;
 use crypto::key_set::KeySet;
 use crypto::sig::signature_encoded;
 use ext::status_code::StatusCodeExt;
-use file::file::DownloadFile;
 use file::metadata::Metadata;
+use file::remote_file::RemoteFile;
 use reader::{EncryptedFileWriter, ProgressReporter, ProgressWriter};
 
 /// The name of the header that is used for the authentication nonce.
@@ -31,16 +31,16 @@ const FILE_EXPIRED_STATUS: StatusCode = StatusCode::NotFound;
 
 /// A file upload action to a Send server.
 pub struct Download<'a> {
-    /// The Send file to download.
-    file: &'a DownloadFile,
+    /// The remote file to download.
+    file: &'a RemoteFile,
 
     /// An optional password to decrypt a protected file.
     password: Option<String>,
 }
 
 impl<'a> Download<'a> {
-    /// Construct a new download action for the given file.
-    pub fn new(file: &'a DownloadFile, password: Option<String>) -> Self {
+    /// Construct a new download action for the given remote file.
+    pub fn new(file: &'a RemoteFile, password: Option<String>) -> Self {
         Self {
             file,
             password,

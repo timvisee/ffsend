@@ -1,6 +1,7 @@
 use ffsend_api::action::download::Error as DownloadError;
 use ffsend_api::action::password::Error as PasswordError;
 use ffsend_api::action::upload::Error as UploadError;
+use ffsend_api::file::remote_file::FileParseError;
 
 #[derive(Fail, Debug)]
 pub enum Error {
@@ -29,6 +30,11 @@ pub enum ActionError {
     /// An error occurred while invoking the password action.
     #[fail(display = "Failed to change the password")]
     Password(#[cause] PasswordError),
+
+    /// Failed to parse a share URL, it was invalid.
+    /// This error is not related to a specific action.
+    #[fail(display = "Invalid share URL")]
+    InvalidUrl(#[cause] FileParseError),
 }
 
 impl From<DownloadError> for ActionError {
@@ -46,5 +52,11 @@ impl From<PasswordError> for ActionError {
 impl From<UploadError> for ActionError {
     fn from(err: UploadError) -> ActionError {
         ActionError::Upload(err)
+    }
+}
+
+impl From<FileParseError> for ActionError {
+    fn from(err: FileParseError) -> ActionError {
+        ActionError::InvalidUrl(err)
     }
 }

@@ -1,7 +1,7 @@
 use openssl::symm::Cipher;
 use url::Url;
 
-use file::file::DownloadFile;
+use file::remote_file::RemoteFile;
 use super::{b64, rand_bytes};
 use super::hdkf::{derive_auth_key, derive_file_key, derive_meta_key};
 
@@ -38,12 +38,11 @@ impl KeySet {
     }
 
     /// Create a key set from the given file ID and secret.
-    /// This method may be used to create a key set based on a Send download
-    /// URL.
+    /// This method may be used to create a key set based on a share URL.
     // TODO: add a parameter for the password and URL
     // TODO: return a result?
     // TODO: supply a client instance as parameter
-    pub fn from(file: &DownloadFile, password: Option<&String>) -> Self {
+    pub fn from(file: &RemoteFile, password: Option<&String>) -> Self {
         // Create a new key set instance
         let mut set = Self::new(
             file.secret_raw().clone(),

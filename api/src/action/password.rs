@@ -7,15 +7,15 @@ use crypto::b64;
 use crypto::key_set::KeySet;
 use crypto::sig::signature_encoded;
 use ext::status_code::StatusCodeExt;
-use file::file::DownloadFile;
+use file::remote_file::RemoteFile;
 
 /// The name of the header that is used for the authentication nonce.
 const HEADER_AUTH_NONCE: &'static str = "WWW-Authenticate";
 
 /// An action to change a password of an uploaded Send file.
 pub struct Password<'a> {
-    /// The uploaded file to change the password for.
-    file: &'a DownloadFile,
+    /// The remote file to change the password for.
+    file: &'a RemoteFile,
 
     /// The new password to use for the file.
     password: &'a str,
@@ -26,9 +26,9 @@ pub struct Password<'a> {
 }
 
 impl<'a> Password<'a> {
-    /// Construct a new password action for the given file.
+    /// Construct a new password action for the given remote file.
     pub fn new(
-        file: &'a DownloadFile,
+        file: &'a RemoteFile,
         password: &'a str,
         nonce: Option<Vec<u8>>,
     ) -> Self {
@@ -143,7 +143,7 @@ struct PasswordData {
 
 impl PasswordData {
     /// Create the password data object from the given key set.
-    pub fn from(file: &DownloadFile, key: &KeySet)
+    pub fn from(file: &RemoteFile, key: &KeySet)
         -> Result<PasswordData, PrepareError>
     {
         Ok(

@@ -1,7 +1,7 @@
 use std::sync::{Arc, Mutex};
 
 use ffsend_api::action::download::Download as ApiDownload;
-use ffsend_api::file::file::DownloadFile;
+use ffsend_api::file::remote_file::RemoteFile;
 use ffsend_api::reqwest::Client;
 
 use cmd::cmd_download::CmdDownload;
@@ -30,10 +30,9 @@ impl<'a> Download<'a> {
         // Create a reqwest client
         let client = Client::new();
 
-        // Parse the file based on the URL
+        // Parse the remote file based on the share URL
         // TODO: handle error here
-        let file = DownloadFile::parse_url(url)
-            .expect("invalid share URL, could not parse file data");
+        let file = RemoteFile::parse_url(url, None)?;
 
         // Create a progress bar reporter
         let bar = Arc::new(Mutex::new(ProgressBar::new_download()));
