@@ -47,6 +47,11 @@ impl Metadata {
         serde_json::to_string(&self).unwrap()
     }
 
+    /// Get the file name.
+    pub fn name(&self) -> &str {
+        &self.name
+    }
+
     /// Get the input vector
     // TODO: use an input vector length from a constant
     pub fn iv(&self) -> [u8; 12] {

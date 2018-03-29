@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use ffsend_api::url::{ParseError, Url};
 
 use super::clap::{App, Arg, ArgMatches, SubCommand};
@@ -23,6 +25,11 @@ impl<'a: 'b, 'b> CmdDownload<'a> {
                 .help("The share URL")
                 .required(true)
                 .multiple(false))
+            .arg(Arg::with_name("file")
+                .long("file")
+                .short("f")
+                .value_name("PATH")
+                .help("The output file or directory"))
             .arg(Arg::with_name("password")
                 .long("password")
                 .short("p")
@@ -69,6 +76,15 @@ impl<'a: 'b, 'b> CmdDownload<'a> {
                 quit_error_msg("Host domain doesn't contain a host"),
             _ => quit_error_msg("The given host is invalid"),
         }
+    }
+
+    /// The target file or directory to download the file to.
+    /// If a directory is given, the file name of the original uploaded file
+    /// will be used.
+    pub fn file(&'a self) -> PathBuf {
+        self.matches.value_of("file")
+            .map(|path| PathBuf::from(path))
+            .unwrap_or(PathBuf::from("./"))
     }
 
     /// Get the password.

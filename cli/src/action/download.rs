@@ -34,12 +34,18 @@ impl<'a> Download<'a> {
         // TODO: handle error here
         let file = RemoteFile::parse_url(url, None)?;
 
+        // Get the target file or directory
+        let target = self.cmd.file();
+
         // Create a progress bar reporter
         let bar = Arc::new(Mutex::new(ProgressBar::new_download()));
 
         // Execute an download action
-        ApiDownload::new(&file, self.cmd.password())
-            .invoke(&client, bar)?;
+        ApiDownload::new(
+            &file,
+            target,
+            self.cmd.password(),
+        ).invoke(&client, bar)?;
 
         // TODO: open the file, or it's location
         // TODO: copy the file location

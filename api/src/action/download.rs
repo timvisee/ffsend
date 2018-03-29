@@ -6,6 +6,7 @@ use std::io::{
     Error as IoError,
     Read,
 };
+use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 
 use failure::Error as FailureError;
@@ -34,15 +35,23 @@ pub struct Download<'a> {
     /// The remote file to download.
     file: &'a RemoteFile,
 
+    /// The target file or directory, to download the file to.
+    target: PathBuf,
+
     /// An optional password to decrypt a protected file.
     password: Option<String>,
 }
 
 impl<'a> Download<'a> {
     /// Construct a new download action for the given remote file.
-    pub fn new(file: &'a RemoteFile, password: Option<String>) -> Self {
+    pub fn new(
+        file: &'a RemoteFile,
+        target: PathBuf,
+        password: Option<String>,
+    ) -> Self {
         Self {
             file,
+            target,
             password,
         }
     }
@@ -59,15 +68,25 @@ impl<'a> Download<'a> {
         // Fetch the authentication nonce
         let auth_nonce = self.fetch_auth_nonce(client)?;
 
-        // Fetch the meta nonce, set the input vector
-        let meta_nonce = self.fetch_meta_nonce(&client, &mut key, auth_nonce)?;
+        // Fetch the meta data, apply the derived input vector
+        let (metadata, meta_nonce) = self.fetch_metadata_apply_iv(
+            &client,
+            &mut key,
+            auth_nonce,
+        )?;
+
+        // Decide what actual file target to use
+        let path = self.decide_path(metadata.name());
+        let path_str = path.to_str().unwrap_or("?").to_owned();
 
         // Open the file we will write to
         // TODO: this should become a temporary file first
         // TODO: use the uploaded file name as default
-        let path = "downloaded.zip";
         let out = File::create(path)
-            .map_err(|err| Error::File(path.into(), FileError::Create(err)))?;
+            .map_err(|err| Error::File(
+                path_str.clone(),
+                FileError::Create(err),
+            ))?;
 
         // Create the file reader for downloading
         let (reader, len) = self.create_file_reader(&key, meta_nonce, &client)?;
@@ -78,7 +97,7 @@ impl<'a> Download<'a> {
             len,
             &key,
             reporter.clone(),
-        ).map_err(|err| Error::File(path.into(), err))?;
+        ).map_err(|err| Error::File(path_str.clone(), err))?;
 
         // Download the file
         self.download(reader, writer, len, reporter)?;
@@ -127,24 +146,29 @@ impl<'a> Download<'a> {
         ).map_err(|_| AuthError::MalformedNonce.into())
     }
 
-    /// Fetch the metadata nonce.
-    /// This method also sets the input vector on the given key set,
-    /// extracted from the metadata.
+
+    /// Create a metadata nonce, and fetch the metadata for the file from the
+    /// server.
     ///
     /// The key set, along with the authentication nonce must be given.
-    /// The meta nonce is returned.
-    fn fetch_meta_nonce(
+    ///
+    /// The metadata, with the meta nonce is returned.
+    ///
+    /// This method is similar to `fetch_metadata`, and additionally applies
+    /// the derived input vector to the given key set.
+    fn fetch_metadata_apply_iv(
         &self,
         client: &Client,
         key: &mut KeySet,
         auth_nonce: Vec<u8>,
-    ) -> Result<Vec<u8>, MetaError> {
+    ) -> Result<(Metadata, Vec<u8>), MetaError> {
         // Fetch the metadata and the nonce
-        let (metadata, meta_nonce) = self.fetch_metadata(client, key, auth_nonce)?;
+        let data = self.fetch_metadata(client, key, auth_nonce)?;
 
-        // Set the input vector, and return the nonce
-        key.set_iv(metadata.iv());
-        Ok(meta_nonce)
+        // Set the input vector bas
+        key.set_iv(data.0.iv());
+
+        Ok(data)
     }
 
     /// Create a metadata nonce, and fetch the metadata for the file from the
@@ -201,6 +225,35 @@ impl<'a> Download<'a> {
                 .map_err(|_| MetaError::Decrypt)?,
             nonce,
         ))
+    }
+
+    /// Decide what path we will download the file to.
+    ///
+    /// A target file or directory, and a file name hint must be given.
+    /// The name hint can be derived from the retrieved metadata on this file.
+    ///
+    /// The name hint is used as file name, if a directory was given.
+    fn decide_path(&self, name_hint: &str) -> PathBuf {
+        // Return the target if it is an existing file
+        if self.target.is_file() {
+            return self.target.clone();
+        }
+
+        // Append the name hint if this is a directory
+        if self.target.is_dir() {
+            return self.target.join(name_hint);
+        }
+
+        // Return if the parent is an existing directory
+        if self.target.parent().map(|p| p.is_dir()).unwrap_or(false) {
+            return self.target.clone();
+        }
+
+        // TODO: canonicalize the path when possible
+        // TODO: allow using `file.toml` as target without directory indication
+        // TODO: return a nice error here as the path may be invalid
+        // TODO: maybe prompt the user to create the directory
+        panic!("Invalid (non-existing) output path given, not yet supported");
     }
 
     /// Make a download request, and create a reader that downloads the

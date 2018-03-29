@@ -1,12 +1,15 @@
 # Ideas
-- Rename DownloadFile to RemoteFile
+- custom file name when uploading
+- allow creating non existent directories with the `-f` flag 
+- only allow file extension renaming on upload with `-f` flag
+- no interact flag
+- `-y` flag for assume yes
+- `-f` flag for forcing (no interact?)
 - Box errors
 - Info endpoint, to view file info
 - On download, mention a wrong or missing password with a HTTP 401 response
 - Automatically get owner token, from file history when setting password
 - Implement error handling everywhere properly
-- `-y` flag for assume yes
-- `-f` flag for forcing (no interact?)
 - Quick upload/download without `upload` or `download` subcommands.
 - Set file password
 - Set file download count
@@ -33,4 +36,8 @@
 - Ubuntu PPA package
 - Move API URL generator methods out of remote file class
 - Prompt if a file download password is required
-- Do not allow empty passwords (must force with `-f`)
+- Do not allow empty passwords (must force with `-f`) (as not usable on web)
+- Must use `-f` to overwrite existing file
+- Rename host to server?
+- Read and write files from and to stdin and stdout with `-` as file
+- Ask to add MIME extension to downloaded files without one on Windows
