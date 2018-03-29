@@ -24,6 +24,13 @@ impl<'a: 'b, 'b> CmdUpload<'a> {
                 .help("The file to upload")
                 .required(true)
                 .multiple(false))
+            .arg(Arg::with_name("name")
+                .long("name")
+                .short("n")
+                .alias("file")
+                .alias("f")
+                .value_name("NAME")
+                .help("Rename the file being uploaded"))
             .arg(Arg::with_name("password")
                 .long("password")
                 .short("p")
@@ -31,7 +38,7 @@ impl<'a: 'b, 'b> CmdUpload<'a> {
                 .value_name("PASSWORD")
                 .min_values(0)
                 .max_values(1)
-                .help("Protect file with a password"))
+                .help("Protect the file with a password"))
             .arg(Arg::with_name("host")
                 .long("host")
                 .short("h")
@@ -61,7 +68,25 @@ impl<'a: 'b, 'b> CmdUpload<'a> {
             .map(|matches| CmdUpload { matches })
     }
 
+    /// The the name to use for the uploaded file.
+    /// If no custom name is given, none is returned.
+    // TODO: validate custom names, no path separators
+    // TODO: only allow extension renaming with force flag
+    pub fn name(&'a self) -> Option<&'a str> {
+        // Get the chosen file name
+        let name = self.matches.value_of("name")?;
+
+        // The file name must not be empty
+        if name.trim().is_empty() {
+            // TODO: return an error here
+            panic!("the new name must not be empty");
+        }
+
+        Some(name)
+    }
+
     /// Get the selected file to upload.
+    // TODO: maybe return a file or path instance here
     pub fn file(&'a self) -> &'a str {
         self.matches.value_of("FILE")
             .expect("no file specified to upload")

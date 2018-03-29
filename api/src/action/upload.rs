@@ -51,16 +51,27 @@ pub struct Upload {
     /// The file to upload.
     path: PathBuf,
 
+    /// The name of the file being uploaded.
+    /// This has no relation to the file path, and will become the name of the
+    /// shared file if set.
+    name: Option<String>,
+
     /// An optional password to protect the file with.
     password: Option<String>,
 }
 
 impl Upload {
     /// Construct a new upload action.
-    pub fn new(host: Url, path: PathBuf, password: Option<String>) -> Self {
+    pub fn new(
+        host: Url,
+        path: PathBuf,
+        name: Option<String>,
+        password: Option<String>,
+    ) -> Self {
         Self {
             host,
             path,
+            name,
             password,
         }
     }
@@ -118,10 +129,14 @@ impl Upload {
     fn create_metadata(&self, key: &KeySet, file: &FileData)
         -> Result<Vec<u8>, MetaError>
     {
+        // Determine what filename to use
+        let name = self.name.clone()
+            .unwrap_or(file.name().to_owned());
+
         // Construct the metadata
         let metadata = Metadata::from(
             key.iv(),
-            file.name().to_owned(),
+            name,
             file.mime().clone(),
         ).to_json().into_bytes();
 
