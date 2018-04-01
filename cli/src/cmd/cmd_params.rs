@@ -1,33 +1,36 @@
+use ffsend_api::action::params::{
+    // TODO: test min/max
+    PARAMS_DOWNLOAD_MIN as DOWNLOAD_MIN,
+    PARAMS_DOWNLOAD_MAX as DOWNLOAD_MAX,
+};
 use ffsend_api::url::{ParseError, Url};
 
 use super::clap::{App, Arg, ArgMatches, SubCommand};
-use rpassword::prompt_password_stderr;
 
 use util::quit_error_msg;
 
-/// The password command.
-pub struct CmdPassword<'a> {
+/// The parameters command.
+pub struct CmdParams<'a> {
     matches: &'a ArgMatches<'a>,
 }
 
-impl<'a: 'b, 'b> CmdPassword<'a> {
+impl<'a: 'b, 'b> CmdParams<'a> {
     /// Build the sub command definition.
     pub fn build<'y, 'z>() -> App<'y, 'z> {
+        // Build a list of data parameter arguments of which one is required
+        let param_args = ["downloads"];
+
         // Build the subcommand
-        let cmd = SubCommand::with_name("password")
-            .about("Change the password of a shared file.")
-            .visible_alias("p")
-            .visible_alias("pass")
+        let cmd = SubCommand::with_name("parameters")
+            .about("Change parameters of a shared file.")
+            .visible_alias("params")
+            .alias("par")
+            .alias("param")
+            .alias("parameter")
             .arg(Arg::with_name("URL")
                 .help("The share URL")
                 .required(true)
                 .multiple(false))
-            .arg(Arg::with_name("password")
-                .long("password")
-                .short("p")
-                .alias("pass")
-                .value_name("PASSWORD")
-                .help("Specify a password, do not prompt"))
             .arg(Arg::with_name("owner")
                 .long("owner")
                 .short("o")
@@ -35,15 +38,24 @@ impl<'a: 'b, 'b> CmdPassword<'a> {
                 .alias("owner-token")
                 .alias("token")
                 .value_name("TOKEN")
-                .help("File owner token"));
+                .help("File owner token"))
+            .arg(Arg::with_name("downloads")
+                .long("downloads")
+                .short("d")
+                .alias("download")
+                .alias("down")
+                .alias("dlimit")
+                .required_unless_one(&param_args)
+                .value_name("COUNT")
+                .help("Set the download limit parameter"));
 
         cmd
     }
 
     /// Parse CLI arguments, from the given parent command matches.
-    pub fn parse(parent: &'a ArgMatches<'a>) -> Option<CmdPassword<'a>> {
-        parent.subcommand_matches("password")
-            .map(|matches| CmdPassword { matches })
+    pub fn parse(parent: &'a ArgMatches<'a>) -> Option<CmdParams<'a>> {
+        parent.subcommand_matches("parameters")
+            .map(|matches| CmdParams { matches })
     }
 
     /// Get the file share URL.
@@ -83,17 +95,24 @@ impl<'a: 'b, 'b> CmdPassword<'a> {
             .map(|token| token.to_owned())
     }
 
-    /// Get the password.
-    pub fn password(&'a self) -> String {
-        // Get the password from the arguments
-        if let Some(password) = self.matches.value_of("password") {
-            return password.into();
-        }
+    /// Get the download counts.
+    pub fn downloads(&'a self) -> Option<u8> {
+        // Get the number of downloads
+        // TODO: do not unwrap, report an error
+        self.matches.value_of("downloads")
+            .map(|d| d.parse::<u8>().expect("invalid number of downloads"))
+            .and_then(|d| {
+                // Check the download count bounds
+                if d < DOWNLOAD_MIN || d > DOWNLOAD_MAX {
+                    panic!(
+                        "invalid number of downloads, must be between {} and {}",
+                        DOWNLOAD_MIN,
+                        DOWNLOAD_MAX,
+                    );
+                }
 
-        // Prompt for the password
-        // TODO: don't unwrap/expect
-        // TODO: create utility function for this
-        prompt_password_stderr("New password: ")
-            .expect("failed to read password from stdin")
+                // Return the value
+                Some(d)
+            })
     }
 }

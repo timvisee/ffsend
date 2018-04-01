@@ -12,6 +12,7 @@ mod progress;
 mod util;
 
 use action::download::Download;
+use action::params::Params;
 use action::password::Password;
 use action::upload::Upload;
 use cmd::Handler;
@@ -43,6 +44,12 @@ fn invoke_action(handler: &Handler) -> Result<(), Error> {
     // Match the download command
     if let Some(cmd) = handler.download() {
         return Download::new(&cmd).invoke()
+            .map_err(|err| err.into());
+    }
+
+    // Match the parameters command
+    if let Some(cmd) = handler.params() {
+        return Params::new(&cmd).invoke()
             .map_err(|err| err.into());
     }
 

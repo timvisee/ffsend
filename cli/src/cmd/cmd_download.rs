@@ -16,8 +16,7 @@ impl<'a: 'b, 'b> CmdDownload<'a> {
     /// Build the sub command definition.
     pub fn build<'y, 'z>() -> App<'y, 'z> {
         // Build the subcommand
-        #[allow(unused_mut)]
-        let mut cmd = SubCommand::with_name("download")
+        let cmd = SubCommand::with_name("download")
             .about("Download files.")
             .visible_alias("d")
             .visible_alias("down")
