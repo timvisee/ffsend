@@ -1,5 +1,4 @@
 use ffsend_api::action::params::{
-    // TODO: test min/max
     PARAMS_DOWNLOAD_MIN as DOWNLOAD_MIN,
     PARAMS_DOWNLOAD_MAX as DOWNLOAD_MAX,
 };

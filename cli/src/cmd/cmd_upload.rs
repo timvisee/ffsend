@@ -1,3 +1,8 @@
+use ffsend_api::action::params::{
+    PARAMS_DEFAULT_DOWNLOAD as DOWNLOAD_DEFAULT,
+    PARAMS_DOWNLOAD_MIN as DOWNLOAD_MIN,
+    PARAMS_DOWNLOAD_MAX as DOWNLOAD_MAX,
+};
 use ffsend_api::url::{ParseError, Url};
 
 use rpassword::prompt_password_stderr;
@@ -39,6 +44,15 @@ impl<'a: 'b, 'b> CmdUpload<'a> {
                 .min_values(0)
                 .max_values(1)
                 .help("Protect the file with a password"))
+            .arg(Arg::with_name("downloads")
+                .long("downloads")
+                .short("d")
+                .alias("download")
+                .alias("down")
+                .alias("dlimit")
+                .value_name("COUNT")
+                .default_value("1")
+                .help("Set the download limit"))
             .arg(Arg::with_name("host")
                 .long("host")
                 .short("h")
@@ -152,5 +166,27 @@ impl<'a: 'b, 'b> CmdUpload<'a> {
             prompt_password_stderr("Password: ")
                 .expect("failed to read password from stdin")
         )
+    }
+
+    /// Get the download limit if set.
+    pub fn downloads(&'a self) -> Option<u8> {
+        // Get the number of downloads, or none if not set or default
+        // TODO: do not unwrap, report an error
+        self.matches.value_of("downloads")
+            .map(|d| d.parse::<u8>().expect("invalid number of downloads"))
+            .and_then(|d| if d == DOWNLOAD_DEFAULT { None } else { Some(d) })
+            .and_then(|d| {
+                // Check the download count bounds
+                if d < DOWNLOAD_MIN || d > DOWNLOAD_MAX {
+                    panic!(
+                        "invalid number of downloads, must be between {} and {}",
+                        DOWNLOAD_MIN,
+                        DOWNLOAD_MAX,
+                    );
+                }
+
+                // Return the value
+                Some(d)
+            })
     }
 }

@@ -33,6 +33,11 @@ use reader::{
     ProgressReader,
     ProgressReporter,
 };
+use super::params::{
+    Error as ParamsError,
+    Params,
+    ParamsData,
+};
 use super::password::{
     Error as PasswordError,
     Password,
@@ -58,6 +63,9 @@ pub struct Upload {
 
     /// An optional password to protect the file with.
     password: Option<String>,
+
+    /// An optional download limit.
+    downloads: Option<u8>,
 }
 
 impl Upload {
@@ -67,12 +75,14 @@ impl Upload {
         path: PathBuf,
         name: Option<String>,
         password: Option<String>,
+        downloads: Option<u8>,
     ) -> Self {
         Self {
             host,
             path,
             name,
             password,
+            downloads,
         }
     }
 
@@ -118,7 +128,16 @@ impl Upload {
             Password::new(
                 &result,
                 &password,
-                nonce,
+                nonce.clone(),
+            ).invoke(client)?;
+        }
+
+        // Change parameters if set
+        if self.downloads.is_some() {
+            Params::new(
+                &result,
+                ParamsData::from(self.downloads),
+                nonce.clone(),
             ).invoke(client)?;
         }
 
@@ -373,6 +392,10 @@ pub enum Error {
     #[fail(display = "Failed to upload the file")]
     Upload(#[cause] UploadError),
 
+    /// An error occurred while chaining file parameters.
+    #[fail(display = "Failed to change file parameters")]
+    Params(#[cause] ParamsError),
+
     /// An error occurred while setting the password.
     #[fail(display = "Failed to set the password")]
     Password(#[cause] PasswordError),
@@ -399,6 +422,12 @@ impl From<ReaderError> for Error {
 impl From<UploadError> for Error {
     fn from(err: UploadError) -> Error {
         Error::Upload(err)
+    }
+}
+
+impl From<ParamsError> for Error {
+    fn from(err: ParamsError) -> Error {
+        Error::Params(err)
     }
 }
 

@@ -17,7 +17,7 @@ use file::remote_file::RemoteFile;
 const HEADER_AUTH_NONCE: &'static str = "WWW-Authenticate";
 
 /// The default download count.
-const PARAMS_DEFAULT_DOWNLOAD: u8 = 1;
+pub const PARAMS_DEFAULT_DOWNLOAD: u8 = 1;
 
 /// The minimum allowed number of downloads, enforced by the server.
 pub const PARAMS_DOWNLOAD_MIN: u8 = 1;

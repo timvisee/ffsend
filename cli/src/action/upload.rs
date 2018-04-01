@@ -44,6 +44,7 @@ impl<'a> Upload<'a> {
             path,
             self.cmd.name().map(|name| name.to_owned()),
             self.cmd.password(),
+            self.cmd.downloads(),
         ).invoke(&client, bar)?;
 
         // Get the download URL, and report it in the console
