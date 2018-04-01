@@ -1,5 +1,7 @@
 #[macro_use]
 extern crate arrayref;
+#[macro_use]
+extern crate derive_builder;
 extern crate failure;
 #[macro_use]
 extern crate failure_derive;

@@ -41,12 +41,11 @@ impl<'a> Upload<'a> {
 
         // Build a parameters object to set for the file
         let params = {
-            // Build an empty parameters object
-            let mut params = ParamsData::new();
-
-            // Set the downloads
-            // TODO: do not unwrap, handle the error
-            params.set_downloads(self.cmd.downloads()).unwrap();
+            // Build the parameters data object
+            let mut params = ParamsDataBuilder::default()
+                .download(self.cmd.downloads())
+                .build()
+                .unwrap();
 
             // Wrap the data in an option if not empty
             if params.is_empty() {

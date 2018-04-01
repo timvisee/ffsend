@@ -149,7 +149,8 @@ impl<'a> Params<'a> {
 }
 
 /// The parameters data object, that is sent to the server.
-#[derive(Clone, Debug, Serialize)]
+// TODO: make sure downloads are in-bound when using the builder
+#[derive(Clone, Debug, Builder, Serialize)]
 pub struct ParamsData {
     /// The number of times this file may be downloaded.
     /// This value must be in the `(0,20)` bounds, as enforced by Send servers.

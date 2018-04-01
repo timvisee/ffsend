@@ -1,6 +1,6 @@
 use ffsend_api::action::params::{
     Params as ApiParams,
-    ParamsData,
+    ParamsDataBuilder,
 };
 use ffsend_api::file::remote_file::RemoteFile;
 use ffsend_api::reqwest::Client;
@@ -37,8 +37,11 @@ impl<'a> Params<'a> {
 
         // TODO: show an informative error if the owner token isn't set
 
-        // Build the params data object
-        let data = ParamsData::from(self.cmd.downloads());
+        // Build the parameters data object
+        let data = ParamsDataBuilder::default()
+            .downloads(self.cmd.downloads())
+            .build()
+            .unwrap();
 
         // TODO: make sure the data isn't empty
 
