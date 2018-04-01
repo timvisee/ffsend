@@ -158,6 +158,13 @@ pub struct ParamsData {
 }
 
 impl ParamsData {
+    /// Construct a new parameters object, that is empty.
+    pub fn new() -> Self {
+        ParamsData {
+            downloads: None,
+        }
+    }
+
     /// Create a new parameters data object, with the given parameters.
     // TODO: the downloads must be between bounds
     pub fn from(downloads: Option<u8>) -> Self {

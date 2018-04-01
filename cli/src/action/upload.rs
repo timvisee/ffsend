@@ -2,6 +2,7 @@ use std::path::Path;
 use std::sync::{Arc, Mutex};
 
 use failure::{err_msg, Fail};
+use ffsend_api::action::params::ParamsData;
 use ffsend_api::action::upload::Upload as ApiUpload;
 use ffsend_api::reqwest::Client;
 
@@ -38,13 +39,30 @@ impl<'a> Upload<'a> {
         // Create a progress bar reporter
         let bar = Arc::new(Mutex::new(ProgressBar::new_upload()));
 
+        // Build a parameters object to set for the file
+        let params = {
+            // Build an empty parameters object
+            let mut params = ParamsData::new();
+
+            // Set the downloads
+            // TODO: do not unwrap, handle the error
+            params.set_downloads(self.cmd.downloads()).unwrap();
+
+            // Wrap the data in an option if not empty
+            if params.is_empty() {
+                None
+            } else {
+                Some(params)
+            }
+        };
+
         // Execute an upload action
         let file = ApiUpload::new(
             host,
             path,
             self.cmd.name().map(|name| name.to_owned()),
             self.cmd.password(),
-            self.cmd.downloads(),
+            params,
         ).invoke(&client, bar)?;
 
         // Get the download URL, and report it in the console

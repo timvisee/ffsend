@@ -64,8 +64,8 @@ pub struct Upload {
     /// An optional password to protect the file with.
     password: Option<String>,
 
-    /// An optional download limit.
-    downloads: Option<u8>,
+    /// Optional file parameters to set.
+    params: Option<ParamsData>,
 }
 
 impl Upload {
@@ -75,14 +75,14 @@ impl Upload {
         path: PathBuf,
         name: Option<String>,
         password: Option<String>,
-        downloads: Option<u8>,
+        params: Option<ParamsData>,
     ) -> Self {
         Self {
             host,
             path,
             name,
             password,
-            downloads,
+            params,
         }
     }
 
@@ -125,20 +125,12 @@ impl Upload {
 
         // Change the password if set
         if let Some(password) = self.password {
-            Password::new(
-                &result,
-                &password,
-                nonce.clone(),
-            ).invoke(client)?;
+            Password::new(&result, &password, nonce.clone()).invoke(client)?;
         }
 
         // Change parameters if set
-        if self.downloads.is_some() {
-            Params::new(
-                &result,
-                ParamsData::from(self.downloads),
-                nonce.clone(),
-            ).invoke(client)?;
+        if let Some(params) = self.params {
+            Params::new(&result, params, nonce.clone()).invoke(client)?;
         }
 
         Ok(result)
