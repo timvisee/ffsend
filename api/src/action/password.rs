@@ -3,6 +3,10 @@
 use reqwest::{Client, StatusCode};
 use reqwest::header::Authorization;
 
+use api::data::{
+    Error as DataError,
+    OwnedData,
+};
 use crypto::b64;
 use crypto::key_set::KeySet;
 use crypto::sig::signature_encoded;
@@ -56,8 +60,9 @@ impl<'a> Password<'a> {
         // Derive a new authentication key
         key.derive_auth_password(self.password, &self.file.download_url(true));
 
-        // Build the password data
-        let data = PasswordData::from(self.file, &key)?;
+        // Build the password data, wrap it as owned
+        let data = OwnedData::from(PasswordData::from(&key), &self.file)
+            .map_err(|err| -> PrepareError { err.into() })?;
 
         // Send the request to change the password
         self.change_password(client, data, sig)
@@ -107,7 +112,7 @@ impl<'a> Password<'a> {
     fn change_password(
         &self,
         client: &Client,
-        data: PasswordData,
+        data: OwnedData<PasswordData>,
         sig: String,
     ) -> Result<(), ChangeError> {
         // Get the password URL, and send the change
@@ -132,28 +137,18 @@ impl<'a> Password<'a> {
 
 /// The data object to send to the password endpoint,
 /// which sets the file password.
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Deserialize)]
 struct PasswordData {
-    /// The file owner token
-    owner_token: String,
-
     /// The authentication key
     auth: String,
 }
 
 impl PasswordData {
     /// Create the password data object from the given key set.
-    pub fn from(file: &RemoteFile, key: &KeySet)
-        -> Result<PasswordData, PrepareError>
-    {
-        Ok(
-            PasswordData {
-                owner_token: file.owner_token()
-                    .ok_or(PrepareError::NoOwnerToken)?
-                    .to_owned(),
-                auth: key.auth_key_encoded().unwrap(),
-            }
-        )
+    pub fn from(key: &KeySet) -> PasswordData {
+        PasswordData {
+            auth: key.auth_key_encoded().unwrap(),
+        }
     }
 }
 
@@ -202,9 +197,17 @@ pub enum PrepareError {
     #[fail(display = "Failed to compute cryptographic signature")]
     ComputeSignature,
 
-    /// The owner token was missing from the file, and is required.
-    #[fail(display = "Missing owner token, must be specified")]
-    NoOwnerToken,
+    /// Some error occurred while building the data that will be sent.
+    /// The owner token might possibly be missing, the wrapped error will
+    /// describe this further.
+    #[fail(display = "")]
+    Data(#[cause] DataError),
+}
+
+impl From<DataError> for PrepareError {
+    fn from(err: DataError) -> PrepareError {
+        PrepareError::Data(err)
+    }
 }
 
 #[derive(Fail, Debug)]
