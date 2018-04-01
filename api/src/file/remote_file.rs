@@ -209,6 +209,16 @@ impl RemoteFile {
 
         url
     }
+
+    /// Get the API params URL of the file.
+    pub fn api_params_url(&self) -> Url {
+        // Get the share URL, and add the secret fragment
+        let mut url = self.url.clone();
+        url.set_path(format!("/api/params/{}", self.id).as_str());
+        url.set_fragment(None);
+
+        url
+    }
 }
 
 #[derive(Debug, Fail)]

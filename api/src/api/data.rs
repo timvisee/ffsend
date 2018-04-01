@@ -1,12 +1,12 @@
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
 use file::remote_file::RemoteFile;
 
 /// An owned data structure, that wraps generic data.
-/// This structure is used to send owned data to the Send server.  
+/// This structure is used to send owned data to the Send server.
 /// This owned data is authenticated using an `owner_token`,
-/// wwhich this structure manages.
-#[derive(Debug, Serialize, Deserialize)]
+/// which this structure manages.
+#[derive(Debug, Serialize)]
 pub struct OwnedData<D> {
     /// The owner token, used for request authentication purposes.
     owner_token: String,
@@ -16,9 +16,9 @@ pub struct OwnedData<D> {
     inner: D,
 }
 
-impl<'a, D> OwnedData<D>
+impl<D> OwnedData<D>
     where
-        D: Serialize + Deserialize<'a>,
+        D: Serialize,
 {
     /// Constructor.
     pub fn new(owner_token: String, inner: D) -> Self {

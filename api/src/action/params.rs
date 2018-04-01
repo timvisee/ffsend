@@ -16,37 +16,49 @@ use file::remote_file::RemoteFile;
 /// The name of the header that is used for the authentication nonce.
 const HEADER_AUTH_NONCE: &'static str = "WWW-Authenticate";
 
-/// An action to change a password of an uploaded Send file.
-pub struct Password<'a> {
-    /// The remote file to change the password for.
+/// The default download count.
+const PARAMS_DEFAULT_DOWNLOAD: u8 = 1;
+
+/// The minimum allowed number of downloads, enforced by the server.
+const PARAMS_DOWNLOAD_MIN: u8 = 1;
+
+/// The maximum (inclusive) allowed number of downloads,
+/// enforced by the server.
+const PARAMS_DOWNLOAD_MAX: u8 = 20;
+
+/// An action to set parameters for a shared file.
+pub struct Params<'a> {
+    /// The remote file to change the parameters for.
     file: &'a RemoteFile,
 
-    /// The new password to use for the file.
-    password: &'a str,
+    /// The parameter data that is sent to the server.
+    params: ParamsData,
 
     /// The authentication nonce.
     /// May be an empty vector if the nonce is unknown.
     nonce: Vec<u8>,
 }
 
-impl<'a> Password<'a> {
-    /// Construct a new password action for the given remote file.
+impl<'a> Params<'a> {
+    /// Construct a new parameters action for the given remote file.
     pub fn new(
         file: &'a RemoteFile,
-        password: &'a str,
+        params: ParamsData,
         nonce: Option<Vec<u8>>,
     ) -> Self {
         Self {
             file,
-            password,
+            params,
             nonce: nonce.unwrap_or(Vec::new()),
         }
     }
 
-    /// Invoke the password action.
+    /// Invoke the parameters action.
     pub fn invoke(mut self, client: &Client) -> Result<(), Error> {
+        // TODO: validate that the parameters object isn't empty
+
         // Create a key set for the file
-        let mut key = KeySet::from(self.file, None);
+        let key = KeySet::from(self.file, None);
 
         // Fetch the authentication nonce if not set yet
         if self.nonce.is_empty() {
@@ -57,15 +69,16 @@ impl<'a> Password<'a> {
         let sig = signature_encoded(key.auth_key().unwrap(), &self.nonce)
             .map_err(|_| PrepareError::ComputeSignature)?;
 
-        // Derive a new authentication key
-        key.derive_auth_password(self.password, &self.file.download_url(true));
+        // TODO: can we remove this?
+        // // Derive a new authentication key
+        // key.derive_auth_password(self.password, &self.file.download_url(true));
 
-        // Build the password data, wrap it as owned
-        let data = OwnedData::from(PasswordData::from(&key), &self.file)
+        // Wrap the parameters data
+        let data = OwnedData::from(self.params.clone(), &self.file)
             .map_err(|err| -> PrepareError { err.into() })?;
 
-        // Send the request to change the password
-        self.change_password(client, data, sig)
+        // Send the request to change the parameters
+        self.change_params(client, data, sig)
             .map_err(|err| err.into())
     }
 
@@ -108,15 +121,15 @@ impl<'a> Password<'a> {
         ).map_err(|_| AuthError::MalformedNonce.into())
     }
 
-    /// Send the request for changing the file password.
-    fn change_password(
+    /// Send the request for changing the parameters.
+    fn change_params(
         &self,
         client: &Client,
-        data: OwnedData<PasswordData>,
+        data: OwnedData<ParamsData>,
         sig: String,
     ) -> Result<(), ChangeError> {
-        // Get the password URL, and send the change
-        let url = self.file.api_password_url();
+        // Get the params URL, and send the change
+        let url = self.file.api_params_url();
         let response = client.post(url)
             .json(&data)
             .header(Authorization(
@@ -135,19 +148,59 @@ impl<'a> Password<'a> {
     }
 }
 
-/// The data object to send to the password endpoint,
-/// which sets the file password.
-#[derive(Debug, Serialize)]
-struct PasswordData {
-    /// The authentication key
-    auth: String,
+/// The parameters data object, that is sent to the server.
+#[derive(Clone, Debug, Serialize)]
+pub struct ParamsData {
+    /// The number of times this file may be downloaded.
+    /// This value must be in the `(0,20)` bounds, as enforced by Send servers.
+    #[serde(rename = "dlimit")]
+    downloads: Option<u8>,
 }
 
-impl PasswordData {
-    /// Create the password data object from the given key set.
-    pub fn from(key: &KeySet) -> PasswordData {
-        PasswordData {
-            auth: key.auth_key_encoded().unwrap(),
+impl ParamsData {
+    /// Create a new parameters data object, with the given parameters.
+    // TODO: the downloads must be between bounds
+    pub fn from(downloads: Option<u8>) -> Self {
+        ParamsData {
+            downloads,
+        }
+    }
+
+    /// Set the maximum number of allowed downloads, after which the file
+    /// will be removed.
+    ///
+    /// `None` may be given, to keep this parameter as is.
+    ///
+    /// An error may be returned if the download value is out of the allowed
+    /// bound. These bounds are fixed and enforced by the server.
+    /// See `PARAMS_DOWNLOAD_MIN` and `PARAMS_DOWNLOAD_MAX`.
+    pub fn set_downloads(&mut self, downloads: Option<u8>)
+        -> Result<(), ParamsDataError>
+    {
+        // Check the download bounds
+        if let Some(d) = downloads {
+            if d < PARAMS_DOWNLOAD_MIN || d > PARAMS_DOWNLOAD_MAX {
+                return Err(ParamsDataError::DownloadBounds);
+            }
+        }
+
+        // Set the downloads
+        self.downloads = downloads;
+        Ok(())
+    }
+
+    /// Check whether this parameters object is empty,
+    /// and wouldn't change any parameter on the server when sent.
+    /// Sending an empty parameter data object would thus be useless.
+    pub fn is_empty(&self) -> bool {
+        self.downloads.is_none()
+    }
+}
+
+impl Default for ParamsData {
+    fn default() -> ParamsData {
+        ParamsData {
+            downloads: Some(PARAMS_DEFAULT_DOWNLOAD),
         }
     }
 }
@@ -155,7 +208,7 @@ impl PasswordData {
 #[derive(Fail, Debug)]
 pub enum Error {
     /// An error occurred while preparing the action.
-    #[fail(display = "Failed to prepare setting the password")]
+    #[fail(display = "Failed to prepare setting the parameters")]
     Prepare(#[cause] PrepareError),
 
     // /// The given Send file has expired, or did never exist in the first place.
@@ -163,9 +216,9 @@ pub enum Error {
     // #[fail(display = "The file has expired or did never exist")]
     // Expired,
 
-    /// An error has occurred while sending the password change request to
+    /// An error has occurred while sending the parameter change request to
     /// the server.
-    #[fail(display = "Failed to send the password change request")]
+    #[fail(display = "Failed to send the parameter change request")]
     Change(#[cause] ChangeError),
 }
 
@@ -187,9 +240,24 @@ impl From<ChangeError> for Error {
     }
 }
 
+#[derive(Debug, Fail)]
+pub enum ParamsDataError {
+    /// The number of downloads is invalid, as it was out of the allowed
+    /// bounds. See `PARAMS_DOWNLOAD_MIN` and `PARAMS_DOWNLOAD_MAX`.
+    // TODO: use bound values from constants, don't hardcode them here
+    #[fail(display = "Invalid number of downloads, must be between 1 and 20")]
+    DownloadBounds,
+
+    /// Some error occurred while trying to wrap the parameter data in an
+    /// owned object, which is required for authentication on the server.
+    /// The wrapped error further described the problem.
+    #[fail(display = "")]
+    Owned(#[cause] DataError),
+}
+
 #[derive(Fail, Debug)]
 pub enum PrepareError {
-    /// Failed authenticating, needed to set a new password.
+    /// Failed authenticating, needed to change the parameters.
     #[fail(display = "Failed to authenticate")]
     Auth(#[cause] AuthError),
 
@@ -197,16 +265,15 @@ pub enum PrepareError {
     #[fail(display = "Failed to compute cryptographic signature")]
     ComputeSignature,
 
-    /// Some error occurred while building the data that will be sent.
-    /// The owner token might possibly be missing, the wrapped error will
-    /// describe this further.
-    #[fail(display = "")]
-    Data(#[cause] DataError),
+    /// An error occurred while building the parameter data that will be send
+    /// to the server.
+    #[fail(display = "Invalid parameters")]
+    ParamsData(#[cause] ParamsDataError),
 }
 
 impl From<DataError> for PrepareError {
     fn from(err: DataError) -> PrepareError {
-        PrepareError::Data(err)
+        PrepareError::ParamsData(ParamsDataError::Owned(err))
     }
 }
 
@@ -237,11 +304,12 @@ pub enum AuthError {
 
 #[derive(Fail, Debug)]
 pub enum ChangeError {
-    /// Sending the request to change the password failed.
-    #[fail(display = "Failed to send password change request")]
+    /// Sending the request to change the parameters failed.
+    #[fail(display = "Failed to send parameter change request")]
     Request,
 
-    /// The response for changing the password indicated an error and wasn't successful.
-    #[fail(display = "Bad HTTP response '{}' while changing the password", _1)]
+    /// The response for changing the parameters indicated an error and wasn't
+    /// successful.
+    #[fail(display = "Bad HTTP response '{}' while changing the parameters", _1)]
     RequestStatus(StatusCode, String),
 }
