@@ -1,15 +1,22 @@
 use ffsend_api::action::download::Error as DownloadError;
-use ffsend_api::action::info::Error as InfoError;
 use ffsend_api::action::params::Error as ParamsError;
 use ffsend_api::action::password::Error as PasswordError;
 use ffsend_api::action::upload::Error as UploadError;
 use ffsend_api::file::remote_file::FileParseError;
+
+use action::info::Error as InfoError;
 
 #[derive(Fail, Debug)]
 pub enum Error {
     /// An error occurred while invoking an action.
     #[fail(display = "")]
     Action(#[cause] ActionError),
+}
+
+impl From<InfoError> for Error {
+    fn from(err: InfoError) -> Error {
+        Error::Action(ActionError::Info(err))
+    }
 }
 
 impl From<ActionError> for Error {

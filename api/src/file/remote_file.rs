@@ -133,6 +133,11 @@ impl RemoteFile {
         ))
     }
 
+    /// Get the file ID.
+    pub fn id(&self) -> &str {
+        &self.id
+    }
+
     /// Get the raw secret.
     pub fn secret_raw(&self) -> &Vec<u8> {
         // A secret must have been set

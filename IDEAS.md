@@ -1,7 +1,5 @@
 # Ideas
 - Endpoints:
-  - exists
-  - metadata
   - delete
 - allow creating non existent directories with the `-f` flag 
 - only allow file extension renaming on upload with `-f` flag

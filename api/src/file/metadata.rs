@@ -52,6 +52,11 @@ impl Metadata {
         &self.name
     }
 
+    /// Get the file MIME type.
+    pub fn mime(&self) -> &str {
+        &self.mime
+    }
+
     /// Get the input vector
     // TODO: use an input vector length from a constant
     pub fn iv(&self) -> [u8; 12] {

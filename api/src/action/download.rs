@@ -18,6 +18,10 @@ use crypto::sig::signature_encoded;
 use ext::status_code::StatusCodeExt;
 use file::remote_file::RemoteFile;
 use reader::{EncryptedFileWriter, ProgressReporter, ProgressWriter};
+use super::exists::{
+    Error as ExistsError,
+    Exists as ExistsAction,
+};
 use super::metadata::{
     Error as MetadataError,
     Metadata as MetadataAction,
@@ -55,6 +59,27 @@ impl<'a> Download<'a> {
         client: &Client,
         reporter: Arc<Mutex<ProgressReporter>>,
     ) -> Result<(), Error> {
+        // Make sure the given file exists
+        let exist_response = ExistsAction::new(&self.file)
+            .invoke(&client)?;
+
+        // Return an error if the file does not exist
+        if !exist_response.exists() {
+            return Err(Error::Expired);
+        }
+
+        // Make sure a password is given when it is required
+        let has_password = self.password.is_some();
+        if has_password != exist_response.has_password() {
+            if has_password {
+                // TODO: show a proper message here
+                println!("file not password protected, ignoring password");
+            } else {
+                // TODO: show a propper error here, or prompt for the password
+                panic!("password required");
+            }
+        }
+
         // Create a key set for the file
         let mut key = KeySet::from(self.file, self.password.as_ref());
 
@@ -232,6 +257,11 @@ impl<'a> Download<'a> {
 
 #[derive(Fail, Debug)]
 pub enum Error {
+    /// An error occurred while checking whether the file exists on the
+    /// server.
+    #[fail(display = "Failed to check whether the file exists")]
+    Exists(#[cause] ExistsError),
+
     /// An error occurred while fetching the metadata of the file.
     /// This step is required in order to succsessfully decrypt the
     /// file that will be downloaded.
@@ -255,6 +285,12 @@ pub enum Error {
     // TODO: show what file this is about
     #[fail(display = "Couldn't use the target file at '{}'", _0)]
     File(String, #[cause] FileError),
+}
+
+impl From<ExistsError> for Error {
+    fn from(err: ExistsError) -> Error {
+        Error::Exists(err)
+    }
 }
 
 impl From<MetadataError> for Error {

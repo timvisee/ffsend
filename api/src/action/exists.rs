@@ -49,8 +49,9 @@ impl<'a> Exists<'a> {
         }
 
         // Parse the response
-        let response = response.json::<ExistsResponse>()
+        let mut response = response.json::<ExistsResponse>()
             .map_err(|_| Error::Malformed)?;
+        response.set_exists(true);
 
         // TODO: fetch the metadata nonce from the response headers
 
@@ -82,6 +83,11 @@ impl ExistsResponse {
     /// Whether the remote file exists on the server.
     pub fn exists(&self) -> bool {
         self.exists
+    }
+
+    /// Set whether the remote file exists.
+    pub fn set_exists(&mut self, exists: bool) {
+        self.exists = exists;
     }
 
     /// Whether the remote file is protected by a password.
