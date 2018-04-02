@@ -486,7 +486,7 @@ pub enum UploadError {
     #[fail(display = "Bad HTTP response '{}' while requesting file upload", _1)]
     RequestStatus(StatusCode, String),
 
-    /// Decoding the upload response from the server.
+    /// Failed to decode the upload response from the server.
     /// Maybe the server responded with data from a newer API version.
     #[fail(display = "Failed to decode upload response")]
     Decode(#[cause] ReqwestError),

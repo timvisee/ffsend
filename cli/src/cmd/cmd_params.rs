@@ -17,7 +17,7 @@ impl<'a: 'b, 'b> CmdParams<'a> {
     /// Build the sub command definition.
     pub fn build<'y, 'z>() -> App<'y, 'z> {
         // Build a list of data parameter arguments of which one is required
-        let param_args = ["downloads"];
+        let param_args = ["download-limit"];
 
         // Build the subcommand
         let cmd = SubCommand::with_name("parameters")
@@ -38,12 +38,16 @@ impl<'a: 'b, 'b> CmdParams<'a> {
                 .alias("token")
                 .value_name("TOKEN")
                 .help("File owner token"))
-            .arg(Arg::with_name("downloads")
-                .long("downloads")
+            .arg(Arg::with_name("download-limit")
+                .long("download-limit")
                 .short("d")
+                .alias("downloads")
                 .alias("download")
                 .alias("down")
                 .alias("dlimit")
+                .alias("limit")
+                .alias("lim")
+                .alias("l")
                 .required_unless_one(&param_args)
                 .value_name("COUNT")
                 .help("Set the download limit parameter"));
@@ -94,17 +98,16 @@ impl<'a: 'b, 'b> CmdParams<'a> {
             .map(|token| token.to_owned())
     }
 
-    /// Get the download counts.
-    pub fn downloads(&'a self) -> Option<u8> {
-        // Get the number of downloads
+    /// Get the download limit.
+    pub fn download_limit(&'a self) -> Option<u8> {
         // TODO: do not unwrap, report an error
-        self.matches.value_of("downloads")
-            .map(|d| d.parse::<u8>().expect("invalid number of downloads"))
+        self.matches.value_of("download-limit")
+            .map(|d| d.parse::<u8>().expect("invalid download limit"))
             .and_then(|d| {
-                // Check the download count bounds
+                // Check the download limit bounds
                 if d < DOWNLOAD_MIN || d > DOWNLOAD_MAX {
                     panic!(
-                        "invalid number of downloads, must be between {} and {}",
+                        "invalid download limit, must be between {} and {}",
                         DOWNLOAD_MIN,
                         DOWNLOAD_MAX,
                     );

@@ -39,7 +39,7 @@ impl<'a> Params<'a> {
 
         // Build the parameters data object
         let data = ParamsDataBuilder::default()
-            .downloads(self.cmd.downloads())
+            .download_limit(self.cmd.download_limit())
             .build()
             .unwrap();
 

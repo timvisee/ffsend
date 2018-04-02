@@ -2,7 +2,7 @@ use std::path::Path;
 use std::sync::{Arc, Mutex};
 
 use failure::{err_msg, Fail};
-use ffsend_api::action::params::ParamsData;
+use ffsend_api::action::params::ParamsDataBuilder;
 use ffsend_api::action::upload::Upload as ApiUpload;
 use ffsend_api::reqwest::Client;
 
@@ -43,7 +43,7 @@ impl<'a> Upload<'a> {
         let params = {
             // Build the parameters data object
             let mut params = ParamsDataBuilder::default()
-                .download(self.cmd.downloads())
+                .download_limit(self.cmd.download_limit())
                 .build()
                 .unwrap();
 

@@ -69,10 +69,6 @@ impl<'a> Params<'a> {
         let sig = signature_encoded(key.auth_key().unwrap(), &self.nonce)
             .map_err(|_| PrepareError::ComputeSignature)?;
 
-        // TODO: can we remove this?
-        // // Derive a new authentication key
-        // key.derive_auth_password(self.password, &self.file.download_url(true));
-
         // Wrap the parameters data
         let data = OwnedData::from(self.params.clone(), &self.file)
             .map_err(|err| -> PrepareError { err.into() })?;
@@ -155,22 +151,22 @@ pub struct ParamsData {
     /// The number of times this file may be downloaded.
     /// This value must be in the `(0,20)` bounds, as enforced by Send servers.
     #[serde(rename = "dlimit")]
-    downloads: Option<u8>,
+    download_limit: Option<u8>,
 }
 
 impl ParamsData {
     /// Construct a new parameters object, that is empty.
     pub fn new() -> Self {
         ParamsData {
-            downloads: None,
+            download_limit: None,
         }
     }
 
     /// Create a new parameters data object, with the given parameters.
     // TODO: the downloads must be between bounds
-    pub fn from(downloads: Option<u8>) -> Self {
+    pub fn from(download_limit: Option<u8>) -> Self {
         ParamsData {
-            downloads,
+            download_limit,
         }
     }
 
@@ -182,18 +178,18 @@ impl ParamsData {
     /// An error may be returned if the download value is out of the allowed
     /// bound. These bounds are fixed and enforced by the server.
     /// See `PARAMS_DOWNLOAD_MIN` and `PARAMS_DOWNLOAD_MAX`.
-    pub fn set_downloads(&mut self, downloads: Option<u8>)
+    pub fn set_download_limit(&mut self, download_limit: Option<u8>)
         -> Result<(), ParamsDataError>
     {
-        // Check the download bounds
-        if let Some(d) = downloads {
+        // Check the download limit bounds
+        if let Some(d) = download_limit {
             if d < PARAMS_DOWNLOAD_MIN || d > PARAMS_DOWNLOAD_MAX {
                 return Err(ParamsDataError::DownloadBounds);
             }
         }
 
-        // Set the downloads
-        self.downloads = downloads;
+        // Set the download limit
+        self.download_limit = download_limit;
         Ok(())
     }
 
@@ -201,14 +197,14 @@ impl ParamsData {
     /// and wouldn't change any parameter on the server when sent.
     /// Sending an empty parameter data object would thus be useless.
     pub fn is_empty(&self) -> bool {
-        self.downloads.is_none()
+        self.download_limit.is_none()
     }
 }
 
 impl Default for ParamsData {
     fn default() -> ParamsData {
         ParamsData {
-            downloads: Some(PARAMS_DEFAULT_DOWNLOAD),
+            download_limit: None,
         }
     }
 }
