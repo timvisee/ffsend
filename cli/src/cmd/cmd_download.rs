@@ -2,8 +2,8 @@ use std::path::PathBuf;
 
 use ffsend_api::url::{ParseError, Url};
 
-use super::clap::{App, Arg, ArgMatches, SubCommand};
 use rpassword::prompt_password_stderr;
+use super::clap::{App, Arg, ArgMatches, SubCommand};
 
 use util::quit_error_msg;
 

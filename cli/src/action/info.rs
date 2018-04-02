@@ -39,9 +39,9 @@ impl<'a> Info<'a> {
         // Create a reqwest client
         let client = Client::new();
 
-        // Parse the remote file based on the share URL
-        // TODO: handle error here
+        // Parse the remote file based on the share URL, get the password
         let file = RemoteFile::parse_url(url, self.cmd.owner())?;
+        let password = self.cmd.password();
 
         // TODO: show an informative error if the owner token isn't set
 
@@ -54,12 +54,21 @@ impl<'a> Info<'a> {
             return Err(Error::Expired);
         }
 
-        // TODO: make sure a password is set if required
+        // Make sure a password is given when it is required
+        let has_password = password.is_some();
+        if has_password != exists_response.has_password() {
+            if has_password {
+                // TODO: show a proper message here
+                println!("file not password protected, ignoring password");
+            } else {
+                // TODO: show a propper error here, or prompt for the password
+                panic!("password required");
+            }
+        }
 
         // Fetch both file info and metadata
         let info = ApiInfo::new(&file, None).invoke(&client)?;
-        // TODO: supply a password here
-        let metadata = ApiMetadata::new(&file, None).invoke(&client)
+        let metadata = ApiMetadata::new(&file, password).invoke(&client)
             .map_err(|err| print_error(err.context(
                 "Failed to fetch file metadata, showing limited info",
             )))
