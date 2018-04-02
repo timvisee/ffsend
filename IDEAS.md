@@ -1,6 +1,4 @@
 # Ideas
-- Endpoints:
-  - delete
 - allow creating non existent directories with the `-f` flag 
 - only allow file extension renaming on upload with `-f` flag
 - no interact flag
@@ -12,6 +10,7 @@
 - Implement error handling everywhere properly
 - Quick upload/download without `upload` or `download` subcommands?
 - Flag to explicitly delete file after download
+- Allow file deletion by consuming all download slots
 - Check remote version and heartbeat using `/__version__`
 - Check whether the file still exists everywhere
 - API actions contain duplicate code, create centralized functions

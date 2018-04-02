@@ -11,6 +11,7 @@ mod error;
 mod progress;
 mod util;
 
+use action::delete::Delete;
 use action::download::Download;
 use action::info::Info;
 use action::params::Params;
@@ -36,9 +37,9 @@ fn main() {
 /// If no proper action is selected, the program will quit with an error
 /// message.
 fn invoke_action(handler: &Handler) -> Result<(), Error> {
-    // Match the upload command
-    if let Some(cmd) = handler.upload() {
-        return Upload::new(&cmd).invoke()
+    // Match the delete command
+    if let Some(cmd) = handler.delete() {
+        return Delete::new(&cmd).invoke()
             .map_err(|err| err.into());
     }
 
@@ -63,6 +64,12 @@ fn invoke_action(handler: &Handler) -> Result<(), Error> {
     // Match the password command
     if let Some(cmd) = handler.password() {
         return Password::new(&cmd).invoke()
+            .map_err(|err| err.into());
+    }
+
+    // Match the upload command
+    if let Some(cmd) = handler.upload() {
+        return Upload::new(&cmd).invoke()
             .map_err(|err| err.into());
     }
 

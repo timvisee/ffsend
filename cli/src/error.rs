@@ -1,3 +1,4 @@
+use ffsend_api::action::delete::Error as DeleteError;
 use ffsend_api::action::download::Error as DownloadError;
 use ffsend_api::action::params::Error as ParamsError;
 use ffsend_api::action::password::Error as PasswordError;
@@ -27,10 +28,9 @@ impl From<ActionError> for Error {
 
 #[derive(Debug, Fail)]
 pub enum ActionError {
-    /// An error occurred while invoking the upload action.
-    // TODO: bind the upload cause here
-    #[fail(display = "Failed to upload the specified file")]
-    Upload(#[cause] UploadError),
+    /// An error occurred while invoking the delete action.
+    #[fail(display = "Failed to delete the file")]
+    Delete(#[cause] DeleteError),
 
     /// An error occurred while invoking the download action.
     #[fail(display = "Failed to download the requested file")]
@@ -48,10 +48,21 @@ pub enum ActionError {
     #[fail(display = "Failed to change the password")]
     Password(#[cause] PasswordError),
 
+    /// An error occurred while invoking the upload action.
+    // TODO: bind the upload cause here
+    #[fail(display = "Failed to upload the specified file")]
+    Upload(#[cause] UploadError),
+
     /// Failed to parse a share URL, it was invalid.
     /// This error is not related to a specific action.
     #[fail(display = "Invalid share URL")]
     InvalidUrl(#[cause] FileParseError),
+}
+
+impl From<DeleteError> for ActionError {
+    fn from(err: DeleteError) -> ActionError {
+        ActionError::Delete(err)
+    }
 }
 
 impl From<DownloadError> for ActionError {

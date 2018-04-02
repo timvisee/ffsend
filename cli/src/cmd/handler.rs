@@ -2,6 +2,7 @@ use super::clap::{App, ArgMatches};
 
 use app::*;
 
+use super::cmd_delete::CmdDelete;
 use super::cmd_download::CmdDownload;
 use super::cmd_info::CmdInfo;
 use super::cmd_params::CmdParams;
@@ -21,11 +22,12 @@ impl<'a: 'b, 'b> Handler<'a> {
             .version(APP_VERSION)
             .author(APP_AUTHOR)
             .about(APP_ABOUT)
-            .subcommand(CmdUpload::build().display_order(1))
+            .subcommand(CmdDelete::build())
             .subcommand(CmdDownload::build().display_order(2))
             .subcommand(CmdInfo::build())
             .subcommand(CmdParams::build())
             .subcommand(CmdPassword::build())
+            .subcommand(CmdUpload::build().display_order(1))
     }
 
     /// Parse CLI arguments.
@@ -36,9 +38,9 @@ impl<'a: 'b, 'b> Handler<'a> {
         }
     }
 
-    /// Get the upload sub command, if matched.
-    pub fn upload(&'a self) -> Option<CmdUpload<'a>> {
-        CmdUpload::parse(&self.matches)
+    /// Get the delete sub command, if matched.
+    pub fn delete(&'a self) -> Option<CmdDelete<'a>> {
+        CmdDelete::parse(&self.matches)
     }
 
     /// Get the download sub command, if matched.
@@ -59,5 +61,10 @@ impl<'a: 'b, 'b> Handler<'a> {
     /// Get the password sub command, if matched.
     pub fn password(&'a self) -> Option<CmdPassword<'a>> {
         CmdPassword::parse(&self.matches)
+    }
+
+    /// Get the upload sub command, if matched.
+    pub fn upload(&'a self) -> Option<CmdUpload<'a>> {
+        CmdUpload::parse(&self.matches)
     }
 }

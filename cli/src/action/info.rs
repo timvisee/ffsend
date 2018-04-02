@@ -105,7 +105,6 @@ pub enum Error {
     Info(#[cause] InfoError),
 
     /// The given Send file has expired, or did never exist in the first place.
-    // TODO: do not return an error, but write to stdout that the file does not exist
     #[fail(display = "The file has expired or did never exist")]
     Expired,
 }

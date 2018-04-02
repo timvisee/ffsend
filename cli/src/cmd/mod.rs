@@ -1,5 +1,6 @@
 extern crate clap;
 
+pub mod cmd_delete;
 pub mod cmd_download;
 pub mod cmd_info;
 pub mod cmd_params;
