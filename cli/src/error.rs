@@ -1,4 +1,5 @@
 use ffsend_api::action::download::Error as DownloadError;
+use ffsend_api::action::info::Error as InfoError;
 use ffsend_api::action::params::Error as ParamsError;
 use ffsend_api::action::password::Error as PasswordError;
 use ffsend_api::action::upload::Error as UploadError;
@@ -28,6 +29,10 @@ pub enum ActionError {
     #[fail(display = "Failed to download the requested file")]
     Download(#[cause] DownloadError),
 
+    /// An error occurred while invoking the info action.
+    #[fail(display = "Failed to fetch file info")]
+    Info(#[cause] InfoError),
+
     /// An error occurred while invoking the params action.
     #[fail(display = "Failed to change the parameters")]
     Params(#[cause] ParamsError),
@@ -45,6 +50,12 @@ pub enum ActionError {
 impl From<DownloadError> for ActionError {
     fn from(err: DownloadError) -> ActionError {
         ActionError::Download(err)
+    }
+}
+
+impl From<InfoError> for ActionError {
+    fn from(err: InfoError) -> ActionError {
+        ActionError::Info(err)
     }
 }
 

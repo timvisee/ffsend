@@ -9,6 +9,10 @@ use reqwest::{
 };
 use reqwest::header::Authorization;
 
+use api::data::{
+    Error as DataError,
+    OwnedData,
+};
 use crypto::b64;
 use crypto::key_set::KeySet;
 use crypto::sig::signature_encoded;
@@ -52,8 +56,12 @@ impl<'a> Info<'a> {
         let sig = signature_encoded(key.auth_key().unwrap(), &self.nonce)
             .map_err(|_| PrepareError::ComputeSignature)?;
 
+        // Create owned data, to send to the server for authentication
+        let data = OwnedData::from(InfoData::new(), &self.file)
+            .map_err(|err| -> PrepareError { err.into() })?;
+
         // Send the info request
-        self.fetch_info(client, sig)
+        self.fetch_info(client, data, sig)
             .map_err(|err| err.into())
     }
 
@@ -95,13 +103,16 @@ impl<'a> Info<'a> {
     }
 
     /// Send the request for fetching the remote file info.
-    fn fetch_info(&self, client: &Client, sig: String)
-        -> Result<InfoResponse, InfoError>
-    {
-        // Get the params URL, and send the change
+    fn fetch_info(
+        &self,
+        client: &Client,
+        data: OwnedData<InfoData>,
+        sig: String,
+    ) -> Result<InfoResponse, InfoError> {
+        // Get the params URL, and send the request
         let url = self.file.api_params_url();
         let mut response = client.get(url)
-            // TODO: is this header required?
+            .json(&data)
             .header(Authorization(
                 format!("send-v1 {}", sig)
             ))
@@ -121,6 +132,19 @@ impl<'a> Info<'a> {
         };
 
         Ok(response)
+    }
+}
+
+/// The info data object.
+/// This object is currently empty, as no additional data is sent to the
+/// server.
+#[derive(Debug, Serialize)]
+pub struct InfoData { }
+
+impl InfoData {
+    /// Constructor.
+    pub fn new() -> Self {
+        InfoData { }
     }
 }
 
@@ -174,9 +198,8 @@ pub enum Error {
     // #[fail(display = "The file has expired or did never exist")]
     // Expired,
 
-    /// An error has occurred while sending the parameter change request to
-    /// the server.
-    #[fail(display = "Failed to send the parameter change request")]
+    /// An error has occurred while sending the info request to the server.
+    #[fail(display = "Failed to send the file info request")]
     Info(#[cause] InfoError),
 }
 
@@ -198,15 +221,35 @@ impl From<InfoError> for Error {
     }
 }
 
+#[derive(Debug, Fail)]
+pub enum InfoDataError {
+    /// Some error occurred while trying to wrap the info data in an
+    /// owned object, which is required for authentication on the server.
+    /// The wrapped error further described the problem.
+    #[fail(display = "")]
+    Owned(#[cause] DataError),
+}
+
 #[derive(Fail, Debug)]
 pub enum PrepareError {
-    /// Failed authenticating, needed to change the parameters.
+    /// Failed authenticating, needed to fetch the info
     #[fail(display = "Failed to authenticate")]
     Auth(#[cause] AuthError),
 
     /// An error occurred while computing the cryptographic signature.
     #[fail(display = "Failed to compute cryptographic signature")]
     ComputeSignature,
+
+    /// An error occurred while building the info data that will be
+    /// send to the server.
+    #[fail(display = "Invalid parameters")]
+    InfoData(#[cause] InfoDataError),
+}
+
+impl From<DataError> for PrepareError {
+    fn from(err: DataError) -> PrepareError {
+        PrepareError::InfoData(InfoDataError::Owned(err))
+    }
 }
 
 #[derive(Fail, Debug)]
