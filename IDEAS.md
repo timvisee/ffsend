@@ -1,18 +1,18 @@
 # Ideas
-- custom file name when uploading
+- Endpoints:
+  - exists
+  - metadata
+  - delete
 - allow creating non existent directories with the `-f` flag 
 - only allow file extension renaming on upload with `-f` flag
 - no interact flag
 - `-y` flag for assume yes
 - `-f` flag for forcing (no interact?)
 - Box errors
-- Info endpoint, to view file info
 - On download, mention a wrong or missing password with a HTTP 401 response
 - Automatically get owner token, from file history when setting password
 - Implement error handling everywhere properly
-- Quick upload/download without `upload` or `download` subcommands.
-- Set file password
-- Set file download count
+- Quick upload/download without `upload` or `download` subcommands?
 - Flag to explicitly delete file after download
 - Check remote version and heartbeat using `/__version__`
 - Check whether the file still exists everywhere
@@ -24,13 +24,12 @@
 - Allow file/directory archiving on upload
 - Allow unarchiving on download 
 - Allow hiding the progress bar, and/or showing simple progress
-- Enter password through pinetry
 - Remember all uploaded files, make files listable
 - Incognito mode, to not remember files `--incognito`
 - Document all code components
 - Dotfile for default properties
 - Host configuration file for host tags, to easily upload to other hosts
-- Generate manual pages
+- Generate man pages
 - Automated releases through CI
 - Release binaries on GitHub
 - Ubuntu PPA package

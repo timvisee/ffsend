@@ -36,7 +36,9 @@ impl<'a> Info<'a> {
         // Execute the info fetch action
         let info = ApiInfo::new(&file, None).invoke(&client)?;
 
-        println!("{:#?}", info);
+        // Print the result
+        println!("Downloads: {} of {}", info.download_count(), info.download_limit());
+        println!("TTL: {}", info.ttl_millis());
 
         Ok(())
     }
