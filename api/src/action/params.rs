@@ -1,15 +1,12 @@
 // TODO: define redirect policy
 
 use reqwest::{Client, StatusCode};
-use reqwest::header::Authorization;
 
 use api::data::{
     Error as DataError,
     OwnedData,
 };
 use crypto::b64;
-use crypto::key_set::KeySet;
-use crypto::sig::signature_encoded;
 use ext::status_code::StatusCodeExt;
 use file::remote_file::RemoteFile;
 
@@ -57,24 +54,17 @@ impl<'a> Params<'a> {
     pub fn invoke(mut self, client: &Client) -> Result<(), Error> {
         // TODO: validate that the parameters object isn't empty
 
-        // Create a key set for the file
-        let key = KeySet::from(self.file, None);
-
         // Fetch the authentication nonce if not set yet
         if self.nonce.is_empty() {
             self.nonce = self.fetch_auth_nonce(client)?;
         }
-
-        // Compute a signature
-        let sig = signature_encoded(key.auth_key().unwrap(), &self.nonce)
-            .map_err(|_| PrepareError::ComputeSignature)?;
 
         // Wrap the parameters data
         let data = OwnedData::from(self.params.clone(), &self.file)
             .map_err(|err| -> PrepareError { err.into() })?;
 
         // Send the request to change the parameters
-        self.change_params(client, data, sig)
+        self.change_params(client, data)
             .map_err(|err| err.into())
     }
 
@@ -122,15 +112,11 @@ impl<'a> Params<'a> {
         &self,
         client: &Client,
         data: OwnedData<ParamsData>,
-        sig: String,
     ) -> Result<(), ChangeError> {
         // Get the params URL, and send the change
         let url = self.file.api_params_url();
         let response = client.post(url)
             .json(&data)
-            .header(Authorization(
-                format!("send-v1 {}", sig)
-            ))
             .send()
             .map_err(|_| ChangeError::Request)?;
 
@@ -264,10 +250,6 @@ pub enum PrepareError {
     /// Failed authenticating, needed to change the parameters.
     #[fail(display = "Failed to authenticate")]
     Auth(#[cause] AuthError),
-
-    /// An error occurred while computing the cryptographic signature.
-    #[fail(display = "Failed to compute cryptographic signature")]
-    ComputeSignature,
 
     /// An error occurred while building the parameter data that will be send
     /// to the server.

@@ -1,7 +1,6 @@
 // TODO: define redirect policy
 
 use reqwest::{Client, StatusCode};
-use reqwest::header::Authorization;
 
 use api::data::{
     Error as DataError,
@@ -9,7 +8,6 @@ use api::data::{
 };
 use crypto::b64;
 use crypto::key_set::KeySet;
-use crypto::sig::signature_encoded;
 use ext::status_code::StatusCodeExt;
 use file::remote_file::RemoteFile;
 
@@ -53,10 +51,6 @@ impl<'a> Password<'a> {
             self.nonce = self.fetch_auth_nonce(client)?;
         }
 
-        // Compute a signature
-        let sig = signature_encoded(key.auth_key().unwrap(), &self.nonce)
-            .map_err(|_| PrepareError::ComputeSignature)?;
-
         // Derive a new authentication key
         key.derive_auth_password(self.password, &self.file.download_url(true));
 
@@ -65,7 +59,7 @@ impl<'a> Password<'a> {
             .map_err(|err| -> PrepareError { err.into() })?;
 
         // Send the request to change the password
-        self.change_password(client, data, sig)
+        self.change_password(client, data)
             .map_err(|err| err.into())
     }
 
@@ -113,15 +107,11 @@ impl<'a> Password<'a> {
         &self,
         client: &Client,
         data: OwnedData<PasswordData>,
-        sig: String,
     ) -> Result<(), ChangeError> {
         // Get the password URL, and send the change
         let url = self.file.api_password_url();
         let response = client.post(url)
             .json(&data)
-            .header(Authorization(
-                format!("send-v1 {}", sig)
-            ))
             .send()
             .map_err(|_| ChangeError::Request)?;
 
@@ -192,10 +182,6 @@ pub enum PrepareError {
     /// Failed authenticating, needed to set a new password.
     #[fail(display = "Failed to authenticate")]
     Auth(#[cause] AuthError),
-
-    /// An error occurred while computing the cryptographic signature.
-    #[fail(display = "Failed to compute cryptographic signature")]
-    ComputeSignature,
 
     /// Some error occurred while building the data that will be sent.
     /// The owner token might possibly be missing, the wrapped error will

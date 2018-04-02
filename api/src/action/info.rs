@@ -7,16 +7,12 @@ use reqwest::{
     Error as ReqwestError,
     StatusCode,
 };
-use reqwest::header::Authorization;
-use serde_json;
 
 use api::data::{
     Error as DataError,
     OwnedData,
 };
 use crypto::b64;
-use crypto::key_set::KeySet;
-use crypto::sig::signature_encoded;
 use ext::status_code::StatusCodeExt;
 use file::remote_file::RemoteFile;
 
@@ -45,25 +41,17 @@ impl<'a> Info<'a> {
 
     /// Invoke the info action.
     pub fn invoke(mut self, client: &Client) -> Result<InfoResponse, Error> {
-        // Create a key set for the file
-        let key = KeySet::from(self.file, None);
-
         // Fetch the authentication nonce if not set yet
         if self.nonce.is_empty() {
             self.nonce = self.fetch_auth_nonce(client)?;
         }
-
-        // Compute a signature
-        let sig = signature_encoded(key.auth_key().unwrap(), &self.nonce)
-            .map_err(|_| PrepareError::ComputeSignature)?;
 
         // Create owned data, to send to the server for authentication
         let data = OwnedData::from(InfoData::new(), &self.file)
             .map_err(|err| -> PrepareError { err.into() })?;
 
         // Send the info request
-        self.fetch_info(client, data, sig)
-            .map_err(|err| err.into())
+        self.fetch_info(client, data).map_err(|err| err.into())
     }
 
     /// Fetch the authentication nonce for the file from the remote server.
@@ -108,15 +96,11 @@ impl<'a> Info<'a> {
         &self,
         client: &Client,
         data: OwnedData<InfoData>,
-        sig: String,
     ) -> Result<InfoResponse, InfoError> {
         // Get the info URL, and send the request
         let url = self.file.api_info_url();
         let mut response = client.post(url)
             .json(&data)
-            .header(Authorization(
-                format!("send-v1 {}", sig)
-            ))
             .send()
             .map_err(|_| InfoError::Request)?;
 
@@ -236,10 +220,6 @@ pub enum PrepareError {
     /// Failed authenticating, needed to fetch the info
     #[fail(display = "Failed to authenticate")]
     Auth(#[cause] AuthError),
-
-    /// An error occurred while computing the cryptographic signature.
-    #[fail(display = "Failed to compute cryptographic signature")]
-    ComputeSignature,
 
     /// An error occurred while building the info data that will be
     /// send to the server.
