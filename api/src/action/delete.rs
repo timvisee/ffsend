@@ -1,12 +1,6 @@
 // TODO: define redirect policy
 
-use std::cmp::max;
-
-use reqwest::{
-    Client,
-    Error as ReqwestError,
-    StatusCode,
-};
+use reqwest::{Client, StatusCode};
 
 use api::data::{
     Error as DataError,
@@ -19,9 +13,9 @@ use file::remote_file::RemoteFile;
 /// The name of the header that is used for the authentication nonce.
 const HEADER_AUTH_NONCE: &'static str = "WWW-Authenticate";
 
-/// An action to fetch info of a shared file.
-pub struct Info<'a> {
-    /// The remote file to fetch the info for.
+/// An action to delete a remote file.
+pub struct Delete<'a> {
+    /// The remote file to delete.
     file: &'a RemoteFile,
 
     /// The authentication nonce.
@@ -29,8 +23,8 @@ pub struct Info<'a> {
     nonce: Vec<u8>,
 }
 
-impl<'a> Info<'a> {
-    /// Construct a new info action for the given remote file.
+impl<'a> Delete<'a> {
+    /// Construct a new delete action for the given file.
     pub fn new(file: &'a RemoteFile, nonce: Option<Vec<u8>>) -> Self {
         Self {
             file,
@@ -38,19 +32,19 @@ impl<'a> Info<'a> {
         }
     }
 
-    /// Invoke the info action.
-    pub fn invoke(mut self, client: &Client) -> Result<InfoResponse, Error> {
+    /// Invoke the delete action.
+    pub fn invoke(mut self, client: &Client) -> Result<(), Error> {
         // Fetch the authentication nonce if not set yet
         if self.nonce.is_empty() {
             self.nonce = self.fetch_auth_nonce(client)?;
         }
 
         // Create owned data, to send to the server for authentication
-        let data = OwnedData::from(InfoData::new(), &self.file)
+        let data = OwnedData::from(DeleteData::new(), &self.file)
             .map_err(|err| -> PrepareError { err.into() })?;
 
-        // Send the info request
-        self.fetch_info(client, data).map_err(|err| err.into())
+        // Send the delete request
+        self.request_delete(client, data).map_err(|err| err.into())
     }
 
     /// Fetch the authentication nonce for the file from the remote server.
@@ -90,84 +84,39 @@ impl<'a> Info<'a> {
         ).map_err(|_| AuthError::MalformedNonce.into())
     }
 
-    /// Send the request for fetching the remote file info.
-    fn fetch_info(
+    /// Send a request to delete the remote file, with the given data.
+    fn request_delete(
         &self,
         client: &Client,
-        data: OwnedData<InfoData>,
-    ) -> Result<InfoResponse, InfoError> {
-        // Get the info URL, and send the request
-        let url = self.file.api_info_url();
-        let mut response = client.post(url)
+        data: OwnedData<DeleteData>,
+    ) -> Result<(), DeleteError> {
+        // Get the delete URL, and send the request
+        let url = self.file.api_delete_url();
+        let response = client.post(url)
             .json(&data)
             .send()
-            .map_err(|_| InfoError::Request)?;
+            .map_err(|_| DeleteError::Request)?;
 
         // Validate the status code
         let status = response.status();
         if !status.is_success() {
-            return Err(InfoError::RequestStatus(status, status.err_text()).into());
+            return Err(DeleteError::RequestStatus(status, status.err_text()).into());
         }
 
-        // Decode the JSON response
-        let response: InfoResponse = match response.json() {
-            Ok(response) => response,
-            Err(err) => return Err(InfoError::Decode(err)),
-        };
-
-        Ok(response)
+        Ok(())
     }
 }
 
-/// The info data object.
+/// The delete data object.
 /// This object is currently empty, as no additional data is sent to the
 /// server.
 #[derive(Debug, Serialize)]
-pub struct InfoData { }
+pub struct DeleteData { }
 
-impl InfoData {
+impl DeleteData {
     /// Constructor.
     pub fn new() -> Self {
-        InfoData { }
-    }
-}
-
-/// The file info response.
-#[derive(Debug, Deserialize)]
-pub struct InfoResponse {
-    /// The download limit.
-    #[serde(rename = "dlimit")]
-    download_limit: usize,
-
-    /// The total number of times the file has been downloaded.
-    #[serde(rename = "dtotal")]
-    download_count: usize,
-
-    /// The time to live for this file in milliseconds.
-    #[serde(rename = "ttl")]
-    ttl: u64,
-}
-
-impl InfoResponse {
-    /// Get the number of times this file has been downloaded.
-    pub fn download_count(&self) -> usize {
-        self.download_count
-    }
-
-    /// Get the maximum number of times the file may be downloaded.
-    pub fn download_limit(&self) -> usize {
-        self.download_limit
-    }
-
-    /// Get the number of times this file may still be downloaded.
-    pub fn download_left(&self) -> usize {
-        max(self.download_limit() - self.download_count(), 0)
-    }
-
-    /// Get the time to live for this file, in milliseconds from the time the
-    /// request was made.
-    pub fn ttl_millis(&self) -> u64 {
-        self.ttl
+        DeleteData { }
     }
 }
 
@@ -182,9 +131,9 @@ pub enum Error {
     // #[fail(display = "The file has expired or did never exist")]
     // Expired,
 
-    /// An error has occurred while sending the info request to the server.
-    #[fail(display = "Failed to send the file info request")]
-    Info(#[cause] InfoError),
+    /// An error has occurred while sending the filedeletion request.
+    #[fail(display = "Failed to send the file deletion request")]
+    Delete(#[cause] DeleteError),
 }
 
 impl From<PrepareError> for Error {
@@ -199,15 +148,15 @@ impl From<AuthError> for Error {
     }
 }
 
-impl From<InfoError> for Error {
-    fn from(err: InfoError) -> Error {
-        Error::Info(err)
+impl From<DeleteError> for Error {
+    fn from(err: DeleteError) -> Error {
+        Error::Delete(err)
     }
 }
 
 #[derive(Debug, Fail)]
-pub enum InfoDataError {
-    /// Some error occurred while trying to wrap the info data in an
+pub enum DeleteDataError {
+    /// Some error occurred while trying to wrap the deletion data in an
     /// owned object, which is required for authentication on the server.
     /// The wrapped error further described the problem.
     #[fail(display = "")]
@@ -216,19 +165,19 @@ pub enum InfoDataError {
 
 #[derive(Fail, Debug)]
 pub enum PrepareError {
-    /// Failed authenticating, needed to fetch the info
+    /// Failed to authenticate
     #[fail(display = "Failed to authenticate")]
     Auth(#[cause] AuthError),
 
-    /// An error occurred while building the info data that will be
+    /// An error occurred while building the deletion data that will be
     /// send to the server.
     #[fail(display = "Invalid parameters")]
-    InfoData(#[cause] InfoDataError),
+    DeleteData(#[cause] DeleteDataError),
 }
 
 impl From<DataError> for PrepareError {
     fn from(err: DataError) -> PrepareError {
-        PrepareError::InfoData(InfoDataError::Owned(err))
+        PrepareError::DeleteData(DeleteDataError::Owned(err))
     }
 }
 
@@ -258,18 +207,13 @@ pub enum AuthError {
 }
 
 #[derive(Fail, Debug)]
-pub enum InfoError {
-    /// Sending the request to fetch the file info failed.
-    #[fail(display = "Failed to send file info request")]
+pub enum DeleteError {
+    /// Sending the file deletion request failed.
+    #[fail(display = "Failed to send file deletion request")]
     Request,
 
-    /// The response fetching the file info indicated an error and wasn't
+    /// The response for deleting the file indicated an error and wasn't
     /// successful.
-    #[fail(display = "Bad HTTP response '{}' while fetching the file info", _1)]
+    #[fail(display = "Bad HTTP response '{}' while deleting the file", _1)]
     RequestStatus(StatusCode, String),
-
-    /// Failed to decode the info response from the server.
-    /// Maybe the server responded with data from a newer API version.
-    #[fail(display = "Failed to decode info response")]
-    Decode(#[cause] ReqwestError),
 }
