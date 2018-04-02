@@ -8,6 +8,7 @@ use reqwest::{
     StatusCode,
 };
 use reqwest::header::Authorization;
+use serde_json;
 
 use api::data::{
     Error as DataError,
@@ -109,9 +110,9 @@ impl<'a> Info<'a> {
         data: OwnedData<InfoData>,
         sig: String,
     ) -> Result<InfoResponse, InfoError> {
-        // Get the params URL, and send the request
-        let url = self.file.api_params_url();
-        let mut response = client.get(url)
+        // Get the info URL, and send the request
+        let url = self.file.api_info_url();
+        let mut response = client.post(url)
             .json(&data)
             .header(Authorization(
                 format!("send-v1 {}", sig)
@@ -190,7 +191,7 @@ impl InfoResponse {
 #[derive(Fail, Debug)]
 pub enum Error {
     /// An error occurred while preparing the action.
-    #[fail(display = "Failed to prepare setting the parameters")]
+    #[fail(display = "Failed to prepare the action")]
     Prepare(#[cause] PrepareError),
 
     // /// The given Send file has expired, or did never exist in the first place.
