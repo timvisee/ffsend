@@ -1,3 +1,4 @@
+use clap::ArgMatches;
 use failure::Fail;
 use ffsend_api::action::exists::{
     Error as ExistsError,
@@ -14,34 +15,40 @@ use ffsend_api::file::remote_file::{
 };
 use ffsend_api::reqwest::Client;
 
-use cmd::cmd_info::CmdInfo;
+use cmd::matcher::{
+    Matcher,
+    info::InfoMatcher,
+};
 use util::print_error;
 
 /// A file info action.
 pub struct Info<'a> {
-    cmd: &'a CmdInfo<'a>,
+    cmd_matches: &'a ArgMatches<'a>,
 }
 
 impl<'a> Info<'a> {
     /// Construct a new info action.
-    pub fn new(cmd: &'a CmdInfo<'a>) -> Self {
+    pub fn new(cmd_matches: &'a ArgMatches<'a>) -> Self {
         Self {
-            cmd,
+            cmd_matches,
         }
     }
 
     /// Invoke the info action.
     // TODO: create a trait for this method
     pub fn invoke(&self) -> Result<(), Error> {
+        // Create the command matchers
+        let matcher_info = InfoMatcher::with(self.cmd_matches).unwrap();
+
         // Get the share URL
-        let url = self.cmd.url();
+        let url = matcher_info.url();
 
         // Create a reqwest client
         let client = Client::new();
 
         // Parse the remote file based on the share URL, get the password
-        let file = RemoteFile::parse_url(url, self.cmd.owner())?;
-        let password = self.cmd.password();
+        let file = RemoteFile::parse_url(url, matcher_info.owner())?;
+        let password = matcher_info.password();
 
         // TODO: show an informative error if the owner token isn't set
 

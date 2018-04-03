@@ -1,31 +1,38 @@
 use std::sync::{Arc, Mutex};
 
+use clap::ArgMatches;
 use ffsend_api::action::download::Download as ApiDownload;
 use ffsend_api::file::remote_file::RemoteFile;
 use ffsend_api::reqwest::Client;
 
-use cmd::cmd_download::CmdDownload;
+use cmd::matcher::{
+    Matcher,
+    download::DownloadMatcher,
+};
 use error::ActionError;
 use progress::ProgressBar;
 
 /// A file download action.
 pub struct Download<'a> {
-    cmd: &'a CmdDownload<'a>,
+    cmd_matches: &'a ArgMatches<'a>,
 }
 
 impl<'a> Download<'a> {
     /// Construct a new download action.
-    pub fn new(cmd: &'a CmdDownload<'a>) -> Self {
+    pub fn new(cmd_matches: &'a ArgMatches<'a>) -> Self {
         Self {
-            cmd,
+            cmd_matches,
         }
     }
 
     /// Invoke the download action.
     // TODO: create a trait for this method
     pub fn invoke(&self) -> Result<(), ActionError> {
+        // Create the command matchers
+        let matcher_download = DownloadMatcher::with(self.cmd_matches).unwrap();
+
         // Get the share URL
-        let url = self.cmd.url();
+        let url = matcher_download.url();
 
         // Create a reqwest client
         let client = Client::new();
@@ -35,7 +42,7 @@ impl<'a> Download<'a> {
         let file = RemoteFile::parse_url(url, None)?;
 
         // Get the target file or directory
-        let target = self.cmd.output();
+        let target = matcher_download.output();
 
         // Create a progress bar reporter
         let bar = Arc::new(Mutex::new(ProgressBar::new_download()));
@@ -44,7 +51,7 @@ impl<'a> Download<'a> {
         ApiDownload::new(
             &file,
             target,
-            self.cmd.password(),
+            matcher_download.password(),
         ).invoke(&client, bar)?;
 
         // TODO: open the file, or it's location

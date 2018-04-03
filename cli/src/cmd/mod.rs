@@ -1,12 +1,7 @@
-extern crate clap;
-
-pub mod cmd_delete;
-pub mod cmd_download;
-pub mod cmd_info;
-pub mod cmd_params;
-pub mod cmd_password;
-pub mod cmd_upload;
+pub mod arg;
+pub mod cmd;
 pub mod handler;
+pub mod matcher;
 
 // Reexport modules
 pub use self::handler::Handler;

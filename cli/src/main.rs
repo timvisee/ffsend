@@ -1,3 +1,4 @@
+extern crate clap;
 extern crate failure;
 #[macro_use]
 extern crate failure_derive;
@@ -38,38 +39,38 @@ fn main() {
 /// message.
 fn invoke_action(handler: &Handler) -> Result<(), Error> {
     // Match the delete command
-    if let Some(cmd) = handler.delete() {
-        return Delete::new(&cmd).invoke()
+    if handler.delete().is_some() {
+        return Delete::new(handler.matches()).invoke()
             .map_err(|err| err.into());
     }
 
     // Match the download command
-    if let Some(cmd) = handler.download() {
-        return Download::new(&cmd).invoke()
+    if handler.download().is_some() {
+        return Download::new(handler.matches()).invoke()
             .map_err(|err| err.into());
     }
 
     // Match the info command
-    if let Some(cmd) = handler.info() {
-        return Info::new(&cmd).invoke()
+    if handler.info().is_some() {
+        return Info::new(handler.matches()).invoke()
             .map_err(|err| err.into());
     }
 
     // Match the parameters command
-    if let Some(cmd) = handler.params() {
-        return Params::new(&cmd).invoke()
+    if handler.params().is_some() {
+        return Params::new(handler.matches()).invoke()
             .map_err(|err| err.into());
     }
 
     // Match the password command
-    if let Some(cmd) = handler.password() {
-        return Password::new(&cmd).invoke()
+    if handler.password().is_some() {
+        return Password::new(handler.matches()).invoke()
             .map_err(|err| err.into());
     }
 
     // Match the upload command
-    if let Some(cmd) = handler.upload() {
-        return Upload::new(&cmd).invoke()
+    if handler.upload().is_some() {
+        return Upload::new(handler.matches()).invoke()
             .map_err(|err| err.into());
     }
 

@@ -1,12 +1,16 @@
 use std::path::Path;
 use std::sync::{Arc, Mutex};
 
+use clap::ArgMatches;
 use failure::{err_msg, Fail};
 use ffsend_api::action::params::ParamsDataBuilder;
 use ffsend_api::action::upload::Upload as ApiUpload;
 use ffsend_api::reqwest::Client;
 
-use cmd::cmd_upload::CmdUpload;
+use cmd::matcher::{
+    Matcher,
+    upload::UploadMatcher,
+};
 use error::ActionError;
 use progress::ProgressBar;
 use util::open_url;
@@ -15,23 +19,26 @@ use util::{print_error, set_clipboard};
 
 /// A file upload action.
 pub struct Upload<'a> {
-    cmd: &'a CmdUpload<'a>,
+    cmd_matches: &'a ArgMatches<'a>,
 }
 
 impl<'a> Upload<'a> {
     /// Construct a new upload action.
-    pub fn new(cmd: &'a CmdUpload<'a>) -> Self {
+    pub fn new(cmd_matches: &'a ArgMatches<'a>) -> Self {
         Self {
-            cmd,
+            cmd_matches,
         }
     }
 
     /// Invoke the upload action.
     // TODO: create a trait for this method
     pub fn invoke(&self) -> Result<(), ActionError> {
+        // Create the command matchers
+        let matcher_upload = UploadMatcher::with(self.cmd_matches).unwrap();
+
         // Get API parameters
-        let path = Path::new(self.cmd.file()).to_path_buf();
-        let host = self.cmd.host();
+        let path = Path::new(matcher_upload.file()).to_path_buf();
+        let host = matcher_upload.host();
 
         // Create a reqwest client
         let client = Client::new();
@@ -43,7 +50,7 @@ impl<'a> Upload<'a> {
         let params = {
             // Build the parameters data object
             let mut params = ParamsDataBuilder::default()
-                .download_limit(self.cmd.download_limit())
+                .download_limit(matcher_upload.download_limit())
                 .build()
                 .unwrap();
 
@@ -59,8 +66,8 @@ impl<'a> Upload<'a> {
         let file = ApiUpload::new(
             host,
             path,
-            self.cmd.name().map(|name| name.to_owned()),
-            self.cmd.password(),
+            matcher_upload.name().map(|name| name.to_owned()),
+            matcher_upload.password(),
             params,
         ).invoke(&client, bar)?;
 
@@ -70,7 +77,7 @@ impl<'a> Upload<'a> {
         println!("Owner token: {}", file.owner_token().unwrap());
 
         // Open the URL in the browser
-        if self.cmd.open() {
+        if matcher_upload.open() {
             if let Err(err) = open_url(url.clone()) {
                 print_error(
                     err.context("Failed to open the URL in the browser")
@@ -81,7 +88,7 @@ impl<'a> Upload<'a> {
         // Copy the URL in the user's clipboard
         #[cfg(feature = "clipboard")]
         {
-            if self.cmd.copy() {
+            if matcher_upload.copy() {
                 if set_clipboard(url.as_str().to_owned()).is_err() {
                     print_error(
                         err_msg("Failed to copy the URL to the clipboard")
