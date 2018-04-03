@@ -1,4 +1,4 @@
-use super::clap::{App, ArgMatches};
+use super::clap::{App, AppSettings, Arg, ArgMatches};
 
 use app::*;
 
@@ -22,6 +22,27 @@ impl<'a: 'b, 'b> Handler<'a> {
             .version(APP_VERSION)
             .author(APP_AUTHOR)
             .about(APP_ABOUT)
+            .global_setting(AppSettings::GlobalVersion)
+            .global_setting(AppSettings::VersionlessSubcommands)
+            // TODO: enable below command when it doesn't break `p` anymore.
+            // .global_setting(AppSettings::InferSubcommands)
+            .arg(Arg::with_name("force")
+                .long("force")
+                .short("f")
+                .global(true)
+                .help("Force the action, ignore warnings"))
+            .arg(Arg::with_name("no-interact")
+                .long("no-interact")
+                .short("I")
+                .alias("no-interactive")
+                .global(true)
+                .help("Not interactive, do not prompt"))
+            .arg(Arg::with_name("yes")
+                .long("yes")
+                .short("y")
+                .visible_alias("assume-yes")
+                .global(true)
+                .help("Assume yes for prompts"))
             .subcommand(CmdDelete::build())
             .subcommand(CmdDownload::build().display_order(2))
             .subcommand(CmdInfo::build())

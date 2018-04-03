@@ -35,7 +35,7 @@ impl<'a> Download<'a> {
         let file = RemoteFile::parse_url(url, None)?;
 
         // Get the target file or directory
-        let target = self.cmd.file();
+        let target = self.cmd.output();
 
         // Create a progress bar reporter
         let bar = Arc::new(Mutex::new(ProgressBar::new_download()));

@@ -24,9 +24,12 @@ impl<'a: 'b, 'b> CmdDownload<'a> {
                 .help("The share URL")
                 .required(true)
                 .multiple(false))
-            .arg(Arg::with_name("file")
-                .long("file")
-                .short("f")
+            .arg(Arg::with_name("output")
+                .long("output")
+                .short("o")
+                .alias("output-file")
+                .alias("out")
+                .alias("file")
                 .value_name("PATH")
                 .help("The output file or directory"))
             .arg(Arg::with_name("password")
@@ -80,8 +83,8 @@ impl<'a: 'b, 'b> CmdDownload<'a> {
     /// The target file or directory to download the file to.
     /// If a directory is given, the file name of the original uploaded file
     /// will be used.
-    pub fn file(&'a self) -> PathBuf {
-        self.matches.value_of("file")
+    pub fn output(&'a self) -> PathBuf {
+        self.matches.value_of("output")
             .map(|path| PathBuf::from(path))
             .unwrap_or(PathBuf::from("./"))
     }
