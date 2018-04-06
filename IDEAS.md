@@ -38,3 +38,4 @@
 - Read and write files from and to stdin and stdout with `-` as file
 - Ask to add MIME extension to downloaded files without one on Windows
 - Fetch max file size from `server/jsconfig.js`
+- Define a redirect policy (allow setting max redirects)

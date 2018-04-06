@@ -1,20 +1,21 @@
-// TODO: define redirect policy
-
 use failure::Error as FailureError;
 use openssl::symm::decrypt_aead;
 use reqwest::{Client, StatusCode};
 use reqwest::header::Authorization;
 use serde_json;
 
+use api::nonce::{
+    HEADER_NONCE,
+    header_nonce,
+    NonceError,
+    request_auth_nonce,
+};
 use crypto::b64;
 use crypto::key_set::KeySet;
 use crypto::sig::signature_encoded;
 use ext::status_code::StatusCodeExt;
 use file::metadata::Metadata as MetadataData;
 use file::remote_file::RemoteFile;
-
-/// The name of the header that is used for the authentication nonce.
-const HEADER_AUTH_NONCE: &'static str = "WWW-Authenticate";
 
 /// The HTTP status code that is returned for expired files.
 const FILE_EXPIRED_STATUS: StatusCode = StatusCode::NotFound;
@@ -50,42 +51,14 @@ impl<'a> Metadata<'a> {
             .map_err(|err| err.into())
     }
 
-    /// Fetch the authentication nonce for the file from the Send server.
+    /// Fetch the authentication nonce for the file from the remote server.
     fn fetch_auth_nonce(&self, client: &Client)
-        -> Result<Vec<u8>, Error>
+        -> Result<Vec<u8>, RequestError>
     {
-        // Get the download url, and parse the nonce
-        let download_url = self.file.download_url(false);
-        let response = client.get(download_url)
-            .send()
-            .map_err(|_| AuthError::NonceReq)?;
-
-        // Validate the status code
-        let status = response.status();
-        if !status.is_success() {
-            // Handle expired files
-            if status == FILE_EXPIRED_STATUS {
-                return Err(Error::Expired);
-            } else {
-                return Err(AuthError::NonceReqStatus(status, status.err_text()).into());
-            }
-        }
-
-        // Get the authentication nonce
-        b64::decode(
-            response.headers()
-                .get_raw(HEADER_AUTH_NONCE)
-                .ok_or(AuthError::NoNonceHeader)?
-                .one()
-                .ok_or(AuthError::MalformedNonce)
-                .and_then(|line| String::from_utf8(line.to_vec())
-                    .map_err(|_| AuthError::MalformedNonce)
-                )?
-                .split_terminator(" ")
-                .skip(1)
-                .next()
-                .ok_or(AuthError::MalformedNonce)?
-        ).map_err(|_| AuthError::MalformedNonce.into())
+        request_auth_nonce(
+            client,
+            self.file.download_url(false),
+        ).map_err(|err| RequestError::Auth(err))
     }
 
     /// Create a metadata nonce, and fetch the metadata for the file from the
@@ -119,20 +92,8 @@ impl<'a> Metadata<'a> {
         }
 
         // Get the metadata nonce
-        let nonce = b64::decode(
-            response.headers()
-                .get_raw(HEADER_AUTH_NONCE)
-                .ok_or(MetaError::NoNonceHeader)?
-                .one()
-                .ok_or(MetaError::MalformedNonce)
-                .and_then(|line| String::from_utf8(line.to_vec())
-                    .map_err(|_| MetaError::MalformedNonce)
-                )?
-                .split_terminator(" ")
-                .skip(1)
-                .next()
-                .ok_or(MetaError::MalformedNonce)?
-        ).map_err(|_| MetaError::MalformedNonce)?;
+        let nonce = header_nonce(HEADER_NONCE, &response)
+            .map_err(|err| MetaError::Nonce(err))?;
 
         // Parse the metadata response, and decrypt it
         Ok(MetadataResponse::from(
@@ -228,9 +189,9 @@ pub enum Error {
     Expired,
 }
 
-impl From<AuthError> for Error {
-    fn from(err: AuthError) -> Error {
-        Error::Request(RequestError::Auth(err))
+impl From<RequestError> for Error {
+    fn from(err: RequestError) -> Error {
+        Error::Request(err)
     }
 }
 
@@ -244,36 +205,11 @@ impl From<MetaError> for Error {
 pub enum RequestError {
     /// Failed authenticating, in order to fetch the file data.
     #[fail(display = "Failed to authenticate")]
-    Auth(#[cause] AuthError),
+    Auth(#[cause] NonceError),
 
     /// Failed to retrieve the file metadata.
     #[fail(display = "Failed to retrieve file metadata")]
     Meta(#[cause] MetaError),
-}
-
-#[derive(Fail, Debug)]
-pub enum AuthError {
-    /// Sending the request to gather the authentication encryption nonce
-    /// failed.
-    #[fail(display = "Failed to request authentication nonce")]
-    NonceReq,
-
-    /// The response for fetching the authentication encryption nonce
-    /// indicated an error and wasn't successful.
-    #[fail(display = "Bad HTTP response '{}' while requesting authentication nonce", _1)]
-    NonceReqStatus(StatusCode, String),
-
-    /// No authentication encryption nonce was included in the response
-    /// from the server, it was missing.
-    #[fail(display = "Missing authentication nonce in server response")]
-    NoNonceHeader,
-
-    /// The authentication encryption nonce from the response malformed or
-    /// empty.
-    /// Maybe the server responded with a new format that isn't supported yet
-    /// by this client.
-    #[fail(display = "Received malformed authentication nonce")]
-    MalformedNonce,
 }
 
 #[derive(Fail, Debug)]
@@ -292,16 +228,9 @@ pub enum MetaError {
     #[fail(display = "Bad HTTP response '{}' while requesting metadata nonce", _1)]
     NonceReqStatus(StatusCode, String),
 
-    /// No metadata encryption nonce was included in the response from the
-    /// server, it was missing.
-    #[fail(display = "Missing metadata nonce in server response")]
-    NoNonceHeader,
-
-    /// The metadata encryption nonce from the response malformed or empty.
-    /// Maybe the server responded with a new format that isn't supported yet
-    /// by this client.
-    #[fail(display = "Received malformed metadata nonce")]
-    MalformedNonce,
+    /// Couldn't parse the metadata encryption nonce.
+    #[fail(display = "Failed to parse the metadata encryption nonce")]
+    Nonce(#[cause] NonceError),
 
     /// The received metadata is malformed, and couldn't be decoded or
     /// interpreted.

@@ -1,5 +1,3 @@
-// TODO: define redirect policy
-
 use std::cmp::max;
 
 use reqwest::{
@@ -12,12 +10,9 @@ use api::data::{
     Error as DataError,
     OwnedData,
 };
-use crypto::b64;
+use api::nonce::{NonceError, request_auth_nonce};
 use ext::status_code::StatusCodeExt;
 use file::remote_file::RemoteFile;
-
-/// The name of the header that is used for the authentication nonce.
-const HEADER_AUTH_NONCE: &'static str = "WWW-Authenticate";
 
 /// An action to fetch info of a shared file.
 pub struct Info<'a> {
@@ -54,40 +49,13 @@ impl<'a> Info<'a> {
     }
 
     /// Fetch the authentication nonce for the file from the remote server.
-    fn fetch_auth_nonce(&self, client: &Client) -> Result<Vec<u8>, AuthError> {
-        // Get the download URL, and parse the nonce
-        let download_url = self.file.download_url(false);
-        let response = client.get(download_url)
-            .send()
-            .map_err(|_| AuthError::NonceReq)?;
-
-        // Validate the status code
-        let status = response.status();
-        if !status.is_success() {
-            // TODO: should we check here whether a 404 is returned?
-            // // Handle expired files
-            // if status == FILE_EXPIRED_STATUS {
-            //     return Err(Error::Expired);
-            // } else {
-            return Err(AuthError::NonceReqStatus(status, status.err_text()).into());
-            // }
-        }
-
-        // Get the authentication nonce
-        b64::decode(
-            response.headers()
-                .get_raw(HEADER_AUTH_NONCE)
-                .ok_or(AuthError::NoNonceHeader)?
-                .one()
-                .ok_or(AuthError::MalformedNonce)
-                .and_then(|line| String::from_utf8(line.to_vec())
-                    .map_err(|_| AuthError::MalformedNonce)
-                )?
-                .split_terminator(" ")
-                .skip(1)
-                .next()
-                .ok_or(AuthError::MalformedNonce)?
-        ).map_err(|_| AuthError::MalformedNonce.into())
+    fn fetch_auth_nonce(&self, client: &Client)
+        -> Result<Vec<u8>, PrepareError>
+    {
+        request_auth_nonce(
+            client,
+            self.file.download_url(false),
+        ).map_err(|err| PrepareError::Auth(err))
     }
 
     /// Send the request for fetching the remote file info.
@@ -193,12 +161,6 @@ impl From<PrepareError> for Error {
     }
 }
 
-impl From<AuthError> for Error {
-    fn from(err: AuthError) -> Error {
-        PrepareError::Auth(err).into()
-    }
-}
-
 impl From<InfoError> for Error {
     fn from(err: InfoError) -> Error {
         Error::Info(err)
@@ -218,7 +180,7 @@ pub enum InfoDataError {
 pub enum PrepareError {
     /// Failed authenticating, needed to fetch the info
     #[fail(display = "Failed to authenticate")]
-    Auth(#[cause] AuthError),
+    Auth(#[cause] NonceError),
 
     /// An error occurred while building the info data that will be
     /// send to the server.
@@ -230,31 +192,6 @@ impl From<DataError> for PrepareError {
     fn from(err: DataError) -> PrepareError {
         PrepareError::InfoData(InfoDataError::Owned(err))
     }
-}
-
-#[derive(Fail, Debug)]
-pub enum AuthError {
-    /// Sending the request to gather the authentication encryption nonce
-    /// failed.
-    #[fail(display = "Failed to request authentication nonce")]
-    NonceReq,
-
-    /// The response for fetching the authentication encryption nonce
-    /// indicated an error and wasn't successful.
-    #[fail(display = "Bad HTTP response '{}' while requesting authentication nonce", _1)]
-    NonceReqStatus(StatusCode, String),
-
-    /// No authentication encryption nonce was included in the response
-    /// from the server, it was missing.
-    #[fail(display = "Missing authentication nonce in server response")]
-    NoNonceHeader,
-
-    /// The authentication encryption nonce from the response malformed or
-    /// empty.
-    /// Maybe the server responded with a new format that isn't supported yet
-    /// by this client.
-    #[fail(display = "Received malformed authentication nonce")]
-    MalformedNonce,
 }
 
 #[derive(Fail, Debug)]

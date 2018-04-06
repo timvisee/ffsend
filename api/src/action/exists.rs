@@ -1,5 +1,3 @@
-// TODO: define redirect policy
-
 use reqwest::{Client, StatusCode};
 
 use ext::status_code::StatusCodeExt;

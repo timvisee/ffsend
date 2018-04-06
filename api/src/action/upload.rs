@@ -22,7 +22,7 @@ use url::{
     Url,
 };
 
-use crypto::b64;
+use api::nonce::{HEADER_NONCE, header_nonce};
 use crypto::key_set::KeySet;
 use ext::status_code::StatusCodeExt;
 use file::remote_file::RemoteFile;
@@ -44,9 +44,6 @@ use super::password::{
 };
 
 type EncryptedReader = ProgressReader<BufReader<EncryptedFileReader>>;
-
-/// The name of the header that is used for the authentication nonce.
-const HEADER_AUTH_NONCE: &'static str = "WWW-Authenticate";
 
 /// A file upload action to a Send server.
 pub struct Upload {
@@ -262,14 +259,7 @@ impl Upload {
         }
 
         // Try to get the nonce, don't error on failure
-        let nonce = response.headers()
-            .get_raw(HEADER_AUTH_NONCE)
-            .and_then(|h| h.one())
-            .and_then(|line| String::from_utf8(line.to_vec()).ok())
-            .and_then(|line| line.split_terminator(" ").skip(1).next()
-                .map(|line| line.to_owned())
-            )
-            .and_then(|nonce| b64::decode(&nonce).ok());
+        let nonce = header_nonce(HEADER_NONCE, &response).ok();
 
         // Decode the response
         let response: UploadResponse = match response.json() {
