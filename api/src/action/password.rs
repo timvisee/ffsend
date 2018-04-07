@@ -4,7 +4,7 @@ use api::data::{
     Error as DataError,
     OwnedData,
 };
-use api::nonce::{NonceError, request_auth_nonce};
+use api::nonce::{NonceError, request_nonce};
 use crypto::key_set::KeySet;
 use ext::status_code::StatusCodeExt;
 use file::remote_file::RemoteFile;
@@ -62,7 +62,7 @@ impl<'a> Password<'a> {
     fn fetch_auth_nonce(&self, client: &Client)
         -> Result<Vec<u8>, PrepareError>
     {
-        request_auth_nonce(
+        request_nonce(
             client,
             self.file.download_url(false),
         ).map_err(|err| PrepareError::Auth(err))

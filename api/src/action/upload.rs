@@ -22,7 +22,7 @@ use url::{
     Url,
 };
 
-use api::nonce::{HEADER_NONCE, header_nonce};
+use api::nonce::header_nonce;
 use crypto::key_set::KeySet;
 use ext::status_code::StatusCodeExt;
 use file::remote_file::RemoteFile;
@@ -259,7 +259,7 @@ impl Upload {
         }
 
         // Try to get the nonce, don't error on failure
-        let nonce = header_nonce(HEADER_NONCE, &response).ok();
+        let nonce = header_nonce(&response).ok();
 
         // Decode the response
         let response: UploadResponse = match response.json() {

@@ -4,12 +4,7 @@ use reqwest::{Client, StatusCode};
 use reqwest::header::Authorization;
 use serde_json;
 
-use api::nonce::{
-    HEADER_NONCE,
-    header_nonce,
-    NonceError,
-    request_auth_nonce,
-};
+use api::nonce::{header_nonce, NonceError, request_nonce};
 use crypto::b64;
 use crypto::key_set::KeySet;
 use crypto::sig::signature_encoded;
@@ -55,7 +50,7 @@ impl<'a> Metadata<'a> {
     fn fetch_auth_nonce(&self, client: &Client)
         -> Result<Vec<u8>, RequestError>
     {
-        request_auth_nonce(
+        request_nonce(
             client,
             self.file.download_url(false),
         ).map_err(|err| RequestError::Auth(err))
@@ -92,7 +87,7 @@ impl<'a> Metadata<'a> {
         }
 
         // Get the metadata nonce
-        let nonce = header_nonce(HEADER_NONCE, &response)
+        let nonce = header_nonce(&response)
             .map_err(|err| MetaError::Nonce(err))?;
 
         // Parse the metadata response, and decrypt it

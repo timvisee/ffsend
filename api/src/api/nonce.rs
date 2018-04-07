@@ -5,10 +5,11 @@ use crypto::b64;
 use ext::status_code::StatusCodeExt;
 
 /// The name of the header the nonce is delivered in.
-pub const HEADER_NONCE: &'static str = "WWW-Authenticate";
+const HEADER_NONCE: &'static str = "WWW-Authenticate";
 
-/// Do a new request, and fetch the nonce from the header with the given name.
-pub fn request_nonce(client: &Client, url: Url, header: &str)
+/// Do a new request, and extract the nonce from a header in the given
+/// response.
+pub fn request_nonce(client: &Client, url: Url)
     -> Result<Vec<u8>, NonceError>
 {
     // Make the request
@@ -28,26 +29,18 @@ pub fn request_nonce(client: &Client, url: Url, header: &str)
         // }
     }
 
-    // Fetch the nonce
-    header_nonce(header, &response)
+    // Extract the nonce
+    header_nonce(&response)
 }
 
-/// Do a new request, and fetch the authentication nonce from the header with
-/// the given name.
-pub fn request_auth_nonce(client: &Client, url: Url)
-    -> Result<Vec<u8>, NonceError>
-{
-    request_nonce(client, url, HEADER_NONCE)
-}
-
-/// Get a nonce from a header in the given response.
-pub fn header_nonce(header: &str, response: &Response)
+/// Extract the nonce from a header in the given response.
+pub fn header_nonce(response: &Response)
     -> Result<Vec<u8>, NonceError>
 {
     // Get the authentication nonce
     b64::decode(
         response.headers()
-            .get_raw(header)
+            .get_raw(HEADER_NONCE)
             .ok_or(NonceError::NoNonceHeader)?
             .one()
             .ok_or(NonceError::MalformedNonce)
