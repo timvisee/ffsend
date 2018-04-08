@@ -5,6 +5,7 @@ use api::data::{
     OwnedData,
 };
 use api::nonce::{NonceError, request_nonce};
+use api::url::UrlBuilder;
 use crypto::key_set::KeySet;
 use ext::status_code::StatusCodeExt;
 use file::remote_file::RemoteFile;
@@ -47,7 +48,7 @@ impl<'a> Password<'a> {
         }
 
         // Derive a new authentication key
-        key.derive_auth_password(self.password, &self.file.download_url(true));
+        key.derive_auth_password(self.password, &UrlBuilder::download(self.file, true));
 
         // Build the password data, wrap it as owned
         let data = OwnedData::from(PasswordData::from(&key), &self.file)
@@ -64,7 +65,7 @@ impl<'a> Password<'a> {
     {
         request_nonce(
             client,
-            self.file.download_url(false),
+            UrlBuilder::download(self.file, false),
         ).map_err(|err| PrepareError::Auth(err))
     }
 
@@ -75,7 +76,7 @@ impl<'a> Password<'a> {
         data: OwnedData<PasswordData>,
     ) -> Result<(), ChangeError> {
         // Get the password URL, and send the change
-        let url = self.file.api_password_url();
+        let url = UrlBuilder::api_password(self.file);
         let response = client.post(url)
             .json(&data)
             .send()

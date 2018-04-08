@@ -1,6 +1,7 @@
 use openssl::symm::Cipher;
 use url::Url;
 
+use api::url::UrlBuilder;
 use file::remote_file::RemoteFile;
 use super::{b64, rand_bytes};
 use super::hdkf::{derive_auth_key, derive_file_key, derive_meta_key};
@@ -54,7 +55,7 @@ impl KeySet {
 
         // Derive a pasworded key
         if let Some(password) = password {
-            set.derive_auth_password(password, &file.download_url(true));
+            set.derive_auth_password(password, &UrlBuilder::download(&file, true));
         }
 
         set

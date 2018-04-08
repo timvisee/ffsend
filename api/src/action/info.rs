@@ -11,6 +11,7 @@ use api::data::{
     OwnedData,
 };
 use api::nonce::{NonceError, request_nonce};
+use api::url::UrlBuilder;
 use ext::status_code::StatusCodeExt;
 use file::remote_file::RemoteFile;
 
@@ -54,7 +55,7 @@ impl<'a> Info<'a> {
     {
         request_nonce(
             client,
-            self.file.download_url(false),
+            UrlBuilder::download(self.file, false),
         ).map_err(|err| PrepareError::Auth(err))
     }
 
@@ -65,7 +66,7 @@ impl<'a> Info<'a> {
         data: OwnedData<InfoData>,
     ) -> Result<InfoResponse, InfoError> {
         // Get the info URL, and send the request
-        let url = self.file.api_info_url();
+        let url = UrlBuilder::api_info(self.file);
         let mut response = client.post(url)
             .json(&data)
             .send()

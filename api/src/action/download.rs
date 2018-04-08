@@ -11,6 +11,7 @@ use reqwest::{Client, Response, StatusCode};
 use reqwest::header::Authorization;
 use reqwest::header::ContentLength;
 
+use api::url::UrlBuilder;
 use crypto::key_set::KeySet;
 use crypto::sig::signature_encoded;
 use ext::status_code::StatusCodeExt;
@@ -172,7 +173,7 @@ impl<'a> Download<'a> {
             .map_err(|_| DownloadError::ComputeSignature)?;
 
         // Build and send the download request
-        let response = client.get(self.file.api_download_url())
+        let response = client.get(UrlBuilder::api_download(self.file))
             .header(Authorization(
                 format!("send-v1 {}", sig)
             ))

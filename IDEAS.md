@@ -39,3 +39,4 @@
 - Ask to add MIME extension to downloaded files without one on Windows
 - Fetch max file size from `server/jsconfig.js`
 - Define a redirect policy (allow setting max redirects)
+- Support servers that are hosted on a sub path (URL builder resets path)

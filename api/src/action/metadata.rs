@@ -5,6 +5,7 @@ use reqwest::header::Authorization;
 use serde_json;
 
 use api::nonce::{header_nonce, NonceError, request_nonce};
+use api::url::UrlBuilder;
 use crypto::b64;
 use crypto::key_set::KeySet;
 use crypto::sig::signature_encoded;
@@ -52,7 +53,7 @@ impl<'a> Metadata<'a> {
     {
         request_nonce(
             client,
-            self.file.download_url(false),
+            UrlBuilder::download(self.file, false),
         ).map_err(|err| RequestError::Auth(err))
     }
 
@@ -73,7 +74,7 @@ impl<'a> Metadata<'a> {
             .map_err(|_| MetaError::ComputeSignature)?;
 
         // Build the request, fetch the encrypted metadata
-        let mut response = client.get(self.file.api_meta_url())
+        let mut response = client.get(UrlBuilder::api_metadata(self.file))
             .header(Authorization(
                 format!("send-v1 {}", sig)
             ))

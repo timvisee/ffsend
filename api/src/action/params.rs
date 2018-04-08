@@ -5,6 +5,7 @@ use api::data::{
     OwnedData,
 };
 use api::nonce::{NonceError, request_nonce};
+use api::url::UrlBuilder;
 use ext::status_code::StatusCodeExt;
 use file::remote_file::RemoteFile;
 
@@ -70,7 +71,7 @@ impl<'a> Params<'a> {
     {
         request_nonce(
             client,
-            self.file.download_url(false),
+            UrlBuilder::download(self.file, false),
         ).map_err(|err| PrepareError::Auth(err))
     }
 
@@ -81,7 +82,7 @@ impl<'a> Params<'a> {
         data: OwnedData<ParamsData>,
     ) -> Result<(), ChangeError> {
         // Get the params URL, and send the change
-        let url = self.file.api_params_url();
+        let url = UrlBuilder::api_params(self.file);
         let response = client.post(url)
             .json(&data)
             .send()

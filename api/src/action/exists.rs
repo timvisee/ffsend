@@ -1,5 +1,6 @@
 use reqwest::{Client, StatusCode};
 
+use api::url::UrlBuilder;
 use ext::status_code::StatusCodeExt;
 use file::remote_file::RemoteFile;
 
@@ -30,7 +31,7 @@ impl<'a> Exists<'a> {
     /// Send a request to check whether the file exists
     fn check_exists(&self, client: &Client) -> Result<ExistsResponse, Error> {
         // Get the download url, and parse the nonce
-        let exists_url = self.file.api_exists_url();
+        let exists_url = UrlBuilder::api_exists(self.file);
         let mut response = client.get(exists_url)
             .send()
             .map_err(|_| Error::Request)?;

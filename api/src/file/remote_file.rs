@@ -138,6 +138,11 @@ impl RemoteFile {
         &self.id
     }
 
+    /// Get the file URL, provided by the server.
+    pub fn url(&self) -> &Url {
+        &self.url
+    }
+
     /// Get the raw secret.
     pub fn secret_raw(&self) -> &Vec<u8> {
         // A secret must have been set
@@ -168,91 +173,6 @@ impl RemoteFile {
     /// Set the owner token.
     pub fn set_owner_token(&mut self, token: Option<String>) {
         self.owner_token = token;
-    }
-
-    /// Get the download URL of the file
-    /// This URL is identical to the share URL, a term used in this API.
-    /// Set `secret` to `true`, to include it in the URL if known.
-    pub fn download_url(&self, secret: bool) -> Url {
-        // Get the share URL, and add the secret fragment
-        let mut url = self.url.clone();
-        if secret && self.has_secret() {
-            url.set_fragment(Some(&self.secret()));
-        } else {
-            url.set_fragment(None);
-        }
-
-        url
-    }
-
-    /// Get the API metadata URL of the file.
-    pub fn api_meta_url(&self) -> Url {
-        // Get the share URL, and add the secret fragment
-        let mut url = self.url.clone();
-        url.set_path(format!("/api/metadata/{}", self.id).as_str());
-        url.set_fragment(None);
-
-        url
-    }
-
-    /// Get the API download URL of the file.
-    pub fn api_download_url(&self) -> Url {
-        // Get the share URL, and add the secret fragment
-        let mut url = self.url.clone();
-        url.set_path(format!("/api/download/{}", self.id).as_str());
-        url.set_fragment(None);
-
-        url
-    }
-
-    /// Get the API password URL of the file.
-    pub fn api_password_url(&self) -> Url {
-        // Get the share URL, and add the secret fragment
-        let mut url = self.url.clone();
-        url.set_path(format!("/api/password/{}", self.id).as_str());
-        url.set_fragment(None);
-
-        url
-    }
-
-    /// Get the API params URL of the file.
-    pub fn api_params_url(&self) -> Url {
-        // Get the share URL, and add the secret fragment
-        let mut url = self.url.clone();
-        url.set_path(format!("/api/params/{}", self.id).as_str());
-        url.set_fragment(None);
-
-        url
-    }
-
-    /// Get the API info URL of the file.
-    pub fn api_info_url(&self) -> Url {
-        // Get the share URL, and add the secret fragment
-        let mut url = self.url.clone();
-        url.set_path(format!("/api/info/{}", self.id).as_str());
-        url.set_fragment(None);
-
-        url
-    }
-
-    /// Get the API exists URL of the file.
-    pub fn api_exists_url(&self) -> Url {
-        // Get the share URL, and add the secret fragment
-        let mut url = self.url.clone();
-        url.set_path(format!("/api/exists/{}", self.id).as_str());
-        url.set_fragment(None);
-
-        url
-    }
-
-    /// Get the API delete URL of the file.
-    pub fn api_delete_url(&self) -> Url {
-        // Get the share URL, and add the secret fragment
-        let mut url = self.url.clone();
-        url.set_path(format!("/api/delete/{}", self.id).as_str());
-        url.set_fragment(None);
-
-        url
     }
 }
 
