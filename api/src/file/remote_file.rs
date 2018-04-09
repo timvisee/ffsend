@@ -1,6 +1,7 @@
 extern crate chrono;
 extern crate regex;
 
+use api::url::UrlBuilder;
 use url::{
     ParseError as UrlParseError,
     Url,
@@ -173,6 +174,13 @@ impl RemoteFile {
     /// Set the owner token.
     pub fn set_owner_token(&mut self, token: Option<String>) {
         self.owner_token = token;
+    }
+
+    /// Build the download URL of the given file.
+    /// This URL is identical to the share URL, a term used in this API.
+    /// Set `secret` to `true`, to include it in the URL if known.
+    pub fn download_url(&self, secret: bool) -> Url {
+        UrlBuilder::download(&self, secret)
     }
 }
 
