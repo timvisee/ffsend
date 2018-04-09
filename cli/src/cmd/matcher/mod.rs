@@ -1,5 +1,6 @@
 pub mod delete;
 pub mod download;
+pub mod exists;
 pub mod info;
 pub mod params;
 pub mod password;
@@ -8,6 +9,7 @@ pub mod upload;
 // Reexport to matcher module
 pub use self::delete::DeleteMatcher;
 pub use self::download::DownloadMatcher;
+pub use self::exists::ExistsMatcher;
 pub use self::info::InfoMatcher;
 pub use self::params::ParamsMatcher;
 pub use self::password::PasswordMatcher;

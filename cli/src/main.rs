@@ -14,6 +14,7 @@ mod util;
 
 use action::delete::Delete;
 use action::download::Download;
+use action::exists::Exists;
 use action::info::Info;
 use action::params::Params;
 use action::password::Password;
@@ -47,6 +48,12 @@ fn invoke_action(handler: &Handler) -> Result<(), Error> {
     // Match the download command
     if handler.download().is_some() {
         return Download::new(handler.matches()).invoke()
+            .map_err(|err| err.into());
+    }
+
+    // Match the exists command
+    if handler.exists().is_some() {
+        return Exists::new(handler.matches()).invoke()
             .map_err(|err| err.into());
     }
 
