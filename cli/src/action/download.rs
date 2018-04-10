@@ -2,6 +2,7 @@ use std::sync::{Arc, Mutex};
 
 use clap::ArgMatches;
 use ffsend_api::action::download::Download as ApiDownload;
+use ffsend_api::action::exists::Exists as ApiExists;
 use ffsend_api::file::remote_file::RemoteFile;
 use ffsend_api::reqwest::Client;
 
@@ -11,6 +12,7 @@ use cmd::matcher::{
 };
 use error::ActionError;
 use progress::ProgressBar;
+use util::prompt_password;
 
 /// A file download action.
 pub struct Download<'a> {
@@ -41,8 +43,21 @@ impl<'a> Download<'a> {
         // TODO: handle error here
         let file = RemoteFile::parse_url(url, None)?;
 
-        // Get the target file or directory
+        // Get the target file or directory, and the password
         let target = matcher_download.output();
+        let mut password = matcher_download.password();
+
+        // Check whether the file requires a password
+        let exists = ApiExists::new(&file).invoke(&client).unwrap();
+        if exists.has_password() != password.is_some() {
+            if exists.has_password() {
+                println!("This file is protected with a password.");
+                password = Some(prompt_password());
+            } else {
+                println!("Ignoring password, it is not required");
+                password = None;
+            }
+        }
 
         // Create a progress bar reporter
         let bar = Arc::new(Mutex::new(ProgressBar::new_download()));
@@ -51,7 +66,8 @@ impl<'a> Download<'a> {
         ApiDownload::new(
             &file,
             target,
-            matcher_download.password(),
+            password,
+            false,
         ).invoke(&client, bar)?;
 
         // TODO: open the file, or it's location

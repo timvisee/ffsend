@@ -36,19 +36,26 @@ pub struct Download<'a> {
 
     /// An optional password to decrypt a protected file.
     password: Option<String>,
+
+    /// Check whether the file exists (recommended).
+    check_exists: bool,
 }
 
 impl<'a> Download<'a> {
     /// Construct a new download action for the given remote file.
+    /// It is recommended to check whether the file exists,
+    /// unless that is already done.
     pub fn new(
         file: &'a RemoteFile,
         target: PathBuf,
         password: Option<String>,
+        check_exists: bool,
     ) -> Self {
         Self {
             file,
             target,
             password,
+            check_exists,
         }
     }
 
@@ -59,23 +66,18 @@ impl<'a> Download<'a> {
         reporter: Arc<Mutex<ProgressReporter>>,
     ) -> Result<(), Error> {
         // Make sure the given file exists
-        let exist_response = ExistsAction::new(&self.file)
-            .invoke(&client)?;
+        if self.check_exists {
+            let exist_response = ExistsAction::new(&self.file)
+                .invoke(&client)?;
 
-        // Return an error if the file does not exist
-        if !exist_response.exists() {
-            return Err(Error::Expired);
-        }
+            // Return an error if the file does not exist
+            if !exist_response.exists() {
+                return Err(Error::Expired);
+            }
 
-        // Make sure a password is given when it is required
-        let has_password = self.password.is_some();
-        if has_password != exist_response.has_password() {
-            if has_password {
-                // TODO: show a proper message here
-                println!("file not password protected, ignoring password");
-            } else {
-                // TODO: show a propper error here, or prompt for the password
-                panic!("password required");
+            // Make sure a password is given when it is required
+            if !self.password.is_some() && exist_response.has_password() {
+                return Err(Error::PasswordRequired);
             }
         }
 
@@ -266,6 +268,10 @@ pub enum Error {
     /// file that will be downloaded.
     #[fail(display = "Failed to fetch file metadata")]
     Meta(#[cause] MetadataError),
+
+    /// A password is required, but was not given.
+    #[fail(display = "Missing password, password required")]
+    PasswordRequired,
 
     /// The given Send file has expired, or did never exist in the first place.
     /// Therefore the file could not be downloaded.

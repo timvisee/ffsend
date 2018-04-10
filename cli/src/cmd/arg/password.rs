@@ -1,7 +1,7 @@
 use clap::{Arg, ArgMatches};
-use rpassword::prompt_password_stderr;
 
 use super::{CmdArg, CmdArgFlag, CmdArgOption};
+use util::prompt_password;
 
 /// The password argument.
 pub struct ArgPassword { }
@@ -41,11 +41,6 @@ impl<'a> CmdArgOption<'a> for ArgPassword {
         }
 
         // Prompt for the password
-        // TODO: don't unwrap/expect
-        // TODO: create utility function for this
-        Some(
-            prompt_password_stderr("Password: ")
-                .expect("failed to read password from stdin")
-        )
+        Some(prompt_password())
     }
 }

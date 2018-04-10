@@ -14,6 +14,7 @@ use self::clipboard::{ClipboardContext, ClipboardProvider};
 use self::colored::*;
 use failure::{self, Fail};
 use ffsend_api::url::Url;
+use rpassword::prompt_password_stderr;
 
 /// Print a success message.
 pub fn print_success(msg: &str) {
@@ -24,8 +25,7 @@ pub fn print_success(msg: &str) {
 /// with it's causes.
 pub fn print_error<E: Fail>(err: E) {
     // Report each printable error, count them
-    let count = err.causes()
-        .map(|err| format!("{}", err))
+    let count = err.causes() .map(|err| format!("{}", err))
         .filter(|err| !err.is_empty())
         .enumerate()
         .map(|(i, err)| if i == 0 {
@@ -81,4 +81,14 @@ pub fn open_path(path: &str) -> Result<ExitStatus, IoError> {
 pub fn set_clipboard(content: String) -> Result<(), Box<StdError>> {
     let mut context: ClipboardContext = ClipboardProvider::new()?;
     context.set_contents(content)
+}
+
+/// Prompt the user to enter a password.
+pub fn prompt_password() -> String {
+    match prompt_password_stderr("Password: ") {
+        Ok(password) => password,
+        Err(err) => quit_error(err.context(
+            "Failed to read password from stdin with password prompt"
+        )),
+    }
 }
