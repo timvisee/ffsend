@@ -1,16 +1,21 @@
 use std::sync::{Arc, Mutex};
 
 use clap::ArgMatches;
-use ffsend_api::action::download::Download as ApiDownload;
-use ffsend_api::action::exists::Exists as ApiExists;
-use ffsend_api::file::remote_file::RemoteFile;
+use ffsend_api::action::download::{
+    Download as ApiDownload,
+    Error as DownloadError,
+};
+use ffsend_api::action::exists::{
+    Error as ExistsError,
+    Exists as ApiExists,
+};
+use ffsend_api::file::remote_file::{FileParseError, RemoteFile};
 use ffsend_api::reqwest::Client;
 
 use cmd::matcher::{
     Matcher,
     download::DownloadMatcher,
 };
-use error::ActionError;
 use progress::ProgressBar;
 use util::prompt_password;
 
@@ -29,7 +34,7 @@ impl<'a> Download<'a> {
 
     /// Invoke the download action.
     // TODO: create a trait for this method
-    pub fn invoke(&self) -> Result<(), ActionError> {
+    pub fn invoke(&self) -> Result<(), Error> {
         // Create the command matchers
         let matcher_download = DownloadMatcher::with(self.cmd_matches).unwrap();
 
@@ -47,9 +52,13 @@ impl<'a> Download<'a> {
         let target = matcher_download.output();
         let mut password = matcher_download.password();
 
+        // Check whether the file exists
+        let exists = ApiExists::new(&file).invoke(&client)?;
+        if !exists.exists() {
+            return Err(Error::Expired);
+        }
+
         // Check whether the file requires a password
-        // TODO: do not unwrap
-        let exists = ApiExists::new(&file).invoke(&client).unwrap();
         if exists.has_password() != password.is_some() {
             if exists.has_password() {
                 println!("This file is protected with a password.");
@@ -75,5 +84,43 @@ impl<'a> Download<'a> {
         // TODO: copy the file location
 
         Ok(())
+    }
+}
+
+#[derive(Debug, Fail)]
+pub enum Error {
+    /// Failed to parse a share URL, it was invalid.
+    /// This error is not related to a specific action.
+    #[fail(display = "Invalid share URL")]
+    InvalidUrl(#[cause] FileParseError),
+
+    /// An error occurred while checking if the file exists.
+    #[fail(display = "Failed to check whether the file exists")]
+    Exists(#[cause] ExistsError),
+
+    /// An error occurred while downloading the file.
+    #[fail(display = "")]
+    Download(#[cause] DownloadError),
+
+    /// The given Send file has expired, or did never exist in the first place.
+    #[fail(display = "The file has expired or did never exist")]
+    Expired,
+}
+
+impl From<FileParseError> for Error {
+    fn from(err: FileParseError) -> Error {
+        Error::InvalidUrl(err)
+    }
+}
+
+impl From<ExistsError> for Error {
+    fn from(err: ExistsError) -> Error {
+        Error::Exists(err)
+    }
+}
+
+impl From<DownloadError> for Error {
+    fn from(err: DownloadError) -> Error {
+        Error::Download(err)
     }
 }

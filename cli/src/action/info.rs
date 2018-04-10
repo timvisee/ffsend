@@ -53,8 +53,7 @@ impl<'a> Info<'a> {
         // TODO: show an informative error if the owner token isn't set
 
         // Check whether the file exists
-        // TODO: do not unwrap
-        let exists = ApiExists::new(&file).invoke(&client).unwrap();
+        let exists = ApiExists::new(&file).invoke(&client)?;
         if !exists.exists() {
             return Err(Error::Expired);
         }

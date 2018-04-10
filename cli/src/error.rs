@@ -1,12 +1,12 @@
 use ffsend_api::action::delete::Error as DeleteError;
-use ffsend_api::action::download::Error as DownloadError;
 use ffsend_api::action::exists::Error as ExistsError;
 use ffsend_api::action::params::Error as ParamsError;
 use ffsend_api::action::password::Error as PasswordError;
 use ffsend_api::action::upload::Error as UploadError;
 use ffsend_api::file::remote_file::FileParseError;
 
-use action::info::Error as InfoError;
+use action::download::Error as CliDownloadError;
+use action::info::Error as CliInfoError;
 
 #[derive(Fail, Debug)]
 pub enum Error {
@@ -15,8 +15,14 @@ pub enum Error {
     Action(#[cause] ActionError),
 }
 
-impl From<InfoError> for Error {
-    fn from(err: InfoError) -> Error {
+impl From<CliDownloadError> for Error {
+    fn from(err: CliDownloadError) -> Error {
+        Error::Action(ActionError::Download(err))
+    }
+}
+
+impl From<CliInfoError> for Error {
+    fn from(err: CliInfoError) -> Error {
         Error::Action(ActionError::Info(err))
     }
 }
@@ -35,7 +41,7 @@ pub enum ActionError {
 
     /// An error occurred while invoking the download action.
     #[fail(display = "Failed to download the requested file")]
-    Download(#[cause] DownloadError),
+    Download(#[cause] CliDownloadError),
 
     /// An error occurred while invoking the exists action.
     #[fail(display = "Failed to check whether the file exists")]
@@ -43,7 +49,7 @@ pub enum ActionError {
 
     /// An error occurred while invoking the info action.
     #[fail(display = "Failed to fetch file info")]
-    Info(#[cause] InfoError),
+    Info(#[cause] CliInfoError),
 
     /// An error occurred while invoking the params action.
     #[fail(display = "Failed to change the parameters")]
@@ -70,21 +76,9 @@ impl From<DeleteError> for ActionError {
     }
 }
 
-impl From<DownloadError> for ActionError {
-    fn from(err: DownloadError) -> ActionError {
-        ActionError::Download(err)
-    }
-}
-
 impl From<ExistsError> for ActionError {
     fn from(err: ExistsError) -> ActionError {
         ActionError::Exists(err)
-    }
-}
-
-impl From<InfoError> for ActionError {
-    fn from(err: InfoError) -> ActionError {
-        ActionError::Info(err)
     }
 }
 
