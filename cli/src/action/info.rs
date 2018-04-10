@@ -19,7 +19,7 @@ use cmd::matcher::{
     Matcher,
     info::InfoMatcher,
 };
-use util::print_error;
+use util::{print_error, prompt_password};
 
 /// A file info action.
 pub struct Info<'a> {
@@ -48,34 +48,32 @@ impl<'a> Info<'a> {
 
         // Parse the remote file based on the share URL, get the password
         let file = RemoteFile::parse_url(url, matcher_info.owner())?;
-        let password = matcher_info.password();
+        let mut password = matcher_info.password();
 
         // TODO: show an informative error if the owner token isn't set
 
-        // Make sure the file exists
-        let exists_response = ApiExists::new(&file)
-            .invoke(&client)?;
-
-        // Make sure the file exists
-        if !exists_response.exists() {
+        // Check whether the file exists
+        // TODO: do not unwrap
+        let exists = ApiExists::new(&file).invoke(&client).unwrap();
+        if !exists.exists() {
             return Err(Error::Expired);
         }
 
-        // Make sure a password is given when it is required
-        let has_password = password.is_some();
-        if has_password != exists_response.has_password() {
-            if has_password {
-                // TODO: show a proper message here
-                println!("file not password protected, ignoring password");
+        // Check whether the file requires a password
+        if exists.has_password() != password.is_some() {
+            if exists.has_password() {
+                println!("This file is protected with a password.");
+                password = Some(prompt_password());
             } else {
-                // TODO: show a propper error here, or prompt for the password
-                panic!("password required");
+                println!("Ignoring password, it is not required");
+                password = None;
             }
         }
 
         // Fetch both file info and metadata
         let info = ApiInfo::new(&file, None).invoke(&client)?;
-        let metadata = ApiMetadata::new(&file, password).invoke(&client)
+        let metadata = ApiMetadata::new(&file, password, false)
+            .invoke(&client)
             .map_err(|err| print_error(err.context(
                 "Failed to fetch file metadata, showing limited info",
             )))

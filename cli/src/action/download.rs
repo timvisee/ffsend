@@ -48,6 +48,7 @@ impl<'a> Download<'a> {
         let mut password = matcher_download.password();
 
         // Check whether the file requires a password
+        // TODO: do not unwrap
         let exists = ApiExists::new(&file).invoke(&client).unwrap();
         if exists.has_password() != password.is_some() {
             if exists.has_password() {

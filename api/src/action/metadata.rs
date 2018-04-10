@@ -12,6 +12,10 @@ use crypto::sig::signature_encoded;
 use ext::status_code::StatusCodeExt;
 use file::metadata::Metadata as MetadataData;
 use file::remote_file::RemoteFile;
+use super::exists::{
+    Error as ExistsError,
+    Exists as ExistsAction,
+};
 
 /// The HTTP status code that is returned for expired files.
 const FILE_EXPIRED_STATUS: StatusCode = StatusCode::NotFound;
@@ -23,19 +27,43 @@ pub struct Metadata<'a> {
 
     /// An optional password to decrypt a protected file.
     password: Option<String>,
+
+    /// Check whether the file exists (recommended).
+    check_exists: bool,
 }
 
 impl<'a> Metadata<'a> {
     /// Construct a new metadata action.
-    pub fn new(file: &'a RemoteFile, password: Option<String>) -> Self {
+    pub fn new(
+        file: &'a RemoteFile,
+        password: Option<String>,
+        check_exists: bool,
+    ) -> Self {
         Self {
             file,
             password,
+            check_exists,
         }
     }
 
     /// Invoke the metadata action.
     pub fn invoke(self, client: &Client) -> Result<MetadataResponse, Error> {
+        // Make sure the given file exists
+        if self.check_exists {
+            let exist_response = ExistsAction::new(&self.file)
+                .invoke(&client)?;
+
+            // Return an error if the file does not exist
+            if !exist_response.exists() {
+                return Err(Error::Expired);
+            }
+
+            // Make sure a password is given when it is required
+            if !self.password.is_some() && exist_response.has_password() {
+                return Err(Error::PasswordRequired);
+            }
+        }
+
         // Create a key set for the file
         let mut key = KeySet::from(self.file, self.password.as_ref());
 
@@ -173,6 +201,11 @@ impl<'a> MetadataResponse {
 
 #[derive(Fail, Debug)]
 pub enum Error {
+    /// An error occurred while checking whether the file exists on the
+    /// server.
+    #[fail(display = "Failed to check whether the file exists")]
+    Exists(#[cause] ExistsError),
+
     /// A general error occurred while requesting the file data.
     /// This may be because authentication failed, because decrypting the
     /// file metadata didn't succeed, or due to some other reason.
@@ -183,6 +216,16 @@ pub enum Error {
     /// Therefore the file could not be downloaded.
     #[fail(display = "The file has expired or did never exist")]
     Expired,
+
+    /// A password is required, but was not given.
+    #[fail(display = "Missing password, password required")]
+    PasswordRequired,
+}
+
+impl From<ExistsError> for Error {
+    fn from(err: ExistsError) -> Error {
+        Error::Exists(err)
+    }
 }
 
 impl From<RequestError> for Error {

@@ -84,6 +84,7 @@ pub fn set_clipboard(content: String) -> Result<(), Box<StdError>> {
 }
 
 /// Prompt the user to enter a password.
+// TODO: do not prompt if no-interactive
 pub fn prompt_password() -> String {
     match prompt_password_stderr("Password: ") {
         Ok(password) => password,

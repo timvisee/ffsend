@@ -17,10 +17,6 @@ use crypto::sig::signature_encoded;
 use ext::status_code::StatusCodeExt;
 use file::remote_file::RemoteFile;
 use reader::{EncryptedFileWriter, ProgressReporter, ProgressWriter};
-use super::exists::{
-    Error as ExistsError,
-    Exists as ExistsAction,
-};
 use super::metadata::{
     Error as MetadataError,
     Metadata as MetadataAction,
@@ -65,29 +61,18 @@ impl<'a> Download<'a> {
         client: &Client,
         reporter: Arc<Mutex<ProgressReporter>>,
     ) -> Result<(), Error> {
-        // Make sure the given file exists
-        if self.check_exists {
-            let exist_response = ExistsAction::new(&self.file)
-                .invoke(&client)?;
-
-            // Return an error if the file does not exist
-            if !exist_response.exists() {
-                return Err(Error::Expired);
-            }
-
-            // Make sure a password is given when it is required
-            if !self.password.is_some() && exist_response.has_password() {
-                return Err(Error::PasswordRequired);
-            }
-        }
-
         // Create a key set for the file
         let mut key = KeySet::from(self.file, self.password.as_ref());
 
         // Fetch the file metadata, update the input vector in the key set
-        let metadata = MetadataAction::new(self.file, self.password.clone())
+        let metadata = MetadataAction::new(
+                self.file,
+                self.password.clone(),
+                self.check_exists,
+            )
             .invoke(&client)
             .map_err(|err| match err {
+                MetadataError::PasswordRequired => Error::PasswordRequired,
                 MetadataError::Expired => Error::Expired,
                 _ => err.into(),
             })?;
@@ -258,25 +243,20 @@ impl<'a> Download<'a> {
 
 #[derive(Fail, Debug)]
 pub enum Error {
-    /// An error occurred while checking whether the file exists on the
-    /// server.
-    #[fail(display = "Failed to check whether the file exists")]
-    Exists(#[cause] ExistsError),
-
     /// An error occurred while fetching the metadata of the file.
     /// This step is required in order to succsessfully decrypt the
     /// file that will be downloaded.
     #[fail(display = "Failed to fetch file metadata")]
     Meta(#[cause] MetadataError),
 
-    /// A password is required, but was not given.
-    #[fail(display = "Missing password, password required")]
-    PasswordRequired,
-
     /// The given Send file has expired, or did never exist in the first place.
     /// Therefore the file could not be downloaded.
     #[fail(display = "The file has expired or did never exist")]
     Expired,
+
+    /// A password is required, but was not given.
+    #[fail(display = "Missing password, password required")]
+    PasswordRequired,
 
     /// An error occurred while downloading the file.
     #[fail(display = "Failed to download the file")]
@@ -290,12 +270,6 @@ pub enum Error {
     // TODO: show what file this is about
     #[fail(display = "Couldn't use the target file at '{}'", _0)]
     File(String, #[cause] FileError),
-}
-
-impl From<ExistsError> for Error {
-    fn from(err: ExistsError) -> Error {
-        Error::Exists(err)
-    }
 }
 
 impl From<MetadataError> for Error {
