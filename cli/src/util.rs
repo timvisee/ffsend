@@ -140,19 +140,8 @@ pub fn prompt(msg: &str) -> String {
         ));
     }
 
-    // Trim
-    let input = input.trim().to_owned();
-
-    // The input must not be empty
-    if input.is_empty() {
-        eprintln!(
-            "Empty input given, which is not allowed. Use {} to cancel.",
-            "[CTRL+C]".yellow(),
-        );
-        return prompt(msg);
-    }
-
-    input
+    // Trim and return
+    input.trim().to_owned()
 }
 
 /// Prompt the user to enter an owner token.
@@ -166,12 +155,26 @@ pub fn prompt_owner_token() -> String {
 ///
 /// This method will prompt the user for the token, if it wasn't set.
 pub fn ensure_owner_token(token: &mut Option<String>) {
-    // Return if we're fine
-    if token.is_some() {
-        return;
+    // Notify that an owner token is required
+    if token.is_none() {
+        println!("The file owner token is required for authentication.");
     }
 
-    // Ask for the owner token
-    println!("The file owner token is required for authentication.");
-    *token = Some(prompt_owner_token());
+    loop {
+        // Prompt for an owner token
+        if token.is_none() {
+            *token = Some(prompt_owner_token());
+        }
+
+        // The token must not be empty
+        if token.as_ref().unwrap().is_empty() {
+            eprintln!(
+                "Empty owner token given, which is invalid. Use {} to cancel.",
+                "[CTRL+C]".yellow(),
+            );
+            *token = None;
+        } else {
+            break;
+        }
+    }
 }
