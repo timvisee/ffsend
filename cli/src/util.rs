@@ -137,12 +137,11 @@ pub fn ensure_password(
 /// Prompt the user to enter some value.
 /// The prompt that is shown should be passed to `msg`,
 /// excluding the `:` suffix.
-// TODO: do not prompt if no-interactive
 pub fn prompt(msg: &str, main_matcher: &MainMatcher) -> String {
     // Quit with an error if we may not interact
     if main_matcher.no_interact() {
         quit_error(format_err!(
-            "Could not prompt for '{}', must be specified in no-interact mode",
+            "Could not prompt for '{}' in no-interact mode, maybe specify it",
             msg,
         ).compat());
     }
@@ -161,6 +160,88 @@ pub fn prompt(msg: &str, main_matcher: &MainMatcher) -> String {
 
     // Trim and return
     input.trim().to_owned()
+}
+
+/// Prompt the user for a question, allowing a yes or now answer.
+/// True is returned if yes was answered, false if no.
+///
+/// A default may be given, which is chosen if no-interact mode is
+/// enabled, or if enter was pressed by the user without entering anything.
+pub fn prompt_yes(
+    msg: &str,
+    def: Option<bool>,
+    main_matcher: &MainMatcher,
+) -> bool {
+    // Define the available options string
+    let options = format!("[{}/{}]", match def {
+        Some(def) if def => "Y",
+        _ => "y",
+    }, match def {
+        Some(def) if !def => "N",
+        _ => "n",
+    });
+
+    // Assume yes
+    if main_matcher.assume_yes() {
+        eprintln!("{} {}: yes", msg, options);
+        return true;
+    }
+
+    // Autoselect if in no-interact mode
+    if main_matcher.no_interact() {
+        if let Some(def) = def {
+            eprintln!("{} {}: {}", msg, options, if def {
+                "yes"
+            } else {
+                "no"
+            });
+            return def;
+        } else {
+            quit_error(format_err!(
+                "Could not prompt question '{}' in no-interact mode, maybe specify it",
+                msg,
+            ).compat());
+        }
+    }
+
+    // Get the user input
+    let answer = prompt(&format!("{} {}", msg, options), main_matcher);
+
+    // Assume the default if the answer is empty
+    if answer.is_empty() && def.is_some() {
+        return def.unwrap();
+    }
+
+    // Derive a boolean and return
+    match derive_bool(&answer) {
+        Some(answer) => answer,
+        None => prompt_yes(msg, def, main_matcher),
+    }
+}
+
+/// Try to derive true or false (yes or no) from the given input.
+/// None is returned if no boolean could be derived accurately.
+fn derive_bool(input: &str) -> Option<bool> {
+    // Process the input
+    let input = input.trim().to_lowercase();
+
+    // Handle short or incomplete answers
+    match input.as_str() {
+        "y" | "ye" | "t" | "1" => return Some(true),
+        "n" | "f" | "0" => return Some(false),
+        _ => {},
+    }
+
+    // Handle complete answers with any suffix
+    if input.starts_with("yes") || input.starts_with("true") {
+        return Some(true);
+    }
+    if input.starts_with("no") || input.starts_with("false") {
+        return Some(false);
+    }
+
+    // The answer could not be determined, return none
+    None
 }
 
 /// Prompt the user to enter an owner token.

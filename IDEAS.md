@@ -1,36 +1,39 @@
-# Ideas
-- allow creating non existent directories with the `-f` flag 
-- only allow file extension renaming on upload with `-f` flag
-- `-y` flag for assume yes
-- `-f` flag for forcing (no interact?)
+# First release
+- Implement `-f` flag for forcing
+- Allow creating non existent directories with the `-f` flag 
+- Only allow file extension renaming on upload with `-f` flag
+- Only allow empty passwords with `-f` flag
+- Implement `-y` flag for assume yes
+- Check for file expiry everywhere
+- Soft limit uploads to 1GB and 2GB
+- Remember all uploaded files, make files listable
+- Incognito mode, to not remember files `--incognito`
+- Automatically get owner token, from file history when setting password
+- Use clipboard through `xclip` on Linux if available for persistence
+- Automated releases through CI
+- Release binaries on GitHub
+- Ubuntu PPA package
+
+# Other ideas
 - Box errors
 - On download, mention a wrong or missing password with a HTTP 401 response
-- Automatically get owner token, from file history when setting password
 - Implement error handling everywhere properly
 - Quick upload/download without `upload` or `download` subcommands?
 - Flag to explicitly delete file after download
 - Allow file deletion by consuming all download slots
 - Check remote version and heartbeat using `/__version__`
-- Check whether the file still exists everywhere
 - API actions contain duplicate code, create centralized functions
 - Download to a temporary location first
-- Soft limit uploads to 1GB and 2GB
 - Allow piping input/output files
 - Allow file/directory archiving on upload
 - Allow unarchiving on download 
-- Allow hiding the progress bar, and/or showing simple progress
-- Remember all uploaded files, make files listable
-- Incognito mode, to not remember files `--incognito`
+- Allow hiding the progress bar, and/or showing simple progress (with `-q`)
 - Document all code components
 - Dotfile for default properties
 - Host configuration file for host tags, to easily upload to other hosts
 - Generate man pages
-- Automated releases through CI
-- Release binaries on GitHub
-- Ubuntu PPA package
 - Move API URL generator methods out of remote file class
 - Prompt if a file download password is required
-- Do not allow empty passwords (must force with `-f`) (as not usable on web)
 - Must use `-f` to overwrite existing file
 - Rename host to server?
 - Read and write files from and to stdin and stdout with `-` as file
