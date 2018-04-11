@@ -5,6 +5,7 @@ use ffsend_api::reqwest::Client;
 
 use cmd::matcher::{
     Matcher,
+    main::MainMatcher,
     password::PasswordMatcher,
 };
 use error::ActionError;
@@ -27,6 +28,7 @@ impl<'a> Password<'a> {
     // TODO: create a trait for this method
     pub fn invoke(&self) -> Result<(), ActionError> {
         // Create the command matchers
+        let matcher_main = MainMatcher::with(self.cmd_matches).unwrap();
         let matcher_password = PasswordMatcher::with(self.cmd_matches).unwrap();
 
         // Get the share URL
@@ -39,7 +41,7 @@ impl<'a> Password<'a> {
         let mut file = RemoteFile::parse_url(url, matcher_password.owner())?;
 
         // Ensure the owner token is set
-        ensure_owner_token(file.owner_token_mut());
+        ensure_owner_token(file.owner_token_mut(), &matcher_main);
 
         // Execute an password action
         ApiPassword::new(&file, &matcher_password.password(), None).invoke(&client)?;

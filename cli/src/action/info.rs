@@ -18,6 +18,7 @@ use ffsend_api::reqwest::Client;
 use cmd::matcher::{
     Matcher,
     info::InfoMatcher,
+    main::MainMatcher,
 };
 use util::{ensure_owner_token, ensure_password, print_error};
 
@@ -38,6 +39,7 @@ impl<'a> Info<'a> {
     // TODO: create a trait for this method
     pub fn invoke(&self) -> Result<(), Error> {
         // Create the command matchers
+        let matcher_main = MainMatcher::with(self.cmd_matches).unwrap();
         let matcher_info = InfoMatcher::with(self.cmd_matches).unwrap();
 
         // Get the share URL
@@ -51,7 +53,7 @@ impl<'a> Info<'a> {
         let mut password = matcher_info.password();
 
         // Ensure the owner token is set
-        ensure_owner_token(file.owner_token_mut());
+        ensure_owner_token(file.owner_token_mut(), &matcher_main);
 
         // Check whether the file exists
         let exists = ApiExists::new(&file).invoke(&client)?;
@@ -60,7 +62,7 @@ impl<'a> Info<'a> {
         }
 
         // Ensure a password is set when required
-        ensure_password(&mut password, exists.has_password());
+        ensure_password(&mut password, exists.has_password(), &matcher_main);
 
         // Fetch both file info and metadata
         let info = ApiInfo::new(&file, None).invoke(&client)?;

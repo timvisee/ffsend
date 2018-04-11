@@ -17,9 +17,11 @@ use std::process::{exit, ExitStatus};
 #[cfg(feature = "clipboard")]
 use self::clipboard::{ClipboardContext, ClipboardProvider};
 use self::colored::*;
-use failure::{self, Fail};
+use failure::{self, err_msg, Fail};
 use ffsend_api::url::Url;
 use rpassword::prompt_password_stderr;
+
+use cmd::matcher::MainMatcher;
 
 /// Print a success message.
 pub fn print_success(msg: &str) {
@@ -89,9 +91,14 @@ pub fn set_clipboard(content: String) -> Result<(), Box<StdError>> {
 }
 
 /// Prompt the user to enter a password.
-// TODO: do not prompt if no-interactive
 // TODO: only allow emtpy password if forced
-pub fn prompt_password() -> String {
+pub fn prompt_password(main_matcher: &MainMatcher) -> String {
+    // Quit with an error if we may not interact
+    if main_matcher.no_interact() {
+        quit_error(err_msg("Missing password, must be specified in no-interact mode").compat());
+    }
+
+    // Prompt and return
     match prompt_password_stderr("Password: ") {
         Ok(password) => password,
         Err(err) => quit_error(err.context(
@@ -107,16 +114,20 @@ pub fn prompt_password() -> String {
 /// This method will prompt the user for a password, if one is required but
 /// wasn't set. An ignore message will be shown if it was not required while it
 /// was set.
-pub fn ensure_password(password: &mut Option<String>, needs: bool) {
+pub fn ensure_password(
+    password: &mut Option<String>,
+    needs: bool,
+    main_matcher: &MainMatcher,
+) {
     // Return if we're fine
     if password.is_some() == needs {
         return;
     }
 
-    // Ask for a password, or reset it
+    // Prompt for the password, or clear it if not required
     if needs {
         println!("This file is protected with a password.");
-        *password = Some(prompt_password());
+        *password = Some(prompt_password(main_matcher));
     } else {
         println!("Ignoring password, it is not required");
         *password = None;
@@ -127,7 +138,15 @@ pub fn ensure_password(password: &mut Option<String>, needs: bool) {
 /// The prompt that is shown should be passed to `msg`,
 /// excluding the `:` suffix.
 // TODO: do not prompt if no-interactive
-pub fn prompt(msg: &str) -> String {
+pub fn prompt(msg: &str, main_matcher: &MainMatcher) -> String {
+    // Quit with an error if we may not interact
+    if main_matcher.no_interact() {
+        quit_error(format_err!(
+            "Could not prompt for '{}', must be specified in no-interact mode",
+            msg,
+        ).compat());
+    }
+
     // Show the prompt
     eprint!("{}: ", msg);
     let _ = stderr().flush();
@@ -145,8 +164,8 @@ pub fn prompt(msg: &str) -> String {
 }
 
 /// Prompt the user to enter an owner token.
-pub fn prompt_owner_token() -> String {
-    prompt("Owner token")
+pub fn prompt_owner_token(main_matcher: &MainMatcher) -> String {
+    prompt("Owner token", main_matcher)
 }
 
 /// Get the owner token.
@@ -154,16 +173,26 @@ pub fn prompt_owner_token() -> String {
 /// parameter.
 ///
 /// This method will prompt the user for the token, if it wasn't set.
-pub fn ensure_owner_token(token: &mut Option<String>) {
+pub fn ensure_owner_token(
+    token: &mut Option<String>,
+    main_matcher: &MainMatcher,
+) {
+    // Check whehter we allow interaction
+    let interact = !main_matcher.no_interact();
+
     // Notify that an owner token is required
-    if token.is_none() {
+    if interact && token.is_none() {
         println!("The file owner token is required for authentication.");
     }
 
     loop {
         // Prompt for an owner token
         if token.is_none() {
-            *token = Some(prompt_owner_token());
+            if interact {
+                *token = Some(prompt_owner_token(main_matcher));
+            } else {
+                quit_error(err_msg("Missing owner token, must be specified in no-interact mode").compat());
+            }
         }
 
         // The token must not be empty

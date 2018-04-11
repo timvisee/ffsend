@@ -12,6 +12,7 @@ use ffsend_api::reqwest::Client;
 use cmd::matcher::{
     Matcher,
     delete::DeleteMatcher,
+    main::MainMatcher,
 };
 use error::ActionError;
 use util::{ensure_owner_token, print_success};
@@ -33,6 +34,7 @@ impl<'a> Delete<'a> {
     // TODO: create a trait for this method
     pub fn invoke(&self) -> Result<(), ActionError> {
         // Create the command matchers
+        let matcher_main = MainMatcher::with(self.cmd_matches).unwrap();
         let matcher_delete = DeleteMatcher::with(self.cmd_matches).unwrap();
 
         // Get the share URL
@@ -45,7 +47,7 @@ impl<'a> Delete<'a> {
         let mut file = RemoteFile::parse_url(url, matcher_delete.owner())?;
 
         // Ensure the owner token is set
-        ensure_owner_token(file.owner_token_mut());
+        ensure_owner_token(file.owner_token_mut(), &matcher_main);
 
         // Send the file deletion request
         ApiDelete::new(&file, None).invoke(&client)?;

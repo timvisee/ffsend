@@ -1,5 +1,6 @@
 use clap::{Arg, ArgMatches};
 
+use cmd::matcher::{MainMatcher, Matcher};
 use super::{CmdArg, CmdArgFlag, CmdArgOption};
 use util::prompt_password;
 
@@ -40,7 +41,10 @@ impl<'a> CmdArgOption<'a> for ArgPassword {
             p => return p.map(|p| p.into()),
         }
 
+        // Create a main matcher
+        let matcher_main = MainMatcher::with(matches).unwrap();
+
         // Prompt for the password
-        Some(prompt_password())
+        Some(prompt_password(&matcher_main))
     }
 }

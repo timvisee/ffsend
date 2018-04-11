@@ -8,6 +8,7 @@ use ffsend_api::reqwest::Client;
 
 use cmd::matcher::{
     Matcher,
+    main::MainMatcher,
     params::ParamsMatcher,
 };
 use error::ActionError;
@@ -30,6 +31,7 @@ impl<'a> Params<'a> {
     // TODO: create a trait for this method
     pub fn invoke(&self) -> Result<(), ActionError> {
         // Create the command matchers
+        let matcher_main = MainMatcher::with(self.cmd_matches).unwrap();
         let matcher_params = ParamsMatcher::with(self.cmd_matches).unwrap();
 
         // Get the share URL
@@ -42,7 +44,7 @@ impl<'a> Params<'a> {
         let mut file = RemoteFile::parse_url(url, matcher_params.owner())?;
 
         // Ensure the owner token is set
-        ensure_owner_token(file.owner_token_mut());
+        ensure_owner_token(file.owner_token_mut(), &matcher_main);
 
         // Build the parameters data object
         let data = ParamsDataBuilder::default()

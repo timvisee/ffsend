@@ -1,5 +1,6 @@
 use clap::{Arg, ArgMatches};
 
+use cmd::matcher::{MainMatcher, Matcher};
 use super::{CmdArg, CmdArgFlag, CmdArgOption};
 use util::prompt_owner_token;
 
@@ -42,7 +43,10 @@ impl<'a> CmdArgOption<'a> for ArgOwner {
             p => return p.map(|p| p.into()),
         }
 
+        // Create a main matcher
+        let matcher_main = MainMatcher::with(matches).unwrap();
+
         // Prompt for the owner token
-        Some(prompt_owner_token())
+        Some(prompt_owner_token(&matcher_main))
     }
 }

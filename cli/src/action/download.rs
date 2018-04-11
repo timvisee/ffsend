@@ -15,6 +15,7 @@ use ffsend_api::reqwest::Client;
 use cmd::matcher::{
     Matcher,
     download::DownloadMatcher,
+    main::MainMatcher,
 };
 use progress::ProgressBar;
 use util::ensure_password;
@@ -36,6 +37,7 @@ impl<'a> Download<'a> {
     // TODO: create a trait for this method
     pub fn invoke(&self) -> Result<(), Error> {
         // Create the command matchers
+        let matcher_main = MainMatcher::with(self.cmd_matches).unwrap();
         let matcher_download = DownloadMatcher::with(self.cmd_matches).unwrap();
 
         // Get the share URL
@@ -59,7 +61,7 @@ impl<'a> Download<'a> {
         }
 
         // Ensure a password is set when required
-        ensure_password(&mut password, exists.has_password());
+        ensure_password(&mut password, exists.has_password(), &matcher_main);
 
         // Create a progress bar reporter
         let bar = Arc::new(Mutex::new(ProgressBar::new_download()));

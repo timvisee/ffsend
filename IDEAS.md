@@ -1,7 +1,6 @@
 # Ideas
 - allow creating non existent directories with the `-f` flag 
 - only allow file extension renaming on upload with `-f` flag
-- no interact flag
 - `-y` flag for assume yes
 - `-f` flag for forcing (no interact?)
 - Box errors
@@ -17,7 +16,6 @@
 - Download to a temporary location first
 - Soft limit uploads to 1GB and 2GB
 - Allow piping input/output files
-- Allow file renaming on upload
 - Allow file/directory archiving on upload
 - Allow unarchiving on download 
 - Allow hiding the progress bar, and/or showing simple progress
