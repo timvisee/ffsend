@@ -171,6 +171,11 @@ impl RemoteFile {
         self.owner_token.as_ref()
     }
 
+    /// Get the owner token if set.
+    pub fn owner_token_mut(&mut self) -> &mut Option<String> {
+        &mut self.owner_token
+    }
+
     /// Set the owner token.
     pub fn set_owner_token(&mut self, token: Option<String>) {
         self.owner_token = token;

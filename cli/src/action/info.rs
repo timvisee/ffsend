@@ -19,7 +19,7 @@ use cmd::matcher::{
     Matcher,
     info::InfoMatcher,
 };
-use util::{print_error, ensure_password};
+use util::{ensure_owner_token, ensure_password, print_error};
 
 /// A file info action.
 pub struct Info<'a> {
@@ -47,10 +47,11 @@ impl<'a> Info<'a> {
         let client = Client::new();
 
         // Parse the remote file based on the share URL, get the password
-        let file = RemoteFile::parse_url(url, matcher_info.owner())?;
+        let mut file = RemoteFile::parse_url(url, matcher_info.owner())?;
         let mut password = matcher_info.password();
 
-        // TODO: show an informative error if the owner token isn't set
+        // Ensure the owner token is set
+        ensure_owner_token(file.owner_token_mut());
 
         // Check whether the file exists
         let exists = ApiExists::new(&file).invoke(&client)?;

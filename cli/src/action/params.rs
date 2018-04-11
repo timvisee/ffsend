@@ -11,7 +11,7 @@ use cmd::matcher::{
     params::ParamsMatcher,
 };
 use error::ActionError;
-use util::print_success;
+use util::{ensure_owner_token, print_success};
 
 /// A file parameters action.
 pub struct Params<'a> {
@@ -39,10 +39,10 @@ impl<'a> Params<'a> {
         let client = Client::new();
 
         // Parse the remote file based on the share URL
-        // TODO: handle error here
-        let file = RemoteFile::parse_url(url, matcher_params.owner())?;
+        let mut file = RemoteFile::parse_url(url, matcher_params.owner())?;
 
-        // TODO: show an informative error if the owner token isn't set
+        // Ensure the owner token is set
+        ensure_owner_token(file.owner_token_mut());
 
         // Build the parameters data object
         let data = ParamsDataBuilder::default()

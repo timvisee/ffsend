@@ -6,7 +6,12 @@ extern crate open;
 #[cfg(feature = "clipboard")]
 use std::error::Error as StdError;
 use std::fmt::{Debug, Display};
-use std::io::Error as IoError;
+use std::io::{
+    Error as IoError,
+    stdin,
+    stderr,
+    Write,
+};
 use std::process::{exit, ExitStatus};
 
 #[cfg(feature = "clipboard")]
@@ -89,7 +94,7 @@ pub fn prompt_password() -> String {
     match prompt_password_stderr("Password: ") {
         Ok(password) => password,
         Err(err) => quit_error(err.context(
-            "Failed to read password from stdin with password prompt"
+            "Failed to read password from password prompt"
         )),
     }
 }
@@ -115,4 +120,46 @@ pub fn ensure_password(password: &mut Option<String>, needs: bool) {
         println!("Ignoring password, it is not required");
         *password = None;
     }
+}
+
+/// Prompt the user to enter some value.
+/// The prompt that is shown should be passed to `prompt`,
+/// excluding the `:` suffix.
+// TODO: do not prompt if no-interactive
+pub fn prompt(prompt: &str) -> String {
+    // Show the prompt
+    eprint!("{}: ", prompt);
+    let _ = stderr().flush();
+
+    // Get the input
+    let mut input = String::new();
+    if let Err(err) = stdin().read_line(&mut input) {
+        quit_error(err.context(
+            "Failed to read input from prompt"
+        ));
+    }
+
+    // Trim and return
+    input.trim().into()
+}
+
+/// Prompt the user to enter an owner token.
+pub fn prompt_owner_token() -> String {
+    prompt("Owner token")
+}
+
+/// Get the owner token.
+/// This method will ensure an owner token is set in the given `token`
+/// parameter.
+///
+/// This method will prompt the user for the token, if it wasn't set.
+pub fn ensure_owner_token(token: &mut Option<String>) {
+    // Return if we're fine
+    if token.is_some() {
+        return;
+    }
+
+    // Ask for the owner token
+    println!("The file owner token is required for authentication.");
+    *token = Some(prompt_owner_token());
 }

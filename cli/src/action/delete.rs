@@ -14,7 +14,7 @@ use cmd::matcher::{
     delete::DeleteMatcher,
 };
 use error::ActionError;
-use util::print_success;
+use util::{ensure_owner_token, print_success};
 
 /// A file delete action.
 pub struct Delete<'a> {
@@ -41,10 +41,11 @@ impl<'a> Delete<'a> {
         // Create a reqwest client
         let client = Client::new();
 
-        // Parse the remote file based on the share URL, get the password
-        let file = RemoteFile::parse_url(url, matcher_delete.owner())?;
+        // Parse the remote file based on the share URL, get the owner token
+        let mut file = RemoteFile::parse_url(url, matcher_delete.owner())?;
 
-        // TODO: show an informative error if the owner token isn't set
+        // Ensure the owner token is set
+        ensure_owner_token(file.owner_token_mut());
 
         // Send the file deletion request
         ApiDelete::new(&file, None).invoke(&client)?;
