@@ -90,6 +90,7 @@ pub fn set_clipboard(content: String) -> Result<(), Box<StdError>> {
 
 /// Prompt the user to enter a password.
 // TODO: do not prompt if no-interactive
+// TODO: only allow emtpy password if forced
 pub fn prompt_password() -> String {
     match prompt_password_stderr("Password: ") {
         Ok(password) => password,
@@ -123,12 +124,12 @@ pub fn ensure_password(password: &mut Option<String>, needs: bool) {
 }
 
 /// Prompt the user to enter some value.
-/// The prompt that is shown should be passed to `prompt`,
+/// The prompt that is shown should be passed to `msg`,
 /// excluding the `:` suffix.
 // TODO: do not prompt if no-interactive
-pub fn prompt(prompt: &str) -> String {
+pub fn prompt(msg: &str) -> String {
     // Show the prompt
-    eprint!("{}: ", prompt);
+    eprint!("{}: ", msg);
     let _ = stderr().flush();
 
     // Get the input
@@ -139,8 +140,19 @@ pub fn prompt(prompt: &str) -> String {
         ));
     }
 
-    // Trim and return
-    input.trim().into()
+    // Trim
+    let input = input.trim().to_owned();
+
+    // The input must not be empty
+    if input.is_empty() {
+        eprintln!(
+            "Empty input given, which is not allowed. Use {} to cancel.",
+            "[CTRL+C]".yellow(),
+        );
+        return prompt(msg);
+    }
+
+    input
 }
 
 /// Prompt the user to enter an owner token.
