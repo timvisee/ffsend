@@ -17,7 +17,7 @@ use cmd::matcher::{
     download::DownloadMatcher,
 };
 use progress::ProgressBar;
-use util::prompt_password;
+use util::ensure_password;
 
 /// A file download action.
 pub struct Download<'a> {
@@ -58,16 +58,8 @@ impl<'a> Download<'a> {
             return Err(Error::Expired);
         }
 
-        // Check whether the file requires a password
-        if exists.has_password() != password.is_some() {
-            if exists.has_password() {
-                println!("This file is protected with a password.");
-                password = Some(prompt_password());
-            } else {
-                println!("Ignoring password, it is not required");
-                password = None;
-            }
-        }
+        // Ensure a password is set when required
+        ensure_password(&mut password, exists.has_password());
 
         // Create a progress bar reporter
         let bar = Arc::new(Mutex::new(ProgressBar::new_download()));

@@ -93,3 +93,26 @@ pub fn prompt_password() -> String {
         )),
     }
 }
+
+/// Get a password if required.
+/// This method will ensure a password is set (or not) in the given `password`
+/// parameter, as defined by `needs`.
+///
+/// This method will prompt the user for a password, if one is required but
+/// wasn't set. An ignore message will be shown if it was not required while it
+/// was set.
+pub fn ensure_password(password: &mut Option<String>, needs: bool) {
+    // Return if we're fine
+    if password.is_some() == needs {
+        return;
+    }
+
+    // Ask for a password, or reset it
+    if needs {
+        println!("This file is protected with a password.");
+        *password = Some(prompt_password());
+    } else {
+        println!("Ignoring password, it is not required");
+        *password = None;
+    }
+}

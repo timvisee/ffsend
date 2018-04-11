@@ -19,7 +19,7 @@ use cmd::matcher::{
     Matcher,
     info::InfoMatcher,
 };
-use util::{print_error, prompt_password};
+use util::{print_error, ensure_password};
 
 /// A file info action.
 pub struct Info<'a> {
@@ -58,16 +58,8 @@ impl<'a> Info<'a> {
             return Err(Error::Expired);
         }
 
-        // Check whether the file requires a password
-        if exists.has_password() != password.is_some() {
-            if exists.has_password() {
-                println!("This file is protected with a password.");
-                password = Some(prompt_password());
-            } else {
-                println!("Ignoring password, it is not required");
-                password = None;
-            }
-        }
+        // Ensure a password is set when required
+        ensure_password(&mut password, exists.has_password());
 
         // Fetch both file info and metadata
         let info = ApiInfo::new(&file, None).invoke(&client)?;
