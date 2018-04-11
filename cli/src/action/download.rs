@@ -1,6 +1,10 @@
+use std::env::current_dir;
+use std::fs::create_dir_all;
+use std::path::{self, PathBuf};
 use std::sync::{Arc, Mutex};
 
 use clap::ArgMatches;
+use failure::{err_msg, Fail};
 use ffsend_api::action::download::{
     Download as ApiDownload,
     Error as DownloadError,
@@ -8,6 +12,10 @@ use ffsend_api::action::download::{
 use ffsend_api::action::exists::{
     Error as ExistsError,
     Exists as ApiExists,
+};
+use ffsend_api::action::metadata::{
+    Error as MetadataError,
+    Metadata as ApiMetadata,
 };
 use ffsend_api::file::remote_file::{FileParseError, RemoteFile};
 use ffsend_api::reqwest::Client;
@@ -18,7 +26,7 @@ use cmd::matcher::{
     main::MainMatcher,
 };
 use progress::ProgressBar;
-use util::ensure_password;
+use util::{ensure_password, prompt_yes, quit, quit_error};
 
 /// A file download action.
 pub struct Download<'a> {
@@ -47,7 +55,6 @@ impl<'a> Download<'a> {
         let client = Client::new();
 
         // Parse the remote file based on the share URL
-        // TODO: handle error here
         let file = RemoteFile::parse_url(url, None)?;
 
         // Get the target file or directory, and the password
@@ -62,6 +69,20 @@ impl<'a> Download<'a> {
 
         // Ensure a password is set when required
         ensure_password(&mut password, exists.has_password(), &matcher_main);
+
+        // Fetch the file metadata
+        let metadata = ApiMetadata::new(
+            &file,
+            password.clone(),
+            false,
+        ).invoke(&client)?;
+
+        // Prepare the output path to use
+        let target = Self::prepare_path(
+            target,
+            metadata.metadata().name(),
+            &matcher_main,
+        );
 
         // Create a progress bar reporter
         let bar = Arc::new(Mutex::new(ProgressBar::new_download()));
@@ -79,6 +100,134 @@ impl<'a> Download<'a> {
 
         Ok(())
     }
+
+    /// This methods prepares a full file path to use for the file to
+    /// download, based on the current directory, the original file name,
+    /// and the user input.
+    ///
+    /// If no file name was given, the original file name is used.
+    ///
+    /// The full path including the name is returned.
+    ///
+    /// This method will check whether a file is overwitten, and whether
+    /// parent directories must be created.
+    ///
+    /// The program will quit with an error message if a problem occurs.
+    fn prepare_path(
+        target: PathBuf,
+        name_hint: &str,
+        main_matcher: &MainMatcher,
+    ) -> PathBuf {
+        // Select the path to use
+        let target = Self::select_path(target, name_hint);
+
+        // Ask to overwrite
+        if target.exists() && !main_matcher.force() {
+            eprintln!(
+                "The path '{}' already exists",
+                target.to_str().unwrap_or("?"),
+            );
+            if !prompt_yes("Overwrite?", None, main_matcher) {
+                println!("Download cancelled");
+                quit();
+            }
+        }
+
+        // Validate the parent directory exists
+        match target.parent() {
+            Some(parent) => if !parent.is_dir() {
+                // Prompt to create them if not forced
+                if !main_matcher.force() {
+                    eprintln!(
+                        "The directory '{}' doesn't exists",
+                        parent.to_str().unwrap_or("?"),
+                    );
+                    if !prompt_yes("Create it?", Some(true), main_matcher) {
+                        println!("Download cancelled");
+                        quit();
+                    }
+                }
+
+                // Create the parent directories
+                if let Err(err) = create_dir_all(parent) {
+                    quit_error(err.context(
+                        "Failed to create parent directories for output file",
+                    ));
+                }
+            },
+            None => quit_error(err_msg("Invalid output file path").compat()),
+        }
+
+        return target;
+    }
+
+    /// This methods prepares a full file path to use for the file to
+    /// download, based on the current directory, the original file name,
+    /// and the user input.
+    ///
+    /// If no file name was given, the original file name is used.
+    ///
+    /// The full path including the file name will be returned.
+    fn select_path(target: PathBuf, name_hint: &str) -> PathBuf {
+        // If we're already working with a file, canonicalize and return
+        if target.is_file() {
+            match target.canonicalize() {
+                Ok(target) => return target,
+                Err(err) => quit_error(
+                    err.context("Failed to canonicalize target path")
+                ),
+            }
+        }
+
+        // Append the name hint if this is a directory, canonicalize and return
+        if target.is_dir() {
+            match target.canonicalize() {
+                Ok(target) => return target.join(name_hint),
+                Err(err) => quit_error(
+                    err.context("Failed to canonicalize target path")
+                ),
+            }
+        }
+
+        // TODO: canonicalize parent if it exists
+
+        // Get the path string
+        let path = target.to_str();
+
+        // If the path is emtpy, use the working directory with the name hint
+        let use_workdir = path
+            .map(|path| path.trim().is_empty())
+            .unwrap_or(true);
+        if use_workdir {
+            match current_dir() {
+                Ok(target) => return target.join(name_hint),
+                Err(err) => quit_error(err.context(
+                    "Failed to determine working directory to use for the output file"
+                )),
+            }
+        }
+        let path = path.unwrap();
+
+        // Make the target mutable
+        let mut target = target.clone();
+
+        // If the path ends with a separator, append the name hint
+        if path.trim().ends_with(path::is_separator) {
+            target = target.join(name_hint);
+        }
+
+        // If relative, use the working directory as base
+        if target.is_relative() {
+            match current_dir() {
+                Ok(workdir) => target = workdir.join(target),
+                Err(err) => quit_error(err.context(
+                    "Failed to determine working directory to use for the output file"
+                )),
+            }
+        }
+
+        return target;
+    }
 }
 
 #[derive(Debug, Fail)]
@@ -91,6 +240,10 @@ pub enum Error {
     /// An error occurred while checking if the file exists.
     #[fail(display = "Failed to check whether the file exists")]
     Exists(#[cause] ExistsError),
+
+    /// An error occurred while fetching metadata.
+    #[fail(display = "Failed to fetch file metadata")]
+    Metadata(#[cause] MetadataError),
 
     /// An error occurred while downloading the file.
     #[fail(display = "")]
@@ -110,6 +263,12 @@ impl From<FileParseError> for Error {
 impl From<ExistsError> for Error {
     fn from(err: ExistsError) -> Error {
         Error::Exists(err)
+    }
+}
+
+impl From<MetadataError> for Error {
+    fn from(err: MetadataError) -> Error {
+        Error::Metadata(err)
     }
 }
 

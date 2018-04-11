@@ -48,6 +48,11 @@ pub fn print_error<E: Fail>(err: E) {
     }
 }
 
+/// Quit the application regularly.
+pub fn quit() -> ! {
+    exit(0);
+}
+
 /// Quit the application with an error code,
 /// and print the given error.
 pub fn quit_error<E: Fail>(err: E) -> ! {
