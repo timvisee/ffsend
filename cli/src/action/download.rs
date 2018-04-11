@@ -93,6 +93,7 @@ impl<'a> Download<'a> {
             target,
             password,
             false,
+            Some(metadata),
         ).invoke(&client, bar)?;
 
         // TODO: open the file, or it's location

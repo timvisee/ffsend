@@ -20,6 +20,7 @@ use reader::{EncryptedFileWriter, ProgressReporter, ProgressWriter};
 use super::metadata::{
     Error as MetadataError,
     Metadata as MetadataAction,
+    MetadataResponse,
 };
 
 /// A file upload action to a Send server.
@@ -35,6 +36,10 @@ pub struct Download<'a> {
 
     /// Check whether the file exists (recommended).
     check_exists: bool,
+
+    /// The metadata response to work with,
+    /// which will skip the internal metadata request.
+    metadata_response: Option<MetadataResponse>,
 }
 
 impl<'a> Download<'a> {
@@ -46,36 +51,43 @@ impl<'a> Download<'a> {
         target: PathBuf,
         password: Option<String>,
         check_exists: bool,
+        metadata_response: Option<MetadataResponse>,
     ) -> Self {
         Self {
             file,
             target,
             password,
             check_exists,
+            metadata_response,
         }
     }
 
     /// Invoke the download action.
     pub fn invoke(
-        self,
+        mut self,
         client: &Client,
         reporter: Arc<Mutex<ProgressReporter>>,
     ) -> Result<(), Error> {
         // Create a key set for the file
         let mut key = KeySet::from(self.file, self.password.as_ref());
 
-        // Fetch the file metadata, update the input vector in the key set
-        let metadata = MetadataAction::new(
-                self.file,
-                self.password.clone(),
-                self.check_exists,
-            )
-            .invoke(&client)
-            .map_err(|err| match err {
-                MetadataError::PasswordRequired => Error::PasswordRequired,
-                MetadataError::Expired => Error::Expired,
-                _ => err.into(),
-            })?;
+        // Get the metadata, or fetch the file metadata,
+        // then update the input vector in the key set
+        let metadata: MetadataResponse = if self.metadata_response.is_some() {
+                self.metadata_response.take().unwrap()
+            } else {
+                MetadataAction::new(
+                        self.file,
+                        self.password.clone(),
+                        self.check_exists,
+                    )
+                    .invoke(&client)
+                    .map_err(|err| match err {
+                        MetadataError::PasswordRequired => Error::PasswordRequired,
+                        MetadataError::Expired => Error::Expired,
+                        _ => err.into(),
+                    })?
+            };
         key.set_iv(metadata.metadata().iv());
 
         // Decide what actual file target to use
