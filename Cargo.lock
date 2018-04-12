@@ -361,6 +361,7 @@ dependencies = [
  "clap 2.31.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "clipboard 0.4.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "colored 1.6.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "derive_builder 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "failure 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "failure_derive 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "ffsend-api 0.1.0",

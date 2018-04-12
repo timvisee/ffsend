@@ -4,7 +4,7 @@ use std::path::{self, PathBuf};
 use std::sync::{Arc, Mutex};
 
 use clap::ArgMatches;
-use failure::{err_msg, Fail};
+use failure::Fail;
 use ffsend_api::action::download::{
     Download as ApiDownload,
     Error as DownloadError,
@@ -26,7 +26,14 @@ use cmd::matcher::{
     main::MainMatcher,
 };
 use progress::ProgressBar;
-use util::{ensure_password, prompt_yes, quit, quit_error};
+use util::{
+    ensure_password,
+    ErrorHints,
+    prompt_yes,
+    quit,
+    quit_error,
+    quit_error_msg,
+};
 
 /// A file download action.
 pub struct Download<'a> {
@@ -153,10 +160,13 @@ impl<'a> Download<'a> {
                 if let Err(err) = create_dir_all(parent) {
                     quit_error(err.context(
                         "Failed to create parent directories for output file",
-                    ));
+                    ), ErrorHints::default());
                 }
             },
-            None => quit_error(err_msg("Invalid output file path").compat()),
+            None => quit_error_msg(
+                "Invalid output file path",
+                ErrorHints::default(),
+            ),
         }
 
         return target;
@@ -175,7 +185,8 @@ impl<'a> Download<'a> {
             match target.canonicalize() {
                 Ok(target) => return target,
                 Err(err) => quit_error(
-                    err.context("Failed to canonicalize target path")
+                    err.context("Failed to canonicalize target path"),
+                    ErrorHints::default(),
                 ),
             }
         }
@@ -185,7 +196,8 @@ impl<'a> Download<'a> {
             match target.canonicalize() {
                 Ok(target) => return target.join(name_hint),
                 Err(err) => quit_error(
-                    err.context("Failed to canonicalize target path")
+                    err.context("Failed to canonicalize target path"),
+                    ErrorHints::default(),
                 ),
             }
         }
@@ -204,7 +216,7 @@ impl<'a> Download<'a> {
                 Ok(target) => return target.join(name_hint),
                 Err(err) => quit_error(err.context(
                     "Failed to determine working directory to use for the output file"
-                )),
+                ), ErrorHints::default()),
             }
         }
         let path = path.unwrap();
@@ -222,8 +234,8 @@ impl<'a> Download<'a> {
             match current_dir() {
                 Ok(workdir) => target = workdir.join(target),
                 Err(err) => quit_error(err.context(
-                    "Failed to determine working directory to use for the output file"
-                )),
+                        "Failed to determine working directory to use for the output file"
+                    ), ErrorHints::default()),
             }
         }
 

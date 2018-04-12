@@ -1,5 +1,6 @@
 extern crate clap;
 #[macro_use]
+extern crate derive_builder;
 extern crate failure;
 #[macro_use]
 extern crate failure_derive;
@@ -22,7 +23,7 @@ use action::password::Password;
 use action::upload::Upload;
 use cmd::Handler;
 use error::Error;
-use util::quit_error;
+use util::{ErrorHints, quit_error};
 
 /// Application entrypoint.
 fn main() {
@@ -31,7 +32,7 @@ fn main() {
 
     // Invoke the proper action
     if let Err(err) = invoke_action(&cmd_handler) {
-        quit_error(err);
+        quit_error(err, ErrorHints::default());
     };
 }
 

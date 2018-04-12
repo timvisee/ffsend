@@ -18,6 +18,7 @@ no-color = ["colored/no-color"]
 clap = "2.31"
 clipboard = { version = "0.4", optional = true }
 colored = "1.6"
+derive_builder = "0.5"
 failure = "0.1"
 failure_derive = "0.1"
 ffsend-api = { version = "*", path = "../api" }

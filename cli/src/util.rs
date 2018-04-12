@@ -17,7 +17,7 @@ use std::process::{exit, ExitStatus};
 #[cfg(feature = "clipboard")]
 use self::clipboard::{ClipboardContext, ClipboardProvider};
 use self::colored::*;
-use failure::{self, err_msg, Fail};
+use failure::{err_msg, Fail};
 use ffsend_api::url::Url;
 use rpassword::prompt_password_stderr;
 
@@ -55,13 +55,12 @@ pub fn quit() -> ! {
 
 /// Quit the application with an error code,
 /// and print the given error.
-pub fn quit_error<E: Fail>(err: E) -> ! {
+pub fn quit_error<E: Fail>(err: E, hints: ErrorHints) -> ! {
     // Print the error
     print_error(err);
 
-    // Print some additional information
-    eprintln!("\nFor detailed errors try '{}'", "--verbose".yellow());
-    eprintln!("For more information try '{}'", "--help".yellow());
+    // Print error hints
+    hints.print();
 
     // Quit
     exit(1);
@@ -69,11 +68,80 @@ pub fn quit_error<E: Fail>(err: E) -> ! {
 
 /// Quit the application with an error code,
 /// and print the given error message.
-pub fn quit_error_msg<S>(err: S) -> !
+pub fn quit_error_msg<S>(err: S, hints: ErrorHints) -> !
     where
         S: AsRef<str> + Display + Debug + Sync + Send + 'static
 {
-    quit_error(failure::err_msg(err).compat());
+    quit_error(err_msg(err).compat(), hints);
+}
+
+/// The error hint configuration.
+#[derive(Copy, Clone, Builder)]
+#[builder(default)]
+pub struct ErrorHints {
+    /// Show about the password option.
+    password: bool,
+
+    /// Show about the owner option.
+    owner: bool,
+
+    /// Show about the force flag.
+    force: bool,
+
+    /// Show about the verbose flag.
+    verbose: bool,
+
+    /// Show about the help flag.
+    help: bool,
+}
+
+impl ErrorHints {
+    /// Check whether any hint should be printed.
+    pub fn any(&self) -> bool {
+        self.password || self.owner || self.force || self.verbose || self.help
+    }
+
+    /// Print the error hints.
+    pub fn print(&self) {
+        // Stop if nothing should be printed
+        if !self.any() {
+            return;
+        }
+
+        eprint!("\n");
+
+        // Print hints
+        if self.password {
+            eprintln!("Use '{}' to specify a password", "--password <PASSWORD>".yellow());
+        }
+        if self.owner {
+            eprintln!("Use '{}' to specify an owner token", "--owner <TOKEN>".yellow());
+        }
+        if self.force {
+            eprintln!("Use '{}' to force", "--force".yellow());
+        }
+        if self.verbose {
+            eprintln!("For detailed errors try '{}'", "--verbose".yellow());
+        }
+        if self.help {
+            eprintln!("For more information try '{}'", "--help".yellow());
+        }
+
+        // Flush
+        let _ = stderr().flush();
+    }
+}
+
+impl Default for ErrorHints {
+    fn default() -> Self {
+        ErrorHints {
+            password: false,
+            owner: false,
+            force: false,
+            verbose: true,
+            help: true,
+        }
+    }
 }
 
 /// Open the given URL in the users default browser.
@@ -100,7 +168,14 @@ pub fn set_clipboard(content: String) -> Result<(), Box<StdError>> {
 pub fn prompt_password(main_matcher: &MainMatcher) -> String {
     // Quit with an error if we may not interact
     if main_matcher.no_interact() {
-        quit_error(err_msg("Missing password, must be specified in no-interact mode").compat());
+        quit_error_msg(
+            "Missing password, must be specified in no-interact mode",
+            ErrorHintsBuilder::default()
+                .password(true)
+                .verbose(false)
+                .build()
+                .unwrap(),
+        );
     }
 
     // Prompt for the password
@@ -108,15 +183,19 @@ pub fn prompt_password(main_matcher: &MainMatcher) -> String {
         Ok(password) => password,
         Err(err) => quit_error(err.context(
             "Failed to read password from password prompt"
-        )),
+        ), ErrorHints::default()),
     };
 
     // Do not allow empty passwords unless forced
     if !main_matcher.force() && password.is_empty() {
-        quit_error(err_msg("\
-            An empty password is not supported by the web interface, \
-            use '-f' to force\
-        ").compat())
+        quit_error_msg(
+            "An empty password is not supported by the web interface",
+            ErrorHintsBuilder::default()
+                .force(true)
+                .verbose(false)
+                .build()
+                .unwrap(),
+        )
     }
 
     password
@@ -155,10 +234,10 @@ pub fn ensure_password(
 pub fn prompt(msg: &str, main_matcher: &MainMatcher) -> String {
     // Quit with an error if we may not interact
     if main_matcher.no_interact() {
-        quit_error(format_err!(
+        quit_error_msg(format!(
             "Could not prompt for '{}' in no-interact mode, maybe specify it",
             msg,
-        ).compat());
+        ), ErrorHints::default());
     }
 
     // Show the prompt
@@ -170,7 +249,7 @@ pub fn prompt(msg: &str, main_matcher: &MainMatcher) -> String {
     if let Err(err) = stdin().read_line(&mut input) {
         quit_error(err.context(
             "Failed to read input from prompt"
-        ));
+        ), ErrorHints::default());
     }
 
     // Trim and return
@@ -212,10 +291,10 @@ pub fn prompt_yes(
             });
             return def;
         } else {
-            quit_error(format_err!(
+            quit_error_msg(format!(
                 "Could not prompt question '{}' in no-interact mode, maybe specify it",
                 msg,
-            ).compat());
+            ), ErrorHints::default());
         }
     }
 
@@ -287,7 +366,14 @@ pub fn ensure_owner_token(
             if interact {
                 *token = Some(prompt_owner_token(main_matcher));
             } else {
-                quit_error(err_msg("Missing owner token, must be specified in no-interact mode").compat());
+                quit_error_msg(
+                    "Missing owner token, must be specified in no-interact mode",
+                    ErrorHintsBuilder::default()
+                        .owner(true)
+                        .verbose(false)
+                        .build()
+                        .unwrap(),
+                );
             }
         }
 
