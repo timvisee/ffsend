@@ -16,6 +16,7 @@ pub extern crate url;
 
 pub mod action;
 mod api;
+pub mod config;
 pub mod crypto;
 mod ext;
 pub mod file;

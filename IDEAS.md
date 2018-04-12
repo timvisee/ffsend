@@ -1,7 +1,6 @@
 # First release
-- Only allow file extension renaming on upload with `-f` flag
 - Check for file expiry everywhere
-- Soft limit uploads to 1GB and 2GB
+- On download, mention a wrong or missing password with a HTTP 401 response
 - Remember all uploaded files, make files listable
 - Incognito mode, to not remember files `--incognito`
 - Automatically get owner token, from file history when setting password
@@ -12,7 +11,7 @@
 
 # Other ideas
 - Box errors
-- On download, mention a wrong or missing password with a HTTP 401 response
+- Only allow file extension renaming on upload with `-f` flag
 - Implement error handling everywhere properly
 - Quick upload/download without `upload` or `download` subcommands?
 - Flag to explicitly delete file after download

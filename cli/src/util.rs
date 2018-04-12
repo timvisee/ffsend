@@ -48,6 +48,15 @@ pub fn print_error<E: Fail>(err: E) {
     }
 }
 
+/// Print the given error message in a proper format for the user,
+/// with it's causes.
+pub fn print_error_msg<S>(err: S)
+    where
+        S: AsRef<str> + Display + Debug + Sync + Send + 'static
+{
+    print_error(err_msg(err).compat());
+}
+
 /// Quit the application regularly.
 pub fn quit() -> ! {
     exit(0);
@@ -391,5 +400,18 @@ pub fn ensure_owner_token(
         } else {
             break;
         }
+    }
+}
+
+/// Format the given number of bytes readable for humans.
+pub fn format_bytes(bytes: u64) -> String {
+    let bytes = bytes as f64;
+    let kb = 1024f64;
+    match bytes {
+        bytes if bytes >= kb.powf(4_f64) => format!("{:.*} TiB", 2, bytes / kb.powf(4_f64)),
+        bytes if bytes >= kb.powf(3_f64) => format!("{:.*} GiB", 2, bytes / kb.powf(3_f64)),
+        bytes if bytes >= kb.powf(2_f64) => format!("{:.*} MiB", 2, bytes / kb.powf(2_f64)),
+        bytes if bytes >= kb => format!("{:.*} KiB", 2, bytes / kb),
+        _ => format!("{:.*} B", 0, bytes),
     }
 }
