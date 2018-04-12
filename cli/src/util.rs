@@ -164,7 +164,8 @@ pub fn set_clipboard(content: String) -> Result<(), Box<StdError>> {
 }
 
 /// Prompt the user to enter a password.
-// TODO: only allow emtpy password if forced
+///
+/// If `empty` is `false`, emtpy passwords aren't allowed unless forced.
 pub fn prompt_password(main_matcher: &MainMatcher) -> String {
     // Quit with an error if we may not interact
     if main_matcher.no_interact() {
@@ -179,26 +180,12 @@ pub fn prompt_password(main_matcher: &MainMatcher) -> String {
     }
 
     // Prompt for the password
-    let password = match prompt_password_stderr("Password: ") {
+    match prompt_password_stderr("Password: ") {
         Ok(password) => password,
         Err(err) => quit_error(err.context(
             "Failed to read password from password prompt"
         ), ErrorHints::default()),
-    };
-
-    // Do not allow empty passwords unless forced
-    if !main_matcher.force() && password.is_empty() {
-        quit_error_msg(
-            "An empty password is not supported by the web interface",
-            ErrorHintsBuilder::default()
-                .force(true)
-                .verbose(false)
-                .build()
-                .unwrap(),
-        )
     }
-
-    password
 }
 
 /// Get a password if required.

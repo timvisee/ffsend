@@ -2,7 +2,7 @@ use clap::{Arg, ArgMatches};
 
 use cmd::matcher::{MainMatcher, Matcher};
 use super::{CmdArg, CmdArgFlag, CmdArgOption};
-use util::prompt_password;
+use util::{ErrorHintsBuilder, quit_error_msg, prompt_password};
 
 /// The password argument.
 pub struct ArgPassword { }
@@ -35,16 +35,27 @@ impl<'a> CmdArgOption<'a> for ArgPassword {
             return None;
         }
 
-        // Get the password from the argument if set
-        match Self::value_raw(matches) {
-            None => {},
-            p => return p.map(|p| p.into()),
-        }
-
         // Create a main matcher
         let matcher_main = MainMatcher::with(matches).unwrap();
 
-        // Prompt for the password
-        Some(prompt_password(&matcher_main))
+        // Get the password argument value, or prompt
+        let password = match Self::value_raw(matches) {
+            Some(password) => password.into(),
+            None => prompt_password(&matcher_main),
+        };
+
+        // Do not allow empty passwords unless forced
+        if !matcher_main.force() && password.is_empty() {
+            quit_error_msg(
+                "An empty password is not supported by the web interface",
+                ErrorHintsBuilder::default()
+                    .force(true)
+                    .verbose(false)
+                    .build()
+                    .unwrap(),
+            )
+        }
+
+        Some(password)
     }
 }

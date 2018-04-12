@@ -1,6 +1,5 @@
 # First release
 - Only allow file extension renaming on upload with `-f` flag
-- Only allow empty passwords with `-f` flag
 - Check for file expiry everywhere
 - Soft limit uploads to 1GB and 2GB
 - Remember all uploaded files, make files listable
