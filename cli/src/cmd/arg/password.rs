@@ -2,7 +2,7 @@ use clap::{Arg, ArgMatches};
 
 use cmd::matcher::{MainMatcher, Matcher};
 use super::{CmdArg, CmdArgFlag, CmdArgOption};
-use util::{ErrorHintsBuilder, quit_error_msg, prompt_password};
+use util::{check_empty_password, prompt_password};
 
 /// The password argument.
 pub struct ArgPassword { }
@@ -44,17 +44,8 @@ impl<'a> CmdArgOption<'a> for ArgPassword {
             None => prompt_password(&matcher_main),
         };
 
-        // Do not allow empty passwords unless forced
-        if !matcher_main.force() && password.is_empty() {
-            quit_error_msg(
-                "An empty password is not supported by the web interface",
-                ErrorHintsBuilder::default()
-                    .force(true)
-                    .verbose(false)
-                    .build()
-                    .unwrap(),
-            )
-        }
+        // Check for empty passwords
+        check_empty_password(&password, &matcher_main);
 
         Some(password)
     }

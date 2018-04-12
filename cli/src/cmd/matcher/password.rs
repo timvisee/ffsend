@@ -3,7 +3,8 @@ use ffsend_api::url::Url;
 use rpassword::prompt_password_stderr;
 
 use cmd::arg::{ArgOwner, ArgPassword, ArgUrl, CmdArgOption};
-use super::Matcher;
+use cmd::matcher::{MainMatcher, Matcher};
+use util::check_empty_password;
 
 /// The password command matcher.
 pub struct PasswordMatcher<'a> {
@@ -30,7 +31,7 @@ impl<'a: 'b, 'b> PasswordMatcher<'a> {
     /// Get the password.
     pub fn password(&'a self) -> String {
         // Get the password, or prompt for it
-        match ArgPassword::value(self.matches) {
+        let password = match ArgPassword::value(self.matches) {
             Some(password) => password,
             None => {
                 // Prompt for the password
@@ -39,7 +40,15 @@ impl<'a: 'b, 'b> PasswordMatcher<'a> {
                 prompt_password_stderr("New password: ")
                     .expect("failed to read password from stdin")
             },
-        }
+        };
+
+        // Create a main matcher
+        let matcher_main = MainMatcher::with(self.matches).unwrap();
+
+        // Check for empty passwords
+        check_empty_password(&password, &matcher_main);
+
+        password
     }
 }
 

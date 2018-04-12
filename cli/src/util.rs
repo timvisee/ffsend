@@ -163,6 +163,23 @@ pub fn set_clipboard(content: String) -> Result<(), Box<StdError>> {
     context.set_contents(content)
 }
 
+/// Check for an emtpy password in the given `password`.
+/// If the password is emtpy the program will quit with an error unless
+/// forced.
+// TODO: move this to a better module
+pub fn check_empty_password(password: &str, matcher_main: &MainMatcher) {
+    if !matcher_main.force() && password.is_empty() {
+        quit_error_msg(
+            "An empty password is not supported by the web interface",
+            ErrorHintsBuilder::default()
+                .force(true)
+                .verbose(false)
+                .build()
+                .unwrap(),
+        )
+    }
+}
+
 /// Prompt the user to enter a password.
 ///
 /// If `empty` is `false`, emtpy passwords aren't allowed unless forced.
