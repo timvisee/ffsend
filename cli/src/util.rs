@@ -103,13 +103,23 @@ pub fn prompt_password(main_matcher: &MainMatcher) -> String {
         quit_error(err_msg("Missing password, must be specified in no-interact mode").compat());
     }
 
-    // Prompt and return
-    match prompt_password_stderr("Password: ") {
+    // Prompt for the password
+    let password = match prompt_password_stderr("Password: ") {
         Ok(password) => password,
         Err(err) => quit_error(err.context(
             "Failed to read password from password prompt"
         )),
+    };
+
+    // Do not allow empty passwords unless forced
+    if !main_matcher.force() && password.is_empty() {
+        quit_error(err_msg("\
+            An empty password is not supported by the web interface, \
+            use '-f' to force\
+        ").compat())
     }
+
+    password
 }
 
 /// Get a password if required.

@@ -1,9 +1,6 @@
 # First release
-- Implement `-f` flag for forcing
-- Allow creating non existent directories with the `-f` flag 
 - Only allow file extension renaming on upload with `-f` flag
 - Only allow empty passwords with `-f` flag
-- Implement `-y` flag for assume yes
 - Check for file expiry everywhere
 - Soft limit uploads to 1GB and 2GB
 - Remember all uploaded files, make files listable
@@ -32,9 +29,6 @@
 - Dotfile for default properties
 - Host configuration file for host tags, to easily upload to other hosts
 - Generate man pages
-- Move API URL generator methods out of remote file class
-- Prompt if a file download password is required
-- Must use `-f` to overwrite existing file
 - Rename host to server?
 - Read and write files from and to stdin and stdout with `-` as file
 - Ask to add MIME extension to downloaded files without one on Windows
