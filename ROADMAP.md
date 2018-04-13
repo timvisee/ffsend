@@ -1,34 +1,37 @@
-# First release
+# Release 0.1
 - Check for file expiry everywhere
 - On download, mention a wrong or missing password with a HTTP 401 response
 - Remember all uploaded files, make files listable
 - Incognito mode, to not remember files `--incognito`
 - Automatically get owner token, from file history when setting password
+- Allow file/directory archiving on upload
+- Allow unarchiving on download 
 - Use clipboard through `xclip` on Linux if available for persistence
 - Automated releases through CI
 - Release binaries on GitHub
 - Ubuntu PPA package
+- Implement error handling everywhere properly
+
+# Future releases
+- Box errors
+- A status command, to check the server status using `/__version__` and
+  heartbeat endpoints
+- Allow piping input/output files
+- Allow hiding the progress bar, and/or showing simple progress (with `-q`)
+- Implement a quiet `-q` mode
+- Host configuration file for host tags, to easily upload to other hosts
 
 # Other ideas
-- Box errors
+- API actions contain duplicate code, create centralized functions
 - Only allow file extension renaming on upload with `-f` flag
-- Implement error handling everywhere properly
 - Quick upload/download without `upload` or `download` subcommands?
 - Flag to explicitly delete file after download
 - Allow file deletion by consuming all download slots
-- Check remote version and heartbeat using `/__version__`
-- API actions contain duplicate code, create centralized functions
 - Download to a temporary location first
-- Allow piping input/output files
-- Allow file/directory archiving on upload
-- Allow unarchiving on download 
-- Allow hiding the progress bar, and/or showing simple progress (with `-q`)
 - Document all code components
 - Dotfile for default properties
-- Host configuration file for host tags, to easily upload to other hosts
 - Generate man pages
 - Rename host to server?
-- Read and write files from and to stdin and stdout with `-` as file
 - Ask to add MIME extension to downloaded files without one on Windows
 - Fetch max file size from `server/jsconfig.js`
 - Define a redirect policy (allow setting max redirects)
