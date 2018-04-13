@@ -1,8 +1,10 @@
 use clap::{Arg, ArgMatches};
-use ffsend_api::url::{ParseError, Url};
+use failure::Fail;
+use ffsend_api::url::Url;
 
+use host::parse_host;
 use super::{CmdArg, CmdArgOption};
-use util::{ErrorHints, quit_error_msg};
+use util::{ErrorHints, quit_error};
 
 /// The URL argument.
 pub struct ArgUrl { }
@@ -28,37 +30,12 @@ impl<'a> CmdArgOption<'a> for ArgUrl {
         let url = Self::value_raw(matches).expect("missing URL");
 
         // Parse the URL
-        // TODO: improve these error messages
-        match Url::parse(url) {
+        match parse_host(&url) {
             Ok(url) => url,
-            Err(ParseError::EmptyHost) =>
-                quit_error_msg("Emtpy host given", ErrorHints::default()),
-            Err(ParseError::InvalidPort) =>
-                quit_error_msg("Invalid host port", ErrorHints::default()),
-            Err(ParseError::InvalidIpv4Address) =>
-                quit_error_msg(
-                    "Invalid IPv4 address in host",
-                    ErrorHints::default(),
-                ),
-            Err(ParseError::InvalidIpv6Address) =>
-                quit_error_msg(
-                    "Invalid IPv6 address in host",
-                    ErrorHints::default(),
-                ),
-            Err(ParseError::InvalidDomainCharacter) =>
-                quit_error_msg(
-                    "Host domains contains an invalid character",
-                    ErrorHints::default(),
-                ),
-            Err(ParseError::RelativeUrlWithoutBase) =>
-                quit_error_msg(
-                    "Host domain doesn't contain a host",
-                    ErrorHints::default(),
-                ),
-            _ => quit_error_msg(
-                    "The given host is invalid",
-                    ErrorHints::default(),
-                ),
+            Err(err) => quit_error(
+                err.context("Failed to parse the given share URL"),
+                ErrorHints::default(),
+            ),
         }
     }
 }

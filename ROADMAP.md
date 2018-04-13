@@ -13,6 +13,7 @@
 - Check all TODOs, solve them when possible
 
 # Future releases
+- Implement verbose logging with `-v`
 - Box errors
 - A status command, to check the server status using `/__version__` and
   heartbeat endpoints

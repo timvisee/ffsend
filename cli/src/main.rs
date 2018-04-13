@@ -11,6 +11,7 @@ mod action;
 mod app;
 mod cmd;
 mod error;
+mod host;
 mod progress;
 mod util;
 
