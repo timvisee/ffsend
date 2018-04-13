@@ -1,6 +1,4 @@
 # Release 0.1
-- Check for file expiry everywhere
-- On download, mention a wrong or missing password with a HTTP 401 response
 - Remember all uploaded files, make files listable
 - Incognito mode, to not remember files `--incognito`
 - Automatically get owner token, from file history when setting password
@@ -11,6 +9,7 @@
 - Release binaries on GitHub
 - Ubuntu PPA package
 - Implement error handling everywhere properly
+- Embed request errors
 - Check all TODOs, solve them when possible
 
 # Future releases

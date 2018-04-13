@@ -30,7 +30,7 @@ pub fn ensure_success(response: &Response) -> Result<(), ResponseError> {
 #[derive(Fail, Debug)]
 pub enum ResponseError {
     /// This request lead to an expired file, or a file that never existed.
-    #[fail(display = "The file has expired or did never exist")]
+    #[fail(display = "This file has expired or did never exist")]
     Expired,
 
     /// We were unauthorized to make this request.

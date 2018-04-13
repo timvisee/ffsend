@@ -1,8 +1,8 @@
 use url::Url;
-use reqwest::{Client, Response, StatusCode};
+use reqwest::{Client, Response};
 
+use api::request::{ensure_success, ResponseError};
 use crypto::b64;
-use ext::status_code::StatusCodeExt;
 
 /// The name of the header the nonce is delivered in.
 const HEADER_NONCE: &'static str = "WWW-Authenticate";
@@ -15,19 +15,11 @@ pub fn request_nonce(client: &Client, url: Url)
     // Make the request
     let response = client.get(url)
         .send()
-        .map_err(|_| NonceError::Req)?;
+        .map_err(|_| NonceError::Request)?;
 
-    // Validate the status code
-    let status = response.status();
-    if !status.is_success() {
-        // TODO: should we check here whether a 404 is returned?
-        // // Handle expired files
-        // if status == FILE_EXPIRED_STATUS {
-        //     return Err(Error::Expired);
-        // } else {
-        return Err(NonceError::ReqStatus(status, status.err_text()).into());
-        // }
-    }
+    // Ensure the response is successful
+    ensure_success(&response)
+        .map_err(|err| NonceError::Response(err))?;
 
     // Extract the nonce
     header_nonce(&response)
@@ -57,13 +49,13 @@ pub fn header_nonce(response: &Response)
 #[derive(Fail, Debug)]
 pub enum NonceError {
     /// Sending the request to fetch a nonce failed.
-    #[fail(display = "Failed to request nonce")]
-    Req,
+    #[fail(display = "Failed to request encryption nonce")]
+    Request,
 
-    /// The response for fetching the nonce indicated an error and wasn't
-    /// successful.
-    #[fail(display = "Bad HTTP response '{}' while requesting nonce", _1)]
-    ReqStatus(StatusCode, String),
+    /// The server responded with an error while requesting the encryption nonce,
+    /// required for some operations.
+    #[fail(display = "Bad response from server while requesting encryption nonce")]
+    Response(#[cause] ResponseError),
 
     /// The nonce header was missing from the request.
     #[fail(display = "Missing nonce in server response")]
