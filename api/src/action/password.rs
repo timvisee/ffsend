@@ -1,13 +1,13 @@
-use reqwest::{Client, StatusCode};
+use reqwest::Client;
 
 use api::data::{
     Error as DataError,
     OwnedData,
 };
 use api::nonce::{NonceError, request_nonce};
+use api::request::{ensure_success, ResponseError};
 use api::url::UrlBuilder;
 use crypto::key_set::KeySet;
-use ext::status_code::StatusCodeExt;
 use file::remote_file::RemoteFile;
 
 /// An action to change a password of an uploaded Send file.
@@ -82,13 +82,9 @@ impl<'a> Password<'a> {
             .send()
             .map_err(|_| ChangeError::Request)?;
 
-        // Validate the status code
-        let status = response.status();
-        if !status.is_success() {
-            return Err(ChangeError::RequestStatus(status, status.err_text()).into());
-        }
-
-        Ok(())
+        // Ensure the response is successful
+        ensure_success(&response)
+            .map_err(|err| ChangeError::Response(err))
     }
 }
 
@@ -163,7 +159,7 @@ pub enum ChangeError {
     #[fail(display = "Failed to send password change request")]
     Request,
 
-    /// The response for changing the password indicated an error and wasn't successful.
-    #[fail(display = "Bad HTTP response '{}' while changing the password", _1)]
-    RequestStatus(StatusCode, String),
+    /// The server responded with an error while changing the file password.
+    #[fail(display = "Bad response from server while changing password")]
+    Response(#[cause] ResponseError),
 }

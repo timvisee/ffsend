@@ -11,6 +11,7 @@
 - Release binaries on GitHub
 - Ubuntu PPA package
 - Implement error handling everywhere properly
+- Check all TODOs, solve them when possible
 
 # Future releases
 - Box errors

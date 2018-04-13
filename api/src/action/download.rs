@@ -7,14 +7,14 @@ use std::io::{
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 
-use reqwest::{Client, Response, StatusCode};
+use reqwest::{Client, Response};
 use reqwest::header::Authorization;
 use reqwest::header::ContentLength;
 
 use api::url::UrlBuilder;
+use api::request::{ensure_success, ResponseError};
 use crypto::key_set::KeySet;
 use crypto::sig::signature_encoded;
-use ext::status_code::StatusCodeExt;
 use file::remote_file::RemoteFile;
 use reader::{EncryptedFileWriter, ProgressReporter, ProgressWriter};
 use super::metadata::{
@@ -179,11 +179,9 @@ impl<'a> Download<'a> {
             .send()
             .map_err(|_| DownloadError::Request)?;
 
-        // Validate the status code
-        let status = response.status();
-        if !status.is_success() {
-            return Err(DownloadError::RequestStatus(status, status.err_text()));
-        }
+        // Ensure the response is succesful
+        ensure_success(&response)
+            .map_err(|err| DownloadError::Response(err))?;
 
         // Get the content length
         // TODO: make sure there is enough disk space
@@ -307,9 +305,9 @@ pub enum DownloadError {
     #[fail(display = "Failed to request file download")]
     Request,
 
-    /// The response for downloading the indicated an error and wasn't successful.
-    #[fail(display = "Bad HTTP response '{}' while requesting file download", _1)]
-    RequestStatus(StatusCode, String),
+    /// The server responded with an error while requesting the file download.
+    #[fail(display = "Bad response from server while requesting download")]
+    Response(#[cause] ResponseError),
 
     /// The length of the file is missing, thus the length of the file to download
     /// couldn't be determined.

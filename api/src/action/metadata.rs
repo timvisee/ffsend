@@ -1,24 +1,21 @@
 use failure::Error as FailureError;
 use openssl::symm::decrypt_aead;
-use reqwest::{Client, StatusCode};
+use reqwest::Client;
 use reqwest::header::Authorization;
 use serde_json;
 
 use api::nonce::{header_nonce, NonceError, request_nonce};
+use api::request::{ensure_success, ResponseError};
 use api::url::UrlBuilder;
 use crypto::b64;
 use crypto::key_set::KeySet;
 use crypto::sig::signature_encoded;
-use ext::status_code::StatusCodeExt;
 use file::metadata::Metadata as MetadataData;
 use file::remote_file::RemoteFile;
 use super::exists::{
     Error as ExistsError,
     Exists as ExistsAction,
 };
-
-/// The HTTP status code that is returned for expired files.
-const FILE_EXPIRED_STATUS: StatusCode = StatusCode::NotFound;
 
 /// An action to fetch file metadata.
 pub struct Metadata<'a> {
@@ -107,13 +104,11 @@ impl<'a> Metadata<'a> {
                 format!("send-v1 {}", sig)
             ))
             .send()
-            .map_err(|_| MetaError::NonceReq)?;
+            .map_err(|_| MetaError::NonceRequest)?;
 
-        // Validate the status code
-        let status = response.status();
-        if !status.is_success() {
-            return Err(MetaError::NonceReqStatus(status, status.err_text()));
-        }
+        // Ensure the status code is successful
+        ensure_success(&response)
+            .map_err(|err| MetaError::NonceResponse(err))?;
 
         // Get the metadata nonce
         let nonce = header_nonce(&response)
@@ -260,12 +255,12 @@ pub enum MetaError {
 
     /// Sending the request to gather the metadata encryption nonce failed.
     #[fail(display = "Failed to request metadata nonce")]
-    NonceReq,
+    NonceRequest,
 
-    /// The response for fetching the metadata encryption nonce indicated an
-    /// error and wasn't successful.
-    #[fail(display = "Bad HTTP response '{}' while requesting metadata nonce", _1)]
-    NonceReqStatus(StatusCode, String),
+    /// The server responded with an error while fetching the metadata
+    /// encryption nonce.
+    #[fail(display = "Bad response from server while fetching metadata nonce")]
+    NonceResponse(#[cause] ResponseError),
 
     /// Couldn't parse the metadata encryption nonce.
     #[fail(display = "Failed to parse the metadata encryption nonce")]

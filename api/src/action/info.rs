@@ -3,7 +3,6 @@ use std::cmp::max;
 use reqwest::{
     Client,
     Error as ReqwestError,
-    StatusCode,
 };
 
 use api::data::{
@@ -11,8 +10,8 @@ use api::data::{
     OwnedData,
 };
 use api::nonce::{NonceError, request_nonce};
+use api::request::{ensure_success, ResponseError};
 use api::url::UrlBuilder;
-use ext::status_code::StatusCodeExt;
 use file::remote_file::RemoteFile;
 
 /// An action to fetch info of a shared file.
@@ -72,11 +71,9 @@ impl<'a> Info<'a> {
             .send()
             .map_err(|_| InfoError::Request)?;
 
-        // Validate the status code
-        let status = response.status();
-        if !status.is_success() {
-            return Err(InfoError::RequestStatus(status, status.err_text()).into());
-        }
+        // Ensure the response is successful
+        ensure_success(&response)
+            .map_err(|err| InfoError::Response(err))?;
 
         // Decode the JSON response
         let response: InfoResponse = match response.json() {
@@ -201,10 +198,9 @@ pub enum InfoError {
     #[fail(display = "Failed to send file info request")]
     Request,
 
-    /// The response fetching the file info indicated an error and wasn't
-    /// successful.
-    #[fail(display = "Bad HTTP response '{}' while fetching the file info", _1)]
-    RequestStatus(StatusCode, String),
+    /// The server responded with an error while fetching the file info.
+    #[fail(display = "Bad response from server while fetching file info")]
+    Response(#[cause] ResponseError),
 
     /// Failed to decode the info response from the server.
     /// Maybe the server responded with data from a newer API version.

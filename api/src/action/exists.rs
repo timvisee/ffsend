@@ -1,11 +1,8 @@
-use reqwest::{Client, StatusCode};
+use reqwest::Client;
 
+use api::request::{ensure_success, ResponseError};
 use api::url::UrlBuilder;
-use ext::status_code::StatusCodeExt;
 use file::remote_file::RemoteFile;
-
-/// The HTTP status code that is returned for expired files.
-const FILE_EXPIRED_STATUS: StatusCode = StatusCode::NotFound;
 
 /// An action to check whether a remote file exists.
 /// This aciton returns an `ExistsResponse`, that defines whether the file
@@ -36,15 +33,13 @@ impl<'a> Exists<'a> {
             .send()
             .map_err(|_| Error::Request)?;
 
-        // Validate the status code
-        let status = response.status();
-        if !status.is_success() {
-            // Handle expired files
-            if status == FILE_EXPIRED_STATUS {
-                return Ok(ExistsResponse::new(false, false));
-            } else {
-                return Err(Error::RequestStatus(status, status.err_text()).into());
-            }
+        // Ensure the status code is succesful, check the expiry state
+        match ensure_success(&response) {
+            Ok(_) => {},
+            Err(ResponseError::Expired) => return Ok(
+                ExistsResponse::new(false, false)
+            ),
+            Err(err) => return Err(Error::Response(err)),
         }
 
         // Parse the response
@@ -110,10 +105,10 @@ pub enum Error {
     #[fail(display = "Failed to send request whether the file exists")]
     Request,
 
-    /// The response for checking whether the file exists indicated an error
-    /// and wasn't successful.
-    #[fail(display = "Bad HTTP response '{}' while requesting whether the file exists", _1)]
-    RequestStatus(StatusCode, String),
+    /// The server responded with an error while checking whether the file
+    /// exists.
+    #[fail(display = "Bad response from server while checking file existence")]
+    Response(#[cause] ResponseError),
 
     /// The response from the server when checking if the file exists was
     /// malformed.

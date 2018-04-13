@@ -12,7 +12,6 @@ use reqwest::{
     Client, 
     Error as ReqwestError,
     Request,
-    StatusCode,
 };
 use reqwest::header::Authorization;
 use reqwest::mime::APPLICATION_OCTET_STREAM;
@@ -23,8 +22,8 @@ use url::{
 };
 
 use api::nonce::header_nonce;
+use api::request::{ensure_success, ResponseError};
 use crypto::key_set::KeySet;
-use ext::status_code::StatusCodeExt;
 use file::remote_file::RemoteFile;
 use file::metadata::{Metadata, XFileMetadata};
 use reader::{
@@ -112,7 +111,6 @@ impl Upload {
             .start(reader_len);
 
         // Execute the request
-        // TODO: don't fail on nonce error, just don't use it
         let (result, nonce) = self.execute_request(req, client, &key)?;
 
         // Mark the reporter as finished
@@ -217,7 +215,6 @@ impl Upload {
 
         // Configure a form to send
         let part = Part::reader_with_length(reader, len)
-            // TODO: keep this here? .file_name(file.name())
             .mime(APPLICATION_OCTET_STREAM);
         let form = Form::new()
             .part("data", part);
@@ -228,6 +225,7 @@ impl Upload {
             .expect("invalid host");
 
         // Build the request
+        // TODO: create an error for this unwrap
         client.post(url.as_str())
             .header(Authorization(
                 format!("send-v1 {}", key.auth_key_encoded().unwrap())
@@ -250,13 +248,9 @@ impl Upload {
             Err(_) => return Err(UploadError::Request),
         };
 
-        // Validate the status code
-        let status = response.status();
-        if !status.is_success() {
-            return Err(
-                UploadError::RequestStatus(status, status.err_text())
-            );
-        }
+        // Ensure the response is successful
+        ensure_success(&response)
+            .map_err(|err| UploadError::Response(err))?;
 
         // Try to get the nonce, don't error on failure
         let nonce = header_nonce(&response).ok();
@@ -472,9 +466,9 @@ pub enum UploadError {
     #[fail(display = "Failed to request file upload")]
     Request,
 
-    /// The response for downloading the indicated an error and wasn't successful.
-    #[fail(display = "Bad HTTP response '{}' while requesting file upload", _1)]
-    RequestStatus(StatusCode, String),
+    /// The server responded with an error while uploading.
+    #[fail(display = "Bad response from server while uploading")]
+    Response(#[cause] ResponseError),
 
     /// Failed to decode the upload response from the server.
     /// Maybe the server responded with data from a newer API version.

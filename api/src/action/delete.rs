@@ -1,12 +1,12 @@
-use reqwest::{Client, StatusCode};
+use reqwest::Client;
 
 use api::data::{
     Error as DataError,
     OwnedData,
 };
 use api::nonce::{NonceError, request_nonce};
+use api::request::{ensure_success, ResponseError};
 use api::url::UrlBuilder;
-use ext::status_code::StatusCodeExt;
 use file::remote_file::RemoteFile;
 
 /// An action to delete a remote file.
@@ -66,13 +66,9 @@ impl<'a> Delete<'a> {
             .send()
             .map_err(|_| DeleteError::Request)?;
 
-        // Validate the status code
-        let status = response.status();
-        if !status.is_success() {
-            return Err(DeleteError::RequestStatus(status, status.err_text()).into());
-        }
-
-        Ok(())
+        // Ensure the status code is succesful
+        ensure_success(&response)
+            .map_err(|err| DeleteError::Response(err))
     }
 }
 
@@ -150,8 +146,7 @@ pub enum DeleteError {
     #[fail(display = "Failed to send file deletion request")]
     Request,
 
-    /// The response for deleting the file indicated an error and wasn't
-    /// successful.
-    #[fail(display = "Bad HTTP response '{}' while deleting the file", _1)]
-    RequestStatus(StatusCode, String),
+    /// The server responded with an error while requesting file deletion.
+    #[fail(display = "Bad response from server while deleting file")]
+    Response(#[cause] ResponseError),
 }
