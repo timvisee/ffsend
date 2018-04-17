@@ -6,7 +6,7 @@ workspace = ".."
 
 [[bin]]
 path = "src/main.rs"
-name = "ffsend"
+name = "ffs"
 
 [features]
 default = ["clipboard"]
