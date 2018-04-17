@@ -7,7 +7,7 @@ pub const HTTP_STATUS_EXPIRED: StatusCode = StatusCode::NotFound;
 pub const HTTP_STATUS_UNAUTHORIZED: StatusCode = StatusCode::Unauthorized;
 
 /// The recommended maximum upload size in bytes.
-pub const UPLOAD_SIZE_MAX_RECOMMENDED: u64 = 1_073_741_824;
+pub const UPLOAD_SIZE_MAX_RECOMMENDED: u64 = 1024 * 1024 * 1024 * 1;
 
 /// The maximum upload size in bytes.
-pub const UPLOAD_SIZE_MAX: u64 = 2_147_483_648;
+pub const UPLOAD_SIZE_MAX: u64 = 1024 * 1024 * 1024 * 2;

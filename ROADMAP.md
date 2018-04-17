@@ -4,6 +4,7 @@
 - Automatically get owner token, from file history when setting password
 - Allow file/directory archiving on upload
 - Allow unarchiving on download 
+- Show a simplified command list when calling `ffsend` without arguments
 - Use clipboard through `xclip` on Linux if available for persistence
 - Automated releases through CI
 - Release binaries on GitHub
@@ -23,6 +24,7 @@
 - Host configuration file for host tags, to easily upload to other hosts
 
 # Other ideas
+- Rework encrypted reader/writer
 - API actions contain duplicate code, create centralized functions
 - Only allow file extension renaming on upload with `-f` flag
 - Quick upload/download without `upload` or `download` subcommands?
