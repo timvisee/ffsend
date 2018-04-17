@@ -1,8 +1,8 @@
 use clap::{Arg, ArgMatches};
 use failure::Fail;
+use ffsend_api::config::SEND_DEFAULT_HOST;
 use ffsend_api::url::Url;
 
-use app::SEND_DEF_HOST;
 use host::parse_host;
 use super::{CmdArg, CmdArgOption};
 use util::{ErrorHints, quit_error};
@@ -21,7 +21,7 @@ impl CmdArg for ArgHost {
             .short("h")
             .alias("server")
             .value_name("URL")
-            .default_value(SEND_DEF_HOST)
+            .default_value(SEND_DEFAULT_HOST)
             .help("The remote host to upload to")
     }
 }

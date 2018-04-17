@@ -9,6 +9,3 @@ pub const APP_AUTHOR: &'static str = "Tim Visee <https://timvisee.com/>";
 
 /// Application about information.
 pub const APP_ABOUT: &'static str = "A simple Firefox Send CLI client.";
-
-/// The default Send host to use.
-pub const SEND_DEF_HOST: &'static str = "http://localhost:8080/";
