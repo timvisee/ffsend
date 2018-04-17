@@ -6,6 +6,10 @@ workspace = ".."
 
 [[bin]]
 path = "src/main.rs"
+name = "ffsend"
+
+[[bin]]
+path = "src/main.rs"
 name = "ffs"
 
 [features]

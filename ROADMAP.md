@@ -1,4 +1,5 @@
 # Release 0.1
+- Set MIME type of file when downloaded 
 - Remember all uploaded files, make files listable
 - Incognito mode, to not remember files `--incognito`
 - Automatically get owner token, from file history when setting password
