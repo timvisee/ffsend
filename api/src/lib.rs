@@ -13,6 +13,7 @@ extern crate serde;
 extern crate serde_derive;
 extern crate serde_json;
 pub extern crate url;
+pub extern crate url_serde;
 
 pub mod action;
 mod api;

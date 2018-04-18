@@ -8,6 +8,7 @@ use url::{
 };
 use self::chrono::{DateTime, Utc};
 use self::regex::Regex;
+use url_serde;
 
 use crypto::b64;
 
@@ -25,7 +26,7 @@ const SHARE_FRAGMENT_PATTERN: &'static str = r"^([a-zA-Z0-9-_+/]+)?\s*$";
 ///
 /// The struct contains the file ID, the file URL, the key that is required
 /// in combination with the file, and the owner key.
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct RemoteFile {
     /// The ID of the file on that server.
     id: String,
@@ -34,9 +35,11 @@ pub struct RemoteFile {
     time: Option<DateTime<Utc>>,
 
     /// The host the file was uploaded to.
+    #[serde(with = "url_serde")]
     host: Url,
 
     /// The file URL that was provided by the server.
+    #[serde(with = "url_serde")]
     url: Url,
 
     /// The secret key that is required to download the file.

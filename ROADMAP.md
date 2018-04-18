@@ -1,5 +1,4 @@
 # Release 0.1
-- Color usage flag
 - Remember all uploaded files, make files listable
 - Incognito mode, to not remember files `--incognito`
 - Automatically get owner token, from file history when setting password
@@ -15,6 +14,7 @@
 - Check all TODOs, solve them when possible
 
 # Future releases
+- Color usage flag
 - Implement verbose logging with `-v`
 - Box errors
 - A status command, to check the server status using `/__version__` and
