@@ -29,7 +29,8 @@ pub struct Handler<'a> {
 impl<'a: 'b, 'b> Handler<'a> {
     /// Build the application CLI definition.
     pub fn build() -> App<'a, 'b> {
-        App::new(crate_name!())
+        // Build the CLI application definition
+        let app = App::new(crate_name!())
             .version(crate_version!())
             .author(crate_authors!())
             .about(crate_description!())
@@ -59,7 +60,13 @@ impl<'a: 'b, 'b> Handler<'a> {
             .subcommand(CmdInfo::build())
             .subcommand(CmdParams::build())
             .subcommand(CmdPassword::build())
-            .subcommand(CmdUpload::build().display_order(1))
+            .subcommand(CmdUpload::build().display_order(1));
+
+        // Disable color usage if compiled without color support
+        #[cfg(feature = "no-color")]
+        let app = app.global_setting(AppSettings::ColorNever);
+
+        app
     }
 
     /// Parse CLI arguments.
