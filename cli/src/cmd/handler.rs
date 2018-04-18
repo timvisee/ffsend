@@ -1,7 +1,5 @@
 use clap::{App, AppSettings, Arg, ArgMatches};
 
-use app::*;
-
 use super::matcher::{
     DeleteMatcher,
     DownloadMatcher,
@@ -31,10 +29,10 @@ pub struct Handler<'a> {
 impl<'a: 'b, 'b> Handler<'a> {
     /// Build the application CLI definition.
     pub fn build() -> App<'a, 'b> {
-        App::new(APP_NAME)
-            .version(APP_VERSION)
-            .author(APP_AUTHOR)
-            .about(APP_ABOUT)
+        App::new(crate_name!())
+            .version(crate_version!())
+            .author(crate_authors!())
+            .about(crate_description!())
             .global_setting(AppSettings::GlobalVersion) .global_setting(AppSettings::VersionlessSubcommands)
             // TODO: enable below command when it doesn't break `p` anymore.
             // .global_setting(AppSettings::InferSubcommands)

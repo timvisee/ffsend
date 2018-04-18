@@ -9,7 +9,6 @@ extern crate ffsend_api;
 extern crate rpassword;
 
 mod action;
-mod app;
 mod cmd;
 mod error;
 mod host;

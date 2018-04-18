@@ -1,7 +1,8 @@
 [package]
 name = "ffsend-api"
-version = "0.1.0"
-authors = ["timvisee <timvisee@gmail.com>"]
+description = "A simple Firefox Send API client."
+version = "0.0.1"
+authors = ["Tim Visee <https://timvisee.com/>"]
 workspace = ".."
 
 [dependencies]
