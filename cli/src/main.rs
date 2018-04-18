@@ -1,3 +1,4 @@
+#[macro_use]
 extern crate clap;
 #[macro_use]
 extern crate derive_builder;
@@ -24,7 +25,7 @@ use action::password::Password;
 use action::upload::Upload;
 use cmd::Handler;
 use error::Error;
-use util::{ErrorHints, quit_error};
+use util::{ErrorHints, exe_name, highlight, quit_error};
 
 /// Application entrypoint.
 fn main() {
@@ -84,10 +85,26 @@ fn invoke_action(handler: &Handler) -> Result<(), Error> {
             .map_err(|err| err.into());
     }
 
-    // No subcommand was selected, show general help
-    Handler::build()
-        .print_help()
-        .expect("failed to print command help");
-
+    // Print the main info and return
+    print_main_info();
     Ok(())
+}
+
+/// Print the main info, shown when no subcommands were supplied.
+pub fn print_main_info() {
+    // Get the name of the used executable
+    let exe = exe_name();
+
+    // Print the main info
+    println!("{} {}", crate_name!(), crate_version!());
+    println!("Usage: {} [FLAGS] <SUBCOMMAND> ...", exe);
+    println!("");
+    println!("{}", crate_description!());
+    println!("");
+    println!("Missing subcommand. Here are the most used:");
+    println!("    {}", highlight(&format!("{} upload <FILE> ...", exe)));
+    println!("    {}", highlight(&format!("{} download <URL> ...", exe)));
+    println!("");
+    println!("To show all subcommands, features and other help:");
+    println!("    {}", highlight(&format!("{} help [SUBCOMMAND]", exe)));
 }

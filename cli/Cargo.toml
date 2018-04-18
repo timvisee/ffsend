@@ -1,6 +1,7 @@
 [package]
 name = "ffsend-cli"
-version = "0.1.0"
+description = "A simple Firefox Send CLI client."
+version = "0.0.1-dev"
 authors = ["timvisee <timvisee@gmail.com>"]
 workspace = ".."
 

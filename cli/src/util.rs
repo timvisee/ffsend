@@ -3,6 +3,7 @@ extern crate clipboard;
 extern crate colored;
 extern crate open;
 
+use std::env::current_exe;
 #[cfg(feature = "clipboard")]
 use std::error::Error as StdError;
 use std::fmt::{Debug, Display};
@@ -121,19 +122,19 @@ impl ErrorHints {
 
         // Print hints
         if self.password {
-            eprintln!("Use '{}' to specify a password", "--password <PASSWORD>".yellow());
+            eprintln!("Use '{}' to specify a password", highlight("--password <PASSWORD>"));
         }
         if self.owner {
-            eprintln!("Use '{}' to specify an owner token", "--owner <TOKEN>".yellow());
+            eprintln!("Use '{}' to specify an owner token", highlight("--owner <TOKEN>"));
         }
         if self.force {
-            eprintln!("Use '{}' to force", "--force".yellow());
+            eprintln!("Use '{}' to force", highlight("--force"));
         }
         if self.verbose {
-            eprintln!("For detailed errors try '{}'", "--verbose".yellow());
+            eprintln!("For detailed errors try '{}'", highlight("--verbose"));
         }
         if self.help {
-            eprintln!("For more information try '{}'", "--help".yellow());
+            eprintln!("For more information try '{}'", highlight("--help"));
         }
 
         // Flush
@@ -151,6 +152,11 @@ impl Default for ErrorHints {
             help: true,
         }
     }
+}
+
+/// Highlight the given text with a color.
+pub fn highlight(msg: &str) -> ColoredString {
+    msg.yellow()
 }
 
 /// Open the given URL in the users default browser.
@@ -394,7 +400,7 @@ pub fn ensure_owner_token(
         if token.as_ref().unwrap().is_empty() {
             eprintln!(
                 "Empty owner token given, which is invalid. Use {} to cancel.",
-                "[CTRL+C]".yellow(),
+                highlight("[CTRL+C]"),
             );
             *token = None;
         } else {
@@ -414,4 +420,13 @@ pub fn format_bytes(bytes: u64) -> String {
         bytes if bytes >= kb => format!("{:.*} KiB", 2, bytes / kb),
         _ => format!("{:.*} B", 0, bytes),
     }
+}
+
+/// Get the name of the executable that was invoked.
+pub fn exe_name() -> String {
+    current_exe()
+        .ok()
+        .and_then(|p| p.file_name().map(|n| n.to_owned()))
+        .and_then(|n| n.into_string().ok())
+        .unwrap_or(crate_name!().into())
 }
