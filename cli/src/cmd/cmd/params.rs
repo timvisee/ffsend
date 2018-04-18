@@ -13,7 +13,7 @@ impl CmdParams {
         ];
 
         SubCommand::with_name("parameters")
-            .about("Change parameters of a shared file.")
+            .about("Change parameters of a shared file")
             .visible_alias("params")
             .alias("par")
             .alias("param")

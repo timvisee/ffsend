@@ -13,7 +13,7 @@ impl CmdUpload {
         // Build the subcommand
         #[allow(unused_mut)]
         let mut cmd = SubCommand::with_name("upload")
-            .about("Upload files.")
+            .about("Upload files")
             .visible_alias("u")
             .visible_alias("up")
             .arg(Arg::with_name("FILE")

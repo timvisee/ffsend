@@ -8,7 +8,7 @@ pub struct CmdDownload;
 impl CmdDownload {
     pub fn build<'a, 'b>() -> App<'a, 'b> {
         SubCommand::with_name("download")
-            .about("Download files.")
+            .about("Download files")
             .visible_alias("d")
             .visible_alias("down")
             .arg(ArgUrl::build())

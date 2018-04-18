@@ -8,7 +8,7 @@ pub struct CmdPassword;
 impl CmdPassword {
     pub fn build<'a, 'b>() -> App<'a, 'b> {
         SubCommand::with_name("password")
-            .about("Change the password of a shared file.")
+            .about("Change the password of a shared file")
             .visible_alias("pass")
             .visible_alias("p")
             .arg(ArgUrl::build())
