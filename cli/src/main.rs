@@ -7,10 +7,14 @@ extern crate failure;
 extern crate failure_derive;
 extern crate ffsend_api;
 extern crate rpassword;
+extern crate serde;
+#[macro_use]
+extern crate serde_derive;
 
 mod action;
 mod cmd;
 mod error;
+mod history;
 mod host;
 mod progress;
 mod util;

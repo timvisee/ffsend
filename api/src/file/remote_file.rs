@@ -26,7 +26,7 @@ const SHARE_FRAGMENT_PATTERN: &'static str = r"^([a-zA-Z0-9-_+/]+)?\s*$";
 ///
 /// The struct contains the file ID, the file URL, the key that is required
 /// in combination with the file, and the owner key.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct RemoteFile {
     /// The ID of the file on that server.
     id: String,

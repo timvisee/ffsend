@@ -1,5 +1,5 @@
 use std::fs::File;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex};
 
 use clap::ArgMatches;
@@ -11,6 +11,7 @@ use ffsend_api::reqwest::Client;
 
 use cmd::matcher::{Matcher, MainMatcher, UploadMatcher};
 use error::ActionError;
+use history::History;
 use progress::ProgressBar;
 use util::{
     ErrorHintsBuilder,
@@ -123,6 +124,18 @@ impl<'a> Upload<'a> {
         let url = file.download_url(true);
         println!("Download URL: {}", url);
         println!("Owner token: {}", file.owner_token().unwrap());
+
+        // Update the history manager, load it first
+        // TODO: complete this implementation
+        let history_path = PathBuf::from("./history.toml");
+        match History::load_or_new(history_path) {
+            Ok(mut history) => {
+                // Add the file, and save
+                history.add(file.clone());
+                history.save();
+            },
+            Err(err) => println!("TODO: PRINT LOAD ERROR HERE"),
+        }
 
         // Open the URL in the browser
         if matcher_upload.open() {

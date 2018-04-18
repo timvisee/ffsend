@@ -370,6 +370,9 @@ dependencies = [
  "open 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "pbr 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "rpassword 2.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "serde 1.0.37 (registry+https://github.com/rust-lang/crates.io-index)",
+ "serde_derive 1.0.37 (registry+https://github.com/rust-lang/crates.io-index)",
+ "toml 0.4.6 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -1312,6 +1315,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "toml"
+version = "0.4.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+dependencies = [
+ "serde 1.0.37 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
 name = "typenum"
 version = "1.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1630,6 +1641,7 @@ dependencies = [
 "checksum tokio-timer 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)" = "29a89e4ad0c8f1e4c9860e605c38c69bfdad3cccd4ea446e58ff588c1c07a397"
 "checksum tokio-tls 0.1.4 (registry+https://github.com/rust-lang/crates.io-index)" = "772f4b04e560117fe3b0a53e490c16ddc8ba6ec437015d91fa385564996ed913"
 "checksum tokio-udp 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)" = "137bda266504893ac4774e0ec4c2108f7ccdbcb7ac8dced6305fe9e4e0b5041a"
+"checksum toml 0.4.6 (registry+https://github.com/rust-lang/crates.io-index)" = "a0263c6c02c4db6c8f7681f9fd35e90de799ebd4cfdeab77a38f4ff6b3d8c0d9"
 "checksum typenum 1.10.0 (registry+https://github.com/rust-lang/crates.io-index)" = "612d636f949607bdf9b123b4a6f6d966dedf3ff669f7f045890d3a4a73948169"
 "checksum ucd-util 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)" = "fd2be2d6639d0f8fe6cdda291ad456e23629558d466e2789d2c3e9892bda285d"
 "checksum unicase 1.4.2 (registry+https://github.com/rust-lang/crates.io-index)" = "7f4765f83163b74f957c797ad9253caf97f103fb064d3999aea9568d09fc8a33"
