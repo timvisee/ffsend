@@ -1,5 +1,6 @@
 extern crate toml;
 
+use std::fs;
 use std::io::Error as IoError;
 use std::path::PathBuf;
 
@@ -38,12 +39,12 @@ impl History {
         // Read the file to a string
         use std::fs::File;
         use std::io::Read;
-        let mut file = File::open(path.clone())?;
+        let mut file = File::open(&path)?;
         let mut data = String::new();
         file.read_to_string(&mut data)?;
 
         // TODO: switch to this instead in stable Rust 1.26
-        // let data = fs::read_to_string(path.clone())?;
+        // let data = fs::read_to_string(&path)?;
 
         // Parse the data, set the autosave path
         let mut history: Self = toml::from_str(&data)?;
@@ -66,20 +67,32 @@ impl History {
 
     /// Save the history to the internal autosave file.
     pub fn save(&mut self) -> Result<(), SaveError> {
-        // TODO: create the parent directories if needed
-
-        // Build the data
-        let data = toml::to_string(self)?;
-
         // Get the path
         let path = self.autosave
             .as_ref()
             .ok_or(SaveError::NoPath)?;
 
+        // If we have no files, remove the history file if it exists
+        if self.files.is_empty() {
+            if path.is_file() {
+                fs::remove_file(&path)
+                    .map_err(|err| SaveError::Delete(err))?;
+            }
+            return Ok(());
+        }
+
+        // Ensure the file parnet directories are available
+        if let Some(parent) = path.parent() {
+            fs::create_dir_all(parent)?;
+        }
+
+        // Build the data
+        let data = toml::to_string(self)?;
+
         // Write to the file
         use std::fs::File;
         use std::io::Write;
-        File::create(path)?.write_all(data.as_ref())?;
+        File::create(&path)?.write_all(data.as_ref())?;
 
         // TODO: switch to this instead in stable Rust 1.26
         // let data = fs::read_to_string(path.clone())?;
@@ -195,6 +208,11 @@ pub enum SaveError {
     /// Failed to write to the history file.
     #[fail(display = "Failed to write to the history file")]
     Write(#[cause] IoError),
+
+    /// Failed to delete the history file, which was tried because there
+    /// are no history items to save.
+    #[fail(display = "Failed to delete history file, because history is empty")]
+    Delete(#[cause] IoError),
 }
 
 impl From<SerError> for SaveError {

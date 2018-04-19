@@ -1,5 +1,12 @@
 # Release 0.1
-- Remember all uploaded files, make files listable
+- Define minimum arguments for options such as `--history`, do not allow empty
+- Add/remove files from history in other commands, such as:
+  - Delete, if file is deleted
+  - Download, if file expired
+  - Exists, if file doesn't exist
+  - Info, if file doesn't exist, and update TTL
+  - Parameters, if file doesn't exist
+  - Password, if file doesn't exist
 - Incognito mode, to not remember files `--incognito`
 - Automatically get owner token, from file history when setting password
 - Allow file/directory archiving on upload
