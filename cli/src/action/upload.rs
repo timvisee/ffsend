@@ -125,16 +125,11 @@ impl<'a> Upload<'a> {
         println!("Download URL: {}", url);
         println!("Owner token: {}", file.owner_token().unwrap());
 
-        // Update the history manager, load it first
-        // TODO: complete this implementation
+        // Add the file to the history manager
+        // TODO: specify the proper path here
         let history_path = PathBuf::from("./history.toml");
-        match History::load_or_new(history_path) {
-            Ok(mut history) => {
-                // Add the file, and save
-                history.add(file.clone());
-                history.save();
-            },
-            Err(err) => println!("TODO: PRINT LOAD ERROR HERE"),
+        if let Err(err) = History::load_add_save(history_path, file.clone()) {
+            print_error(err.context("Failed to add file to history, ignoring"));
         }
 
         // Open the URL in the browser

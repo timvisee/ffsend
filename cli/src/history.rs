@@ -1,10 +1,14 @@
 extern crate toml;
 
 use std::fs;
-use std::io::Read;
+use std::io::Error as IoError;
 use std::path::PathBuf;
 
 use ffsend_api::file::remote_file::RemoteFile;
+use self::toml::de::Error as DeError;
+use self::toml::ser::Error as SerError;
+
+use util::print_error;
 
 #[derive(Serialize, Deserialize)]
 pub struct History {
@@ -30,10 +34,22 @@ impl History {
     }
 
     /// Load the history from the given file.
+    pub fn load(path: PathBuf) -> Result<Self, LoadError> {
+        // Read the file to a string
+        let data = fs::read_to_string(path.clone())?;
+
+        // Parse the data, set the autosave path
+        let mut history: Self = toml::from_str(&data)?;
+        history.autosave = Some(path);
+
+        Ok(history)
+    }
+
+    /// Load the history from the given file.
     /// If the file doesn't exist, create a new empty history instance.
     ///
     /// Autosaving will be enabled, and will save to the given file path.
-    pub fn load_or_new(file: PathBuf) -> Result<Self, ()> {
+    pub fn load_or_new(file: PathBuf) -> Result<Self, LoadError> {
         if file.is_file() {
             Self::load(file)
         } else {
@@ -41,28 +57,18 @@ impl History {
         }
     }
 
-    /// Load the history from the given file.
-    pub fn load(path: PathBuf) -> Result<Self, ()> {
-        // Read the file to a string
-        // TODO: handle error
-        let data = fs::read_to_string(path.clone()).unwrap();
-
-        // Parse the data, set the autosave path
-        let mut history: Self = toml::from_str(&data).unwrap();
-        history.autosave = Some(path);
-
-        Ok(history)
-    }
-
     /// Save the history to the internal autosave file.
-    pub fn save(&mut self) -> Result<(), ()> {
-        // Build the data
-        // TODO: handle error
-        let data = toml::to_string(self).unwrap();
+    pub fn save(&mut self) -> Result<(), SaveError> {
+        // TODO: create the parent directories if needed
 
-        // Write to a file
-        // TODO: handle error
-        fs::write(self.autosave.as_ref().unwrap(), data).unwrap();
+        // Build the data
+        let data = toml::to_string(self)?;
+
+        // Get the path, write to a file
+        let path = self.autosave
+            .as_ref()
+            .ok_or(SaveError::NoPath)?;
+        fs::write(path, data)?;
 
         // There are no new changes, set the flag
         self.changed = false;
@@ -76,6 +82,16 @@ impl History {
         self.changed = true;
     }
 
+    /// Load the history from the given path, add the given file, and save it
+    /// again.
+    /// If there is not history file at the given path, a new empty one will
+    /// be created.
+    pub fn load_add_save(path: PathBuf, file: RemoteFile) -> Result<(), Error> {
+        let mut history = Self::load_or_new(path)?;
+        history.add(file);
+        history.save().map_err(|err| err.into())
+    }
+
     /// Get all files.
     pub fn files(&self) -> &Vec<RemoteFile> {
         &self.files
@@ -86,7 +102,10 @@ impl Drop for History {
     fn drop(&mut self) {
         // Automatically save if enabled and something was changed
         if self.autosave.is_some() && self.changed {
-            self.save();
+            // Save and report errors
+            if let Err(err) = self.save() {
+                print_error(err);
+            }
         }
     }
 }
@@ -98,5 +117,78 @@ impl Default for History {
             changed: false,
             autosave: None,
         }
+    }
+}
+
+#[derive(Debug, Fail)]
+pub enum Error {
+    /// An error occurred while loading the history from a file.
+    #[fail(display = "Failed to load history from file")]
+    Load(#[cause] LoadError),
+
+    /// An error occurred while saving the history to a file.
+    #[fail(display = "Failed to save history to file")]
+    Save(#[cause] SaveError),
+}
+
+impl From<LoadError> for Error {
+    fn from(err: LoadError) -> Self {
+        Error::Load(err)
+    }
+}
+
+impl From<SaveError> for Error {
+    fn from(err: SaveError) -> Self {
+        Error::Save(err)
+    }
+}
+
+#[derive(Debug, Fail)]
+pub enum LoadError {
+    /// Failed to read the file contents from the given file.
+    #[fail(display = "Failed to read from the history file")]
+    Read(#[cause] IoError),
+
+    /// Failed to parse the loaded file.
+    #[fail(display = "Failed to parse the file contents")]
+    Parse(#[cause] DeError),
+}
+
+impl From<IoError> for LoadError {
+    fn from(err: IoError) -> Self {
+        LoadError::Read(err)
+    }
+}
+
+impl From<DeError> for LoadError {
+    fn from(err: DeError) -> Self {
+        LoadError::Parse(err)
+    }
+}
+
+#[derive(Debug, Fail)]
+pub enum SaveError {
+    /// No autosave file path was present, failed to save.
+    #[fail(display = "No autosave file path specified")]
+    NoPath,
+
+    /// Failed to serialize the history for saving.
+    #[fail(display = "Failed to serialize the history for saving")]
+    Serialize(#[cause] SerError),
+
+    /// Failed to write to the history file.
+    #[fail(display = "Failed to write to the history file")]
+    Write(#[cause] IoError),
+}
+
+impl From<SerError> for SaveError {
+    fn from(err: SerError) -> Self {
+        SaveError::Serialize(err)
+    }
+}
+
+impl From<IoError> for SaveError {
+    fn from(err: IoError) -> Self {
+        SaveError::Write(err)
     }
 }
