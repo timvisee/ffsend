@@ -1,6 +1,5 @@
 extern crate toml;
 
-use std::fs;
 use std::io::Error as IoError;
 use std::path::PathBuf;
 
@@ -36,7 +35,14 @@ impl History {
     /// Load the history from the given file.
     pub fn load(path: PathBuf) -> Result<Self, LoadError> {
         // Read the file to a string
-        let data = fs::read_to_string(path.clone())?;
+        use std::fs::File;
+        use std::io::Read;
+        let mut file = File::open(path.clone())?;
+        let mut data = String::new();
+        file.read_to_string(&mut data)?;
+
+        // TODO: switch to this instead in stable Rust 1.26
+        // let data = fs::read_to_string(path.clone())?;
 
         // Parse the data, set the autosave path
         let mut history: Self = toml::from_str(&data)?;
@@ -64,11 +70,18 @@ impl History {
         // Build the data
         let data = toml::to_string(self)?;
 
-        // Get the path, write to a file
+        // Get the path
         let path = self.autosave
             .as_ref()
             .ok_or(SaveError::NoPath)?;
-        fs::write(path, data)?;
+
+        // Write to the file
+        use std::fs::File;
+        use std::io::Write;
+        File::create(path)?.write_all(data.as_ref())?;
+
+        // TODO: switch to this instead in stable Rust 1.26
+        // let data = fs::read_to_string(path.clone())?;
 
         // There are no new changes, set the flag
         self.changed = false;
