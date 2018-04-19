@@ -95,6 +95,9 @@ pub struct ErrorHints {
     /// Show about the owner option.
     owner: bool,
 
+    /// Show about the history flag.
+    history: bool,
+
     /// Show about the force flag.
     force: bool,
 
@@ -108,7 +111,12 @@ pub struct ErrorHints {
 impl ErrorHints {
     /// Check whether any hint should be printed.
     pub fn any(&self) -> bool {
-        self.password || self.owner || self.force || self.verbose || self.help
+        self.password
+            || self.owner
+            || self.history
+            || self.force
+            || self.verbose
+            || self.help
     }
 
     /// Print the error hints.
@@ -126,6 +134,9 @@ impl ErrorHints {
         }
         if self.owner {
             eprintln!("Use '{}' to specify an owner token", highlight("--owner <TOKEN>"));
+        }
+        if self.history {
+            eprintln!("Use '{}' to specify a history file", highlight("--history <FILE>"));
         }
         if self.force {
             eprintln!("Use '{}' to force", highlight("--force"));
@@ -147,6 +158,7 @@ impl Default for ErrorHints {
         ErrorHints {
             password: false,
             owner: false,
+            history: false,
             force: false,
             verbose: true,
             help: true,

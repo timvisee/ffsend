@@ -1,5 +1,5 @@
 use std::fs::File;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use std::sync::{Arc, Mutex};
 
 use clap::ArgMatches;
@@ -126,9 +126,10 @@ impl<'a> Upload<'a> {
         println!("Owner token: {}", file.owner_token().unwrap());
 
         // Add the file to the history manager
-        // TODO: specify the proper path here
-        let history_path = PathBuf::from("./history.toml");
-        if let Err(err) = History::load_add_save(history_path, file.clone()) {
+        if let Err(err) = History::load_add_save(
+            matcher_main.history(),
+            file.clone(),
+        ) {
             print_error(err.context("Failed to add file to history, ignoring"));
         }
 

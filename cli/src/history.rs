@@ -3,6 +3,7 @@ extern crate toml;
 use std::io::Error as IoError;
 use std::path::PathBuf;
 
+use failure::Fail;
 use ffsend_api::file::remote_file::RemoteFile;
 use self::toml::de::Error as DeError;
 use self::toml::ser::Error as SerError;
@@ -117,7 +118,9 @@ impl Drop for History {
         if self.autosave.is_some() && self.changed {
             // Save and report errors
             if let Err(err) = self.save() {
-                print_error(err);
+                print_error(
+                    err.context("Failed to auto save history, ignoring"),
+                );
             }
         }
     }

@@ -1,4 +1,7 @@
+extern crate app_dirs2;
+
 use clap::{App, AppSettings, Arg, ArgMatches};
+use self::app_dirs2::{AppDataType, AppInfo, get_app_dir};
 
 use super::matcher::{
     DeleteMatcher,
@@ -19,6 +22,23 @@ use super::cmd::{
     CmdPassword,
     CmdUpload,
 };
+
+lazy_static! {
+    /// The default history file
+    static ref DEFAULT_HISTORY_FILE: String =
+        get_app_dir(
+            AppDataType::UserCache,
+            &AppInfo {
+                name: crate_name!(),
+                author: crate_name!(),
+            },
+            "history.toml",
+        )
+        .unwrap()
+        .to_str()
+        .unwrap()
+        .to_owned();
+}
 
 /// CLI argument handler.
 pub struct Handler<'a> {
@@ -54,6 +74,13 @@ impl<'a: 'b, 'b> Handler<'a> {
                 .visible_alias("assume-yes")
                 .global(true)
                 .help("Assume yes for prompts"))
+            .arg(Arg::with_name("history")
+                .long("history")
+                .short("H")
+                .value_name("FILE")
+                .global(true)
+                .help("History file to use")
+                .default_value(&DEFAULT_HISTORY_FILE))
             .subcommand(CmdDelete::build())
             .subcommand(CmdDownload::build().display_order(2))
             .subcommand(CmdExists::build())

@@ -6,6 +6,8 @@ extern crate failure;
 #[macro_use]
 extern crate failure_derive;
 extern crate ffsend_api;
+#[macro_use]
+extern crate lazy_static;
 extern crate rpassword;
 extern crate serde;
 #[macro_use]
