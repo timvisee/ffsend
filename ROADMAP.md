@@ -7,6 +7,8 @@
   - Info, if file doesn't exist, and update TTL
   - Parameters, if file doesn't exist
   - Password, if file doesn't exist
+- Create history command
+- History compiler flag
 - Incognito mode, to not remember files `--incognito`
 - Automatically get owner token, from file history when setting password
 - Allow file/directory archiving on upload

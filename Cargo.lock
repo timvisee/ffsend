@@ -344,6 +344,27 @@ version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
+name = "ffsend"
+version = "0.0.1"
+dependencies = [
+ "app_dirs2 2.0.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "clap 2.31.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "clipboard 0.4.6 (registry+https://github.com/rust-lang/crates.io-index)",
+ "colored 1.6.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "derive_builder 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "failure 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "failure_derive 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "ffsend-api 0.0.1",
+ "lazy_static 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "open 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "pbr 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rpassword 2.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "serde 1.0.39 (registry+https://github.com/rust-lang/crates.io-index)",
+ "serde_derive 1.0.39 (registry+https://github.com/rust-lang/crates.io-index)",
+ "toml 0.4.6 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
 name = "ffsend-api"
 version = "0.0.1"
 dependencies = [
@@ -365,27 +386,6 @@ dependencies = [
  "sha2 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "url 1.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "url_serde 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[[package]]
-name = "ffsend-cli"
-version = "0.0.1"
-dependencies = [
- "app_dirs2 2.0.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "clap 2.31.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "clipboard 0.4.6 (registry+https://github.com/rust-lang/crates.io-index)",
- "colored 1.6.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "derive_builder 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "failure 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "failure_derive 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "ffsend-api 0.0.1",
- "lazy_static 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "open 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "pbr 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "rpassword 2.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "serde 1.0.39 (registry+https://github.com/rust-lang/crates.io-index)",
- "serde_derive 1.0.39 (registry+https://github.com/rust-lang/crates.io-index)",
- "toml 0.4.6 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]

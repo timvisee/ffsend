@@ -1,5 +1,5 @@
 [package]
-name = "ffsend-cli"
+name = "ffsend"
 description = "A simple Firefox Send CLI client."
 version = "0.0.1"
 authors = ["Tim Visee <https://timvisee.com/>"]
