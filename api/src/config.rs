@@ -1,7 +1,10 @@
 use reqwest::StatusCode;
 
-/// The default Send host to use.
+/// The Send host to use by default.
 pub const SEND_DEFAULT_HOST: &'static str = "https://send.firefox.com/";
+
+/// The default time after which uploaded files expire after, in seconds.
+pub const SEND_DEFAULT_EXPIRE_TIME: i64 = 24 * 60 * 60;
 
 /// The HTTP status code that is returned for expired or non existant files.
 pub const HTTP_STATUS_EXPIRED: StatusCode = StatusCode::NotFound;

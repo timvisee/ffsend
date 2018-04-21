@@ -7,6 +7,9 @@
   - Info, if file doesn't exist, and update TTL
   - Parameters, if file doesn't exist
   - Password, if file doesn't exist
+- Remote file expiry time:
+  - Add uncertainty flag
+  - Give all files the default expiry flag if not set (with uncertainty flag)
 - Create history command
 - History compiler flag
 - Incognito mode, to not remember files `--incognito`

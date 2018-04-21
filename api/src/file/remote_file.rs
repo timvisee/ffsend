@@ -8,8 +8,10 @@ use url::{
 };
 use self::chrono::{DateTime, Utc};
 use self::regex::Regex;
+use time::Duration;
 use url_serde;
 
+use config::SEND_DEFAULT_EXPIRE_TIME;
 use crypto::b64;
 
 /// A pattern for share URL paths, capturing the file ID.
@@ -32,7 +34,10 @@ pub struct RemoteFile {
     id: String,
 
     /// The time the file was uploaded at, if known.
-    time: Option<DateTime<Utc>>,
+    upload_at: Option<DateTime<Utc>>,
+
+    /// The time the file will expire at, if known.
+    expire_at: Option<DateTime<Utc>>,
 
     /// The host the file was uploaded to.
     #[serde(with = "url_serde")]
@@ -53,7 +58,8 @@ impl RemoteFile {
     /// Construct a new file.
     pub fn new(
         id: String,
-        time: Option<DateTime<Utc>>,
+        upload_at: Option<DateTime<Utc>>,
+        expire_at: Option<DateTime<Utc>>,
         host: Url,
         url: Url,
         secret: Vec<u8>,
@@ -61,7 +67,8 @@ impl RemoteFile {
     ) -> Self {
         Self {
             id,
-            time,
+            upload_at,
+            expire_at,
             host,
             url,
             secret,
@@ -70,6 +77,7 @@ impl RemoteFile {
     }
 
     /// Construct a new file, that was created at this exact time.
+    /// This will set the file expiration time 
     pub fn new_now(
         id: String,
         host: Url,
@@ -77,9 +85,15 @@ impl RemoteFile {
         secret: Vec<u8>,
         owner_token: Option<String>,
     ) -> Self {
+        // Get the current time
+        let now = Utc::now();
+        let expire_at = now + Duration::seconds(SEND_DEFAULT_EXPIRE_TIME);
+
+        // Construct and return
         Self::new(
             id,
-            Some(Utc::now()),
+            Some(now),
+            Some(expire_at),
             host,
             url,
             secret,
@@ -129,6 +143,7 @@ impl RemoteFile {
         // Construct the file
         Ok(Self::new(
             id,
+            None,
             None,
             host,
             url,
