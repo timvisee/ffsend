@@ -50,6 +50,9 @@ impl History {
         let mut history: Self = toml::from_str(&data)?;
         history.autosave = Some(path);
 
+        // Garbage collect
+        history.gc();
+
         Ok(history)
     }
 
@@ -67,6 +70,9 @@ impl History {
 
     /// Save the history to the internal autosave file.
     pub fn save(&mut self) -> Result<(), SaveError> {
+        // Garbage collect
+        self.gc();
+
         // Get the path
         let path = self.autosave
             .as_ref()
@@ -122,6 +128,34 @@ impl History {
     /// Get all files.
     pub fn files(&self) -> &Vec<RemoteFile> {
         &self.files
+    }
+
+    /// Garbage collect (remove) all files that have been expired,
+    /// as defined by their `expire_at` property.
+    ///
+    /// If the expiry property is None (thus unknown), the file will be kept.
+    ///
+    /// The number of exired files is returned.
+    pub fn gc(&mut self) -> usize {
+        // Get the indices of files that have expired
+        let expired_indices: Vec<usize> = self.files.iter()
+            .enumerate()
+            .filter(|(_, f)| f.has_expired(false))
+            .map(|(i, _)| i)
+            .collect();
+
+        // Remove these specific files
+        for i in &expired_indices {
+            self.files.remove(*i);
+        }
+
+        // Set the changed flag
+        if !expired_indices.is_empty() {
+            self.changed = true;
+        }
+
+        // Return the number of expired files
+        expired_indices.len()
     }
 }
 

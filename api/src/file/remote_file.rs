@@ -157,6 +157,17 @@ impl RemoteFile {
         &self.id
     }
 
+    /// Check whether this file has expired, based on it's expiry property.
+    ///
+    /// If no expiry time is set (known) for this file,
+    /// the `def` value is returned instead.
+    pub fn has_expired(&self, def: bool) -> bool {
+        match self.expire_at {
+            Some(time) => time < Utc::now(),
+            None => def,
+        }
+    }
+
     /// Get the file URL, provided by the server.
     pub fn url(&self) -> &Url {
         &self.url
