@@ -109,25 +109,6 @@ impl History {
         Ok(())
     }
 
-    /// Load the history from the given path, add the given file, and save it
-    /// again.
-    /// If there is no file at the given path, new history will be created.
-    pub fn load_add_save(path: PathBuf, file: RemoteFile) -> Result<(), Error> {
-        let mut history = Self::load_or_new(path)?;
-        history.add(file);
-        history.save().map_err(|err| err.into())
-    }
-
-    /// Load the history from the given path, remove the given file by it's
-    /// ID, and save it again.
-    /// True is returned if any file was removed.
-    pub fn load_remove_save(path: PathBuf, file: &RemoteFile) -> Result<bool, Error> {
-        let mut history = Self::load_or_new(path)?;
-        let removed = history.remove(file);
-        history.save()?;
-        Ok(removed)
-    }
-
     /// Add the given remote file to the history.
     pub fn add(&mut self, file: RemoteFile) {
         self.files.push(file);

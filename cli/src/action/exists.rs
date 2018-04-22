@@ -1,5 +1,4 @@
 use clap::ArgMatches;
-use failure::Fail;
 use ffsend_api::action::exists::{
     Error as ExistsError,
     Exists as ApiExists,
@@ -16,8 +15,7 @@ use cmd::matcher::{
     main::MainMatcher,
 };
 use error::ActionError;
-use history::History;
-use util::print_error;
+use history_tool;
 
 /// A file exists action.
 pub struct Exists<'a> {
@@ -62,14 +60,7 @@ impl<'a> Exists<'a> {
         // Remove the file from the history manager if it doesn't exist
         // TODO: add if it does exist
         if !exists {
-            if let Err(err) = History::load_remove_save(
-                matcher_main.history(),
-                &file,
-            ) {
-                print_error(err.context(
-                    "Failed to remove file from local history, ignoring",
-                ));
-            }
+            history_tool::remove(&matcher_main, &file);
         }
 
         Ok(())

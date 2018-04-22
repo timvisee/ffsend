@@ -11,7 +11,7 @@ use ffsend_api::reqwest::Client;
 
 use cmd::matcher::{Matcher, MainMatcher, UploadMatcher};
 use error::ActionError;
-use history::History;
+use history_tool;
 use progress::ProgressBar;
 use util::{
     ErrorHintsBuilder,
@@ -126,14 +126,7 @@ impl<'a> Upload<'a> {
         println!("Owner token: {}", file.owner_token().unwrap());
 
         // Add the file to the history manager
-        if let Err(err) = History::load_add_save(
-            matcher_main.history(),
-            file.clone(),
-        ) {
-            print_error(err.context(
-                "Failed to add file to local history, ignoring",
-            ));
-        }
+        history_tool::add(&matcher_main, file.clone());
 
         // Open the URL in the browser
         if matcher_upload.open() {

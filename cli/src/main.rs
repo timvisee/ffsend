@@ -17,6 +17,7 @@ mod action;
 mod cmd;
 mod error;
 mod history;
+mod history_tool;
 mod host;
 mod progress;
 mod util;
