@@ -130,7 +130,9 @@ impl<'a> Upload<'a> {
             matcher_main.history(),
             file.clone(),
         ) {
-            print_error(err.context("Failed to add file to history, ignoring"));
+            print_error(err.context(
+                "Failed to add file to local history, ignoring",
+            ));
         }
 
         // Open the URL in the browser

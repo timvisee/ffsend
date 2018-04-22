@@ -20,6 +20,7 @@ use cmd::matcher::{
     info::InfoMatcher,
     main::MainMatcher,
 };
+use history::History;
 use util::{ensure_owner_token, ensure_password, print_error};
 
 /// A file info action.
@@ -58,6 +59,16 @@ impl<'a> Info<'a> {
         // Check whether the file exists
         let exists = ApiExists::new(&file).invoke(&client)?;
         if !exists.exists() {
+            // Remove the file from the history manager if it doesn't exist
+            if let Err(err) = History::load_remove_save(
+                matcher_main.history(),
+                &file,
+            ) {
+                print_error(err.context(
+                    "Failed to remove file from local history, ignoring",
+                ));
+            }
+
             return Err(Error::Expired);
         }
 

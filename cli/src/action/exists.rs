@@ -1,4 +1,5 @@
 use clap::ArgMatches;
+use failure::Fail;
 use ffsend_api::action::exists::{
     Error as ExistsError,
     Exists as ApiExists,
@@ -12,8 +13,11 @@ use ffsend_api::reqwest::Client;
 use cmd::matcher::{
     Matcher,
     exists::ExistsMatcher,
+    main::MainMatcher,
 };
 use error::ActionError;
+use history::History;
+use util::print_error;
 
 /// A file exists action.
 pub struct Exists<'a> {
@@ -33,6 +37,7 @@ impl<'a> Exists<'a> {
     pub fn invoke(&self) -> Result<(), ActionError> {
         // Create the command matchers
         let matcher_exists = ExistsMatcher::with(self.cmd_matches).unwrap();
+        let matcher_main = MainMatcher::with(self.cmd_matches).unwrap();
 
         // Get the share URL
         let url = matcher_exists.url();
@@ -52,6 +57,19 @@ impl<'a> Exists<'a> {
         println!("Exists: {:?}", exists);
         if exists {
             println!("Password: {:?}", exists_response.has_password());
+        }
+
+        // Remove the file from the history manager if it doesn't exist
+        // TODO: add if it does exist
+        if !exists {
+            if let Err(err) = History::load_remove_save(
+                matcher_main.history(),
+                &file,
+            ) {
+                print_error(err.context(
+                    "Failed to remove file from local history, ignoring",
+                ));
+            }
         }
 
         Ok(())

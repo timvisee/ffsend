@@ -1,4 +1,5 @@
 use clap::ArgMatches;
+use failure::Fail;
 use ffsend_api::action::delete::{
     Error as DeleteError,
     Delete as ApiDelete,
@@ -15,7 +16,8 @@ use cmd::matcher::{
     main::MainMatcher,
 };
 use error::ActionError;
-use util::{ensure_owner_token, print_success};
+use history::History;
+use util::{ensure_owner_token, print_error, print_success};
 
 /// A file delete action.
 pub struct Delete<'a> {
@@ -51,6 +53,17 @@ impl<'a> Delete<'a> {
 
         // Send the file deletion request
         ApiDelete::new(&file, None).invoke(&client)?;
+
+        // Remove the file from the history manager
+        // TODO: also remove if it was expired
+        if let Err(err) = History::load_remove_save(
+            matcher_main.history(),
+            &file,
+        ) {
+            print_error(err.context(
+                "Failed to remove file from local history, ignoring",
+            ));
+        }
 
         // Print a success message
         print_success("File deleted");
