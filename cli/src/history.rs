@@ -109,12 +109,6 @@ impl History {
         Ok(())
     }
 
-    /// Add the given remote file to the history.
-    pub fn add(&mut self, file: RemoteFile) {
-        self.files.push(file);
-        self.changed = true;
-    }
-
     /// Load the history from the given path, add the given file, and save it
     /// again.
     /// If there is not history file at the given path, a new empty one will
@@ -123,6 +117,35 @@ impl History {
         let mut history = Self::load_or_new(path)?;
         history.add(file);
         history.save().map_err(|err| err.into())
+    }
+
+    /// Add the given remote file to the history.
+    pub fn add(&mut self, file: RemoteFile) {
+        self.files.push(file);
+        self.changed = true;
+    }
+
+    /// Remove the given remote file, matched by it's file ID.
+    ///
+    /// If any file was removed, true is returned.
+    pub fn remove(&mut self, file: &RemoteFile) -> bool {
+        // Get the indices of files that have expired
+        let expired_indices: Vec<usize> = self.files.iter()
+            .enumerate()
+            .filter(|(_, f)| f.id() == file.id())
+            .map(|(i, _)| i)
+            .collect();
+
+        // Remove these specific files
+        for i in expired_indices.iter().rev() {
+            self.files.remove(*i);
+        }
+
+        // Set the changed flag, and return
+        if expired_indices.is_empty() {
+            self.changed = true;
+        }
+        !expired_indices.is_empty()
     }
 
     /// Get all files.
@@ -137,25 +160,25 @@ impl History {
     ///
     /// The number of exired files is returned.
     pub fn gc(&mut self) -> usize {
-        // Get the indices of files that have expired
-        let expired_indices: Vec<usize> = self.files.iter()
-            .enumerate()
-            .filter(|(_, f)| f.has_expired(false))
-            .map(|(i, _)| i)
+        // Get a list of expired files
+        let expired: Vec<RemoteFile> = self.files
+            .iter()
+            .filter(|f| f.has_expired(false))
+            .cloned()
             .collect();
 
-        // Remove these specific files
-        for i in &expired_indices {
-            self.files.remove(*i);
+        // Remove the files
+        for f in &expired {
+            self.remove(f);
         }
 
         // Set the changed flag
-        if !expired_indices.is_empty() {
+        if !expired.is_empty() {
             self.changed = true;
         }
 
         // Return the number of expired files
-        expired_indices.len()
+        expired.len()
     }
 }
 
