@@ -132,7 +132,7 @@ impl History {
         // Get the indices of files that have expired
         let expired_indices: Vec<usize> = self.files.iter()
             .enumerate()
-            .filter(|(_, f)| f.id() == file.id())
+            .filter(|&(_, f)| f.id() == file.id())
             .map(|(i, _)| i)
             .collect();
 
