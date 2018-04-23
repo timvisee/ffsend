@@ -57,9 +57,10 @@ impl<'a> Exists<'a> {
             println!("Password: {:?}", exists_response.has_password());
         }
 
-        // Remove the file from the history manager if it doesn't exist
-        // TODO: add if it does exist
-        if !exists {
+        // Add or remove the file from the history
+        if exists {
+            history_tool::add(&matcher_main, file, false);
+        } else {
             history_tool::remove(&matcher_main, &file);
         }
 

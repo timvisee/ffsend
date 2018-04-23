@@ -14,6 +14,7 @@ use ffsend_api::file::remote_file::{
     RemoteFile,
 };
 use ffsend_api::reqwest::Client;
+use time::Duration;
 
 use cmd::matcher::{
     Matcher,
@@ -77,8 +78,13 @@ impl<'a> Info<'a> {
             )))
             .ok();
 
+        // Update file properties
+        file.set_expire_duration(
+            Duration::milliseconds(info.ttl_millis() as i64),
+        );
+
         // Add the file to the history
-        history_tool::add(&matcher_main, file.clone());
+        history_tool::add(&matcher_main, file.clone(), true);
 
         // Print the result
         println!("ID: {}", file.id());

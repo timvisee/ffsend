@@ -71,7 +71,7 @@ impl<'a: 'b, 'b> Handler<'a> {
             .arg(Arg::with_name("yes")
                 .long("yes")
                 .short("y")
-                .visible_alias("assume-yes")
+                .alias("assume-yes")
                 .global(true)
                 .help("Assume yes for prompts"))
             .arg(Arg::with_name("history")

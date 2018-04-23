@@ -60,7 +60,7 @@ impl<'a> Password<'a> {
         result?;
 
         // Add the file to the history
-        history_tool::add(&matcher_main, file);
+        history_tool::add(&matcher_main, file, true);
 
         // Print a success message
         print_success("Password set");

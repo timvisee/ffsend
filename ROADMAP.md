@@ -1,6 +1,4 @@
 # Release 0.1
-- Define minimum arguments for options such as `--history`, do not allow empty
-- Update history file TTL and other properties on info fetch
 - Remote file expiry time:
   - Add uncertainty flag
   - Give all files the default expiry flag if not set (with uncertainty flag)
@@ -11,6 +9,7 @@
 - Allow unarchiving on download 
 - Show a simplified command list when calling `ffsend` without arguments
 - Use clipboard through `xclip` on Linux if available for persistence
+- Allow environment variable settings using `Arg.env(NAME)`
 - Automated releases through CI
 - Release binaries on GitHub
 - Ubuntu PPA package

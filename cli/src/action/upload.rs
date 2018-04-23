@@ -126,7 +126,7 @@ impl<'a> Upload<'a> {
         println!("Owner token: {}", file.owner_token().unwrap());
 
         // Add the file to the history manager
-        history_tool::add(&matcher_main, file.clone());
+        history_tool::add(&matcher_main, file.clone(), false);
 
         // Open the URL in the browser
         if matcher_upload.open() {

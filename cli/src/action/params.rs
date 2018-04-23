@@ -65,7 +65,7 @@ impl<'a> Params<'a> {
         result?;
 
         // Update the history
-        history_tool::add(&matcher_main, file);
+        history_tool::add(&matcher_main, file, true);
 
         // Print a success message
         print_success("Parameters set");

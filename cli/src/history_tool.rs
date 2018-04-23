@@ -10,8 +10,13 @@ use util::print_error;
 
 /// Load the history from the given path, add the given file, and save it
 /// again.
+///
+/// When a file with the same ID already exists, the existing file is
+/// merged with this one. If `overwrite` is set to true, this file will
+/// overwrite properties in the already existing file when merging.
+///
 /// If there is no file at the given path, new history will be created.
-fn add_error(matcher_main: &MainMatcher, file: RemoteFile)
+fn add_error(matcher_main: &MainMatcher, file: RemoteFile, overwrite: bool)
     -> Result<(), HistoryError>
 {
     // Ignore if incognito
@@ -21,16 +26,21 @@ fn add_error(matcher_main: &MainMatcher, file: RemoteFile)
 
     // Load the history, add the file, and save
     let mut history = History::load_or_new(matcher_main.history())?;
-    history.add(file);
+    history.add(file, overwrite);
     history.save().map_err(|err| err.into())
 }
 
 /// Load the history from the given path, add the given file, and save it
 /// again.
 /// If there is no file at the given path, new history will be created.
+///
+/// When a file with the same ID already exists, the existing file is
+/// merged with this one. If `overwrite` is set to true, this file will
+/// overwrite properties in the already existing file when merging.
+///
 /// If an error occurred, the error is printed and ignored.
-pub fn add(matcher_main: &MainMatcher, file: RemoteFile) {
-    if let Err(err) = add_error(matcher_main, file) {
+pub fn add(matcher_main: &MainMatcher, file: RemoteFile, overwrite: bool) {
+    if let Err(err) = add_error(matcher_main, file, overwrite) {
         print_error(err.context(
             "Failed to add file to local history, ignoring",
         ));

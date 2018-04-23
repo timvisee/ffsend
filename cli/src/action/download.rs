@@ -108,7 +108,7 @@ impl<'a> Download<'a> {
         ).invoke(&client, bar)?;
 
         // Add the file to the history
-        history_tool::add(&matcher_main, file);
+        history_tool::add(&matcher_main, file, true);
 
         // TODO: open the file, or it's location
         // TODO: copy the file location

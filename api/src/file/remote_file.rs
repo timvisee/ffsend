@@ -157,6 +157,18 @@ impl RemoteFile {
         &self.id
     }
 
+    /// Set the time this file will expire at.
+    /// None may be given if the expire time is unknown.
+    pub fn set_expire_at(&mut self, expire_at: Option<DateTime<Utc>>) {
+        self.expire_at = expire_at;
+    }
+
+    /// Set the time this file will expire at,
+    /// based on the given duration from now.
+    pub fn set_expire_duration(&mut self, duration: Duration) {
+        self.set_expire_at(Some(Utc::now() + duration));
+    }
+
     /// Check whether this file has expired, based on it's expiry property.
     ///
     /// If no expiry time is set (known) for this file,
@@ -221,30 +233,30 @@ impl RemoteFile {
     /// This is ofcourse only done for properties that may be empty.
     ///
     /// The file IDs are not asserted for equality.
-    pub fn merge(&mut self, other: &RemoteFile) -> bool {
+    pub fn merge(&mut self, other: &RemoteFile, overwrite: bool) -> bool {
         // Remember whether anything was changed
         let mut changed = false;
 
         // Set the upload time
-        if self.upload_at.is_none() && other.upload_at.is_some() {
+        if other.upload_at.is_some() && (self.upload_at.is_none() || overwrite) {
             self.upload_at = other.upload_at.clone();
             changed = true;
         }
 
         // Set the expire time
-        if self.expire_at.is_none() && other.expire_at.is_some() {
+        if other.expire_at.is_some() && (self.expire_at.is_none() || overwrite) {
             self.expire_at = other.expire_at.clone();
             changed = true;
         }
 
         // Set the secret
-        if !self.has_secret() && other.has_secret() {
+        if other.has_secret() && (!self.has_secret() || overwrite) {
             self.secret = other.secret_raw().clone();
             changed = true;
         }
 
         // Set the owner token
-        if self.owner_token.is_none() && other.owner_token.is_some() {
+        if other.owner_token.is_some() && (self.owner_token.is_none() || overwrite) {
             self.owner_token = other.owner_token.clone();
             changed = true;
         }

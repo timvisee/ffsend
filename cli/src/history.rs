@@ -112,13 +112,16 @@ impl History {
     /// Add the given remote file to the history.
     /// If a file with the same ID as the given file exists,
     /// the files are merged, see `RemoteFile::merge()`.
-    pub fn add(&mut self, file: RemoteFile) {
+    ///
+    /// If `overwrite` is set to true, the given file will overwrite
+    /// properties on the existing file.
+    pub fn add(&mut self, file: RemoteFile, overwrite: bool) {
         // Merge any existing file with the same ID
         {
             // Find anything to merge
             let merge_info: Vec<bool> = self.files.iter_mut()
                 .filter(|f| f.id() == file.id())
-                .map(|ref mut f| f.merge(&file))
+                .map(|ref mut f| f.merge(&file, overwrite))
                 .collect();
             let merged = !merge_info.is_empty();
             let changed = merge_info.iter().any(|i| *i);
