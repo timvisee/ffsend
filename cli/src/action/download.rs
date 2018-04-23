@@ -25,6 +25,7 @@ use cmd::matcher::{
     download::DownloadMatcher,
     main::MainMatcher,
 };
+use history_tool;
 use progress::ProgressBar;
 use util::{
     ensure_password,
@@ -71,6 +72,9 @@ impl<'a> Download<'a> {
         // Check whether the file exists
         let exists = ApiExists::new(&file).invoke(&client)?;
         if !exists.exists() {
+            // Remove the file from the history manager if it does not exist
+            history_tool::remove(&matcher_main, &file);
+
             return Err(Error::Expired);
         }
 
@@ -102,6 +106,9 @@ impl<'a> Download<'a> {
             false,
             Some(metadata),
         ).invoke(&client, bar)?;
+
+        // Add the file to the history
+        history_tool::add(&matcher_main, file);
 
         // TODO: open the file, or it's location
         // TODO: copy the file location

@@ -1,5 +1,8 @@
 use clap::ArgMatches;
-use ffsend_api::action::password::Password as ApiPassword;
+use ffsend_api::action::password::{
+    Error as PasswordError,
+    Password as ApiPassword,
+};
 use ffsend_api::file::remote_file::RemoteFile;
 use ffsend_api::reqwest::Client;
 
@@ -9,6 +12,7 @@ use cmd::matcher::{
     password::PasswordMatcher,
 };
 use error::ActionError;
+use history_tool;
 use util::{ensure_owner_token, print_success};
 
 /// A file password action.
@@ -44,7 +48,19 @@ impl<'a> Password<'a> {
         ensure_owner_token(file.owner_token_mut(), &matcher_main);
 
         // Execute an password action
-        ApiPassword::new(&file, &matcher_password.password(), None).invoke(&client)?;
+        let result = ApiPassword::new(
+            &file,
+            &matcher_password.password(),
+            None,
+        ).invoke(&client);
+        if let Err(PasswordError::Expired) = result {
+            // Remove the file from the history if expired
+            history_tool::remove(&matcher_main, &file);
+        }
+        result?;
+
+        // Add the file to the history
+        history_tool::add(&matcher_main, file);
 
         // Print a success message
         print_success("Password set");

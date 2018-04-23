@@ -1,5 +1,6 @@
 use clap::ArgMatches;
 use ffsend_api::action::params::{
+    Error as ParamsError,
     Params as ApiParams,
     ParamsDataBuilder,
 };
@@ -12,6 +13,7 @@ use cmd::matcher::{
     params::ParamsMatcher,
 };
 use error::ActionError;
+use history_tool;
 use util::{ensure_owner_token, print_success};
 
 /// A file parameters action.
@@ -55,7 +57,15 @@ impl<'a> Params<'a> {
         // TODO: make sure the data isn't empty
 
         // Execute an password action
-        ApiParams::new(&file, data, None).invoke(&client)?;
+        let result = ApiParams::new(&file, data, None).invoke(&client);
+        if let Err(ParamsError::Expired) = result {
+            // Remove the file from the history if expired
+            history_tool::remove(&matcher_main, &file);
+        }
+        result?;
+
+        // Update the history
+        history_tool::add(&matcher_main, file);
 
         // Print a success message
         print_success("Parameters set");

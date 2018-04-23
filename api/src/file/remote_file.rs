@@ -216,6 +216,41 @@ impl RemoteFile {
     pub fn download_url(&self, secret: bool) -> Url {
         UrlBuilder::download(&self, secret)
     }
+
+    /// Merge properties non-existant into this file, from the given other file.
+    /// This is ofcourse only done for properties that may be empty.
+    ///
+    /// The file IDs are not asserted for equality.
+    pub fn merge(&mut self, other: &RemoteFile) -> bool {
+        // Remember whether anything was changed
+        let mut changed = false;
+
+        // Set the upload time
+        if self.upload_at.is_none() && other.upload_at.is_some() {
+            self.upload_at = other.upload_at.clone();
+            changed = true;
+        }
+
+        // Set the expire time
+        if self.expire_at.is_none() && other.expire_at.is_some() {
+            self.expire_at = other.expire_at.clone();
+            changed = true;
+        }
+
+        // Set the secret
+        if !self.has_secret() && other.has_secret() {
+            self.secret = other.secret_raw().clone();
+            changed = true;
+        }
+
+        // Set the owner token
+        if self.owner_token.is_none() && other.owner_token.is_some() {
+            self.owner_token = other.owner_token.clone();
+            changed = true;
+        }
+
+        return changed;
+    }
 }
 
 #[derive(Debug, Fail)]

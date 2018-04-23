@@ -1,12 +1,7 @@
 # Release 0.1
+- History use flag
 - Define minimum arguments for options such as `--history`, do not allow empty
-- Add/remove files from history in other commands, such as:
-  - Delete, if file is deleted
-  - Download, if file expired
-  - Exists, if file doesn't exist
-  - Info, if file doesn't exist, and update TTL
-  - Parameters, if file doesn't exist
-  - Password, if file doesn't exist
+- Update history file TTL and other properties on info fetch
 - Remote file expiry time:
   - Add uncertainty flag
   - Give all files the default expiry flag if not set (with uncertainty flag)

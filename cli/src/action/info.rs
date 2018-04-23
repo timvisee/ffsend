@@ -77,6 +77,9 @@ impl<'a> Info<'a> {
             )))
             .ok();
 
+        // Add the file to the history
+        history_tool::add(&matcher_main, file);
+
         // Print the result
         println!("ID: {}", file.id());
         if let Some(metadata) = metadata {
@@ -86,7 +89,7 @@ impl<'a> Info<'a> {
         println!("Downloads: {} of {}", info.download_count(), info.download_limit());
         println!("TTL: {} ms", info.ttl_millis());
 
-        // TODO: show the file size, fetch TTL from metadata?
+        // TODO: show the file size, fetch TTL from metadata, update in history?
 
         Ok(())
     }

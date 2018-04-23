@@ -110,7 +110,29 @@ impl History {
     }
 
     /// Add the given remote file to the history.
+    /// If a file with the same ID as the given file exists,
+    /// the files are merged, see `RemoteFile::merge()`.
     pub fn add(&mut self, file: RemoteFile) {
+        // Merge any existing file with the same ID
+        {
+            // Find anything to merge
+            let merge_info: Vec<bool> = self.files.iter_mut()
+                .filter(|f| f.id() == file.id())
+                .map(|ref mut f| f.merge(&file))
+                .collect();
+            let merged = !merge_info.is_empty();
+            let changed = merge_info.iter().any(|i| *i);
+
+            // Return if merged, update the changed state
+            if merged {
+                if changed {
+                    self.changed = true;
+                }
+                return;
+            }
+        }
+
+        // Add the file to the list
         self.files.push(file);
         self.changed = true;
     }
