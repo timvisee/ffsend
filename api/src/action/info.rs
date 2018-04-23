@@ -50,12 +50,12 @@ impl<'a> Info<'a> {
 
     /// Fetch the authentication nonce for the file from the remote server.
     fn fetch_auth_nonce(&self, client: &Client)
-        -> Result<Vec<u8>, PrepareError>
+        -> Result<Vec<u8>, Error>
     {
         request_nonce(
             client,
             UrlBuilder::download(self.file, false),
-        ).map_err(|err| PrepareError::Auth(err))
+        ).map_err(|err| err.into())
     }
 
     /// Send the request for fetching the remote file info.
@@ -63,7 +63,7 @@ impl<'a> Info<'a> {
         &self,
         client: &Client,
         data: OwnedData<InfoData>,
-    ) -> Result<InfoResponse, InfoError> {
+    ) -> Result<InfoResponse, Error> {
         // Get the info URL, and send the request
         let url = UrlBuilder::api_info(self.file);
         let mut response = client.post(url)
@@ -72,13 +72,12 @@ impl<'a> Info<'a> {
             .map_err(|_| InfoError::Request)?;
 
         // Ensure the response is successful
-        ensure_success(&response)
-            .map_err(|err| InfoError::Response(err))?;
+        ensure_success(&response)?;
 
         // Decode the JSON response
         let response: InfoResponse = match response.json() {
             Ok(response) => response,
-            Err(err) => return Err(InfoError::Decode(err)),
+            Err(err) => return Err(InfoError::Decode(err).into()),
         };
 
         Ok(response)
@@ -143,19 +142,37 @@ pub enum Error {
     #[fail(display = "Failed to prepare the action")]
     Prepare(#[cause] PrepareError),
 
-    // /// The given Send file has expired, or did never exist in the first place.
-    // /// Therefore the file could not be downloaded.
-    // #[fail(display = "The file has expired or did never exist")]
-    // Expired,
+    /// The given Send file has expired, or did never exist in the first place.
+    /// Therefore the file could not be downloaded.
+    #[fail(display = "The file has expired or did never exist")]
+    Expired,
 
     /// An error has occurred while sending the info request to the server.
     #[fail(display = "Failed to send the file info request")]
     Info(#[cause] InfoError),
 }
 
+impl From<NonceError> for Error {
+    fn from(err: NonceError) -> Error {
+        match err {
+            NonceError::Expired => Error::Expired,
+            err => Error::Prepare(PrepareError::Auth(err)),
+        }
+    }
+}
+
 impl From<PrepareError> for Error {
     fn from(err: PrepareError) -> Error {
         Error::Prepare(err)
+    }
+}
+
+impl From<ResponseError> for Error {
+    fn from(err: ResponseError) -> Error {
+        match err {
+            ResponseError::Expired => Error::Expired,
+            err => Error::Info(InfoError::Response(err)),
+        }
     }
 }
 

@@ -67,12 +67,12 @@ impl<'a> Params<'a> {
 
     /// Fetch the authentication nonce for the file from the remote server.
     fn fetch_auth_nonce(&self, client: &Client)
-        -> Result<Vec<u8>, PrepareError>
+        -> Result<Vec<u8>, Error>
     {
         request_nonce(
             client,
             UrlBuilder::download(self.file, false),
-        ).map_err(|err| PrepareError::Auth(err))
+        ).map_err(|err| err.into())
     }
 
     /// Send the request for changing the parameters.
@@ -80,7 +80,7 @@ impl<'a> Params<'a> {
         &self,
         client: &Client,
         data: OwnedData<ParamsData>,
-    ) -> Result<(), ChangeError> {
+    ) -> Result<(), Error> {
         // Get the params URL, and send the change
         let url = UrlBuilder::api_params(self.file);
         let response = client.post(url)
@@ -90,7 +90,7 @@ impl<'a> Params<'a> {
 
         // Ensure the response is successful
         ensure_success(&response)
-            .map_err(|err| ChangeError::Response(err))
+            .map_err(|err| err.into())
     }
 }
 
@@ -165,15 +165,24 @@ pub enum Error {
     #[fail(display = "Failed to prepare setting the parameters")]
     Prepare(#[cause] PrepareError),
 
-    // /// The given Send file has expired, or did never exist in the first place.
-    // /// Therefore the file could not be downloaded.
-    // #[fail(display = "The file has expired or did never exist")]
-    // Expired,
+    /// The given Send file has expired, or did never exist in the first place.
+    /// Therefore the file could not be downloaded.
+    #[fail(display = "The file has expired or did never exist")]
+    Expired,
 
     /// An error has occurred while sending the parameter change request to
     /// the server.
     #[fail(display = "Failed to send the parameter change request")]
     Change(#[cause] ChangeError),
+}
+
+impl From<NonceError> for Error {
+    fn from(err: NonceError) -> Error {
+        match err {
+            NonceError::Expired => Error::Expired,
+            err => Error::Prepare(PrepareError::Auth(err)),
+        }
+    }
 }
 
 impl From<PrepareError> for Error {
@@ -183,8 +192,17 @@ impl From<PrepareError> for Error {
 }
 
 impl From<ChangeError> for Error {
-    fn from(err: ChangeError) -> Error {
+    fn from(err:ChangeError) -> Error {
         Error::Change(err)
+    }
+}
+
+impl From<ResponseError> for Error {
+    fn from(err: ResponseError) -> Error {
+        match err {
+            ResponseError::Expired => Error::Expired,
+            err => Error::Change(ChangeError::Response(err)),
+        }
     }
 }
 

@@ -74,12 +74,12 @@ impl<'a> Metadata<'a> {
 
     /// Fetch the authentication nonce for the file from the remote server.
     fn fetch_auth_nonce(&self, client: &Client)
-        -> Result<Vec<u8>, RequestError>
+        -> Result<Vec<u8>, Error>
     {
         request_nonce(
             client,
             UrlBuilder::download(self.file, false),
-        ).map_err(|err| RequestError::Auth(err))
+        ).map_err(|err| err.into())
     }
 
     /// Create a metadata nonce, and fetch the metadata for the file from the
@@ -232,6 +232,15 @@ impl From<RequestError> for Error {
 impl From<MetaError> for Error {
     fn from(err: MetaError) -> Error {
         Error::Request(RequestError::Meta(err))
+    }
+}
+
+impl From<NonceError> for Error {
+    fn from(err: NonceError) -> Error {
+        match err {
+            NonceError::Expired => Error::Expired,
+            err => Error::Request(RequestError::Auth(err)),
+        }
     }
 }
 

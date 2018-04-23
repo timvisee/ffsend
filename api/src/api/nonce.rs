@@ -15,11 +15,10 @@ pub fn request_nonce(client: &Client, url: Url)
     // Make the request
     let response = client.get(url)
         .send()
-        .map_err(|_| NonceError::Request)?;
+        .map_err(|_| NonceError::Request)?; 
 
     // Ensure the response is successful
-    ensure_success(&response)
-        .map_err(|err| NonceError::Response(err))?;
+    ensure_success(&response)?;
 
     // Extract the nonce
     header_nonce(&response)
@@ -48,6 +47,11 @@ pub fn header_nonce(response: &Response)
 
 #[derive(Fail, Debug)]
 pub enum NonceError {
+    /// Sending the request to fetch a nonce failed,
+    /// as the file has expired or did never exist.
+    #[fail(display = "The file has expired or did never exist")]
+    Expired,
+
     /// Sending the request to fetch a nonce failed.
     #[fail(display = "Failed to request encryption nonce")]
     Request,
@@ -66,4 +70,13 @@ pub enum NonceError {
     /// by this client.
     #[fail(display = "Received malformed nonce")]
     MalformedNonce,
+}
+
+impl From<ResponseError> for NonceError {
+    fn from(err: ResponseError) -> Self {
+        match err {
+            ResponseError::Expired => NonceError::Expired,
+            err => NonceError::Response(err),
+        }
+    }
 }

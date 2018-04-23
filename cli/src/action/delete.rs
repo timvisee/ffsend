@@ -51,10 +51,14 @@ impl<'a> Delete<'a> {
         ensure_owner_token(file.owner_token_mut(), &matcher_main);
 
         // Send the file deletion request
-        ApiDelete::new(&file, None).invoke(&client)?;
+        let result = ApiDelete::new(&file, None).invoke(&client);
+        if let Err(DeleteError::Expired) = result {
+            // Remove the file from the history manager if it does not exist
+            history_tool::remove(&matcher_main, &file);
+        }
+        result?;
 
         // Remove the file from the history manager
-        // TODO: also remove if it was expired
         history_tool::remove(&matcher_main, &file);
 
         // Print a success message
@@ -71,6 +75,10 @@ pub enum Error {
     #[fail(display = "Invalid share URL")]
     InvalidUrl(#[cause] FileParseError),
 
+    /// Could not delete, the file has expired or did never exist.
+    #[fail(display = "The file has expired or did never exist")]
+    Expired,
+
     /// An error occurred while deleting the remote file.
     #[fail(display = "Failed to delete the shared file")]
     Delete(#[cause] DeleteError),
@@ -84,6 +92,9 @@ impl From<FileParseError> for Error {
 
 impl From<DeleteError> for Error {
     fn from(err: DeleteError) -> Error {
-        Error::Delete(err)
+        match err {
+            DeleteError::Expired => Error::Expired,
+            err => Error::Delete(err),
+        }
     }
 }

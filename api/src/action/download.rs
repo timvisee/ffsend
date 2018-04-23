@@ -81,12 +81,7 @@ impl<'a> Download<'a> {
                         self.password.clone(),
                         self.check_exists,
                     )
-                    .invoke(&client)
-                    .map_err(|err| match err {
-                        MetadataError::PasswordRequired => Error::PasswordRequired,
-                        MetadataError::Expired => Error::Expired,
-                        _ => err.into(),
-                    })?
+                    .invoke(&client)?
             };
         key.set_iv(metadata.metadata().iv());
 
@@ -149,6 +144,7 @@ impl<'a> Download<'a> {
             return self.target.clone();
         }
 
+        // TODO: are these todos below already implemented in CLI client?
         // TODO: canonicalize the path when possible
         // TODO: allow using `file.toml` as target without directory indication
         // TODO: return a nice error here as the path may be invalid
@@ -235,7 +231,8 @@ impl<'a> Download<'a> {
             .start(len);
 
         // Write to the output file
-        io::copy(&mut reader, &mut writer).map_err(|_| DownloadError::Download)?;
+        io::copy(&mut reader, &mut writer)
+            .map_err(|_| DownloadError::Download)?;
 
         // Finish
         reporter.lock()
@@ -284,7 +281,11 @@ pub enum Error {
 
 impl From<MetadataError> for Error {
     fn from(err: MetadataError) -> Error {
-        Error::Meta(err)
+        match err {
+            MetadataError::Expired => Error::Expired,
+            MetadataError::PasswordRequired => Error::PasswordRequired,
+            err => Error::Meta(err),
+        }
     }
 }
 

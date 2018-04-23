@@ -37,7 +37,9 @@ impl<'a> Delete<'a> {
 
         // Create owned data, to send to the server for authentication
         let data = OwnedData::from(DeleteData::new(), &self.file)
-            .map_err(|err| -> PrepareError { err.into() })?;
+            .map_err(|err| PrepareError::DeleteData(
+                DeleteDataError::Owned(err),
+            ))?;
 
         // Send the delete request
         self.request_delete(client, data).map_err(|err| err.into())
@@ -45,12 +47,12 @@ impl<'a> Delete<'a> {
 
     /// Fetch the authentication nonce for the file from the remote server.
     fn fetch_auth_nonce(&self, client: &Client)
-        -> Result<Vec<u8>, PrepareError>
+        -> Result<Vec<u8>, Error>
     {
         request_nonce(
             client,
             UrlBuilder::download(self.file, false),
-        ).map_err(|err| PrepareError::Auth(err))
+        ).map_err(|err| err.into())
     }
 
     /// Send a request to delete the remote file, with the given data.
@@ -58,7 +60,7 @@ impl<'a> Delete<'a> {
         &self,
         client: &Client,
         data: OwnedData<DeleteData>,
-    ) -> Result<(), DeleteError> {
+    ) -> Result<(), Error> {
         // Get the delete URL, and send the request
         let url = UrlBuilder::api_delete(self.file);
         let response = client.post(url)
@@ -68,7 +70,7 @@ impl<'a> Delete<'a> {
 
         // Ensure the status code is succesful
         ensure_success(&response)
-            .map_err(|err| DeleteError::Response(err))
+            .map_err(|err| err.into())
     }
 }
 
@@ -91,14 +93,23 @@ pub enum Error {
     #[fail(display = "Failed to prepare the action")]
     Prepare(#[cause] PrepareError),
 
-    // /// The given Send file has expired, or did never exist in the first place.
-    // /// Therefore the file could not be downloaded.
-    // #[fail(display = "The file has expired or did never exist")]
-    // Expired,
+    /// The given Send file has expired, or did never exist in the first place.
+    /// Therefore the file could not be downloaded.
+    #[fail(display = "The file has expired or did never exist")]
+    Expired,
 
     /// An error has occurred while sending the filedeletion request.
     #[fail(display = "Failed to send the file deletion request")]
     Delete(#[cause] DeleteError),
+}
+
+impl From<NonceError> for Error {
+    fn from(err: NonceError) -> Error {
+        match err {
+            NonceError::Expired => Error::Expired,
+            err => Error::Prepare(PrepareError::Auth(err)),
+        }
+    }
 }
 
 impl From<PrepareError> for Error {
@@ -134,12 +145,6 @@ pub enum PrepareError {
     DeleteData(#[cause] DeleteDataError),
 }
 
-impl From<DataError> for PrepareError {
-    fn from(err: DataError) -> PrepareError {
-        PrepareError::DeleteData(DeleteDataError::Owned(err))
-    }
-}
-
 #[derive(Fail, Debug)]
 pub enum DeleteError {
     /// Sending the file deletion request failed.
@@ -149,4 +154,13 @@ pub enum DeleteError {
     /// The server responded with an error while requesting file deletion.
     #[fail(display = "Bad response from server while deleting file")]
     Response(#[cause] ResponseError),
+}
+
+impl From<ResponseError> for Error {
+    fn from(err: ResponseError) -> Self {
+        match err {
+            ResponseError::Expired => Error::Expired,
+            err => Error::Delete(DeleteError::Response(err)),
+        }
+    }
 }
