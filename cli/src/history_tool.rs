@@ -14,6 +14,12 @@ use util::print_error;
 fn add_error(matcher_main: &MainMatcher, file: RemoteFile)
     -> Result<(), HistoryError>
 {
+    // Ignore if incognito
+    if matcher_main.incognito() {
+        return Ok(());
+    }
+
+    // Load the history, add the file, and save
     let mut history = History::load_or_new(matcher_main.history())?;
     history.add(file);
     history.save().map_err(|err| err.into())
@@ -37,6 +43,12 @@ pub fn add(matcher_main: &MainMatcher, file: RemoteFile) {
 fn remove_error(matcher_main: &MainMatcher, file: &RemoteFile)
     -> Result<bool, HistoryError>
 {
+    // Ignore if incognito
+    if matcher_main.incognito() {
+        return Ok(false);
+    }
+
+    // Load the history, remove the file, and save
     let mut history = History::load_or_new(matcher_main.history())?;
     let removed = history.remove(file);
     history.save()?;
@@ -47,12 +59,12 @@ fn remove_error(matcher_main: &MainMatcher, file: &RemoteFile)
 /// ID, and save it again.
 /// True is returned if any file was removed.
 pub fn remove(matcher_main: &MainMatcher, file: &RemoteFile) -> bool {
-    if let Err(err) = remove_error(matcher_main, file) {
+    let result = remove_error(matcher_main, file);
+    let ok = result.is_ok();
+    if let Err(err) = result {
         print_error(err.context(
             "Failed to remove file from local history, ignoring",
         ));
-        false
-    } else {
-        true
     }
+    ok
 }

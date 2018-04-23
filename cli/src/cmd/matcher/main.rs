@@ -45,6 +45,11 @@ impl<'a: 'b, 'b> MainMatcher<'a> {
             ),
         }
     }
+
+    /// Check whether we are incognito from the file history.
+    pub fn incognito(&self) -> bool {
+        self.matches.is_present("incognito")
+    }
 }
 
 impl<'a> Matcher<'a> for MainMatcher<'a> {

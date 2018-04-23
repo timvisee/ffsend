@@ -78,7 +78,7 @@ impl<'a> Info<'a> {
             .ok();
 
         // Add the file to the history
-        history_tool::add(&matcher_main, file);
+        history_tool::add(&matcher_main, file.clone());
 
         // Print the result
         println!("ID: {}", file.id());

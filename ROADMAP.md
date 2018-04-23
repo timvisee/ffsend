@@ -1,5 +1,4 @@
 # Release 0.1
-- History use flag
 - Define minimum arguments for options such as `--history`, do not allow empty
 - Update history file TTL and other properties on info fetch
 - Remote file expiry time:
@@ -7,7 +6,6 @@
   - Give all files the default expiry flag if not set (with uncertainty flag)
 - Create history command
 - History compiler flag
-- Incognito mode, to not remember files `--incognito`
 - Automatically get owner token, from file history when setting password
 - Allow file/directory archiving on upload
 - Allow unarchiving on download 
@@ -30,6 +28,7 @@
 - Allow hiding the progress bar, and/or showing simple progress (with `-q`)
 - Implement a quiet `-q` mode
 - Host configuration file for host tags, to easily upload to other hosts
+- History use flag
 
 # Other ideas
 - Rework encrypted reader/writer
