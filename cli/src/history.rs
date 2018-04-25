@@ -1,4 +1,5 @@
 extern crate toml;
+extern crate version_compare;
 
 use std::fs;
 use std::io::Error as IoError;
@@ -8,11 +9,25 @@ use failure::Fail;
 use ffsend_api::file::remote_file::RemoteFile;
 use self::toml::de::Error as DeError;
 use self::toml::ser::Error as SerError;
+use self::version_compare::{
+    CompOp,
+    VersionCompare,
+};
 
-use util::print_error;
+use util::{print_error, print_warning};
+
+/// The minimum supported history file version.
+const VERSION_MIN: &'static str = "0.0.1";
+
+/// The maximum supported history file version.
+const VERSION_MAX: &'static str = crate_version!();
 
 #[derive(Serialize, Deserialize)]
 pub struct History {
+    /// The application version the history file was built with.
+    /// Used for compatability checking.
+    version: Option<String>,
+
     /// The file history.
     files: Vec<RemoteFile>,
 
@@ -49,6 +64,21 @@ impl History {
         // Parse the data, set the autosave path
         let mut history: Self = toml::from_str(&data)?;
         history.autosave = Some(path);
+
+        // Make sure the file version is supported
+        if history.version.is_none() { 
+            print_warning("History file has no version, ignoring");
+            history.version = Some(crate_version!().into());
+        } else {
+            // Get the version number from the file
+            let version = history.version.as_ref().unwrap();
+
+            if let Ok(true) = VersionCompare::compare_to(version, VERSION_MIN, &CompOp::Lt) {
+                print_warning("History file version is too old, ignoring");
+            } else if let Ok(true) = VersionCompare::compare_to(version, VERSION_MAX, &CompOp::Gt) {
+                print_warning("History file has an unknown version, ignoring");
+            }
+        }
 
         // Garbage collect
         history.gc();
@@ -214,6 +244,7 @@ impl Drop for History {
 impl Default for History {
     fn default() -> Self {
         Self {
+            version: Some(crate_version!().into()),
             files: Vec::new(),
             changed: false,
             autosave: None,

@@ -58,6 +58,14 @@ pub fn print_error_msg<S>(err: S)
     print_error(err_msg(err).compat());
 }
 
+/// Print a warning.
+pub fn print_warning<S>(err: S)
+    where
+        S: AsRef<str> + Display + Debug + Sync + Send + 'static
+{
+    eprintln!("{} {}", "warning:".yellow().bold(), err);
+}
+
 /// Quit the application regularly.
 pub fn quit() -> ! {
     exit(0);
