@@ -17,8 +17,8 @@ script:
 - cargo build --verbose --all
 
   # Other feature combinations 
-- cargo build --no-default-features --verbose --all
-- cargo build --features no-color --verbose --all
+- cargo build --package ffsend --no-default-features --verbose --all
+- cargo build --package ffsend --features no-color --verbose --all
 
   # Tests
 - cargo test --verbose --all
