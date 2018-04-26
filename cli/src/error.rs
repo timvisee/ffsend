@@ -6,6 +6,7 @@ use ffsend_api::action::upload::Error as UploadError;
 use ffsend_api::file::remote_file::FileParseError;
 
 use action::download::Error as CliDownloadError;
+use action::history::Error as CliHistoryError;
 use action::info::Error as CliInfoError;
 
 #[derive(Fail, Debug)]
@@ -47,6 +48,10 @@ pub enum ActionError {
     #[fail(display = "Failed to check whether the file exists")]
     Exists(#[cause] ExistsError),
 
+    /// An error occurred while processing the file history.
+    #[fail(display = "Failed to process the history")]
+    History(#[cause] CliHistoryError),
+
     /// An error occurred while invoking the info action.
     #[fail(display = "Failed to fetch file info")]
     Info(#[cause] CliInfoError),
@@ -79,6 +84,12 @@ impl From<DeleteError> for ActionError {
 impl From<ExistsError> for ActionError {
     fn from(err: ExistsError) -> ActionError {
         ActionError::Exists(err)
+    }
+}
+
+impl From<CliHistoryError> for ActionError {
+    fn from(err: CliHistoryError) -> ActionError {
+        ActionError::History(err)
     }
 }
 

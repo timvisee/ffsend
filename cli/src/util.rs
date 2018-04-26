@@ -26,7 +26,7 @@ use cmd::matcher::MainMatcher;
 
 /// Print a success message.
 pub fn print_success(msg: &str) {
-    println!("{}", msg.green());
+    eprintln!("{}", msg.green());
 }
 
 /// Print the given error in a proper format for the user,

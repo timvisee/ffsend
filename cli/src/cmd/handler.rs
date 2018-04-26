@@ -7,6 +7,7 @@ use super::matcher::{
     DeleteMatcher,
     DownloadMatcher,
     ExistsMatcher,
+    HistoryMatcher,
     InfoMatcher,
     Matcher,
     ParamsMatcher,
@@ -17,6 +18,7 @@ use super::cmd::{
     CmdDelete,
     CmdDownload,
     CmdExists,
+    CmdHistory,
     CmdInfo,
     CmdParams,
     CmdPassword,
@@ -92,6 +94,7 @@ impl<'a: 'b, 'b> Handler<'a> {
             .subcommand(CmdDelete::build())
             .subcommand(CmdDownload::build().display_order(2))
             .subcommand(CmdExists::build())
+            .subcommand(CmdHistory::build())
             .subcommand(CmdInfo::build())
             .subcommand(CmdParams::build())
             .subcommand(CmdPassword::build())
@@ -130,6 +133,11 @@ impl<'a: 'b, 'b> Handler<'a> {
     /// Get the exists sub command, if matched.
     pub fn exists(&'a self) -> Option<ExistsMatcher> {
         ExistsMatcher::with(&self.matches)
+    }
+
+    /// Get the history sub command, if matched.
+    pub fn history(&'a self) -> Option<HistoryMatcher> {
+        HistoryMatcher::with(&self.matches)
     }
 
     /// Get the info matcher, if that subcommand is entered.
