@@ -1,4 +1,12 @@
+extern crate prettytable;
+
 use clap::ArgMatches;
+use self::prettytable::{
+    cell::Cell,
+    format::FormatBuilder,
+    row::Row,
+    Table,
+};
 
 use cmd::matcher::{
     Matcher,
@@ -40,9 +48,26 @@ impl<'a> History<'a> {
         // History
         let history = HistoryManager::load(history_path)?;
 
-        for file in history.files() {
-            println!("- File ID: {}", file.id());
+        // Create a new table
+        let mut table = Table::new();
+        table.set_format(FormatBuilder::new().padding(0, 2).build());
+        table.add_row(Row::new(vec![
+            Cell::new("#"),
+            Cell::new("FILE ID"),
+            Cell::new("URL"),
+        ]));
+
+        // Add an entry for each file
+        for (i, file) in history.files().iter().enumerate() {
+            table.add_row(Row::new(vec![
+                Cell::new(&format!("{}", i + 1)),
+                Cell::new(file.id()),
+                Cell::new(file.download_url(false).as_str()),
+            ]));
         }
+
+        // Print the table
+        table.printstd();
 
         Ok(())
     }

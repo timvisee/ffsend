@@ -222,6 +222,11 @@ impl RemoteFile {
         self.owner_token = token;
     }
 
+    /// Get the host URL for this remote file.
+    pub fn host(&self) -> Url {
+        self.host.clone()
+    }
+
     /// Build the download URL of the given file.
     /// This URL is identical to the share URL, a term used in this API.
     /// Set `secret` to `true`, to include it in the URL if known.
