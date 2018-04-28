@@ -48,6 +48,12 @@ impl<'a> History<'a> {
         // History
         let history = HistoryManager::load(history_path)?;
 
+        // Do not report any files if there aren't any
+        if history.files().is_empty() {
+            println!("No files in history");
+            return Ok(());
+        }
+
         // Create a new table
         let mut table = Table::new();
         table.set_format(FormatBuilder::new().padding(0, 2).build());
