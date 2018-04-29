@@ -6,9 +6,8 @@ use url::{
     ParseError as UrlParseError,
     Url,
 };
-use self::chrono::{DateTime, Utc};
+use self::chrono::{DateTime, Duration, Utc};
 use self::regex::Regex;
-use time::Duration;
 use url_serde;
 
 use config::SEND_DEFAULT_EXPIRE_TIME;
@@ -155,6 +154,23 @@ impl RemoteFile {
     /// Get the file ID.
     pub fn id(&self) -> &str {
         &self.id
+    }
+
+    /// Get the duration the file will expire after,
+    /// if an expiry time is known.
+    /// Otherwise `None` is returned.
+    pub fn expire_duration(&self) -> Option<Duration> {
+        self.expire_at.as_ref().map(|time| {
+            // Get the current time
+            let now = Utc::now();
+
+            // Return the duration if not expired, otherwise return zero
+            if time > &now {
+                *time - now
+            } else {
+                Duration::zero()
+            }
+        })
     }
 
     /// Set the time this file will expire at.

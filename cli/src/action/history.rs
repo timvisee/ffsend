@@ -18,6 +18,7 @@ use history::{
     History as HistoryManager,
     LoadError as HistoryLoadError,
 };
+use util::format_duration;
 
 /// A history action.
 pub struct History<'a> {
@@ -61,14 +62,23 @@ impl<'a> History<'a> {
             Cell::new("#"),
             Cell::new("FILE ID"),
             Cell::new("URL"),
+            Cell::new("EXPIRY"),
         ]));
 
         // Add an entry for each file
         for (i, file) in history.files().iter().enumerate() {
+            // Build the expiry time string
+            let expiry = match file.expire_duration() {
+                Some(ref expire) => format_duration(expire),
+                None => "?".into(),
+            };
+
+            // Add the row
             table.add_row(Row::new(vec![
                 Cell::new(&format!("{}", i + 1)),
                 Cell::new(file.id()),
-                Cell::new(file.download_url(false).as_str()),
+                Cell::new(file.download_url(true).as_str()),
+                Cell::new(&expiry),
             ]));
         }
 
