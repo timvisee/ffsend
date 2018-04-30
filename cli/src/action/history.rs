@@ -60,9 +60,9 @@ impl<'a> History<'a> {
         table.set_format(FormatBuilder::new().padding(0, 2).build());
         table.add_row(Row::new(vec![
             Cell::new("#"),
-            Cell::new("FILE ID"),
             Cell::new("URL"),
             Cell::new("EXPIRY"),
+            Cell::new("OWNER TOKEN"),
         ]));
 
         // Add an entry for each file
@@ -73,12 +73,18 @@ impl<'a> History<'a> {
                 None => "?".into(),
             };
 
+            // Get the owner token
+            let owner_token: String = match file.owner_token() {
+                Some(token) => token.clone(),
+                None => "?".into(),
+            };
+
             // Add the row
             table.add_row(Row::new(vec![
                 Cell::new(&format!("{}", i + 1)),
-                Cell::new(file.id()),
                 Cell::new(file.download_url(true).as_str()),
                 Cell::new(&expiry),
+                Cell::new(&owner_token),
             ]));
         }
 
