@@ -38,6 +38,9 @@ pub struct RemoteFile {
     /// The time the file will expire at, if known.
     expire_at: Option<DateTime<Utc>>,
 
+    /// Define whether the expiry time is uncertain.
+    expire_uncertain: bool,
+
     /// The host the file was uploaded to.
     #[serde(with = "url_serde")]
     host: Url,
@@ -58,16 +61,24 @@ impl RemoteFile {
     pub fn new(
         id: String,
         upload_at: Option<DateTime<Utc>>,
-        expire_at: Option<DateTime<Utc>>,
+        mut expire_at: Option<DateTime<Utc>>,
         host: Url,
         url: Url,
         secret: Vec<u8>,
         owner_token: Option<String>,
     ) -> Self {
+        // Assign the default expiry time if uncetain
+        let expire_uncertain = expire_at.is_none();
+        if expire_uncertain {
+            expire_at = Some(Utc::now() + Duration::seconds(SEND_DEFAULT_EXPIRE_TIME));
+        }
+
+        // Build the object
         Self {
             id,
             upload_at,
             expire_at,
+            expire_uncertain,
             host,
             url,
             secret,
@@ -196,6 +207,16 @@ impl RemoteFile {
         }
     }
 
+    /// Check whehter the set expiry time is uncertain.
+    /// If the expiry time of a file is unknown,
+    /// the default time is assigned from the first time
+    /// the file was used. Such time will be uncertain as it probably isn't
+    /// correct.
+    /// This time may be used however to check for expiry.
+    pub fn expire_uncertain(&self) -> bool {
+        self.expire_uncertain
+    }
+
     /// Get the file URL, provided by the server.
     pub fn url(&self) -> &Url {
         &self.url
@@ -265,8 +286,9 @@ impl RemoteFile {
         }
 
         // Set the expire time
-        if other.expire_at.is_some() && (self.expire_at.is_none() || overwrite) {
+        if other.expire_at.is_some() && !other.expire_uncertain() && (self.expire_at.is_none() || overwrite) {
             self.expire_at = other.expire_at.clone();
+            self.expire_uncertain = false;
             changed = true;
         }
 

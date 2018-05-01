@@ -69,7 +69,14 @@ impl<'a> History<'a> {
         for (i, file) in history.files().iter().enumerate() {
             // Build the expiry time string
             let expiry = match file.expire_duration() {
-                Some(ref expire) => format_duration(expire),
+                Some(ref expire) => {
+                    // Format the expiry date, add uncertainty question mark if relevant
+                    let mut expiry = format_duration(expire);
+                    if file.expire_uncertain() {
+                        expiry.insert(0, '~');
+                    }
+                    expiry
+                },
                 None => "?".into(),
             };
 
