@@ -1,9 +1,7 @@
 # Release 0.1
-- Remote file expiry time:
-  - Add uncertainty flag
-  - Give all files the default expiry flag if not set (with uncertainty flag)
 - Create history command
 - History compiler flag
+- Lowercase error messages
 - Automatically get owner token, from file history when setting password
 - Allow file/directory archiving on upload
 - Allow unarchiving on download 

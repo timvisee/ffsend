@@ -35,8 +35,8 @@ pub struct RemoteFile {
     /// The time the file was uploaded at, if known.
     upload_at: Option<DateTime<Utc>>,
 
-    /// The time the file will expire at, if known.
-    expire_at: Option<DateTime<Utc>>,
+    /// The time the file will expire at.
+    expire_at: DateTime<Utc>,
 
     /// Define whether the expiry time is uncertain.
     expire_uncertain: bool,
@@ -61,7 +61,7 @@ impl RemoteFile {
     pub fn new(
         id: String,
         upload_at: Option<DateTime<Utc>>,
-        mut expire_at: Option<DateTime<Utc>>,
+        expire_at: Option<DateTime<Utc>>,
         host: Url,
         url: Url,
         secret: Vec<u8>,
@@ -69,9 +69,9 @@ impl RemoteFile {
     ) -> Self {
         // Assign the default expiry time if uncetain
         let expire_uncertain = expire_at.is_none();
-        if expire_uncertain {
-            expire_at = Some(Utc::now() + Duration::seconds(SEND_DEFAULT_EXPIRE_TIME));
-        }
+        let expire_at = expire_at.unwrap_or(
+            Utc::now() + Duration::seconds(SEND_DEFAULT_EXPIRE_TIME)
+        );
 
         // Build the object
         Self {
@@ -170,24 +170,28 @@ impl RemoteFile {
     /// Get the duration the file will expire after,
     /// if an expiry time is known.
     /// Otherwise `None` is returned.
-    pub fn expire_duration(&self) -> Option<Duration> {
-        self.expire_at.as_ref().map(|time| {
-            // Get the current time
-            let now = Utc::now();
+    pub fn expire_duration(&self) -> Duration {
+        // Get the current time
+        let now = Utc::now();
 
-            // Return the duration if not expired, otherwise return zero
-            if time > &now {
-                *time - now
-            } else {
-                Duration::zero()
-            }
-        })
+        // Return the duration if not expired, otherwise return zero
+        if self.expire_at > now {
+            self.expire_at - now
+        } else {
+            Duration::zero()
+        }
     }
 
     /// Set the time this file will expire at.
-    /// None may be given if the expire time is unknown.
+    /// None may be given to assign the default expiry time with the
+    /// uncertainty flag set.
     pub fn set_expire_at(&mut self, expire_at: Option<DateTime<Utc>>) {
-        self.expire_at = expire_at;
+        if let Some(expire_at) = expire_at {
+            self.expire_at = expire_at;
+        } else {
+            self.expire_at = Utc::now() + Duration::seconds(SEND_DEFAULT_EXPIRE_TIME);
+            self.expire_uncertain = true;
+        }
     }
 
     /// Set the time this file will expire at,
@@ -197,14 +201,8 @@ impl RemoteFile {
     }
 
     /// Check whether this file has expired, based on it's expiry property.
-    ///
-    /// If no expiry time is set (known) for this file,
-    /// the `def` value is returned instead.
-    pub fn has_expired(&self, def: bool) -> bool {
-        match self.expire_at {
-            Some(time) => time < Utc::now(),
-            None => def,
-        }
+    pub fn has_expired(&self) -> bool {
+        self.expire_at < Utc::now()
     }
 
     /// Check whehter the set expiry time is uncertain.
@@ -286,9 +284,9 @@ impl RemoteFile {
         }
 
         // Set the expire time
-        if other.expire_at.is_some() && !other.expire_uncertain() && (self.expire_at.is_none() || overwrite) {
+        if !other.expire_uncertain() && (self.expire_uncertain() || overwrite) {
             self.expire_at = other.expire_at.clone();
-            self.expire_uncertain = false;
+            self.expire_uncertain = other.expire_uncertain();
             changed = true;
         }
 

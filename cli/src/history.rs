@@ -208,7 +208,7 @@ impl History {
         // Get a list of expired files
         let expired: Vec<RemoteFile> = self.files
             .iter()
-            .filter(|f| f.has_expired(false))
+            .filter(|f| f.has_expired())
             .cloned()
             .collect();
 

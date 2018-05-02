@@ -68,17 +68,10 @@ impl<'a> History<'a> {
         // Add an entry for each file
         for (i, file) in history.files().iter().enumerate() {
             // Build the expiry time string
-            let expiry = match file.expire_duration() {
-                Some(ref expire) => {
-                    // Format the expiry date, add uncertainty question mark if relevant
-                    let mut expiry = format_duration(expire);
-                    if file.expire_uncertain() {
-                        expiry.insert(0, '~');
-                    }
-                    expiry
-                },
-                None => "?".into(),
-            };
+            let mut expiry = format_duration(&file.expire_duration());
+            if file.expire_uncertain() {
+                expiry.insert(0, '~');
+            }
 
             // Get the owner token
             let owner_token: String = match file.owner_token() {
