@@ -1,8 +1,8 @@
 # Release 0.1
-- Create history command
 - History compiler flag
 - Lowercase error messages
 - Automatically get owner token, from file history when setting password
+- Switch to `directories` instead of `app_dirs2`?
 - Allow file/directory archiving on upload
 - Allow unarchiving on download 
 - Show a simplified command list when calling `ffsend` without arguments
