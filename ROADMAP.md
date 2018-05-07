@@ -1,11 +1,11 @@
 # Release 0.1
+- Sort history entries
+- Panic when secret is missing from URL with info action
 - History compiler flag
 - Lowercase error messages
-- Automatically get owner token, from file history when setting password
 - Switch to `directories` instead of `app_dirs2`?
 - Allow file/directory archiving on upload
 - Allow unarchiving on download 
-- Show a simplified command list when calling `ffsend` without arguments
 - Use clipboard through `xclip` on Linux if available for persistence
 - Allow environment variable settings using `Arg.env(NAME)`
 - Automated releases through CI
@@ -13,7 +13,12 @@
 - Ubuntu PPA package
 - Implement error handling everywhere properly
 - Embed request errors
+- Extract utility module
+- Think of a new description:
+    Securely and easily share files from the command line;
+    a fully featured Firefox Send client. 
 - Check all TODOs, solve them when possible
+- Windows, macOS and Redox support
 
 # Future releases
 - Color usage flag

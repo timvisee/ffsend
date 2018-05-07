@@ -78,3 +78,49 @@ pub fn remove(matcher_main: &MainMatcher, file: &RemoteFile) -> bool {
     }
     ok
 }
+
+/// Derive an owner token of a remote file from the current history.
+/// The newly derived owner token will be set into the given borrowed remote file.
+/// This method may be used to automatically derive the owner token for some file actions
+/// requiring this token, to prevent the user from having to enter it manually.
+///
+/// If the file already has an owner token set,
+/// nothing will be derived and `false` is returned.
+/// If an error occurred while deriving,
+/// the error is printed and `false` is returned.
+/// If there was no matching file in the history,
+/// and no owner token could be derived, `false` is returned.
+/// If in incognito mode, nothing is derived and `false` is returned.
+///
+/// If an owner token was successfully derived from the history,
+/// `true` is returned.
+///
+/// Note, to check if an owner token is set in the remote file,
+/// use the `file.has_owner_token()` method instead of the returned boolean from this method.
+pub fn derive_owner_token(matcher_main: &MainMatcher, file: &mut RemoteFile) -> bool {
+    // Return if the remote file already has an owner token set, or if we're incognito
+    if file.has_owner_token() || matcher_main.incognito() {
+        return false;
+    }
+
+    // Load the history
+    let history = match History::load_or_new(matcher_main.history()) {
+        Ok(history) => history,
+        Err(err) => {
+            print_error(err.context(
+                "Failed to derive file owner token from history, ignoring",
+            ));
+            return false;
+        }
+    };
+
+    // Find a matching file, grab and set the owner token if available
+    match history.get_file(file) {
+        Some(f) if f.has_owner_token() => {
+            file.set_owner_token(f.owner_token().cloned());
+            println!("DEBUG: Owner token set from history");
+            return true;
+        },
+        _ => return false,
+    }
+}

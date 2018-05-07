@@ -41,8 +41,9 @@ impl<'a> Password<'a> {
         // Create a reqwest client
         let client = Client::new();
 
-        // Parse the remote file based on the share URL
+        // Parse the remote file based on the share URL, derive the owner token from history
         let mut file = RemoteFile::parse_url(url, matcher_password.owner())?;
+        history_tool::derive_owner_token(&matcher_main, &mut file);
 
         // Ensure the owner token is set
         ensure_owner_token(file.owner_token_mut(), &matcher_main);

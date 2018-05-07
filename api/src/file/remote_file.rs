@@ -252,9 +252,18 @@ impl RemoteFile {
         &mut self.owner_token
     }
 
-    /// Set the owner token.
+    /// Set the owner token, wrapped in an option.
+    /// If `None` is given, the owner token will be unset.
     pub fn set_owner_token(&mut self, token: Option<String>) {
         self.owner_token = token;
+    }
+
+    /// Check whether an owner token is set in this remote file.
+    pub fn has_owner_token(&self) -> bool {
+        self.owner_token
+            .clone()
+            .map(|t| !t.is_empty())
+            .unwrap_or(false)
     }
 
     /// Get the host URL for this remote file.

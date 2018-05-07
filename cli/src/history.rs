@@ -198,6 +198,16 @@ impl History {
         &self.files
     }
 
+    /// Get a file from the history, based on the given remote file.
+    /// The file ID and host will be compared against all files in this history.
+    /// If multiple files exist within the history that are equal, only one is returned.
+    /// If no matching file was found, `None` is returned.
+    pub fn get_file(&self, file: &RemoteFile) -> Option<&RemoteFile> {
+        self.files.iter()
+            .filter(|f| f.id() == file.id() && f.host() == file.host())
+            .next()
+    }
+
     /// Garbage collect (remove) all files that have been expired,
     /// as defined by their `expire_at` property.
     ///
