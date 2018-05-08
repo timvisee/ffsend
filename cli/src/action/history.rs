@@ -66,8 +66,12 @@ impl<'a> History<'a> {
             Cell::new("OWNER TOKEN"),
         ]));
 
+        // Get the list of files, and sort the first expiring files to be last
+        let mut files = history.files().clone();
+        files.sort_by(|a, b| b.expire_at().cmp(&a.expire_at()));
+
         // Add an entry for each file
-        for (i, file) in history.files().iter().enumerate() {
+        for (i, file) in files.iter().enumerate() {
             // Build the expiry time string
             let mut expiry = format_duration(&file.expire_duration());
             if file.expire_uncertain() {

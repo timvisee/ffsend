@@ -167,9 +167,16 @@ impl RemoteFile {
         &self.id
     }
 
-    /// Get the duration the file will expire after,
-    /// if an expiry time is known.
-    /// Otherwise `None` is returned.
+    /// Get the time the file will expire after.
+    /// Note that this time may not be correct as it may have been guessed,
+    /// see `expire_uncertain()`.
+    pub fn expire_at(&self) -> DateTime<Utc> {
+        self.expire_at
+    }
+
+    /// Get the duration the file will expire after.
+    /// Note that this time may not be correct as it may have been guessed,
+    /// see `expire_uncertain()`.
     pub fn expire_duration(&self) -> Duration {
         // Get the current time
         let now = Utc::now();

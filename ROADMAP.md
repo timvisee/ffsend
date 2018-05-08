@@ -1,5 +1,4 @@
 # Release 0.1
-- Sort history entries
 - Panic when secret is missing from URL with info action
 - History compiler flag
 - Lowercase error messages
