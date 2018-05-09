@@ -90,7 +90,8 @@ pub fn remove(matcher_main: &MainMatcher, file: &RemoteFile) -> bool {
 /// the error is printed and `false` is returned.
 /// If there was no matching file in the history,
 /// and no owner token could be derived, `false` is returned.
-/// If in incognito mode, nothing is derived and `false` is returned.
+/// Incognito mode does not have any effect on this method,
+/// as it won't ever change the history.
 ///
 /// If an owner token was successfully derived from the history,
 /// `true` is returned.
@@ -99,7 +100,7 @@ pub fn remove(matcher_main: &MainMatcher, file: &RemoteFile) -> bool {
 /// use the `file.has_owner_token()` method instead of the returned boolean from this method.
 pub fn derive_owner_token(matcher_main: &MainMatcher, file: &mut RemoteFile) -> bool {
     // Return if the remote file already has an owner token set, or if we're incognito
-    if file.has_owner_token() || matcher_main.incognito() {
+    if file.has_owner_token() {
         return false;
     }
 
