@@ -30,15 +30,15 @@ pub fn ensure_success(response: &Response) -> Result<(), ResponseError> {
 #[derive(Fail, Debug)]
 pub enum ResponseError {
     /// This request lead to an expired file, or a file that never existed.
-    #[fail(display = "This file has expired or did never exist")]
+    #[fail(display = "this file has expired or did never exist")]
     Expired,
 
     /// We were unauthorized to make this request.
     /// This is usually because of an incorrect password.
-    #[fail(display = "Unauthorized, are the credentials correct?")]
+    #[fail(display = "unauthorized, are the credentials correct?")]
     Unauthorized,
 
     /// Some undefined error occurred with this response.
-    #[fail(display = "Bad HTTP response: {}", _1)]
+    #[fail(display = "bad HTTP response: {}", _1)]
     Other(StatusCode, String),
 }

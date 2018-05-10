@@ -231,22 +231,22 @@ impl<'a> MetadataResponse {
 pub enum Error {
     /// An error occurred while checking whether the file exists on the
     /// server.
-    #[fail(display = "Failed to check whether the file exists")]
+    #[fail(display = "failed to check whether the file exists")]
     Exists(#[cause] ExistsError),
 
     /// A general error occurred while requesting the file data.
     /// This may be because authentication failed, because decrypting the
     /// file metadata didn't succeed, or due to some other reason.
-    #[fail(display = "Failed to request file data")]
+    #[fail(display = "failed to request file data")]
     Request(#[cause] RequestError),
 
     /// The given Send file has expired, or did never exist in the first place.
     /// Therefore the file could not be downloaded.
-    #[fail(display = "The file has expired or did never exist")]
+    #[fail(display = "the file has expired or did never exist")]
     Expired,
 
     /// A password is required, but was not given.
-    #[fail(display = "Missing password, password required")]
+    #[fail(display = "missing password, password required")]
     PasswordRequired,
 }
 
@@ -280,11 +280,11 @@ impl From<NonceError> for Error {
 #[derive(Fail, Debug)]
 pub enum RequestError {
     /// Failed authenticating, in order to fetch the file data.
-    #[fail(display = "Failed to authenticate")]
+    #[fail(display = "failed to authenticate")]
     Auth(#[cause] NonceError),
 
     /// Failed to retrieve the file metadata.
-    #[fail(display = "Failed to retrieve file metadata")]
+    #[fail(display = "failed to retrieve file metadata")]
     Meta(#[cause] MetaError),
 }
 
@@ -292,28 +292,28 @@ pub enum RequestError {
 pub enum MetaError {
     /// An error occurred while computing the cryptographic signature used for
     /// decryption.
-    #[fail(display = "Failed to compute cryptographic signature")]
+    #[fail(display = "failed to compute cryptographic signature")]
     ComputeSignature,
 
     /// Sending the request to gather the metadata encryption nonce failed.
-    #[fail(display = "Failed to request metadata nonce")]
+    #[fail(display = "failed to request metadata nonce")]
     NonceRequest,
 
     /// The server responded with an error while fetching the metadata
     /// encryption nonce.
-    #[fail(display = "Bad response from server while fetching metadata nonce")]
+    #[fail(display = "bad response from server while fetching metadata nonce")]
     NonceResponse(#[cause] ResponseError),
 
     /// Couldn't parse the metadata encryption nonce.
-    #[fail(display = "Failed to parse the metadata encryption nonce")]
+    #[fail(display = "failed to parse the metadata encryption nonce")]
     Nonce(#[cause] NonceError),
 
     /// The received metadata is malformed, and couldn't be decoded or
     /// interpreted.
-    #[fail(display = "Received malformed metadata")]
+    #[fail(display = "received malformed metadata")]
     Malformed,
 
     /// Failed to decrypt the received metadata.
-    #[fail(display = "Failed to decrypt received metadata")]
+    #[fail(display = "failed to decrypt received metadata")]
     Decrypt,
 }

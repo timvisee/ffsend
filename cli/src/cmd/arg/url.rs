@@ -33,7 +33,7 @@ impl<'a> CmdArgOption<'a> for ArgUrl {
         match parse_host(&url) {
             Ok(url) => url,
             Err(err) => quit_error(
-                err.context("Failed to parse the given share URL"),
+                err.context("failed to parse the given share URL"),
                 ErrorHints::default(),
             ),
         }

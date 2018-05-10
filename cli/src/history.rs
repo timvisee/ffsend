@@ -74,9 +74,9 @@ impl History {
             let version = history.version.as_ref().unwrap();
 
             if let Ok(true) = VersionCompare::compare_to(version, VERSION_MIN, &CompOp::Lt) {
-                print_warning("History file version is too old, ignoring");
+                print_warning("history file version is too old, ignoring");
             } else if let Ok(true) = VersionCompare::compare_to(version, VERSION_MAX, &CompOp::Gt) {
-                print_warning("History file has an unknown version, ignoring");
+                print_warning("history file has an unknown version, ignoring");
             }
         }
 
@@ -244,7 +244,7 @@ impl Drop for History {
             // Save and report errors
             if let Err(err) = self.save() {
                 print_error(
-                    err.context("Failed to auto save history, ignoring"),
+                    err.context("failed to auto save history, ignoring"),
                 );
             }
         }
@@ -265,11 +265,11 @@ impl Default for History {
 #[derive(Debug, Fail)]
 pub enum Error {
     /// An error occurred while loading the history from a file.
-    #[fail(display = "Failed to load history from file")]
+    #[fail(display = "failed to load history from file")]
     Load(#[cause] LoadError),
 
     /// An error occurred while saving the history to a file.
-    #[fail(display = "Failed to save history to file")]
+    #[fail(display = "failed to save history to file")]
     Save(#[cause] SaveError),
 }
 
@@ -311,20 +311,20 @@ impl From<DeError> for LoadError {
 #[derive(Debug, Fail)]
 pub enum SaveError {
     /// No autosave file path was present, failed to save.
-    #[fail(display = "No autosave file path specified")]
+    #[fail(display = "no autosave file path specified")]
     NoPath,
 
     /// Failed to serialize the history for saving.
-    #[fail(display = "Failed to serialize the history for saving")]
+    #[fail(display = "failed to serialize the history for saving")]
     Serialize(#[cause] SerError),
 
     /// Failed to write to the history file.
-    #[fail(display = "Failed to write to the history file")]
+    #[fail(display = "failed to write to the history file")]
     Write(#[cause] IoError),
 
     /// Failed to delete the history file, which was tried because there
     /// are no history items to save.
-    #[fail(display = "Failed to delete history file, because history is empty")]
+    #[fail(display = "failed to delete history file, because history is empty")]
     Delete(#[cause] IoError),
 }
 

@@ -49,26 +49,26 @@ pub fn header_nonce(response: &Response)
 pub enum NonceError {
     /// Sending the request to fetch a nonce failed,
     /// as the file has expired or did never exist.
-    #[fail(display = "The file has expired or did never exist")]
+    #[fail(display = "the file has expired or did never exist")]
     Expired,
 
     /// Sending the request to fetch a nonce failed.
-    #[fail(display = "Failed to request encryption nonce")]
+    #[fail(display = "failed to request encryption nonce")]
     Request,
 
     /// The server responded with an error while requesting the encryption nonce,
     /// required for some operations.
-    #[fail(display = "Bad response from server while requesting encryption nonce")]
+    #[fail(display = "bad response from server while requesting encryption nonce")]
     Response(#[cause] ResponseError),
 
     /// The nonce header was missing from the request.
-    #[fail(display = "Missing nonce in server response")]
+    #[fail(display = "missing nonce in server response")]
     NoNonceHeader,
 
     /// The received nonce could not be parsed, because it was malformed.
     /// Maybe the server responded with a new format that isn't supported yet
     /// by this client.
-    #[fail(display = "Received malformed nonce")]
+    #[fail(display = "received malformed nonce")]
     MalformedNonce,
 }
 

@@ -45,6 +45,6 @@ impl<D> OwnedData<D>
 #[derive(Debug, Fail)]
 pub enum Error {
     /// Missing owner token, which is required.
-    #[fail(display = "Missing owner token, must be specified")]
+    #[fail(display = "missing owner token, must be specified")]
     NoOwnerToken,
 }

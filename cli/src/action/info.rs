@@ -83,7 +83,7 @@ impl<'a> Info<'a> {
         let metadata = ApiMetadata::new(&file, password, false)
             .invoke(&client)
             .map_err(|err| print_error(err.context(
-                "Failed to fetch file metadata, showing limited info",
+                "failed to fetch file metadata, showing limited info",
             )))
             .ok();
 
@@ -124,19 +124,19 @@ impl<'a> Info<'a> {
 pub enum Error {
     /// Failed to parse a share URL, it was invalid.
     /// This error is not related to a specific action.
-    #[fail(display = "Invalid share URL")]
+    #[fail(display = "invalid share URL")]
     InvalidUrl(#[cause] FileParseError),
 
     /// An error occurred while checking if the file exists.
-    #[fail(display = "Failed to check whether the file exists")]
+    #[fail(display = "failed to check whether the file exists")]
     Exists(#[cause] ExistsError),
 
     /// An error occurred while fetching the file information.
-    #[fail(display = "Failed to fetch file info")]
+    #[fail(display = "failed to fetch file info")]
     Info(#[cause] InfoError),
 
     /// The given Send file has expired, or did never exist in the first place.
-    #[fail(display = "The file has expired or did never exist")]
+    #[fail(display = "the file has expired or did never exist")]
     Expired,
 }
 

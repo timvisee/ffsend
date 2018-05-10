@@ -253,29 +253,29 @@ pub enum Error {
     /// An error occurred while fetching the metadata of the file.
     /// This step is required in order to succsessfully decrypt the
     /// file that will be downloaded.
-    #[fail(display = "Failed to fetch file metadata")]
+    #[fail(display = "failed to fetch file metadata")]
     Meta(#[cause] MetadataError),
 
     /// The given Send file has expired, or did never exist in the first place.
     /// Therefore the file could not be downloaded.
-    #[fail(display = "The file has expired or did never exist")]
+    #[fail(display = "the file has expired or did never exist")]
     Expired,
 
     /// A password is required, but was not given.
-    #[fail(display = "Missing password, password required")]
+    #[fail(display = "missing password, password required")]
     PasswordRequired,
 
     /// An error occurred while downloading the file.
-    #[fail(display = "Failed to download the file")]
+    #[fail(display = "failed to download the file")]
     Download(#[cause] DownloadError),
 
     /// An error occurred while decrypting the downloaded file.
-    #[fail(display = "Failed to decrypt the downloaded file")]
+    #[fail(display = "failed to decrypt the downloaded file")]
     Decrypt,
 
     /// An error occurred while opening or writing to the target file.
     // TODO: show what file this is about
-    #[fail(display = "Couldn't use the target file at '{}'", _0)]
+    #[fail(display = "couldn't use the target file at '{}'", _0)]
     File(String, #[cause] FileError),
 }
 
@@ -299,46 +299,46 @@ impl From<DownloadError> for Error {
 pub enum DownloadError {
     /// An error occurred while computing the cryptographic signature used for
     /// downloading the file.
-    #[fail(display = "Failed to compute cryptographic signature")]
+    #[fail(display = "failed to compute cryptographic signature")]
     ComputeSignature,
 
     /// Sending the request to download the file failed.
-    #[fail(display = "Failed to request file download")]
+    #[fail(display = "failed to request file download")]
     Request,
 
     /// The server responded with an error while requesting the file download.
-    #[fail(display = "Bad response from server while requesting download")]
+    #[fail(display = "bad response from server while requesting download")]
     Response(#[cause] ResponseError),
 
     /// The length of the file is missing, thus the length of the file to download
     /// couldn't be determined.
-    #[fail(display = "Couldn't determine file download length, missing property")]
+    #[fail(display = "couldn't determine file download length, missing property")]
     NoLength,
 
     /// Failed to start or update the downloading progress, because of this the
     /// download can't continue.
-    #[fail(display = "Failed to update download progress")]
+    #[fail(display = "failed to update download progress")]
     Progress,
 
     /// The actual download and decryption process the server.
     /// This covers reading the file from the server, decrypting the file,
     /// and writing it to the file system.
-    #[fail(display = "Failed to download the file")]
+    #[fail(display = "failed to download the file")]
     Download,
 
     /// Verifying the downloaded file failed.
-    #[fail(display = "File verification failed")]
+    #[fail(display = "file verification failed")]
     Verify,
 }
 
 #[derive(Fail, Debug)]
 pub enum FileError {
     /// An error occurred while creating or opening the file to write to.
-    #[fail(display = "Failed to create or replace the file")]
+    #[fail(display = "failed to create or replace the file")]
     Create(#[cause] IoError),
 
     /// Failed to create an encrypted writer for the file, which is used to
     /// decrypt the downloaded file.
-    #[fail(display = "Failed to create file decryptor")]
+    #[fail(display = "failed to create file decryptor")]
     EncryptedWriter,
 }

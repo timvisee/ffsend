@@ -102,18 +102,18 @@ impl Default for ExistsResponse {
 #[derive(Fail, Debug)]
 pub enum Error {
     /// Sending the request to check whether the file exists failed.
-    #[fail(display = "Failed to send request whether the file exists")]
+    #[fail(display = "failed to send request whether the file exists")]
     Request,
 
     /// The server responded with an error while checking whether the file
     /// exists.
-    #[fail(display = "Bad response from server while checking file existence")]
+    #[fail(display = "bad response from server while checking file existence")]
     Response(#[cause] ResponseError),
 
     /// The response from the server when checking if the file exists was
     /// malformed.
     /// Maybe the server responded with a new format that isn't supported yet
     /// by this client.
-    #[fail(display = "Received malformed authentication nonce")]
+    #[fail(display = "received malformed authentication nonce")]
     Malformed,
 }

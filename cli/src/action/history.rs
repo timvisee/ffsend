@@ -43,7 +43,7 @@ impl<'a> History<'a> {
         // Get the history path, make sure it exists
         let history_path = matcher_main.history();
         if !history_path.is_file() {
-            println!("No files in history");
+            eprintln!("No files in history");
             return Ok(());
         }
 
@@ -52,7 +52,7 @@ impl<'a> History<'a> {
 
         // Do not report any files if there aren't any
         if history.files().is_empty() {
-            println!("No files in history");
+            eprintln!("No files in history");
             return Ok(());
         }
 

@@ -108,17 +108,17 @@ impl PasswordData {
 #[derive(Fail, Debug)]
 pub enum Error {
     /// An error occurred while preparing the action.
-    #[fail(display = "Failed to prepare setting the password")]
+    #[fail(display = "failed to prepare setting the password")]
     Prepare(#[cause] PrepareError),
 
     /// The given Send file has expired, or did never exist in the first place.
     /// Therefore the file could not be downloaded.
-    #[fail(display = "The file has expired or did never exist")]
+    #[fail(display = "the file has expired or did never exist")]
     Expired,
 
     /// An error has occurred while sending the password change request to
     /// the server.
-    #[fail(display = "Failed to send the password change request")]
+    #[fail(display = "failed to send the password change request")]
     Change(#[cause] ChangeError),
 }
 
@@ -155,7 +155,7 @@ impl From<ResponseError> for Error {
 #[derive(Fail, Debug)]
 pub enum PrepareError {
     /// Failed authenticating, needed to set a new password.
-    #[fail(display = "Failed to authenticate")]
+    #[fail(display = "failed to authenticate")]
     Auth(#[cause] NonceError),
 
     /// Some error occurred while building the data that will be sent.
@@ -174,10 +174,10 @@ impl From<DataError> for PrepareError {
 #[derive(Fail, Debug)]
 pub enum ChangeError {
     /// Sending the request to change the password failed.
-    #[fail(display = "Failed to send password change request")]
+    #[fail(display = "failed to send password change request")]
     Request,
 
     /// The server responded with an error while changing the file password.
-    #[fail(display = "Bad response from server while changing password")]
+    #[fail(display = "bad response from server while changing password")]
     Response(#[cause] ResponseError),
 }

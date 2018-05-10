@@ -26,34 +26,34 @@ pub fn parse_host(host: &str) -> Result<Url, HostError> {
 #[derive(Debug, Fail)]
 pub enum HostError {
     /// The URL scheme is missing or invalid.
-    #[fail(display = "The URL must have the 'https://' or 'http://' scheme")]
+    #[fail(display = "the URL must have the 'https://' or 'http://' scheme")]
     Scheme,
 
     /// The host address is empty.
-    #[fail(display = "Empty host address")]
+    #[fail(display = "empty host address")]
     Empty,
 
     /// The port number is invalid.
-    #[fail(display = "Invalid port")]
+    #[fail(display = "invalid port")]
     Port,
 
     /// The given IPv4 styled address is invalid.
-    #[fail(display = "Invalid IPv4 address in the host")]
+    #[fail(display = "invalid IPv4 address in the host")]
     Ipv4,
 
     /// The given IPv6 styled address is invalid.
-    #[fail(display = "Invalid IPv6 address in the host")]
+    #[fail(display = "invalid IPv6 address in the host")]
     Ipv6,
 
     /// The domain contains an invalid character.
-    #[fail(display = "Invalid character in the domain")]
+    #[fail(display = "invalid character in the domain")]
     DomainCharacter,
 
     /// The base host is missing from the host URL.
-    #[fail(display = "Missing host in the host URL")]
+    #[fail(display = "missing host in the host URL")]
     NoBase,
 
     /// Failed to parse the host URL due to another reason.
-    #[fail(display = "Could not parse host URL")]
+    #[fail(display = "could not parse host URL")]
     Other(#[cause] ParseError),
 }

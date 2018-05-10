@@ -49,7 +49,7 @@ pub fn print_error<E: Fail>(err: E) {
 
     // Fall back to a basic message
     if count == 0 {
-        eprintln!("{} {}", highlight_error("error:"), "An undefined error occurred");
+        eprintln!("{} {}", highlight_error("error:"), "an undefined error occurred");
     }
 }
 
@@ -250,7 +250,7 @@ pub fn set_clipboard(content: String) -> Result<(), Box<StdError>> {
 pub fn check_empty_password(password: &str, matcher_main: &MainMatcher) {
     if !matcher_main.force() && password.is_empty() {
         quit_error_msg(
-            "An empty password is not supported by the web interface",
+            "an empty password is not supported by the web interface",
             ErrorHintsBuilder::default()
                 .force(true)
                 .verbose(false)
@@ -267,7 +267,7 @@ pub fn prompt_password(main_matcher: &MainMatcher) -> String {
     // Quit with an error if we may not interact
     if main_matcher.no_interact() {
         quit_error_msg(
-            "Missing password, must be specified in no-interact mode",
+            "missing password, must be specified in no-interact mode",
             ErrorHintsBuilder::default()
                 .password(true)
                 .verbose(false)
@@ -280,7 +280,7 @@ pub fn prompt_password(main_matcher: &MainMatcher) -> String {
     match prompt_password_stderr("Password: ") {
         Ok(password) => password,
         Err(err) => quit_error(err.context(
-            "Failed to read password from password prompt"
+            "failed to read password from password prompt"
         ), ErrorHints::default()),
     }
 }
@@ -319,7 +319,7 @@ pub fn prompt(msg: &str, main_matcher: &MainMatcher) -> String {
     // Quit with an error if we may not interact
     if main_matcher.no_interact() {
         quit_error_msg(format!(
-            "Could not prompt for '{}' in no-interact mode, maybe specify it",
+            "could not prompt for '{}' in no-interact mode, maybe specify it",
             msg,
         ), ErrorHints::default());
     }
@@ -332,7 +332,7 @@ pub fn prompt(msg: &str, main_matcher: &MainMatcher) -> String {
     let mut input = String::new();
     if let Err(err) = stdin().read_line(&mut input) {
         quit_error(err.context(
-            "Failed to read input from prompt"
+            "failed to read input from prompt"
         ), ErrorHints::default());
     }
 
@@ -376,7 +376,7 @@ pub fn prompt_yes(
             return def;
         } else {
             quit_error_msg(format!(
-                "Could not prompt question '{}' in no-interact mode, maybe specify it",
+                "could not prompt question '{}' in no-interact mode, maybe specify it",
                 msg,
             ), ErrorHints::default());
         }
@@ -451,7 +451,7 @@ pub fn ensure_owner_token(
                 *token = Some(prompt_owner_token(main_matcher));
             } else {
                 quit_error_msg(
-                    "Missing owner token, must be specified in no-interact mode",
+                    "missing owner token, must be specified in no-interact mode",
                     ErrorHintsBuilder::default()
                         .owner(true)
                         .verbose(false)
@@ -546,19 +546,20 @@ pub fn exe_name() -> String {
         .unwrap_or(crate_name!().into())
 }
 
-/// Check whether there is enough space avaialble at the given `path` to store a file
-/// with the given `size`.
+/// Ensure that there is enough free disk space available at the given `path`,
+/// to store a file with the given `size`.
 ///
 /// If an error occurred while querying the file system,
-/// the error is reported to the user, and `true` is returned.
+/// the error is reported to the user and the method returns.
 ///
-/// `false` is only returned when sure that there isn't enough space available.
+/// If there is not enough disk space available,
+/// an error is reported and the program will quit.
 pub fn ensure_enough_space<P: AsRef<Path>>(path: P, size: u64) {
     // Get the available space at this path
     let space = match available_space(path) {
         Ok(space) => space,
         Err(err) => {
-            print_error(err.context("Failed to check available space on disk, ignoring"));
+            print_error(err.context("failed to check available space on disk, ignoring"));
             return;
         },
     };
@@ -570,15 +571,15 @@ pub fn ensure_enough_space<P: AsRef<Path>>(path: P, size: u64) {
 
     // Create an info message giving details about the required space
     let info = format!(
-        "{} is required, but only {} is available",
+        "{} of space required, but only {} is available",
         format_bytes(size),
         format_bytes(space),
     );
 
     // Print an descriptive error and quit
     quit_error(
-        err_msg("Not enough disk space available in the target directory")
-            .context("Failed to download file"),
+        err_msg("not enough disk space available in the target directory")
+            .context("failed to download file"),
         ErrorHintsBuilder::default()
             .add_info(info)
             .force(true)

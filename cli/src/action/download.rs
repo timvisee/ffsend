@@ -172,12 +172,12 @@ impl<'a> Download<'a> {
                 // Create the parent directories
                 if let Err(err) = create_dir_all(parent) {
                     quit_error(err.context(
-                        "Failed to create parent directories for output file",
+                        "failed to create parent directories for output file",
                     ), ErrorHints::default());
                 }
             },
             None => quit_error_msg(
-                "Invalid output file path",
+                "invalid output file path",
                 ErrorHints::default(),
             ),
         }
@@ -198,7 +198,7 @@ impl<'a> Download<'a> {
             match target.canonicalize() {
                 Ok(target) => return target,
                 Err(err) => quit_error(
-                    err.context("Failed to canonicalize target path"),
+                    err.context("failed to canonicalize target path"),
                     ErrorHints::default(),
                 ),
             }
@@ -209,7 +209,7 @@ impl<'a> Download<'a> {
             match target.canonicalize() {
                 Ok(target) => return target.join(name_hint),
                 Err(err) => quit_error(
-                    err.context("Failed to canonicalize target path"),
+                    err.context("failed to canonicalize target path"),
                     ErrorHints::default(),
                 ),
             }
@@ -228,7 +228,7 @@ impl<'a> Download<'a> {
             match current_dir() {
                 Ok(target) => return target.join(name_hint),
                 Err(err) => quit_error(err.context(
-                    "Failed to determine working directory to use for the output file"
+                    "failed to determine working directory to use for the output file"
                 ), ErrorHints::default()),
             }
         }
@@ -247,7 +247,7 @@ impl<'a> Download<'a> {
             match current_dir() {
                 Ok(workdir) => target = workdir.join(target),
                 Err(err) => quit_error(err.context(
-                        "Failed to determine working directory to use for the output file"
+                        "failed to determine working directory to use for the output file"
                     ), ErrorHints::default()),
             }
         }
@@ -260,15 +260,15 @@ impl<'a> Download<'a> {
 pub enum Error {
     /// Failed to parse a share URL, it was invalid.
     /// This error is not related to a specific action.
-    #[fail(display = "Invalid share URL")]
+    #[fail(display = "invalid share URL")]
     InvalidUrl(#[cause] FileParseError),
 
     /// An error occurred while checking if the file exists.
-    #[fail(display = "Failed to check whether the file exists")]
+    #[fail(display = "failed to check whether the file exists")]
     Exists(#[cause] ExistsError),
 
     /// An error occurred while fetching metadata.
-    #[fail(display = "Failed to fetch file metadata")]
+    #[fail(display = "failed to fetch file metadata")]
     Metadata(#[cause] MetadataError),
 
     /// An error occurred while downloading the file.
@@ -276,7 +276,7 @@ pub enum Error {
     Download(#[cause] DownloadError),
 
     /// The given Send file has expired, or did never exist in the first place.
-    #[fail(display = "The file has expired or did never exist")]
+    #[fail(display = "the file has expired or did never exist")]
     Expired,
 }
 

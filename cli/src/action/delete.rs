@@ -73,15 +73,15 @@ impl<'a> Delete<'a> {
 pub enum Error {
     /// Failed to parse a share URL, it was invalid.
     /// This error is not related to a specific action.
-    #[fail(display = "Invalid share URL")]
+    #[fail(display = "invalid share URL")]
     InvalidUrl(#[cause] FileParseError),
 
     /// Could not delete, the file has expired or did never exist.
-    #[fail(display = "The file has expired or did never exist")]
+    #[fail(display = "the file has expired or did never exist")]
     Expired,
 
     /// An error occurred while deleting the remote file.
-    #[fail(display = "Failed to delete the shared file")]
+    #[fail(display = "failed to delete the shared file")]
     Delete(#[cause] DeleteError),
 }
 

@@ -36,7 +36,7 @@ impl<'a: 'b, 'b> MainMatcher<'a> {
         match path {
             Some(path) => path,
             None => quit_error_msg(
-                "History file path not set",
+                "history file path not set",
                 ErrorHintsBuilder::default()
                     .history(true)
                     .verbose(false)

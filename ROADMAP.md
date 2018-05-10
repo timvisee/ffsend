@@ -1,6 +1,7 @@
 # Release 0.1
+- Print nice error in `cli/cmd/arg/download_limit.rs`
+- Resolve panics with a nice error message
 - Panic when secret is missing from URL with info action
-- Lowercase error messages
 - Switch to `directories` instead of `app_dirs2`?
 - Allow file/directory archiving on upload
 - Allow unarchiving on download 

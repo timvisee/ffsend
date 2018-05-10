@@ -42,7 +42,7 @@ fn add_error(matcher_main: &MainMatcher, file: RemoteFile, overwrite: bool)
 pub fn add(matcher_main: &MainMatcher, file: RemoteFile, overwrite: bool) {
     if let Err(err) = add_error(matcher_main, file, overwrite) {
         print_error(err.context(
-            "Failed to add file to local history, ignoring",
+            "failed to add file to local history, ignoring",
         ));
     }
 }
@@ -73,7 +73,7 @@ pub fn remove(matcher_main: &MainMatcher, file: &RemoteFile) -> bool {
     let ok = result.is_ok();
     if let Err(err) = result {
         print_error(err.context(
-            "Failed to remove file from local history, ignoring",
+            "failed to remove file from local history, ignoring",
         ));
     }
     ok
@@ -109,7 +109,7 @@ pub fn derive_owner_token(matcher_main: &MainMatcher, file: &mut RemoteFile) -> 
         Ok(history) => history,
         Err(err) => {
             print_error(err.context(
-                "Failed to derive file owner token from history, ignoring",
+                "failed to derive file owner token from history, ignoring",
             ));
             return false;
         }

@@ -61,7 +61,7 @@ impl<'a> Upload<'a> {
                 // The file is too large, show an error and quit
                 quit_error_msg(
                     format!(
-                        "The file size is {}, bigger than the maximum allowed of {}",
+                        "the file size is {}, bigger than the maximum allowed of {}",
                         format_bytes(size),
                         format_bytes(UPLOAD_SIZE_MAX),
                     ),
@@ -74,7 +74,7 @@ impl<'a> Upload<'a> {
             } else if size > UPLOAD_SIZE_MAX_RECOMMENDED && !matcher_main.force() {
                 // The file is larger than the recommended maximum, warn
                 eprintln!(
-                    "The file size is {}, bigger than the recommended maximum of {}",
+                    "the file size is {}, bigger than the recommended maximum of {}",
                     format_bytes(size),
                     format_bytes(UPLOAD_SIZE_MAX_RECOMMENDED),
                 );
@@ -86,7 +86,7 @@ impl<'a> Upload<'a> {
                 }
             }
         } else {
-            print_error_msg("Failed to check the file size, ignoring");
+            print_error_msg("failed to check the file size, ignoring");
         }
 
         // Create a reqwest client
@@ -132,7 +132,7 @@ impl<'a> Upload<'a> {
         if matcher_upload.open() {
             if let Err(err) = open_url(url.clone()) {
                 print_error(
-                    err.context("Failed to open the URL in the browser")
+                    err.context("failed to open the URL in the browser")
                 );
             };
         }
@@ -143,7 +143,7 @@ impl<'a> Upload<'a> {
             if matcher_upload.copy() {
                 if set_clipboard(url.as_str().to_owned()).is_err() {
                     print_error(
-                        err_msg("Failed to copy the URL to the clipboard")
+                        err_msg("failed to copy the URL to the clipboard")
                             .compat()
                     );
                 }

@@ -514,21 +514,6 @@ impl Write for EncryptedFileWriter {
     }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /// A writer wrapper, that measures the reading process for a writer with a
 /// known length.
 ///

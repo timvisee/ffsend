@@ -139,16 +139,16 @@ impl InfoResponse {
 #[derive(Fail, Debug)]
 pub enum Error {
     /// An error occurred while preparing the action.
-    #[fail(display = "Failed to prepare the action")]
+    #[fail(display = "failed to prepare the action")]
     Prepare(#[cause] PrepareError),
 
     /// The given Send file has expired, or did never exist in the first place.
     /// Therefore the file could not be downloaded.
-    #[fail(display = "The file has expired or did never exist")]
+    #[fail(display = "the file has expired or did never exist")]
     Expired,
 
     /// An error has occurred while sending the info request to the server.
-    #[fail(display = "Failed to send the file info request")]
+    #[fail(display = "failed to send the file info request")]
     Info(#[cause] InfoError),
 }
 
@@ -194,12 +194,12 @@ pub enum InfoDataError {
 #[derive(Fail, Debug)]
 pub enum PrepareError {
     /// Failed authenticating, needed to fetch the info
-    #[fail(display = "Failed to authenticate")]
+    #[fail(display = "failed to authenticate")]
     Auth(#[cause] NonceError),
 
     /// An error occurred while building the info data that will be
     /// send to the server.
-    #[fail(display = "Invalid parameters")]
+    #[fail(display = "invalid parameters")]
     InfoData(#[cause] InfoDataError),
 }
 
@@ -212,15 +212,15 @@ impl From<DataError> for PrepareError {
 #[derive(Fail, Debug)]
 pub enum InfoError {
     /// Sending the request to fetch the file info failed.
-    #[fail(display = "Failed to send file info request")]
+    #[fail(display = "failed to send file info request")]
     Request,
 
     /// The server responded with an error while fetching the file info.
-    #[fail(display = "Bad response from server while fetching file info")]
+    #[fail(display = "bad response from server while fetching file info")]
     Response(#[cause] ResponseError),
 
     /// Failed to decode the info response from the server.
     /// Maybe the server responded with data from a newer API version.
-    #[fail(display = "Failed to decode info response")]
+    #[fail(display = "failed to decode info response")]
     Decode(#[cause] ReqwestError),
 }

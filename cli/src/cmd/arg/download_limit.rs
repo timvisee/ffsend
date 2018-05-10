@@ -41,6 +41,7 @@ impl<'a> CmdArgOption<'a> for ArgDownloadLimit {
             .map(|d| d.parse::<u8>().expect("invalid download limit"))
             .and_then(|d| {
                 // Check the download limit bounds
+                // TODO: print a nicely formatted error here
                 if d < DOWNLOAD_MIN || d > DOWNLOAD_MAX {
                     panic!(
                         "invalid download limit, must be between {} and {}",

@@ -72,11 +72,11 @@ impl<'a> Exists<'a> {
 pub enum Error {
     /// Failed to parse a share URL, it was invalid.
     /// This error is not related to a specific action.
-    #[fail(display = "Invalid share URL")]
+    #[fail(display = "invalid share URL")]
     InvalidUrl(#[cause] FileParseError),
 
     /// An error occurred while checking if the file exists.
-    #[fail(display = "Failed to check whether the file exists")]
+    #[fail(display = "failed to check whether the file exists")]
     Exists(#[cause] ExistsError),
 }
 

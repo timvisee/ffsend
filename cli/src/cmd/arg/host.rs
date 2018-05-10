@@ -37,7 +37,7 @@ impl<'a> CmdArgOption<'a> for ArgHost {
         match parse_host(&url) {
             Ok(url) => url,
             Err(err) => quit_error(
-                err.context("Failed to parse the given host"),
+                err.context("failed to parse the given host"),
                 ErrorHints::default(),
             ),
         }

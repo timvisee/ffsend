@@ -90,16 +90,16 @@ impl DeleteData {
 #[derive(Fail, Debug)]
 pub enum Error {
     /// An error occurred while preparing the action.
-    #[fail(display = "Failed to prepare the action")]
+    #[fail(display = "failed to prepare the action")]
     Prepare(#[cause] PrepareError),
 
     /// The given Send file has expired, or did never exist in the first place.
     /// Therefore the file could not be downloaded.
-    #[fail(display = "The file has expired or did never exist")]
+    #[fail(display = "the file has expired or did never exist")]
     Expired,
 
     /// An error has occurred while sending the filedeletion request.
-    #[fail(display = "Failed to send the file deletion request")]
+    #[fail(display = "failed to send the file deletion request")]
     Delete(#[cause] DeleteError),
 }
 
@@ -136,23 +136,23 @@ pub enum DeleteDataError {
 #[derive(Fail, Debug)]
 pub enum PrepareError {
     /// Failed to authenticate
-    #[fail(display = "Failed to authenticate")]
+    #[fail(display = "failed to authenticate")]
     Auth(#[cause] NonceError),
 
     /// An error occurred while building the deletion data that will be
     /// send to the server.
-    #[fail(display = "Invalid parameters")]
+    #[fail(display = "invalid parameters")]
     DeleteData(#[cause] DeleteDataError),
 }
 
 #[derive(Fail, Debug)]
 pub enum DeleteError {
     /// Sending the file deletion request failed.
-    #[fail(display = "Failed to send file deletion request")]
+    #[fail(display = "failed to send file deletion request")]
     Request,
 
     /// The server responded with an error while requesting file deletion.
-    #[fail(display = "Bad response from server while deleting file")]
+    #[fail(display = "bad response from server while deleting file")]
     Response(#[cause] ResponseError),
 }
 

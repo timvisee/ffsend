@@ -325,14 +325,14 @@ impl RemoteFile {
 #[derive(Debug, Fail)]
 pub enum FileParseError {
     /// An URL format error.
-    #[fail(display = "Failed to parse remote file, invalid URL format")]
+    #[fail(display = "failed to parse remote file, invalid URL format")]
     UrlFormatError(#[cause] UrlParseError),
 
     /// An error for an invalid share URL format.
-    #[fail(display = "Failed to parse remote file, invalid URL")]
+    #[fail(display = "failed to parse remote file, invalid URL")]
     InvalidUrl,
 
     /// An error for an invalid secret format, if an URL fragmet exists.
-    #[fail(display = "Failed to parse remote file, invalid secret in URL")]
+    #[fail(display = "failed to parse remote file, invalid secret in URL")]
     InvalidSecret,
 }

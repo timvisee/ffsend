@@ -37,41 +37,41 @@ impl From<ActionError> for Error {
 #[derive(Debug, Fail)]
 pub enum ActionError {
     /// An error occurred while invoking the delete action.
-    #[fail(display = "Failed to delete the file")]
+    #[fail(display = "failed to delete the file")]
     Delete(#[cause] DeleteError),
 
     /// An error occurred while invoking the download action.
-    #[fail(display = "Failed to download the requested file")]
+    #[fail(display = "failed to download the requested file")]
     Download(#[cause] CliDownloadError),
 
     /// An error occurred while invoking the exists action.
-    #[fail(display = "Failed to check whether the file exists")]
+    #[fail(display = "failed to check whether the file exists")]
     Exists(#[cause] ExistsError),
 
     /// An error occurred while processing the file history.
-    #[fail(display = "Failed to process the history")]
+    #[fail(display = "failed to process the history")]
     History(#[cause] CliHistoryError),
 
     /// An error occurred while invoking the info action.
-    #[fail(display = "Failed to fetch file info")]
+    #[fail(display = "failed to fetch file info")]
     Info(#[cause] CliInfoError),
 
     /// An error occurred while invoking the params action.
-    #[fail(display = "Failed to change the parameters")]
+    #[fail(display = "failed to change the parameters")]
     Params(#[cause] ParamsError),
 
     /// An error occurred while invoking the password action.
-    #[fail(display = "Failed to change the password")]
+    #[fail(display = "failed to change the password")]
     Password(#[cause] PasswordError),
 
     /// An error occurred while invoking the upload action.
     // TODO: bind the upload cause here
-    #[fail(display = "Failed to upload the specified file")]
+    #[fail(display = "failed to upload the specified file")]
     Upload(#[cause] UploadError),
 
     /// Failed to parse a share URL, it was invalid.
     /// This error is not related to a specific action.
-    #[fail(display = "Invalid share URL")]
+    #[fail(display = "invalid share URL")]
     InvalidUrl(#[cause] FileParseError),
 }
 

@@ -355,7 +355,7 @@ impl<'a> FileData<'a> {
 #[derive(Fail, Debug)]
 pub enum Error {
     /// An error occurred while preparing a file for uploading.
-    #[fail(display = "Failed to prepare uploading the file")]
+    #[fail(display = "failed to prepare uploading the file")]
     Prepare(#[cause] PrepareError),
 
     /// An error occurred while opening, reading or using the file that
@@ -365,15 +365,15 @@ pub enum Error {
     File(#[cause] FileError),
 
     /// An error occurred while uploading the file.
-    #[fail(display = "Failed to upload the file")]
+    #[fail(display = "failed to upload the file")]
     Upload(#[cause] UploadError),
 
     /// An error occurred while chaining file parameters.
-    #[fail(display = "Failed to change file parameters")]
+    #[fail(display = "failed to change file parameters")]
     Params(#[cause] ParamsError),
 
     /// An error occurred while setting the password.
-    #[fail(display = "Failed to set the password")]
+    #[fail(display = "failed to set the password")]
     Password(#[cause] PasswordError),
 }
 
@@ -416,42 +416,42 @@ impl From<PasswordError> for Error {
 #[derive(Fail, Debug)]
 pub enum PrepareError {
     /// Failed to prepare the file metadata for uploading.
-    #[fail(display = "Failed to prepare file metadata")]
+    #[fail(display = "failed to prepare file metadata")]
     Meta(#[cause] MetaError),
 
     /// Failed to create an encrypted file reader, that encrypts
     /// the file on the fly when it is read.
-    #[fail(display = "Failed to access the file to upload")]
+    #[fail(display = "failed to access the file to upload")]
     Reader(#[cause] ReaderError),
 }
 
 #[derive(Fail, Debug)]
 pub enum MetaError {
     /// An error occurred while encrypting the file metadata.
-    #[fail(display = "Failed to encrypt file metadata")]
+    #[fail(display = "failed to encrypt file metadata")]
     Encrypt,
 }
 
 #[derive(Fail, Debug)]
 pub enum ReaderError {
     /// An error occurred while creating the file encryptor.
-    #[fail(display = "Failed to create file encryptor")]
+    #[fail(display = "failed to create file encryptor")]
     Encrypt,
 
     /// Failed to create the progress reader, attached to the file reader,
     /// to measure the uploading progress.
-    #[fail(display = "Failed to create progress reader")]
+    #[fail(display = "failed to create progress reader")]
     Progress,
 }
 
 #[derive(Fail, Debug)]
 pub enum FileError {
     /// The given path, is not not a file or doesn't exist.
-    #[fail(display = "The given path is not an existing file")]
+    #[fail(display = "the given path is not an existing file")]
     NotAFile,
 
     /// Failed to open the file that must be uploaded for reading.
-    #[fail(display = "Failed to open the file to upload")]
+    #[fail(display = "failed to open the file to upload")]
     Open(#[cause] IoError),
 }
 
@@ -459,24 +459,24 @@ pub enum FileError {
 pub enum UploadError {
     /// Failed to start or update the uploading progress, because of this the
     /// upload can't continue.
-    #[fail(display = "Failed to update upload progress")]
+    #[fail(display = "failed to update upload progress")]
     Progress,
 
     /// Sending the request to upload the file failed.
-    #[fail(display = "Failed to request file upload")]
+    #[fail(display = "failed to request file upload")]
     Request,
 
     /// The server responded with an error while uploading.
-    #[fail(display = "Bad response from server while uploading")]
+    #[fail(display = "bad response from server while uploading")]
     Response(#[cause] ResponseError),
 
     /// Failed to decode the upload response from the server.
     /// Maybe the server responded with data from a newer API version.
-    #[fail(display = "Failed to decode upload response")]
+    #[fail(display = "failed to decode upload response")]
     Decode(#[cause] ReqwestError),
 
     /// Failed to parse the retrieved URL from the upload response.
-    #[fail(display = "Failed to parse received URL")]
+    #[fail(display = "failed to parse received URL")]
     ParseUrl(#[cause] UrlParseError),
 }
 
