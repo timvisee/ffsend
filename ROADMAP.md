@@ -1,5 +1,4 @@
 # Release 0.1
-- Panic when secret is missing from URL with info action
 - Switch to `directories` instead of `app_dirs2`?
 - Allow file/directory archiving on upload
 - Allow unarchiving on download 

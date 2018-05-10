@@ -228,12 +228,8 @@ impl RemoteFile {
     }
 
     /// Get the raw secret.
+    // TODO: ensure whether the secret is set?
     pub fn secret_raw(&self) -> &Vec<u8> {
-        // A secret must have been set
-        if !self.has_secret() {
-            panic!("missing secret");
-        }
-
         &self.secret
     }
 

@@ -52,14 +52,7 @@ impl History {
     /// Load the history from the given file.
     pub fn load(path: PathBuf) -> Result<Self, LoadError> {
         // Read the file to a string
-        use std::fs::File;
-        use std::io::Read;
-        let mut file = File::open(&path)?;
-        let mut data = String::new();
-        file.read_to_string(&mut data)?;
-
-        // TODO: switch to this instead in stable Rust 1.26
-        // let data = fs::read_to_string(&path)?;
+        let data = fs::read_to_string(&path)?;
 
         // Parse the data, set the autosave path
         let mut history: Self = toml::from_str(&data)?;
@@ -122,16 +115,9 @@ impl History {
             fs::create_dir_all(parent)?;
         }
 
-        // Build the data
+        // Build the data and write to a file
         let data = toml::to_string(self)?;
-
-        // Write to the file
-        use std::fs::File;
-        use std::io::Write;
-        File::create(&path)?.write_all(data.as_ref())?;
-
-        // TODO: switch to this instead in stable Rust 1.26
-        // let data = fs::read_to_string(path.clone())?;
+        fs::write(&path, data)?;
 
         // There are no new changes, set the flag
         self.changed = false;
