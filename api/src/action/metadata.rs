@@ -114,14 +114,13 @@ impl<'a> Metadata<'a> {
         let nonce = header_nonce(&response)
             .map_err(|err| MetaError::Nonce(err))?;
 
-        // Parse the metadata response, and decrypt it
-        Ok(MetadataResponse::from(
-            response.json::<RawMetadataResponse>()
-                .map_err(|_| MetaError::Malformed)?
-                .decrypt_metadata(&key)
-                .map_err(|_| MetaError::Decrypt)?,
+        // Parse the metadata response
+        MetadataResponse::from(
+            &response.json::<RawMetadataResponse>()
+                .map_err(|_| MetaError::Malformed)?,
+            &key,
             nonce,
-        ))
+        ).map_err(|_| MetaError::Decrypt)
     }
 }
 
@@ -133,6 +132,9 @@ pub struct RawMetadataResponse {
     /// The encrypted metadata.
     #[serde(rename = "metadata")]
     meta: String,
+
+    /// The file size in bytes.
+    size: u64,
 }
 
 impl RawMetadataResponse {
@@ -162,6 +164,11 @@ impl RawMetadataResponse {
         // Parse the metadata, and return
         Ok(serde_json::from_slice(&meta)?)
     }
+
+    /// Get the file size in bytes.
+    pub fn size(&self) -> u64 {
+        self.size
+    }
 }
 
 /// The decoded and decrypted metadata response, holding all the properties.
@@ -170,22 +177,48 @@ pub struct MetadataResponse {
     /// The actual metadata.
     metadata: MetadataData,
 
+    /// The file size in bytes.
+    size: u64,
+
     /// The metadata nonce.
     nonce: Vec<u8>,
 }
 
 impl<'a> MetadataResponse {
     /// Construct a new response with the given metadata and nonce.
-    pub fn from(metadata: MetadataData, nonce: Vec<u8>) -> Self {
+    pub fn new(metadata: MetadataData, size: u64, nonce: Vec<u8>) -> Self {
         MetadataResponse {
             metadata,
+            size,
             nonce,
         }
+    }
+
+    // Construct a new metadata response from the given raw metadata response,
+    // with an additional key set and nonce.
+    //
+    // This internally decrypts the metadata from the raw response.
+    // An error is returned if decrypting the metadata failed.
+    pub fn from(raw: &RawMetadataResponse, key_set: &KeySet, nonce: Vec<u8>)
+        -> Result<Self, FailureError>
+    {
+        Ok(
+            Self::new(
+                raw.decrypt_metadata(key_set)?,
+                raw.size(),
+                nonce,
+            )
+        )
     }
 
     /// Get the metadata.
     pub fn metadata(&self) -> &MetadataData {
         &self.metadata
+    }
+
+    /// Get the file size in bytes.
+    pub fn size(&self) -> u64 {
+        self.size
     }
 
     /// Get the nonce.

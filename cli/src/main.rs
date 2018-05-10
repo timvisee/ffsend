@@ -1,3 +1,4 @@
+extern crate chrono;
 #[macro_use]
 extern crate clap;
 #[macro_use]
@@ -12,7 +13,6 @@ extern crate rpassword;
 extern crate serde;
 #[macro_use]
 extern crate serde_derive;
-extern crate time;
 
 mod action;
 mod cmd;

@@ -355,6 +355,7 @@ name = "ffsend"
 version = "0.0.1"
 dependencies = [
  "app_dirs2 2.0.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "chrono 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "clap 2.31.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "clipboard 0.4.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "colored 1.6.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -369,7 +370,6 @@ dependencies = [
  "rpassword 2.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde 1.0.50 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_derive 1.0.50 (registry+https://github.com/rust-lang/crates.io-index)",
- "time 0.1.39 (registry+https://github.com/rust-lang/crates.io-index)",
  "toml 0.4.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "version-compare 0.0.6 (registry+https://github.com/rust-lang/crates.io-index)",
 ]

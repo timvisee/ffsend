@@ -15,13 +15,13 @@ use std::io::{
 };
 use std::process::{exit, ExitStatus};
 
+use chrono::Duration;
 #[cfg(feature = "clipboard")]
 use self::clipboard::{ClipboardContext, ClipboardProvider};
 use self::colored::*;
 use failure::{err_msg, Fail};
 use ffsend_api::url::Url;
 use rpassword::prompt_password_stderr;
-use time::Duration;
 
 use cmd::matcher::MainMatcher;
 

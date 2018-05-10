@@ -1,3 +1,4 @@
+use chrono::Duration;
 use clap::ArgMatches;
 use failure::Fail;
 use ffsend_api::action::exists::{
@@ -14,7 +15,6 @@ use ffsend_api::file::remote_file::{
     RemoteFile,
 };
 use ffsend_api::reqwest::Client;
-use time::Duration;
 
 use cmd::matcher::{
     Matcher,
@@ -22,7 +22,13 @@ use cmd::matcher::{
     main::MainMatcher,
 };
 use history_tool;
-use util::{ensure_owner_token, ensure_password, print_error};
+use util::{
+    ensure_owner_token,
+    ensure_password,
+    format_bytes,
+    format_duration,
+    print_error,
+};
 
 /// A file info action.
 pub struct Info<'a> {
@@ -81,24 +87,34 @@ impl<'a> Info<'a> {
             )))
             .ok();
 
+        // Get the TTL duration
+        let ttl_millis = info.ttl_millis() as i64;
+        let ttl = Duration::milliseconds(ttl_millis);
+
         // Update file properties
-        file.set_expire_duration(
-            Duration::milliseconds(info.ttl_millis() as i64),
-        );
+        file.set_expire_duration(ttl);
 
         // Add the file to the history
         history_tool::add(&matcher_main, file.clone(), true);
 
-        // Print the result
+        // Print all file details
         println!("ID: {}", file.id());
         if let Some(metadata) = metadata {
-            println!("File name: {}", metadata.metadata().name());
-            println!("MIME type: {}", metadata.metadata().mime());
+            let size = metadata.size();
+            println!("Name: {}", metadata.metadata().name());
+            if size >= 1024 {
+                println!("Size: {} ({} B)", format_bytes(size), size);
+            } else {
+                println!("Size: {}", format_bytes(size));
+            }
+            println!("MIME: {}", metadata.metadata().mime());
         }
         println!("Downloads: {} of {}", info.download_count(), info.download_limit());
-        println!("TTL: {} ms", info.ttl_millis());
-
-        // TODO: show the file size, fetch TTL from metadata, update in history?
+        if ttl_millis >= 60 * 1000 {
+            println!("Expiry: {} ({}s)", format_duration(&ttl), ttl.num_seconds());
+        } else {
+            println!("Expiry: {}", format_duration(&ttl));
+        }
 
         Ok(())
     }

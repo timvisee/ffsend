@@ -119,7 +119,6 @@ pub fn derive_owner_token(matcher_main: &MainMatcher, file: &mut RemoteFile) -> 
     match history.get_file(file) {
         Some(f) if f.has_owner_token() => {
             file.set_owner_token(f.owner_token().cloned());
-            println!("DEBUG: Owner token set from history");
             return true;
         },
         _ => return false,

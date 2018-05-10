@@ -17,6 +17,7 @@ no-color = ["colored/no-color"]
 
 [dependencies]
 app_dirs2 = "2.0"
+chrono = "0.4"
 clap = "2.31"
 clipboard = { version = "0.4", optional = true }
 colored = "1.6"
@@ -31,6 +32,5 @@ prettytable-rs = "0.6"
 rpassword = "2.0"
 serde = "1.0"
 serde_derive = "1.0"
-time = "0.1"
 toml = "0.4"
 version-compare = "0.0.6"
