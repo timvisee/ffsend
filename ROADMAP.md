@@ -1,4 +1,8 @@
-# Release 0.1
+# Alpha release 0.0.1 (private feedback)
+The first release used for gathering feedback on the application by selected
+people.
+
+Features:
 - Allow file/directory archiving on upload
 - Allow unarchiving on download 
 - Use clipboard through `xclip` on Linux if available for persistence
@@ -6,21 +10,26 @@
 - Automated releases through CI
 - Release binaries on GitHub
 - Ubuntu PPA package
-- Implement error handling everywhere properly
-- Embed request errors
-- Extract utility module
-- Check all TODOs, solve them when possible
 - Windows, macOS and Redox support
 
-# Future releases
-- Color usage flag
+# Beta release 0.1 (public)
+The first public release.
+
+Features:
+- Implement error handling everywhere properly
+- Extract utility module
+- Embed/wrap request errors with failure
 - Implement verbose logging with `-v`
 - Box errors
-- A status command, to check the server status using `/__version__` and
-  heartbeat endpoints
 - Allow piping input/output files
 - Allow hiding the progress bar, and/or showing simple progress (with `-q`)
 - Implement a quiet `-q` mode
+- Check all TODOs, solve them when possible
+
+# Future releases
+- Color usage flag
+- A status command, to check the server status using `/__version__` and
+  heartbeat endpoints
 - Host configuration file for host tags, to easily upload to other hosts
 
 # Other ideas
