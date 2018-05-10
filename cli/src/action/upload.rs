@@ -3,7 +3,7 @@ use std::path::Path;
 use std::sync::{Arc, Mutex};
 
 use clap::ArgMatches;
-use failure::{err_msg, Fail};
+use failure::Fail;
 use ffsend_api::action::params::ParamsDataBuilder;
 use ffsend_api::action::upload::Upload as ApiUpload;
 use ffsend_api::config::{UPLOAD_SIZE_MAX, UPLOAD_SIZE_MAX_RECOMMENDED};
@@ -11,6 +11,7 @@ use ffsend_api::reqwest::Client;
 
 use cmd::matcher::{Matcher, MainMatcher, UploadMatcher};
 use error::ActionError;
+#[cfg(feature = "history")]
 use history_tool;
 use progress::ProgressBar;
 use util::{
@@ -126,6 +127,7 @@ impl<'a> Upload<'a> {
         println!("Owner token: {}", file.owner_token().unwrap());
 
         // Add the file to the history manager
+        #[cfg(feature = "history")]
         history_tool::add(&matcher_main, file.clone(), false);
 
         // Open the URL in the browser
@@ -142,10 +144,7 @@ impl<'a> Upload<'a> {
         {
             if matcher_upload.copy() {
                 if set_clipboard(url.as_str().to_owned()).is_err() {
-                    print_error(
-                        err_msg("failed to copy the URL to the clipboard")
-                            .compat()
-                    );
+                    print_error_msg("failed to copy the URL to the clipboard");
                 }
             }
         }

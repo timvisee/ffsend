@@ -1,6 +1,7 @@
 pub mod delete;
 pub mod download;
 pub mod exists;
+#[cfg(feature = "history")]
 pub mod history;
 pub mod info;
 pub mod main;
@@ -12,6 +13,7 @@ pub mod upload;
 pub use self::delete::DeleteMatcher;
 pub use self::download::DownloadMatcher;
 pub use self::exists::ExistsMatcher;
+#[cfg(feature = "history")]
 pub use self::history::HistoryMatcher;
 pub use self::info::InfoMatcher;
 pub use self::main::MainMatcher;

@@ -7,17 +7,21 @@ extern crate failure;
 #[macro_use]
 extern crate failure_derive;
 extern crate ffsend_api;
+#[cfg(feature = "history")]
 #[macro_use]
 extern crate lazy_static;
 extern crate rpassword;
 extern crate serde;
+#[cfg(feature = "history")]
 #[macro_use]
 extern crate serde_derive;
 
 mod action;
 mod cmd;
 mod error;
+#[cfg(feature = "history")]
 mod history;
+#[cfg(feature = "history")]
 mod history_tool;
 mod host;
 mod progress;
@@ -26,6 +30,7 @@ mod util;
 use action::delete::Delete;
 use action::download::Download;
 use action::exists::Exists;
+#[cfg(feature = "history")]
 use action::history::History;
 use action::info::Info;
 use action::params::Params;
@@ -70,9 +75,12 @@ fn invoke_action(handler: &Handler) -> Result<(), Error> {
     }
 
     // Match the history command
-    if handler.history().is_some() {
-        return History::new(handler.matches()).invoke()
-            .map_err(|err| err.into());
+    #[cfg(feature = "history")]
+    {
+        if handler.history().is_some() {
+            return History::new(handler.matches()).invoke()
+                .map_err(|err| err.into());
+        }
     }
 
     // Match the info command

@@ -6,6 +6,7 @@ use ffsend_api::action::upload::Error as UploadError;
 use ffsend_api::file::remote_file::FileParseError;
 
 use action::download::Error as CliDownloadError;
+#[cfg(feature = "history")]
 use action::history::Error as CliHistoryError;
 use action::info::Error as CliInfoError;
 
@@ -49,6 +50,7 @@ pub enum ActionError {
     Exists(#[cause] ExistsError),
 
     /// An error occurred while processing the file history.
+    #[cfg(feature = "history")]
     #[fail(display = "failed to process the history")]
     History(#[cause] CliHistoryError),
 
@@ -87,6 +89,7 @@ impl From<ExistsError> for ActionError {
     }
 }
 
+#[cfg(feature = "history")]
 impl From<CliHistoryError> for ActionError {
     fn from(err: CliHistoryError) -> ActionError {
         ActionError::History(err)

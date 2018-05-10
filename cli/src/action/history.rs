@@ -10,7 +10,6 @@ use self::prettytable::{
 
 use cmd::matcher::{
     Matcher,
-    history::HistoryMatcher,
     main::MainMatcher,
 };
 use error::ActionError;
@@ -38,7 +37,6 @@ impl<'a> History<'a> {
     pub fn invoke(&self) -> Result<(), ActionError> {
         // Create the command matchers
         let matcher_main = MainMatcher::with(self.cmd_matches).unwrap();
-        let _matcher_history = HistoryMatcher::with(self.cmd_matches).unwrap();
 
         // Get the history path, make sure it exists
         let history_path = matcher_main.history();

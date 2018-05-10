@@ -6,25 +6,29 @@ use super::matcher::{
     DeleteMatcher,
     DownloadMatcher,
     ExistsMatcher,
-    HistoryMatcher,
     InfoMatcher,
     Matcher,
     ParamsMatcher,
     PasswordMatcher,
     UploadMatcher,
 };
+#[cfg(feature = "history")]
+use super::matcher::HistoryMatcher;
 use super::cmd::{
     CmdDelete,
     CmdDownload,
     CmdExists,
-    CmdHistory,
     CmdInfo,
     CmdParams,
     CmdPassword,
     CmdUpload,
 };
+#[cfg(feature = "history")]
+use super::cmd::CmdHistory;
+#[cfg(feature = "history")]
 use util::app_history_file_path_string;
 
+#[cfg(feature = "history")]
 lazy_static! {
     /// The default history file
     static ref DEFAULT_HISTORY_FILE: String = app_history_file_path_string();
@@ -64,7 +68,17 @@ impl<'a: 'b, 'b> Handler<'a> {
                 .alias("assume-yes")
                 .global(true)
                 .help("Assume yes for prompts"))
-            .arg(Arg::with_name("history")
+            .subcommand(CmdDelete::build())
+            .subcommand(CmdDownload::build().display_order(2))
+            .subcommand(CmdExists::build())
+            .subcommand(CmdInfo::build())
+            .subcommand(CmdParams::build())
+            .subcommand(CmdPassword::build())
+            .subcommand(CmdUpload::build().display_order(1));
+
+        // With history support, a flag for the history file and incognito mode
+        #[cfg(feature = "history")]
+        let app = app.arg(Arg::with_name("history")
                 .long("history")
                 .short("H")
                 .value_name("FILE")
@@ -79,14 +93,7 @@ impl<'a: 'b, 'b> Handler<'a> {
                 .alias("priv")
                 .global(true)
                 .help("Don't update local history for actions"))
-            .subcommand(CmdDelete::build())
-            .subcommand(CmdDownload::build().display_order(2))
-            .subcommand(CmdExists::build())
-            .subcommand(CmdHistory::build())
-            .subcommand(CmdInfo::build())
-            .subcommand(CmdParams::build())
-            .subcommand(CmdPassword::build())
-            .subcommand(CmdUpload::build().display_order(1));
+            .subcommand(CmdHistory::build());
 
         // Disable color usage if compiled without color support
         #[cfg(feature = "no-color")]
@@ -124,6 +131,7 @@ impl<'a: 'b, 'b> Handler<'a> {
     }
 
     /// Get the history sub command, if matched.
+    #[cfg(feature = "history")]
     pub fn history(&'a self) -> Option<HistoryMatcher> {
         HistoryMatcher::with(&self.matches)
     }

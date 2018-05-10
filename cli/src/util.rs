@@ -15,16 +15,19 @@ use std::io::{
     stderr,
     Write,
 };
-use std::path::{Path, PathBuf};
+use std::path::Path;
+#[cfg(feature = "history")]
+use std::path::PathBuf;
 use std::process::{exit, ExitStatus};
 
 use chrono::Duration;
-#[cfg(feature = "clipboard")]
 use failure::{err_msg, Fail};
 use ffsend_api::url::Url;
 use rpassword::prompt_password_stderr;
+#[cfg(feature = "clipboard")]
 use self::clipboard::{ClipboardContext, ClipboardProvider};
 use self::colored::*;
+#[cfg(feature = "history")]
 use self::directories::ProjectDirs;
 use self::fs2::available_space;
 
@@ -65,6 +68,7 @@ pub fn print_error_msg<S>(err: S)
 }
 
 /// Print a warning.
+#[cfg(feature = "history")]
 pub fn print_warning<S>(err: S)
     where
         S: AsRef<str> + Display + Debug + Sync + Send + 'static
@@ -113,6 +117,7 @@ pub struct ErrorHints {
     owner: bool,
 
     /// Show about the history flag.
+    #[cfg(feature = "history")]
     history: bool,
 
     /// Show about the force flag.
@@ -128,12 +133,21 @@ pub struct ErrorHints {
 impl ErrorHints {
     /// Check whether any hint should be printed.
     pub fn any(&self) -> bool {
-        self.password
+        // Determine the result
+        #[allow(unused_mut)]
+        let mut result = self.password
             || self.owner
-            || self.history
             || self.force
             || self.verbose
-            || self.help
+            || self.help;
+
+        // Factor in the history hint when enabled
+        #[cfg(feature = "history")]
+        {
+            result = result || self.history;
+        }
+
+        result
     }
 
     /// Print the error hints.
@@ -157,8 +171,11 @@ impl ErrorHints {
         if self.owner {
             eprintln!("Use '{}' to specify an owner token", highlight("--owner <TOKEN>"));
         }
-        if self.history {
-            eprintln!("Use '{}' to specify a history file", highlight("--history <FILE>"));
+        #[cfg(feature = "history")]
+        {
+            if self.history {
+                eprintln!("Use '{}' to specify a history file", highlight("--history <FILE>"));
+            }
         }
         if self.force {
             eprintln!("Use '{}' to force", highlight("--force"));
@@ -181,6 +198,7 @@ impl Default for ErrorHints {
             info: Vec::new(),
             password: false,
             owner: false,
+            #[cfg(feature = "history")]
             history: false,
             force: false,
             verbose: true,
@@ -217,6 +235,7 @@ pub fn highlight_error(msg: &str) -> ColoredString {
 }
 
 /// Highlight the given text with an warning color.
+#[cfg(feature = "history")]
 pub fn highlight_warning(msg: &str) -> ColoredString {
     highlight(msg).bold()
 }
@@ -594,16 +613,19 @@ pub fn ensure_enough_space<P: AsRef<Path>>(path: P, size: u64) {
 /// Get the project directories instance for this application.
 /// This may be used to determine the project, cache, configuration, data and
 /// some other directory paths.
+#[cfg(feature = "history")]
 pub fn app_project_dirs() -> ProjectDirs {
     ProjectDirs::from("", "", crate_name!())
 }
 
 /// Get the default path to use for the history file.
+#[cfg(feature = "history")]
 pub fn app_history_file_path<'a>() -> PathBuf {
     app_project_dirs().cache_dir().join("history.toml")
 }
 
 /// Get the default path to use for the history file, as a string.
+#[cfg(feature = "history")]
 pub fn app_history_file_path_string() -> String {
     app_history_file_path().to_str()
         .unwrap()

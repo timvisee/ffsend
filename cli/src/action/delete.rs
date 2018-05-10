@@ -15,6 +15,7 @@ use cmd::matcher::{
     main::MainMatcher,
 };
 use error::ActionError;
+#[cfg(feature = "history")]
 use history_tool;
 use util::{ensure_owner_token, print_success};
 
@@ -46,6 +47,7 @@ impl<'a> Delete<'a> {
 
         // Parse the remote file based on the share URL, derive the owner token from history
         let mut file = RemoteFile::parse_url(url, matcher_delete.owner())?;
+        #[cfg(feature = "history")]
         history_tool::derive_file_properties(&matcher_main, &mut file);
 
         // Ensure the owner token is set
@@ -55,11 +57,13 @@ impl<'a> Delete<'a> {
         let result = ApiDelete::new(&file, None).invoke(&client);
         if let Err(DeleteError::Expired) = result {
             // Remove the file from the history manager if it does not exist
+            #[cfg(feature = "history")]
             history_tool::remove(&matcher_main, &file);
         }
         result?;
 
         // Remove the file from the history manager
+        #[cfg(feature = "history")]
         history_tool::remove(&matcher_main, &file);
 
         // Print a success message

@@ -1,8 +1,10 @@
+#[cfg(feature = "history")]
 use std::path::PathBuf;
 
 use clap::ArgMatches;
 
 use super::Matcher;
+#[cfg(feature = "history")]
 use util::{ErrorHintsBuilder, quit_error_msg};
 
 /// The main command matcher.
@@ -27,6 +29,7 @@ impl<'a: 'b, 'b> MainMatcher<'a> {
     }
 
     /// Get the history file to use.
+    #[cfg(feature = "history")]
     pub fn history(&self) -> PathBuf {
         // Get the path
         let path = self.matches.value_of("history")
@@ -47,6 +50,7 @@ impl<'a: 'b, 'b> MainMatcher<'a> {
     }
 
     /// Check whether we are incognito from the file history.
+    #[cfg(feature = "history")]
     pub fn incognito(&self) -> bool {
         self.matches.is_present("incognito")
     }

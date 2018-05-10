@@ -1,5 +1,4 @@
 # Release 0.1
-- Switch to `directories` instead of `app_dirs2`?
 - Allow file/directory archiving on upload
 - Allow unarchiving on download 
 - Use clipboard through `xclip` on Linux if available for persistence
@@ -23,7 +22,6 @@
 - Allow hiding the progress bar, and/or showing simple progress (with `-q`)
 - Implement a quiet `-q` mode
 - Host configuration file for host tags, to easily upload to other hosts
-- History use flag
 
 # Other ideas
 - Rework encrypted reader/writer

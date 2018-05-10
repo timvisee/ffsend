@@ -21,6 +21,7 @@ use cmd::matcher::{
     info::InfoMatcher,
     main::MainMatcher,
 };
+#[cfg(feature = "history")]
 use history_tool;
 use util::{
     ensure_owner_token,
@@ -58,6 +59,7 @@ impl<'a> Info<'a> {
 
         // Parse the remote file based on the share URL, derive the owner token from history
         let mut file = RemoteFile::parse_url(url, matcher_info.owner())?;
+        #[cfg(feature = "history")]
         history_tool::derive_file_properties(&matcher_main, &mut file);
 
         // Ensure the owner token is set
@@ -67,6 +69,7 @@ impl<'a> Info<'a> {
         let exists = ApiExists::new(&file).invoke(&client)?;
         if !exists.exists() {
             // Remove the file from the history manager if it doesn't exist
+            #[cfg(feature = "history")]
             history_tool::remove(&matcher_main, &file);
 
             return Err(Error::Expired);
@@ -95,6 +98,7 @@ impl<'a> Info<'a> {
         file.set_expire_duration(ttl);
 
         // Add the file to the history
+        #[cfg(feature = "history")]
         history_tool::add(&matcher_main, file.clone(), true);
 
         // Print all file details

@@ -25,6 +25,7 @@ use cmd::matcher::{
     download::DownloadMatcher,
     main::MainMatcher,
 };
+#[cfg(feature = "history")]
 use history_tool;
 use progress::ProgressBar;
 use util::{
@@ -74,6 +75,7 @@ impl<'a> Download<'a> {
         let exists = ApiExists::new(&file).invoke(&client)?;
         if !exists.exists() {
             // Remove the file from the history manager if it does not exist
+            #[cfg(feature = "history")]
             history_tool::remove(&matcher_main, &file);
 
             return Err(Error::Expired);
@@ -114,6 +116,7 @@ impl<'a> Download<'a> {
         ).invoke(&client, bar)?;
 
         // Add the file to the history
+        #[cfg(feature = "history")]
         history_tool::add(&matcher_main, file, true);
 
         // TODO: open the file, or it's location

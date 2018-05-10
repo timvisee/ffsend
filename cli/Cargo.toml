@@ -13,7 +13,10 @@ path = "src/main.rs"
 name = "ffsend"
 
 [features]
-default = ["clipboard"]
+default = ["clipboard", "history"]
+
+# Compile with file history support
+history = []
 
 # Compile without colored output support
 no-color = ["colored/no-color"]

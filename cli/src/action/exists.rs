@@ -3,18 +3,14 @@ use ffsend_api::action::exists::{
     Error as ExistsError,
     Exists as ApiExists,
 };
-use ffsend_api::file::remote_file::{
-    FileParseError,
-    RemoteFile,
-};
+use ffsend_api::file::remote_file::{FileParseError, RemoteFile};
 use ffsend_api::reqwest::Client;
 
-use cmd::matcher::{
-    Matcher,
-    exists::ExistsMatcher,
-    main::MainMatcher,
-};
+use cmd::matcher::{Matcher, exists::ExistsMatcher};
+#[cfg(feature = "history")]
+use cmd::matcher::main::MainMatcher;
 use error::ActionError;
+#[cfg(feature = "history")]
 use history_tool;
 
 /// A file exists action.
@@ -35,6 +31,7 @@ impl<'a> Exists<'a> {
     pub fn invoke(&self) -> Result<(), ActionError> {
         // Create the command matchers
         let matcher_exists = ExistsMatcher::with(self.cmd_matches).unwrap();
+        #[cfg(feature = "history")]
         let matcher_main = MainMatcher::with(self.cmd_matches).unwrap();
 
         // Get the share URL
@@ -58,10 +55,13 @@ impl<'a> Exists<'a> {
         }
 
         // Add or remove the file from the history
-        if exists {
-            history_tool::add(&matcher_main, file, false);
-        } else {
-            history_tool::remove(&matcher_main, &file);
+        #[cfg(feature = "history")]
+        {
+            if exists {
+                history_tool::add(&matcher_main, file, false);
+            } else {
+                history_tool::remove(&matcher_main, &file);
+            }
         }
 
         Ok(())

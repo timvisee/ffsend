@@ -12,6 +12,7 @@ use cmd::matcher::{
     password::PasswordMatcher,
 };
 use error::ActionError;
+#[cfg(feature = "history")]
 use history_tool;
 use util::{ensure_owner_token, print_success};
 
@@ -43,6 +44,7 @@ impl<'a> Password<'a> {
 
         // Parse the remote file based on the share URL, derive the owner token from history
         let mut file = RemoteFile::parse_url(url, matcher_password.owner())?;
+        #[cfg(feature = "history")]
         history_tool::derive_file_properties(&matcher_main, &mut file);
 
         // Ensure the owner token is set
@@ -56,11 +58,13 @@ impl<'a> Password<'a> {
         ).invoke(&client);
         if let Err(PasswordError::Expired) = result {
             // Remove the file from the history if expired
+            #[cfg(feature = "history")]
             history_tool::remove(&matcher_main, &file);
         }
         result?;
 
         // Add the file to the history
+        #[cfg(feature = "history")]
         history_tool::add(&matcher_main, file, true);
 
         // Print a success message
