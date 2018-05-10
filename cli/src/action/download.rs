@@ -28,6 +28,7 @@ use cmd::matcher::{
 use history_tool;
 use progress::ProgressBar;
 use util::{
+    ensure_enough_space,
     ensure_password,
     ErrorHints,
     prompt_yes,
@@ -94,6 +95,11 @@ impl<'a> Download<'a> {
             metadata.metadata().name(),
             &matcher_main,
         );
+
+        // Ensure there is enough disk space available when not being forced
+        if !matcher_main.force() {
+            ensure_enough_space(target.parent().unwrap(), metadata.size());
+        }
 
         // Create a progress bar reporter
         let bar = Arc::new(Mutex::new(ProgressBar::new_download()));

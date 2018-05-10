@@ -25,6 +25,7 @@ derive_builder = "0.5"
 failure = "0.1"
 failure_derive = "0.1"
 ffsend-api = { version = "*", path = "../api" }
+fs2 = "0.4"
 lazy_static = "1.0"
 open = "1"
 pbr = "1"

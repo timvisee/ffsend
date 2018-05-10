@@ -1,6 +1,7 @@
 #[cfg(feature = "clipboard")]
 extern crate clipboard;
 extern crate colored;
+extern crate fs2;
 extern crate open;
 
 use std::env::current_exe;
@@ -13,15 +14,17 @@ use std::io::{
     stderr,
     Write,
 };
+use std::path::Path;
 use std::process::{exit, ExitStatus};
 
 use chrono::Duration;
 #[cfg(feature = "clipboard")]
-use self::clipboard::{ClipboardContext, ClipboardProvider};
-use self::colored::*;
 use failure::{err_msg, Fail};
 use ffsend_api::url::Url;
 use rpassword::prompt_password_stderr;
+use self::clipboard::{ClipboardContext, ClipboardProvider};
+use self::colored::*;
+use self::fs2::available_space;
 
 use cmd::matcher::MainMatcher;
 
@@ -38,15 +41,15 @@ pub fn print_error<E: Fail>(err: E) {
         .filter(|err| !err.is_empty())
         .enumerate()
         .map(|(i, err)| if i == 0 {
-            eprintln!("{} {}", "error:".red().bold(), err);
+            eprintln!("{} {}", highlight_error("error:"), err);
         } else {
-            eprintln!("{} {}", "caused by:".red().bold(), err);
+            eprintln!("{} {}", highlight_error("caused by:"), err);
         })
         .count();
 
     // Fall back to a basic message
     if count == 0 {
-        eprintln!("{} {}", "error:".red().bold(), "An undefined error occurred");
+        eprintln!("{} {}", highlight_error("error:"), "An undefined error occurred");
     }
 }
 
@@ -64,7 +67,7 @@ pub fn print_warning<S>(err: S)
     where
         S: AsRef<str> + Display + Debug + Sync + Send + 'static
 {
-    eprintln!("{} {}", "warning:".yellow().bold(), err);
+    eprintln!("{} {}", highlight_warning("warning:"), err);
 }
 
 /// Quit the application regularly.
@@ -95,9 +98,12 @@ pub fn quit_error_msg<S>(err: S, hints: ErrorHints) -> !
 }
 
 /// The error hint configuration.
-#[derive(Copy, Clone, Builder)]
+#[derive(Clone, Builder)]
 #[builder(default)]
 pub struct ErrorHints {
+    /// A list of info messages to print along with the error.
+    info: Vec<String>,
+
     /// Show about the password option.
     password: bool,
 
@@ -130,6 +136,11 @@ impl ErrorHints {
 
     /// Print the error hints.
     pub fn print(&self) {
+        // Print info messages
+        for msg in &self.info {
+            eprintln!("{} {}", highlight_info("info:"), msg);
+        }
+
         // Stop if nothing should be printed
         if !self.any() {
             return;
@@ -165,6 +176,7 @@ impl ErrorHints {
 impl Default for ErrorHints {
     fn default() -> Self {
         ErrorHints {
+            info: Vec::new(),
             password: false,
             owner: false,
             history: false,
@@ -175,9 +187,41 @@ impl Default for ErrorHints {
     }
 }
 
+impl ErrorHintsBuilder {
+    /// Add a single info entry.
+    pub fn add_info(mut self, info: String) -> Self {
+        // Initialize the info list
+        if self.info.is_none() {
+            self.info = Some(Vec::new());
+        }
+
+        // Add the item to the info list
+        if let Some(ref mut list) = self.info {
+            list.push(info);
+        }
+
+        self
+    }
+}
+
 /// Highlight the given text with a color.
 pub fn highlight(msg: &str) -> ColoredString {
     msg.yellow()
+}
+
+/// Highlight the given text with an error color.
+pub fn highlight_error(msg: &str) -> ColoredString {
+    msg.red().bold()
+}
+
+/// Highlight the given text with an warning color.
+pub fn highlight_warning(msg: &str) -> ColoredString {
+    highlight(msg).bold()
+}
+
+/// Highlight the given text with an info color
+pub fn highlight_info(msg: &str) -> ColoredString {
+    msg.cyan()
 }
 
 /// Open the given URL in the users default browser.
@@ -500,4 +544,46 @@ pub fn exe_name() -> String {
         .and_then(|p| p.file_name().map(|n| n.to_owned()))
         .and_then(|n| n.into_string().ok())
         .unwrap_or(crate_name!().into())
+}
+
+/// Check whether there is enough space avaialble at the given `path` to store a file
+/// with the given `size`.
+///
+/// If an error occurred while querying the file system,
+/// the error is reported to the user, and `true` is returned.
+///
+/// `false` is only returned when sure that there isn't enough space available.
+pub fn ensure_enough_space<P: AsRef<Path>>(path: P, size: u64) {
+    // Get the available space at this path
+    let space = match available_space(path) {
+        Ok(space) => space,
+        Err(err) => {
+            print_error(err.context("Failed to check available space on disk, ignoring"));
+            return;
+        },
+    };
+
+    // Return if enough disk space is avaiable
+    if space >= size {
+        return;
+    }
+
+    // Create an info message giving details about the required space
+    let info = format!(
+        "{} is required, but only {} is available",
+        format_bytes(size),
+        format_bytes(space),
+    );
+
+    // Print an descriptive error and quit
+    quit_error(
+        err_msg("Not enough disk space available in the target directory")
+            .context("Failed to download file"),
+        ErrorHintsBuilder::default()
+            .add_info(info)
+            .force(true)
+            .verbose(false)
+            .build()
+            .unwrap(),
+    );
 }
