@@ -6,6 +6,8 @@ use ffsend_api::action::params::{
 
 use super::{CmdArg, CmdArgFlag, CmdArgOption};
 
+use util::{ErrorHintsBuilder, quit_error_msg};
+
 /// The download limit argument.
 pub struct ArgDownloadLimit { }
 
@@ -41,12 +43,19 @@ impl<'a> CmdArgOption<'a> for ArgDownloadLimit {
             .map(|d| d.parse::<u8>().expect("invalid download limit"))
             .and_then(|d| {
                 // Check the download limit bounds
-                // TODO: print a nicely formatted error here
+                // TODO: somehow allow to force a different number here
                 if d < DOWNLOAD_MIN || d > DOWNLOAD_MAX {
-                    panic!(
-                        "invalid download limit, must be between {} and {}",
-                        DOWNLOAD_MIN,
-                        DOWNLOAD_MAX,
+                    quit_error_msg(
+                        format!(
+                            "invalid download limit, must be between {} and {}",
+                            DOWNLOAD_MIN,
+                            DOWNLOAD_MAX,
+                        ),
+                        ErrorHintsBuilder::default()
+                            .force(false)
+                            .verbose(false)
+                            .build()
+                            .unwrap(),
                     );
                 }
 

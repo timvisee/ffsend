@@ -1,6 +1,4 @@
 # Release 0.1
-- Print nice error in `cli/cmd/arg/download_limit.rs`
-- Resolve panics with a nice error message
 - Panic when secret is missing from URL with info action
 - Switch to `directories` instead of `app_dirs2`?
 - Allow file/directory archiving on upload
@@ -13,9 +11,6 @@
 - Implement error handling everywhere properly
 - Embed request errors
 - Extract utility module
-- Think of a new description:
-    Securely and easily share files from the command line;
-    a fully featured Firefox Send client. 
 - Check all TODOs, solve them when possible
 - Windows, macOS and Redox support
 

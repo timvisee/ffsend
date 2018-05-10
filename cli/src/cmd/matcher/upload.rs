@@ -6,6 +6,7 @@ use ffsend_api::url::Url;
 
 use cmd::arg::{ArgDownloadLimit, ArgHost, ArgPassword, CmdArgOption};
 use super::Matcher;
+use util::{ErrorHintsBuilder, quit_error_msg};
 
 /// The upload command matcher.
 pub struct UploadMatcher<'a> {
@@ -29,9 +30,16 @@ impl<'a: 'b, 'b> UploadMatcher<'a> {
         let name = self.matches.value_of("name")?;
 
         // The file name must not be empty
+        // TODO: allow to force an empty name here, and process emtpy names on downloading
         if name.trim().is_empty() {
-            // TODO: return an error here
-            panic!("the new name must not be empty");
+            quit_error_msg(
+                "the file name must not be empty",
+                ErrorHintsBuilder::default()
+                    .force(false)
+                    .verbose(false)
+                    .build()
+                    .unwrap(),
+            );
         }
 
         Some(name)

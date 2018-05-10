@@ -1,6 +1,9 @@
 [package]
 name = "ffsend"
-description = "A simple Firefox Send CLI client."
+description = """\
+    Securely and easily share files from the command line.\n\
+    A fully featured Firefox Send client.\
+"""
 version = "0.0.1"
 authors = ["Tim Visee <https://timvisee.com/>"]
 workspace = ".."
