@@ -1,7 +1,6 @@
-extern crate app_dirs2;
+extern crate directories;
 
 use clap::{App, AppSettings, Arg, ArgMatches};
-use self::app_dirs2::{AppDataType, AppInfo, get_app_dir};
 
 use super::matcher::{
     DeleteMatcher,
@@ -24,22 +23,11 @@ use super::cmd::{
     CmdPassword,
     CmdUpload,
 };
+use util::app_history_file_path_string;
 
 lazy_static! {
     /// The default history file
-    static ref DEFAULT_HISTORY_FILE: String =
-        get_app_dir(
-            AppDataType::UserCache,
-            &AppInfo {
-                name: crate_name!(),
-                author: crate_name!(),
-            },
-            "history.toml",
-        )
-        .unwrap()
-        .to_str()
-        .unwrap()
-        .to_owned();
+    static ref DEFAULT_HISTORY_FILE: String = app_history_file_path_string();
 }
 
 /// CLI argument handler.

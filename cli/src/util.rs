@@ -1,6 +1,7 @@
 #[cfg(feature = "clipboard")]
 extern crate clipboard;
 extern crate colored;
+extern crate directories;
 extern crate fs2;
 extern crate open;
 
@@ -14,7 +15,7 @@ use std::io::{
     stderr,
     Write,
 };
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::process::{exit, ExitStatus};
 
 use chrono::Duration;
@@ -24,6 +25,7 @@ use ffsend_api::url::Url;
 use rpassword::prompt_password_stderr;
 use self::clipboard::{ClipboardContext, ClipboardProvider};
 use self::colored::*;
+use self::directories::ProjectDirs;
 use self::fs2::available_space;
 
 use cmd::matcher::MainMatcher;
@@ -587,4 +589,23 @@ pub fn ensure_enough_space<P: AsRef<Path>>(path: P, size: u64) {
             .build()
             .unwrap(),
     );
+}
+
+/// Get the project directories instance for this application.
+/// This may be used to determine the project, cache, configuration, data and
+/// some other directory paths.
+pub fn app_project_dirs() -> ProjectDirs {
+    ProjectDirs::from("", "", crate_name!())
+}
+
+/// Get the default path to use for the history file.
+pub fn app_history_file_path<'a>() -> PathBuf {
+    app_project_dirs().cache_dir().join("history.toml")
+}
+
+/// Get the default path to use for the history file, as a string.
+pub fn app_history_file_path_string() -> String {
+    app_history_file_path().to_str()
+        .unwrap()
+        .to_owned()
 }
