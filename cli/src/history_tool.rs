@@ -79,28 +79,24 @@ pub fn remove(matcher_main: &MainMatcher, file: &RemoteFile) -> bool {
     ok
 }
 
-/// Derive an owner token of a remote file from the current history.
-/// The newly derived owner token will be set into the given borrowed remote file.
-/// This method may be used to automatically derive the owner token for some file actions
-/// requiring this token, to prevent the user from having to enter it manually.
+/// Derive the file secret and owner token from the history for the given file.
+/// The newly derived properties will be set into the given borrowed remote file.
+/// This method may be used to automatically derive the properties for some file actions
+/// requiring an owner token or secret, to prevent the user from having to enter it manually.
 ///
-/// If the file already has an owner token set,
+/// If the file already has all properties set,
 /// nothing will be derived and `false` is returned.
 /// If an error occurred while deriving,
 /// the error is printed and `false` is returned.
 /// If there was no matching file in the history,
-/// and no owner token could be derived, `false` is returned.
+/// and no properties could be derived, `false` is returned.
 /// Incognito mode does not have any effect on this method,
 /// as it won't ever change the history.
 ///
-/// If an owner token was successfully derived from the history,
-/// `true` is returned.
-///
-/// Note, to check if an owner token is set in the remote file,
-/// use the `file.has_owner_token()` method instead of the returned boolean from this method.
-pub fn derive_owner_token(matcher_main: &MainMatcher, file: &mut RemoteFile) -> bool {
-    // Return if the remote file already has an owner token set, or if we're incognito
-    if file.has_owner_token() {
+/// If any property was successfully derived, `true` is returned.
+pub fn derive_file_properties(matcher_main: &MainMatcher, file: &mut RemoteFile) -> bool {
+    // Return if all properties are already set
+    if file.has_secret() && file.has_owner_token() {
         return false;
     }
 
@@ -109,7 +105,7 @@ pub fn derive_owner_token(matcher_main: &MainMatcher, file: &mut RemoteFile) -> 
         Ok(history) => history,
         Err(err) => {
             print_error(err.context(
-                "failed to derive file owner token from history, ignoring",
+                "failed to derive file properties from history, ignoring",
             ));
             return false;
         }
@@ -117,10 +113,20 @@ pub fn derive_owner_token(matcher_main: &MainMatcher, file: &mut RemoteFile) -> 
 
     // Find a matching file, grab and set the owner token if available
     match history.get_file(file) {
-        Some(f) if f.has_owner_token() => {
-            file.set_owner_token(f.owner_token().cloned());
-            return true;
+        Some(f) => {
+            // Set the secret
+            if f.has_secret() {
+                file.set_secret(f.secret_raw().clone());
+            }
+
+            // Set the owner token
+            if f.has_owner_token() {
+                file.set_owner_token(f.owner_token().cloned());
+            }
+
+            // Return whether any property was derived
+            return f.has_secret() || f.has_owner_token();
         },
-        _ => return false,
+        None => return false,
     }
 }

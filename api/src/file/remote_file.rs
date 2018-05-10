@@ -231,7 +231,6 @@ impl RemoteFile {
     pub fn secret_raw(&self) -> &Vec<u8> {
         // A secret must have been set
         if !self.has_secret() {
-            // TODO: don't panic, return an error instead
             panic!("missing secret");
         }
 
@@ -241,6 +240,11 @@ impl RemoteFile {
     /// Get the secret as base64 encoded string.
     pub fn secret(&self) -> String {
         b64::encode(self.secret_raw())
+    }
+
+    /// Set the secret for this file.
+    pub fn set_secret(&mut self, secret: Vec<u8>) {
+        self.secret = secret;
     }
 
     /// Check whether a file secret is set.

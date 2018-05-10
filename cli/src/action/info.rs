@@ -58,7 +58,7 @@ impl<'a> Info<'a> {
 
         // Parse the remote file based on the share URL, derive the owner token from history
         let mut file = RemoteFile::parse_url(url, matcher_info.owner())?;
-        history_tool::derive_owner_token(&matcher_main, &mut file);
+        history_tool::derive_file_properties(&matcher_main, &mut file);
 
         // Ensure the owner token is set
         ensure_owner_token(file.owner_token_mut(), &matcher_main);
