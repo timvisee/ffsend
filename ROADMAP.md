@@ -7,9 +7,12 @@ Features:
 - Allow unarchiving on download 
 - Use clipboard through `xclip` on Linux if available for persistence
 - Allow environment variable settings using `Arg.env(NAME)`
+- Write complete README
 - Automated releases through CI
 - Release binaries on GitHub
 - Ubuntu PPA package
+- Gentoo portage package
+- Arch AUR package
 - Windows, macOS and Redox support
 
 # Beta release 0.1 (public)
