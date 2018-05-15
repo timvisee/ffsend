@@ -1,3 +1,7 @@
+// TODO: remove all expect unwraps, replace them with proper errors
+
+extern crate tempfile;
+
 use std::fs::File;
 use std::path::Path;
 use std::sync::{Arc, Mutex};
@@ -8,7 +12,9 @@ use ffsend_api::action::params::ParamsDataBuilder;
 use ffsend_api::action::upload::Upload as ApiUpload;
 use ffsend_api::config::{UPLOAD_SIZE_MAX, UPLOAD_SIZE_MAX_RECOMMENDED};
 use ffsend_api::reqwest::Client;
+use self::tempfile::NamedTempFile;
 
+use archive::archiver::Archiver;
 use cmd::matcher::{Matcher, MainMatcher, UploadMatcher};
 use error::ActionError;
 #[cfg(feature = "history")]
@@ -48,7 +54,7 @@ impl<'a> Upload<'a> {
         let matcher_upload = UploadMatcher::with(self.cmd_matches).unwrap();
 
         // Get API parameters
-        let path = Path::new(matcher_upload.file()).to_path_buf();
+        let mut path = Path::new(matcher_upload.file()).to_path_buf();
         let host = matcher_upload.host();
 
         // TODO: ensure the file exists and is accessible
@@ -112,11 +118,59 @@ impl<'a> Upload<'a> {
             }
         };
 
+        // The file name to use
+        let mut file_name = matcher_upload.name().map(|s| s.to_owned());
+
+        // A temporary archive file, only used when archiving
+        // The temporary file is stored here, to ensure it's lifetime exceeds the upload process
+        let mut tmp_archive: Option<NamedTempFile> = None;
+
+        // Archive the file if specified
+        if matcher_upload.archive() {
+            println!("Archiving file...");
+
+            // Create a new temporary file to write the archive to
+            tmp_archive = Some(
+                NamedTempFile::new().expect("failed to create temporary archive file"),
+            );
+            if let Some(tmp_archive) = &tmp_archive {
+                // Get the path, and the actual file
+                let archive_path = tmp_archive.path().clone().to_path_buf();
+                let archive_file = tmp_archive.as_file().try_clone()
+                    .expect("failed to clone archive file");
+
+                // Select the file name to use if not set
+                if file_name.is_none() {
+                    file_name = Some(
+                        path.file_name()
+                            .expect("failed to determine file name")
+                            .to_str()
+                            .map(|s| s.to_owned())
+                            .expect("failed to create string from file name")
+                    );
+                }
+
+                // Build an archiver and append the file
+                let mut archiver = Archiver::new(archive_file);
+                archiver.append_path(file_name.as_ref().unwrap(), &path)
+                    .expect("failed to append file to archive");
+
+                // Finish the archival process, writes the archive file
+                archiver.finish().expect("failed to write archive file");
+
+                // Append archive extention to name, set to upload archived file
+                if let Some(ref mut file_name) = file_name {
+                    file_name.push_str(".tar");
+                }
+                path = archive_path;
+            }
+        }
+
         // Execute an upload action
         let file = ApiUpload::new(
             host,
-            path,
-            matcher_upload.name().map(|name| name.to_owned()),
+            path.clone(),
+            file_name,
             matcher_upload.password(),
             params,
         ).invoke(&client, bar)?;
@@ -147,6 +201,11 @@ impl<'a> Upload<'a> {
                     print_error_msg("failed to copy the URL to the clipboard");
                 }
             }
+        }
+
+        // Close the temporary zip file, to ensure it's removed
+        if let Some(tmp_archive) = tmp_archive.take() {
+            tmp_archive.close();
         }
 
         Ok(())

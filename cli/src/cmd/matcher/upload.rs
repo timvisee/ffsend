@@ -71,6 +71,12 @@ impl<'a: 'b, 'b> UploadMatcher<'a> {
             })
     }
 
+    /// Check whether to archive the file to upload.
+    /// TODO: infer to use this flag if a directory is selected
+    pub fn archive(&self) -> bool {
+        self.matches.is_present("archive")
+    }
+
     /// Check whether to open the file URL in the user's browser.
     pub fn open(&self) -> bool {
         self.matches.is_present("open")

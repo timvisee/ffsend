@@ -48,7 +48,10 @@ impl<'a: 'b, 'b> Handler<'a> {
             .version(crate_version!())
             .author(crate_authors!())
             .about(crate_description!())
-            .after_help("This application is not affiliated with Mozilla, Firefox or Firefox Send.")
+            .after_help("\
+                The public Send service that is used as default host is provided by Mozilla.\n\
+                This application is not affiliated with Mozilla, Firefox or Firefox Send.\
+            ")
             .global_setting(AppSettings::GlobalVersion)
             .global_setting(AppSettings::VersionlessSubcommands)
             // TODO: enable below command when it doesn't break `p` anymore.

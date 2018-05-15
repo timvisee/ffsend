@@ -17,6 +17,7 @@ extern crate serde;
 extern crate serde_derive;
 
 mod action;
+mod archive;
 mod cmd;
 mod error;
 #[cfg(feature = "history")]
