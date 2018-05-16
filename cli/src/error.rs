@@ -2,13 +2,13 @@ use ffsend_api::action::delete::Error as DeleteError;
 use ffsend_api::action::exists::Error as ExistsError;
 use ffsend_api::action::params::Error as ParamsError;
 use ffsend_api::action::password::Error as PasswordError;
-use ffsend_api::action::upload::Error as UploadError;
 use ffsend_api::file::remote_file::FileParseError;
 
 use action::download::Error as CliDownloadError;
 #[cfg(feature = "history")]
 use action::history::Error as CliHistoryError;
 use action::info::Error as CliInfoError;
+use action::upload::Error as CliUploadError;
 
 #[derive(Fail, Debug)]
 pub enum Error {
@@ -26,6 +26,12 @@ impl From<CliDownloadError> for Error {
 impl From<CliInfoError> for Error {
     fn from(err: CliInfoError) -> Error {
         Error::Action(ActionError::Info(err))
+    }
+}
+
+impl From<CliUploadError> for Error {
+    fn from(err: CliUploadError) -> Error {
+        Error::Action(ActionError::Upload(err))
     }
 }
 
@@ -67,9 +73,8 @@ pub enum ActionError {
     Password(#[cause] PasswordError),
 
     /// An error occurred while invoking the upload action.
-    // TODO: bind the upload cause here
     #[fail(display = "failed to upload the specified file")]
-    Upload(#[cause] UploadError),
+    Upload(#[cause] CliUploadError),
 
     /// Failed to parse a share URL, it was invalid.
     /// This error is not related to a specific action.
@@ -105,12 +110,6 @@ impl From<ParamsError> for ActionError {
 impl From<PasswordError> for ActionError {
     fn from(err: PasswordError) -> ActionError {
         ActionError::Password(err)
-    }
-}
-
-impl From<UploadError> for ActionError {
-    fn from(err: UploadError) -> ActionError {
-        ActionError::Upload(err)
     }
 }
 

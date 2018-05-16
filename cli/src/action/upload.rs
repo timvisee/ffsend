@@ -3,20 +3,26 @@
 extern crate tempfile;
 
 use std::fs::File;
+use std::io::Error as IoError;
 use std::path::Path;
 use std::sync::{Arc, Mutex};
 
 use clap::ArgMatches;
 use failure::Fail;
 use ffsend_api::action::params::ParamsDataBuilder;
-use ffsend_api::action::upload::Upload as ApiUpload;
+use ffsend_api::action::upload::{
+    Error as UploadError,
+    Upload as ApiUpload,
+};
 use ffsend_api::config::{UPLOAD_SIZE_MAX, UPLOAD_SIZE_MAX_RECOMMENDED};
 use ffsend_api::reqwest::Client;
-use self::tempfile::NamedTempFile;
+use self::tempfile::{
+    Builder as TempBuilder,
+    NamedTempFile,
+};
 
 use archive::archiver::Archiver;
 use cmd::matcher::{Matcher, MainMatcher, UploadMatcher};
-use error::ActionError;
 #[cfg(feature = "history")]
 use history_tool;
 use progress::ProgressBar;
@@ -48,7 +54,7 @@ impl<'a> Upload<'a> {
 
     /// Invoke the upload action.
     // TODO: create a trait for this method
-    pub fn invoke(&self) -> Result<(), ActionError> {
+    pub fn invoke(&self) -> Result<(), Error> {
         // Create the command matchers
         let matcher_main = MainMatcher::with(self.cmd_matches).unwrap();
         let matcher_upload = UploadMatcher::with(self.cmd_matches).unwrap();
@@ -124,6 +130,7 @@ impl<'a> Upload<'a> {
         // A temporary archive file, only used when archiving
         // The temporary file is stored here, to ensure it's lifetime exceeds the upload process
         let mut tmp_archive: Option<NamedTempFile> = None;
+        let archive_extention = ".tar";
 
         // Archive the file if specified
         if matcher_upload.archive() {
@@ -131,19 +138,25 @@ impl<'a> Upload<'a> {
 
             // Create a new temporary file to write the archive to
             tmp_archive = Some(
-                NamedTempFile::new().expect("failed to create temporary archive file"),
+                TempBuilder::new()
+                    .prefix(&format!(".{}-archive-", crate_name!()))
+                    .suffix(archive_extention)
+                    .tempfile()
+                    .map_err(|err| ArchiveError::TempFile(err))?
             );
             if let Some(tmp_archive) = &tmp_archive {
                 // Get the path, and the actual file
                 let archive_path = tmp_archive.path().clone().to_path_buf();
-                let archive_file = tmp_archive.as_file().try_clone()
-                    .expect("failed to clone archive file");
+                let archive_file = tmp_archive.as_file()
+                    .try_clone()
+                    .map_err(|err| ArchiveError::CloneHandle(err))?;
 
                 // Select the file name to use if not set
                 if file_name.is_none() {
+                    // TODO: use canonical path here
                     file_name = Some(
                         path.file_name()
-                            .expect("failed to determine file name")
+                            .ok_or(ArchiveError::FileName)?
                             .to_str()
                             .map(|s| s.to_owned())
                             .expect("failed to create string from file name")
@@ -153,14 +166,14 @@ impl<'a> Upload<'a> {
                 // Build an archiver and append the file
                 let mut archiver = Archiver::new(archive_file);
                 archiver.append_path(file_name.as_ref().unwrap(), &path)
-                    .expect("failed to append file to archive");
+                    .map_err(|err| ArchiveError::AddFile(err))?;
 
                 // Finish the archival process, writes the archive file
-                archiver.finish().expect("failed to write archive file");
+                archiver.finish().map_err(|err| ArchiveError::Write(err))?;
 
                 // Append archive extention to name, set to upload archived file
                 if let Some(ref mut file_name) = file_name {
-                    file_name.push_str(".tar");
+                    file_name.push_str(archive_extention);
                 }
                 path = archive_path;
             }
@@ -205,9 +218,59 @@ impl<'a> Upload<'a> {
 
         // Close the temporary zip file, to ensure it's removed
         if let Some(tmp_archive) = tmp_archive.take() {
-            tmp_archive.close();
+            if let Err(err) = tmp_archive.close() {
+                print_error(
+                    err.context("failed to clean up temporary archive file, ignoring").compat(),
+                );
+            }
         }
 
         Ok(())
     }
+}
+
+#[derive(Debug, Fail)]
+pub enum Error {
+    /// An error occurred while archiving the file to upload.
+    #[fail(display = "failed to archive file to upload")]
+    Archive(#[cause] ArchiveError),
+
+    /// An error occurred while uploading the file.
+    #[fail(display = "")]
+    Upload(#[cause] UploadError),
+}
+
+impl From<ArchiveError> for Error {
+    fn from(err: ArchiveError) -> Error {
+        Error::Archive(err)
+    }
+}
+
+impl From<UploadError> for Error {
+    fn from(err: UploadError) -> Error {
+        Error::Upload(err)
+    }
+}
+
+#[derive(Debug, Fail)]
+pub enum ArchiveError {
+    /// An error occurred while creating the temporary archive file.
+    #[fail(display = "failed to create temporary archive file")]
+    TempFile(#[cause] IoError),
+
+    /// An error occurred while internally cloning the handle to the temporary archive file.
+    #[fail(display = "failed to clone handle to temporary archive file")]
+    CloneHandle(#[cause] IoError),
+
+    /// Failed to infer a file name for the archive.
+    #[fail(display = "failed to infer a file name for the archive")]
+    FileName,
+
+    /// Failed to add a file or directory to the archive.
+    #[fail(display = "failed to add file to the archive")]
+    AddFile(#[cause] IoError),
+
+    /// Failed to write the created archive to the disk.
+    #[fail(display = "failed to write archive to disk")]
+    Write(#[cause] IoError),
 }
