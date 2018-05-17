@@ -1,3 +1,4 @@
+pub mod debug;
 pub mod delete;
 pub mod download;
 pub mod exists;
@@ -9,6 +10,7 @@ pub mod password;
 pub mod upload;
 
 // Reexport to cmd module
+pub use self::debug::CmdDebug;
 pub use self::delete::CmdDelete;
 pub use self::download::CmdDownload;
 pub use self::exists::CmdExists;

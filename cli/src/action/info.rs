@@ -15,6 +15,13 @@ use ffsend_api::file::remote_file::{
     RemoteFile,
 };
 use ffsend_api::reqwest::Client;
+use prettytable::{
+    cell::Cell,
+    format::FormatBuilder,
+    row::Row,
+    Table,
+};
+
 
 use cmd::matcher::{
     Matcher,
@@ -101,24 +108,61 @@ impl<'a> Info<'a> {
         #[cfg(feature = "history")]
         history_tool::add(&matcher_main, file.clone(), true);
 
-        // Print all file details
-        println!("ID: {}", file.id());
+        // Create a new table for the information
+        let mut table = Table::new();
+        table.set_format(FormatBuilder::new().padding(0, 2).build());
+
+        // Add the ID
+        table.add_row(Row::new(vec![
+            Cell::new("ID:"),
+            Cell::new(file.id()),
+        ]));
+
+        // Metadata related details
         if let Some(metadata) = metadata {
+            // The file name
+            table.add_row(Row::new(vec![
+                Cell::new("name:"),
+                Cell::new(metadata.metadata().name()),
+            ]));
+
+            // The file size
             let size = metadata.size();
-            println!("Name: {}", metadata.metadata().name());
-            if size >= 1024 {
-                println!("Size: {} ({} B)", format_bytes(size), size);
-            } else {
-                println!("Size: {}", format_bytes(size));
-            }
-            println!("MIME: {}", metadata.metadata().mime());
+            table.add_row(Row::new(vec![
+                Cell::new("MIME:"),
+                Cell::new(
+                    &if size >= 1024 {
+                        format!("{} ({} B)", format_bytes(size), size)
+                    } else {
+                        format_bytes(size)
+                    }
+                ),
+            ]));
+
+            // The file MIME
+            table.add_row(Row::new(vec![
+                Cell::new("MIME:"),
+                Cell::new(metadata.metadata().mime()),
+            ]));
         }
-        println!("Downloads: {} of {}", info.download_count(), info.download_limit());
-        if ttl_millis >= 60 * 1000 {
-            println!("Expiry: {} ({}s)", format_duration(&ttl), ttl.num_seconds());
-        } else {
-            println!("Expiry: {}", format_duration(&ttl));
-        }
+
+        // The download count
+        table.add_row(Row::new(vec![
+            Cell::new("downloads:"),
+            Cell::new(&format!("{} of {}", info.download_count(), info.download_limit())),
+        ]));
+
+        // The time to live
+        table.add_row(Row::new(vec![
+            Cell::new("expiry:"),
+            Cell::new(
+                &if ttl_millis >= 60 * 1000 {
+                    format!("{} ({}s)", format_duration(&ttl), ttl.num_seconds())
+                } else {
+                    format_duration(&ttl)
+                }
+            ),
+        ]));
 
         Ok(())
     }

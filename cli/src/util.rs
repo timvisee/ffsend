@@ -530,9 +530,9 @@ pub fn format_bytes(bytes: u64) -> String {
 /// - `9m55s`
 /// - `1s`
 /// - `now`
-pub fn format_duration(duration: &Duration) -> String {
+pub fn format_duration(duration: impl Borrow<Duration>) -> String {
     // Get the total number of seconds, return immediately if zero or less
-    let mut secs = duration.num_seconds();
+    let mut secs = duration.borrow().num_seconds();
     if secs <= 0 {
         return "now".into();
     }

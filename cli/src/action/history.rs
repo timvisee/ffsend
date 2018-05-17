@@ -1,7 +1,5 @@
-extern crate prettytable;
-
 use clap::ArgMatches;
-use self::prettytable::{
+use prettytable::{
     cell::Cell,
     format::FormatBuilder,
     row::Row,

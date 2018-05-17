@@ -3,6 +3,7 @@ extern crate directories;
 use clap::{App, AppSettings, Arg, ArgMatches};
 
 use super::matcher::{
+    DebugMatcher,
     DeleteMatcher,
     DownloadMatcher,
     ExistsMatcher,
@@ -15,6 +16,7 @@ use super::matcher::{
 #[cfg(feature = "history")]
 use super::matcher::HistoryMatcher;
 use super::subcmd::{
+    CmdDebug,
     CmdDelete,
     CmdDownload,
     CmdExists,
@@ -73,6 +75,7 @@ impl<'a: 'b, 'b> Handler<'a> {
                 .alias("assume-yes")
                 .global(true)
                 .help("Assume yes for prompts"))
+            .subcommand(CmdDebug::build())
             .subcommand(CmdDelete::build())
             .subcommand(CmdDownload::build().display_order(2))
             .subcommand(CmdExists::build())
@@ -88,8 +91,9 @@ impl<'a: 'b, 'b> Handler<'a> {
                 .short("H")
                 .value_name("FILE")
                 .global(true)
-                .help("History file to use")
-                .default_value(&DEFAULT_HISTORY_FILE))
+                .help("Use the specified history file")
+                .default_value(&DEFAULT_HISTORY_FILE)
+                .hide_default_value(true))
             .arg(Arg::with_name("incognito")
                 .long("incognito")
                 .short("i")
@@ -118,6 +122,11 @@ impl<'a: 'b, 'b> Handler<'a> {
     /// Get the raw matches.
     pub fn matches(&'a self) -> &'a ArgMatches {
         &self.matches
+    }
+
+    /// Get the debug sub command, if matched.
+    pub fn debug(&'a self) -> Option<DebugMatcher> {
+        DebugMatcher::with(&self.matches)
     }
 
     /// Get the delete sub command, if matched.

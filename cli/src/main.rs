@@ -10,6 +10,7 @@ extern crate ffsend_api;
 #[cfg(feature = "history")]
 #[macro_use]
 extern crate lazy_static;
+extern crate prettytable;
 extern crate rpassword;
 extern crate serde;
 #[cfg(feature = "history")]
@@ -29,6 +30,7 @@ mod host;
 mod progress;
 mod util;
 
+use action::debug::Debug;
 use action::delete::Delete;
 use action::download::Download;
 use action::exists::Exists;
@@ -58,6 +60,12 @@ fn main() {
 /// If no proper action is selected, the program will quit with an error
 /// message.
 fn invoke_action(handler: &Handler) -> Result<(), Error> {
+    // Match the debug command
+    if handler.debug().is_some() {
+        return Debug::new(handler.matches()).invoke()
+            .map_err(|err| err.into());
+    }
+
     // Match the delete command
     if handler.delete().is_some() {
         return Delete::new(handler.matches()).invoke()

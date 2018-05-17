@@ -7,8 +7,8 @@ use ffsend_api::file::remote_file::RemoteFile;
 use ffsend_api::reqwest::Client;
 
 use cmd::matcher::{
-    Matcher,
     main::MainMatcher,
+    Matcher,
     password::PasswordMatcher,
 };
 use error::ActionError;
