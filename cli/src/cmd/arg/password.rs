@@ -16,7 +16,6 @@ impl CmdArg for ArgPassword {
         Arg::with_name("password")
             .long("password")
             .short("p")
-            .alias("pass")
             .value_name("PASSWORD")
             .min_values(0)
             .max_values(1)

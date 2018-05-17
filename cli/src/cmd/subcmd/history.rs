@@ -8,8 +8,6 @@ impl CmdHistory {
         SubCommand::with_name("history")
             .about("View file history")
             .visible_alias("h")
-            .alias("his")
-            .alias("list")
             .alias("ls")
     }
 }

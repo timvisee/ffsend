@@ -3,8 +3,6 @@ The first release used for gathering feedback on the application by selected
 people.
 
 Features:
-- Use flag for archival functionality
-- Remove unnecessary command argument aliases
 - A `defaults` command to list defaults such as the host URL and history file
 - Make use of stdout and stderr consistent
 - Allow file/directory archiving on upload

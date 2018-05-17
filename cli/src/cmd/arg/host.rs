@@ -19,7 +19,6 @@ impl CmdArg for ArgHost {
         Arg::with_name("host")
             .long("host")
             .short("h")
-            .alias("server")
             .value_name("URL")
             .default_value(SEND_DEFAULT_HOST)
             .help("The remote host to upload to")

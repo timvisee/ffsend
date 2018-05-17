@@ -22,11 +22,6 @@ impl CmdArg for ArgDownloadLimit {
             .short("d")
             .alias("downloads")
             .alias("download")
-            .alias("down")
-            .alias("dlimit")
-            .alias("limit")
-            .alias("lim")
-            .alias("l")
             .value_name("COUNT")
             .help("The file download limit")
     }
