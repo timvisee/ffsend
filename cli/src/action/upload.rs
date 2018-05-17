@@ -1,4 +1,5 @@
 use std::fs::File;
+#[cfg(feature = "archive")]
 use std::io::Error as IoError;
 use std::path::Path;
 use std::sync::{Arc, Mutex};
@@ -19,6 +20,7 @@ use prettytable::{
     row::Row,
     Table,
 };
+#[cfg(feature = "archive")]
 use tempfile::{
     Builder as TempBuilder,
     NamedTempFile,
@@ -64,6 +66,7 @@ impl<'a> Upload<'a> {
         let matcher_upload = UploadMatcher::with(self.cmd_matches).unwrap();
 
         // Get API parameters
+        #[allow(unused_mut)]
         let mut path = Path::new(matcher_upload.file()).to_path_buf();
         let host = matcher_upload.host();
 
@@ -129,10 +132,13 @@ impl<'a> Upload<'a> {
         };
 
         // The file name to use
+        #[allow(unused_mut)]
         let mut file_name = matcher_upload.name().map(|s| s.to_owned());
 
         // A temporary archive file, only used when archiving
         // The temporary file is stored here, to ensure it's lifetime exceeds the upload process
+        #[allow(unused_mut)]
+        #[cfg(feature = "archive")]
         let mut tmp_archive: Option<NamedTempFile> = None;
 
         #[cfg(feature = "archive")] {
@@ -265,6 +271,7 @@ impl<'a> Upload<'a> {
 #[derive(Debug, Fail)]
 pub enum Error {
     /// An error occurred while archiving the file to upload.
+    #[cfg(feature = "archive")]
     #[fail(display = "failed to archive file to upload")]
     Archive(#[cause] ArchiveError),
 
@@ -273,6 +280,7 @@ pub enum Error {
     Upload(#[cause] UploadError),
 }
 
+#[cfg(feature = "archive")]
 impl From<ArchiveError> for Error {
     fn from(err: ArchiveError) -> Error {
         Error::Archive(err)
@@ -285,6 +293,7 @@ impl From<UploadError> for Error {
     }
 }
 
+#[cfg(feature = "archive")]
 #[derive(Debug, Fail)]
 pub enum ArchiveError {
     /// An error occurred while creating the temporary archive file.

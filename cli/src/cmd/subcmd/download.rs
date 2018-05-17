@@ -8,6 +8,7 @@ pub struct CmdDownload;
 impl CmdDownload {
     pub fn build<'a, 'b>() -> App<'a, 'b> {
         // Build the subcommand
+        #[allow(unused_mut)]
         let mut cmd = SubCommand::with_name("download")
             .about("Download files")
             .visible_alias("d")

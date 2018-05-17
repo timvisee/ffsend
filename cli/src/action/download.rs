@@ -1,5 +1,6 @@
 use std::env::current_dir;
 use std::fs::create_dir_all;
+#[cfg(feature = "archive")]
 use std::io::Error as IoError;
 use std::path::{self, PathBuf};
 use std::sync::{Arc, Mutex};
@@ -21,6 +22,7 @@ use ffsend_api::action::metadata::{
 use ffsend_api::file::remote_file::{FileParseError, RemoteFile};
 use ffsend_api::reader::ProgressReporter;
 use ffsend_api::reqwest::Client;
+#[cfg(feature = "archive")]
 use tempfile::{
     Builder as TempBuilder,
     NamedTempFile,
@@ -126,12 +128,14 @@ impl<'a> Download<'a> {
         let output_dir = !extract;
         #[cfg(not(feature = "archive"))]
         let output_dir = false;
+        #[allow(unused_mut)]
         let mut target = Self::prepare_path(
             &target,
             metadata.metadata().name(),
             &matcher_main,
             output_dir,
         );
+        #[cfg(feature = "archive")]
         let output_path = target.clone();
 
         #[cfg(feature = "archive")] {
@@ -365,6 +369,7 @@ pub enum Error {
     Download(#[cause] DownloadError),
 
     /// An error occurred while extracting the file.
+    #[cfg(feature = "archive")]
     #[fail(display = "failed the extraction procedure")]
     Extract(#[cause] ExtractError),
 
@@ -397,12 +402,14 @@ impl From<DownloadError> for Error {
     }
 }
 
+#[cfg(feature = "archive")]
 impl From<ExtractError> for Error {
     fn from(err: ExtractError) -> Error {
         Error::Extract(err)
     }
 }
 
+#[cfg(feature = "archive")]
 #[derive(Debug, Fail)]
 pub enum ExtractError {
     /// An error occurred while creating the temporary archive file.

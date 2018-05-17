@@ -5,6 +5,7 @@ use ffsend_api::url::Url;
 
 use cmd::arg::{ArgPassword, ArgUrl, CmdArgOption};
 use super::Matcher;
+#[cfg(feature = "archive")]
 use util::env_var_present;
 
 /// The download command matcher.

@@ -47,6 +47,7 @@ impl<'a> Debug<'a> {
         ]));
 
         // The history file
+        #[cfg(feature = "history")]
         table.add_row(Row::new(vec![
             Cell::new("History file:"),
             Cell::new(matcher_main.history().to_str().unwrap_or("?")),
