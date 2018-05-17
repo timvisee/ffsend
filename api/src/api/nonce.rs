@@ -5,7 +5,7 @@ use api::request::{ensure_success, ResponseError};
 use crypto::b64;
 
 /// The name of the header the nonce is delivered in.
-const HEADER_NONCE: &'static str = "WWW-Authenticate";
+const HEADER_NONCE: &str = "WWW-Authenticate";
 
 /// Do a new request, and extract the nonce from a header in the given
 /// response.
@@ -38,11 +38,10 @@ pub fn header_nonce(response: &Response)
             .and_then(|line| String::from_utf8(line.to_vec())
                 .map_err(|_| NonceError::MalformedNonce)
             )?
-            .split_terminator(" ")
-            .skip(1)
-            .next()
+            .split_terminator(' ')
+            .nth(2)
             .ok_or(NonceError::MalformedNonce)?
-    ).map_err(|_| NonceError::MalformedNonce.into())
+    ).map_err(|_| NonceError::MalformedNonce)
 }
 
 #[derive(Fail, Debug)]

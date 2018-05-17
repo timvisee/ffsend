@@ -121,13 +121,13 @@ pub fn print_main_info() {
     // Print the main info
     println!("{} {}", crate_name!(), crate_version!());
     println!("Usage: {} [FLAGS] <SUBCOMMAND> ...", exe);
-    println!("");
-    println!("{}", crate_description!());
-    println!("");
+    println!();
+    println!(crate_description!());
+    println!();
     println!("Missing subcommand. Here are the most used:");
     println!("    {}", highlight(&format!("{} upload <FILE> ...", exe)));
     println!("    {}", highlight(&format!("{} download <URL> ...", exe)));
-    println!("");
+    println!();
     println!("To show all subcommands, features and other help:");
     println!("    {}", highlight(&format!("{} help [SUBCOMMAND]", exe)));
 }

@@ -18,6 +18,7 @@ use ffsend_api::action::metadata::{
     Metadata as ApiMetadata,
 };
 use ffsend_api::file::remote_file::{FileParseError, RemoteFile};
+use ffsend_api::reader::ProgressReporter;
 use ffsend_api::reqwest::Client;
 
 use cmd::matcher::{
@@ -93,7 +94,7 @@ impl<'a> Download<'a> {
 
         // Prepare the output path to use
         let target = Self::prepare_path(
-            target,
+            &target,
             metadata.metadata().name(),
             &matcher_main,
         );
@@ -104,7 +105,8 @@ impl<'a> Download<'a> {
         }
 
         // Create a progress bar reporter
-        let bar = Arc::new(Mutex::new(ProgressBar::new_download()));
+        let progress_bar = Arc::new(Mutex::new(ProgressBar::new_download()));
+        let progress_reader: Arc<Mutex<ProgressReporter>> = progress_bar;
 
         // Execute an download action
         ApiDownload::new(
@@ -113,7 +115,7 @@ impl<'a> Download<'a> {
             password,
             false,
             Some(metadata),
-        ).invoke(&client, bar)?;
+        ).invoke(&client, &progress_reader)?;
 
         // Add the file to the history
         #[cfg(feature = "history")]
@@ -138,12 +140,12 @@ impl<'a> Download<'a> {
     ///
     /// The program will quit with an error message if a problem occurs.
     fn prepare_path(
-        target: PathBuf,
+        target: &PathBuf,
         name_hint: &str,
         main_matcher: &MainMatcher,
     ) -> PathBuf {
         // Select the path to use
-        let target = Self::select_path(target, name_hint);
+        let target = Self::select_path(&target, name_hint);
 
         // Ask to overwrite
         if target.exists() && !main_matcher.force() {
@@ -185,7 +187,7 @@ impl<'a> Download<'a> {
             ),
         }
 
-        return target;
+        target
     }
 
     /// This methods prepares a full file path to use for the file to
@@ -195,7 +197,7 @@ impl<'a> Download<'a> {
     /// If no file name was given, the original file name is used.
     ///
     /// The full path including the file name will be returned.
-    fn select_path(target: PathBuf, name_hint: &str) -> PathBuf {
+    fn select_path(target: &PathBuf, name_hint: &str) -> PathBuf {
         // If we're already working with a file, canonicalize and return
         if target.is_file() {
             match target.canonicalize() {
@@ -255,7 +257,7 @@ impl<'a> Download<'a> {
             }
         }
 
-        return target;
+        target
     }
 }
 

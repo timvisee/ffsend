@@ -66,7 +66,7 @@ impl<'a> Download<'a> {
     pub fn invoke(
         mut self,
         client: &Client,
-        reporter: Arc<Mutex<ProgressReporter>>,
+        reporter: &Arc<Mutex<ProgressReporter>>,
     ) -> Result<(), Error> {
         // Create a key set for the file
         let mut key = KeySet::from(self.file, self.password.as_ref());
@@ -101,7 +101,7 @@ impl<'a> Download<'a> {
         // Create the file reader for downloading
         let (reader, len) = self.create_file_reader(
             &key,
-            metadata.nonce().to_vec(),
+            metadata.nonce(),
             &client,
         )?;
 
@@ -110,11 +110,11 @@ impl<'a> Download<'a> {
             out,
             len,
             &key,
-            reporter.clone(),
+            &reporter,
         ).map_err(|err| Error::File(path_str.clone(), err))?;
 
         // Download the file
-        self.download(reader, writer, len, reporter)?;
+        self.download(reader, writer, len, &reporter)?;
 
         // TODO: return the file path
         // TODO: return the new remote state (does it still exist remote)
@@ -160,7 +160,7 @@ impl<'a> Download<'a> {
     fn create_file_reader(
         &self,
         key: &KeySet,
-        meta_nonce: Vec<u8>,
+        meta_nonce: &[u8],
         client: &Client,
     ) -> Result<(Response, u64), DownloadError> {
         // Compute the cryptographic signature
@@ -177,7 +177,7 @@ impl<'a> Download<'a> {
 
         // Ensure the response is succesful
         ensure_success(&response)
-            .map_err(|err| DownloadError::Response(err))?;
+            .map_err(DownloadError::Response)?;
 
         // Get the content length
         // TODO: make sure there is enough disk space
@@ -196,7 +196,7 @@ impl<'a> Download<'a> {
         file: File,
         len: u64,
         key: &KeySet,
-        reporter: Arc<Mutex<ProgressReporter>>,
+        reporter: &Arc<Mutex<ProgressReporter>>,
     ) -> Result<ProgressWriter<EncryptedFileWriter>, FileError> {
         // Build an encrypted writer
         let mut writer = ProgressWriter::new(
@@ -223,7 +223,7 @@ impl<'a> Download<'a> {
         mut reader: R,
         mut writer: ProgressWriter<EncryptedFileWriter>,
         len: u64,
-        reporter: Arc<Mutex<ProgressReporter>>,
+        reporter: &Arc<Mutex<ProgressReporter>>,
     ) -> Result<(), DownloadError> {
         // Start the writer
         reporter.lock()

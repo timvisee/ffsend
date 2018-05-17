@@ -15,6 +15,7 @@ use ffsend_api::action::upload::{
     Upload as ApiUpload,
 };
 use ffsend_api::config::{UPLOAD_SIZE_MAX, UPLOAD_SIZE_MAX_RECOMMENDED};
+use ffsend_api::reader::ProgressReporter;
 use ffsend_api::reqwest::Client;
 use self::tempfile::{
     Builder as TempBuilder,
@@ -106,7 +107,7 @@ impl<'a> Upload<'a> {
         let client = Client::new();
 
         // Create a progress bar reporter
-        let bar = Arc::new(Mutex::new(ProgressBar::new_upload()));
+        let progress_bar = Arc::new(Mutex::new(ProgressBar::new_upload()));
 
         // Build a parameters object to set for the file
         let params = {
@@ -142,14 +143,14 @@ impl<'a> Upload<'a> {
                     .prefix(&format!(".{}-archive-", crate_name!()))
                     .suffix(archive_extention)
                     .tempfile()
-                    .map_err(|err| ArchiveError::TempFile(err))?
+                    .map_err(ArchiveError::TempFile)?
             );
             if let Some(tmp_archive) = &tmp_archive {
                 // Get the path, and the actual file
-                let archive_path = tmp_archive.path().clone().to_path_buf();
+                let archive_path = tmp_archive.path().to_path_buf();
                 let archive_file = tmp_archive.as_file()
                     .try_clone()
-                    .map_err(|err| ArchiveError::CloneHandle(err))?;
+                    .map_err(ArchiveError::CloneHandle)?;
 
                 // Select the file name to use if not set
                 if file_name.is_none() {
@@ -166,10 +167,10 @@ impl<'a> Upload<'a> {
                 // Build an archiver and append the file
                 let mut archiver = Archiver::new(archive_file);
                 archiver.append_path(file_name.as_ref().unwrap(), &path)
-                    .map_err(|err| ArchiveError::AddFile(err))?;
+                    .map_err(ArchiveError::AddFile)?;
 
                 // Finish the archival process, writes the archive file
-                archiver.finish().map_err(|err| ArchiveError::Write(err))?;
+                archiver.finish().map_err(ArchiveError::Write)?;
 
                 // Append archive extention to name, set to upload archived file
                 if let Some(ref mut file_name) = file_name {
@@ -179,6 +180,9 @@ impl<'a> Upload<'a> {
             }
         }
 
+        // Build the progress reporter
+        let progress_reporter: Arc<Mutex<ProgressReporter>> = progress_bar;
+
         // Execute an upload action
         let file = ApiUpload::new(
             host,
@@ -186,7 +190,7 @@ impl<'a> Upload<'a> {
             file_name,
             matcher_upload.password(),
             params,
-        ).invoke(&client, bar)?;
+        ).invoke(&client, &progress_reporter)?;
 
         // Get the download URL, and report it in the console
         let url = file.download_url(true);
@@ -199,7 +203,7 @@ impl<'a> Upload<'a> {
 
         // Open the URL in the browser
         if matcher_upload.open() {
-            if let Err(err) = open_url(url.clone()) {
+            if let Err(err) = open_url(&url) {
                 print_error(
                     err.context("failed to open the URL in the browser")
                 );
@@ -209,10 +213,8 @@ impl<'a> Upload<'a> {
         // Copy the URL in the user's clipboard
         #[cfg(feature = "clipboard")]
         {
-            if matcher_upload.copy() {
-                if set_clipboard(url.as_str().to_owned()).is_err() {
-                    print_error_msg("failed to copy the URL to the clipboard");
-                }
+            if matcher_upload.copy() && set_clipboard(url.as_str().to_owned()).is_err() {
+                print_error_msg("failed to copy the URL to the clipboard");
             }
         }
 

@@ -125,8 +125,8 @@ pub fn derive_file_properties(matcher_main: &MainMatcher, file: &mut RemoteFile)
             }
 
             // Return whether any property was derived
-            return f.has_secret() || f.has_owner_token();
+            f.has_secret() || f.has_owner_token()
         },
-        None => return false,
+        None => false,
     }
 }

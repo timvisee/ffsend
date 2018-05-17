@@ -24,7 +24,7 @@ impl<'a> Delete<'a> {
     pub fn new(file: &'a RemoteFile, nonce: Option<Vec<u8>>) -> Self {
         Self {
             file,
-            nonce: nonce.unwrap_or(Vec::new()),
+            nonce: nonce.unwrap_or_default(),
         }
     }
 
@@ -42,7 +42,7 @@ impl<'a> Delete<'a> {
             ))?;
 
         // Send the delete request
-        self.request_delete(client, data).map_err(|err| err.into())
+        self.request_delete(client, &data)
     }
 
     /// Fetch the authentication nonce for the file from the remote server.
@@ -59,7 +59,7 @@ impl<'a> Delete<'a> {
     fn request_delete(
         &self,
         client: &Client,
-        data: OwnedData<DeleteData>,
+        data: &OwnedData<DeleteData>,
     ) -> Result<(), Error> {
         // Get the delete URL, and send the request
         let url = UrlBuilder::api_delete(self.file);
@@ -77,13 +77,13 @@ impl<'a> Delete<'a> {
 /// The delete data object.
 /// This object is currently empty, as no additional data is sent to the
 /// server.
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Default)]
 pub struct DeleteData { }
 
 impl DeleteData {
     /// Constructor.
     pub fn new() -> Self {
-        DeleteData { }
+        DeleteData::default()
     }
 }
 

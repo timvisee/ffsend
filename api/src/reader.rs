@@ -94,7 +94,7 @@ impl EncryptedFileReader {
     /// returned.
     fn read_internal(&mut self, buf: &mut [u8]) -> usize {
         // Return if there is no data to read
-        if self.internal_buf.is_empty() || buf.len() == 0 {
+        if self.internal_buf.is_empty() || buf.is_empty() {
             return 0;
         }
 
@@ -335,6 +335,11 @@ pub trait ProgressReporter: Send {
 pub trait ExactLengthReader {
     /// Get the exact length of the reader in bytes.
     fn len(&self) -> Result<u64, io::Error>;
+
+    /// Check whehter this extact length reader is emtpy.
+    fn is_empty(&self) -> Result<bool, io::Error> {
+        self.len().map(|l| l == 0)
+    }
 }
 
 impl<R: ExactLengthReader + Read> ExactLengthReader for BufReader<R> {

@@ -1,5 +1,5 @@
 pub mod arg;
-pub mod cmd;
+pub mod subcmd;
 pub mod handler;
 pub mod matcher;
 

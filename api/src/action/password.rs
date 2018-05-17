@@ -33,7 +33,7 @@ impl<'a> Password<'a> {
         Self {
             file,
             password,
-            nonce: nonce.unwrap_or(Vec::new()),
+            nonce: nonce.unwrap_or_default(),
         }
     }
 
@@ -55,8 +55,7 @@ impl<'a> Password<'a> {
             .map_err(|err| -> PrepareError { err.into() })?;
 
         // Send the request to change the password
-        self.change_password(client, data)
-            .map_err(|err| err.into())
+        self.change_password(client, &data)
     }
 
     /// Fetch the authentication nonce for the file from the Send server.
@@ -73,7 +72,7 @@ impl<'a> Password<'a> {
     fn change_password(
         &self,
         client: &Client,
-        data: OwnedData<PasswordData>,
+        data: &OwnedData<PasswordData>,
     ) -> Result<(), Error> {
         // Get the password URL, and send the change
         let url = UrlBuilder::api_password(self.file);

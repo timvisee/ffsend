@@ -5,6 +5,7 @@ extern crate directories;
 extern crate fs2;
 extern crate open;
 
+use std::borrow::Borrow;
 use std::env::current_exe;
 #[cfg(feature = "clipboard")]
 use std::error::Error as StdError;
@@ -40,9 +41,11 @@ pub fn print_success(msg: &str) {
 
 /// Print the given error in a proper format for the user,
 /// with it's causes.
-pub fn print_error<E: Fail>(err: E) {
+pub fn print_error<E: Fail>(err: impl Borrow<E>) {
     // Report each printable error, count them
-    let count = err.causes() .map(|err| format!("{}", err))
+    let count = err.borrow()
+        .causes()
+        .map(|err| format!("{}", err))
         .filter(|err| !err.is_empty())
         .enumerate()
         .map(|(i, err)| if i == 0 {
@@ -56,8 +59,7 @@ pub fn print_error<E: Fail>(err: E) {
     if count == 0 {
         eprintln!("{} {}", highlight_error("error:"), "an undefined error occurred");
     }
-}
-
+} 
 /// Print the given error message in a proper format for the user,
 /// with it's causes.
 pub fn print_error_msg<S>(err: S)
@@ -83,12 +85,12 @@ pub fn quit() -> ! {
 
 /// Quit the application with an error code,
 /// and print the given error.
-pub fn quit_error<E: Fail>(err: E, hints: ErrorHints) -> ! {
+pub fn quit_error<E: Fail>(err: E, hints: impl Borrow<ErrorHints>) -> ! {
     // Print the error
     print_error(err);
 
     // Print error hints
-    hints.print();
+    hints.borrow().print();
 
     // Quit
     exit(1);
@@ -96,7 +98,7 @@ pub fn quit_error<E: Fail>(err: E, hints: ErrorHints) -> ! {
 
 /// Quit the application with an error code,
 /// and print the given error message.
-pub fn quit_error_msg<S>(err: S, hints: ErrorHints) -> !
+pub fn quit_error_msg<S>(err: S, hints: impl Borrow<ErrorHints>) -> !
     where
         S: AsRef<str> + Display + Debug + Sync + Send + 'static
 {
@@ -247,8 +249,8 @@ pub fn highlight_info(msg: &str) -> ColoredString {
 
 /// Open the given URL in the users default browser.
 /// The browsers exit statis is returned.
-pub fn open_url(url: Url) -> Result<ExitStatus, IoError> {
-    open_path(url.as_str())
+pub fn open_url(url: impl Borrow<Url>) -> Result<ExitStatus, IoError> {
+    open_path(url.borrow().as_str())
 }
 
 /// Open the given path or URL using the program configured on the system.
@@ -538,15 +540,15 @@ pub fn format_duration(duration: &Duration) -> String {
     // Build a list of time units, define a list for time components
     let mut components = Vec::new();
     let units = [
-        (1 * 60 * 60 * 24 * 7, "w"),
-        (1 * 60 * 60 * 24, "d"),
-        (1 * 60 * 60, "h"),
-        (1 * 60, "m"),
+        (60 * 60 * 24 * 7, "w"),
+        (60 * 60 * 24, "d"),
+        (60 * 60, "h"),
+        (60, "m"),
         (1, "s"),
     ];
 
     // Fill the list of time components based on the units which fit
-    for unit in units.iter() {
+    for unit in &units {
         if secs >= unit.0 {
             components.push(format!("{}{}", secs / unit.0, unit.1));
             secs %= unit.0;
@@ -564,7 +566,7 @@ pub fn exe_name() -> String {
         .ok()
         .and_then(|p| p.file_name().map(|n| n.to_owned()))
         .and_then(|n| n.into_string().ok())
-        .unwrap_or(crate_name!().into())
+        .unwrap_or_else(|| crate_name!().into())
 }
 
 /// Ensure that there is enough free disk space available at the given `path`,
@@ -620,7 +622,7 @@ pub fn app_project_dirs() -> ProjectDirs {
 
 /// Get the default path to use for the history file.
 #[cfg(feature = "history")]
-pub fn app_history_file_path<'a>() -> PathBuf {
+pub fn app_history_file_path() -> PathBuf {
     app_project_dirs().cache_dir().join("history.toml")
 }
 

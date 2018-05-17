@@ -17,10 +17,10 @@ use self::version_compare::{
 use util::{print_error, print_warning};
 
 /// The minimum supported history file version.
-const VERSION_MIN: &'static str = "0.0.1";
+const VERSION_MIN: &str = "0.0.1";
 
 /// The maximum supported history file version.
-const VERSION_MAX: &'static str = crate_version!();
+const VERSION_MAX: &str = crate_version!();
 
 #[derive(Serialize, Deserialize)]
 pub struct History {
@@ -105,7 +105,7 @@ impl History {
         if self.files.is_empty() {
             if path.is_file() {
                 fs::remove_file(&path)
-                    .map_err(|err| SaveError::Delete(err))?;
+                    .map_err(SaveError::Delete)?;
             }
             return Ok(());
         }
@@ -189,9 +189,7 @@ impl History {
     /// If multiple files exist within the history that are equal, only one is returned.
     /// If no matching file was found, `None` is returned.
     pub fn get_file(&self, file: &RemoteFile) -> Option<&RemoteFile> {
-        self.files.iter()
-            .filter(|f| f.id() == file.id() && f.host() == file.host())
-            .next()
+        self.files.iter().find(|f| f.id() == file.id() && f.host() == file.host())
     }
 
     /// Garbage collect (remove) all files that have been expired,

@@ -33,7 +33,7 @@ impl<'a: 'b, 'b> MainMatcher<'a> {
     pub fn history(&self) -> PathBuf {
         // Get the path
         let path = self.matches.value_of("history")
-            .map(|path| PathBuf::from(path));
+            .map(PathBuf::from);
 
         // Ensure the path is correct
         match path {

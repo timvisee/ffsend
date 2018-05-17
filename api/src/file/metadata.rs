@@ -34,7 +34,7 @@ impl Metadata {
     /// * iv: initialisation vector
     /// * name: file name
     /// * mime: file mimetype
-    pub fn from(iv: &[u8], name: String, mime: Mime) -> Self {
+    pub fn from(iv: &[u8], name: String, mime: &Mime) -> Self {
         Metadata {
             iv: b64::encode(iv),
             name,

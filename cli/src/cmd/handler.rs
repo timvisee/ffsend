@@ -14,7 +14,7 @@ use super::matcher::{
 };
 #[cfg(feature = "history")]
 use super::matcher::HistoryMatcher;
-use super::cmd::{
+use super::subcmd::{
     CmdDelete,
     CmdDownload,
     CmdExists,
@@ -24,7 +24,7 @@ use super::cmd::{
     CmdUpload,
 };
 #[cfg(feature = "history")]
-use super::cmd::CmdHistory;
+use super::subcmd::CmdHistory;
 #[cfg(feature = "history")]
 use util::app_history_file_path_string;
 

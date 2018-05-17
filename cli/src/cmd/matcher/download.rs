@@ -32,8 +32,8 @@ impl<'a: 'b, 'b> DownloadMatcher<'a> {
     /// will be used.
     pub fn output(&'a self) -> PathBuf {
         self.matches.value_of("output")
-            .map(|path| PathBuf::from(path))
-            .unwrap_or(PathBuf::from("./"))
+            .map(PathBuf::from)
+            .unwrap_or_else(|| PathBuf::from("./"))
     }
 }
 

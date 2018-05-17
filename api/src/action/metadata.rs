@@ -56,19 +56,19 @@ impl<'a> Metadata<'a> {
             }
 
             // Make sure a password is given when it is required
-            if !self.password.is_some() && exist_response.has_password() {
+            if self.password.is_none() && exist_response.has_password() {
                 return Err(Error::PasswordRequired);
             }
         }
 
         // Create a key set for the file
-        let mut key = KeySet::from(self.file, self.password.as_ref());
+        let key = KeySet::from(self.file, self.password.as_ref());
 
         // Fetch the authentication nonce
         let auth_nonce = self.fetch_auth_nonce(client)?;
 
         // Fetch the metadata and the metadata nonce, return the result
-        self.fetch_metadata(&client, &mut key, auth_nonce)
+        self.fetch_metadata(&client, &key, &auth_nonce)
             .map_err(|err| err.into())
     }
 
@@ -92,7 +92,7 @@ impl<'a> Metadata<'a> {
         &self,
         client: &Client,
         key: &KeySet,
-        auth_nonce: Vec<u8>,
+        auth_nonce: &[u8],
     ) -> Result<MetadataResponse, MetaError> {
         // Compute the cryptographic signature for authentication
         let sig = signature_encoded(key.auth_key().unwrap(), &auth_nonce)
@@ -108,11 +108,11 @@ impl<'a> Metadata<'a> {
 
         // Ensure the status code is successful
         ensure_success(&response)
-            .map_err(|err| MetaError::NonceResponse(err))?;
+            .map_err(MetaError::NonceResponse)?;
 
         // Get the metadata nonce
         let nonce = header_nonce(&response)
-            .map_err(|err| MetaError::Nonce(err))?;
+            .map_err(MetaError::Nonce)?;
 
         // Parse the metadata response
         MetadataResponse::from(

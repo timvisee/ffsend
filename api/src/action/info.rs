@@ -29,7 +29,7 @@ impl<'a> Info<'a> {
     pub fn new(file: &'a RemoteFile, nonce: Option<Vec<u8>>) -> Self {
         Self {
             file,
-            nonce: nonce.unwrap_or(Vec::new()),
+            nonce: nonce.unwrap_or_default(),
         }
     }
 
@@ -45,7 +45,7 @@ impl<'a> Info<'a> {
             .map_err(|err| -> PrepareError { err.into() })?;
 
         // Send the info request
-        self.fetch_info(client, data).map_err(|err| err.into())
+        self.fetch_info(client, &data)
     }
 
     /// Fetch the authentication nonce for the file from the remote server.
@@ -62,7 +62,7 @@ impl<'a> Info<'a> {
     fn fetch_info(
         &self,
         client: &Client,
-        data: OwnedData<InfoData>,
+        data: &OwnedData<InfoData>,
     ) -> Result<InfoResponse, Error> {
         // Get the info URL, and send the request
         let url = UrlBuilder::api_info(self.file);
@@ -87,13 +87,13 @@ impl<'a> Info<'a> {
 /// The info data object.
 /// This object is currently empty, as no additional data is sent to the
 /// server.
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Default)]
 pub struct InfoData { }
 
 impl InfoData {
     /// Constructor.
     pub fn new() -> Self {
-        InfoData { }
+        InfoData::default()
     }
 }
 

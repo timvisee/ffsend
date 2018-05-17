@@ -14,7 +14,7 @@ const PROGRESS_BAR_FPS_MILLIS: u64 = 200;
 
 /// A progress bar reporter.
 pub struct ProgressBar<'a> {
-    bar: Option<Pbr<Stdout>>,
+    progress_bar: Option<Pbr<Stdout>>,
     msg_progress: &'a str,
     msg_finish: &'a str,
 }
@@ -23,7 +23,7 @@ impl<'a> ProgressBar<'a> {
     /// Construct a new progress bar, with the given messages.
     pub fn new(msg_progress: &'a str, msg_finish: &'a str) -> ProgressBar<'a> {
         Self {
-            bar: None,
+            progress_bar: None,
             msg_progress,
             msg_finish,
         }
@@ -44,26 +44,26 @@ impl<'a> ProgressReporter for ProgressBar<'a> {
     /// Start the progress with the given total.
     fn start(&mut self, total: u64) {
         // Initialize the progress bar
-        let mut bar = Pbr::new(total);
-        bar.set_max_refresh_rate(
+        let mut progress_bar = Pbr::new(total);
+        progress_bar.set_max_refresh_rate(
             Some(Duration::from_millis(PROGRESS_BAR_FPS_MILLIS))
         );
-        bar.set_units(Units::Bytes);
-        bar.message(self.msg_progress);
+        progress_bar.set_units(Units::Bytes);
+        progress_bar.message(self.msg_progress);
 
-        self.bar = Some(bar);
+        self.progress_bar = Some(progress_bar);
     }
 
     /// A progress update.
     fn progress(&mut self, progress: u64) {
-        self.bar.as_mut()
+        self.progress_bar.as_mut()
             .expect("progress bar not yet instantiated, cannot set progress")
             .set(progress);
     }
 
     /// Finish the progress.
     fn finish(&mut self) {
-        self.bar.as_mut()
+        self.progress_bar.as_mut()
             .expect("progress bar not yet instantiated")
             .finish_print(self.msg_finish);
     }

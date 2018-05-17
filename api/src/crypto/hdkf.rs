@@ -26,7 +26,7 @@ const KEY_AUTH_ITERATIONS: usize = 100;
 /// # Returns
 /// The output keying material, with the length as as specified in the `length`
 /// argument.
-fn hkdf<'a>(
+fn hkdf(
     length: usize,
     ikm: &[u8],
     info: Option<&[u8]>,

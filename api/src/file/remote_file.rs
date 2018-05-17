@@ -17,11 +17,11 @@ use crypto::b64;
 // TODO: match any sub-path?
 // TODO: match URL-safe base64 chars for the file ID?
 // TODO: constrain the ID length?
-const SHARE_PATH_PATTERN: &'static str = r"^/?download/([[:alnum:]]{8,}={0,3})/?$";
+const SHARE_PATH_PATTERN: &str = r"^/?download/([[:alnum:]]{8,}={0,3})/?$";
 
 /// A pattern for share URL fragments, capturing the file secret.
 // TODO: constrain the secret length?
-const SHARE_FRAGMENT_PATTERN: &'static str = r"^([a-zA-Z0-9-_+/]+)?\s*$";
+const SHARE_FRAGMENT_PATTERN: &str = r"^([a-zA-Z0-9-_+/]+)?\s*$";
 
 /// A struct representing an uploaded file on a Send host.
 ///
@@ -289,19 +289,20 @@ impl RemoteFile {
     /// This is ofcourse only done for properties that may be empty.
     ///
     /// The file IDs are not asserted for equality.
+    #[allow(useless_let_if_seq)]
     pub fn merge(&mut self, other: &RemoteFile, overwrite: bool) -> bool {
-        // Remember whether anything was changed
+        // Remember whether anything has changed
         let mut changed = false;
 
         // Set the upload time
         if other.upload_at.is_some() && (self.upload_at.is_none() || overwrite) {
-            self.upload_at = other.upload_at.clone();
+            self.upload_at = other.upload_at;
             changed = true;
         }
 
         // Set the expire time
         if !other.expire_uncertain() && (self.expire_uncertain() || overwrite) {
-            self.expire_at = other.expire_at.clone();
+            self.expire_at = other.expire_at;
             self.expire_uncertain = other.expire_uncertain();
             changed = true;
         }
@@ -318,7 +319,7 @@ impl RemoteFile {
             changed = true;
         }
 
-        return changed;
+        changed
     }
 }
 

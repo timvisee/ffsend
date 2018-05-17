@@ -11,7 +11,7 @@ use file::remote_file::RemoteFile;
 
 /// The default download count.
 pub const PARAMS_DEFAULT_DOWNLOAD: u8 = 1;
-pub const PARAMS_DEFAULT_DOWNLOAD_STR: &'static str = "1";
+pub const PARAMS_DEFAULT_DOWNLOAD_STR: &str = "1";
 
 /// The minimum allowed number of downloads, enforced by the server.
 pub const PARAMS_DOWNLOAD_MIN: u8 = 1;
@@ -43,7 +43,7 @@ impl<'a> Params<'a> {
         Self {
             file,
             params,
-            nonce: nonce.unwrap_or(Vec::new()),
+            nonce: nonce.unwrap_or_default(),
         }
     }
 
@@ -61,8 +61,7 @@ impl<'a> Params<'a> {
             .map_err(|err| -> PrepareError { err.into() })?;
 
         // Send the request to change the parameters
-        self.change_params(client, data)
-            .map_err(|err| err.into())
+        self.change_params(client, &data)
     }
 
     /// Fetch the authentication nonce for the file from the remote server.
@@ -79,7 +78,7 @@ impl<'a> Params<'a> {
     fn change_params(
         &self,
         client: &Client,
-        data: OwnedData<ParamsData>,
+        data: &OwnedData<ParamsData>,
     ) -> Result<(), Error> {
         // Get the params URL, and send the change
         let url = UrlBuilder::api_params(self.file);

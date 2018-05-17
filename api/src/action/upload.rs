@@ -86,7 +86,7 @@ impl Upload {
     pub fn invoke(
         self,
         client: &Client,
-        reporter: Arc<Mutex<ProgressReporter>>,
+        reporter: &Arc<Mutex<ProgressReporter>>,
     ) -> Result<RemoteFile, Error> {
         // Create file data, generate a key
         let file = FileData::from(&self.path)?;
@@ -101,7 +101,7 @@ impl Upload {
         let req = self.create_request(
             client,
             &key,
-            metadata,
+            &metadata,
             reader,
         );
 
@@ -137,13 +137,13 @@ impl Upload {
     {
         // Determine what filename to use
         let name = self.name.clone()
-            .unwrap_or(file.name().to_owned());
+            .unwrap_or_else(|| file.name().to_owned());
 
         // Construct the metadata
         let metadata = Metadata::from(
             key.iv(),
             name,
-            file.mime().clone(),
+            &file.mime(),
         ).to_json().into_bytes();
 
         // Encrypt the metadata
@@ -207,7 +207,7 @@ impl Upload {
         &self,
         client: &Client,
         key: &KeySet,
-        metadata: Vec<u8>,
+        metadata: &[u8],
         reader: EncryptedReader,
     ) -> Request {
         // Get the reader length
@@ -250,7 +250,7 @@ impl Upload {
 
         // Ensure the response is successful
         ensure_success(&response)
-            .map_err(|err| UploadError::Response(err))?;
+            .map_err(UploadError::Response)?;
 
         // Try to get the nonce, don't error on failure
         let nonce = header_nonce(&response).ok();
