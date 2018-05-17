@@ -1,11 +1,23 @@
 use clap::ArgMatches;
+use ffsend_api::url::Url;
 
+use cmd::arg::{ArgHost, CmdArgOption};
 use super::Matcher;
 
 /// The debug command matcher.
 pub struct DebugMatcher<'a> {
-    #[allow(dead_code)]
     matches: &'a ArgMatches<'a>,
+}
+
+impl<'a: 'b, 'b> DebugMatcher<'a> {
+    /// Get the host to upload to.
+    ///
+    /// This method parses the host into an `Url`.
+    /// If the given host is invalid,
+    /// the program will quit with an error message.
+    pub fn host(&'a self) -> Url {
+        ArgHost::value(self.matches)
+    }
 }
 
 impl<'a> Matcher<'a> for DebugMatcher<'a> {

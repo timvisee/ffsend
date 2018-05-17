@@ -35,6 +35,7 @@ impl CmdUpload {
             .arg(Arg::with_name("open")
                 .long("open")
                 .short("o")
+                .env("FFSEND_OPEN")
                 .help("Open the share link in your browser"));
 
         // Optional archive support
@@ -43,6 +44,7 @@ impl CmdUpload {
                 .long("archive")
                 .short("a")
                 .alias("arch")
+                .env("FFSEND_ARCHIVE")
                 .help("Package the file as an archive"))
         }
 
@@ -51,6 +53,7 @@ impl CmdUpload {
             cmd = cmd.arg(Arg::with_name("copy")
                 .long("copy")
                 .short("c")
+                .env("FFSEND_COPY")
                 .help("Copy the share link to your clipboard"));
         } 
         cmd

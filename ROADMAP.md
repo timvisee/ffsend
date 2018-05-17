@@ -7,7 +7,6 @@ Features:
 - Allow file/directory archiving on upload
 - Allow unarchiving on download 
 - Use clipboard through `xclip` on Linux if available for persistence
-- Allow environment variable settings using `Arg.env(NAME)`
 - Write complete README
 - Polish command outputs, make it consistent (format, color)
 - Automated releases through CI

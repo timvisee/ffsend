@@ -1,6 +1,6 @@
 use chrono::Duration;
 use clap::ArgMatches;
-use ffsend_api::config::{SEND_DEFAULT_EXPIRE_TIME, SEND_DEFAULT_HOST};
+use ffsend_api::config::SEND_DEFAULT_EXPIRE_TIME;
 use prettytable::{
     cell::Cell,
     format::FormatBuilder,
@@ -9,6 +9,7 @@ use prettytable::{
 };
 
 use cmd::matcher::{
+    debug::DebugMatcher,
     main::MainMatcher,
     Matcher,
 };
@@ -33,6 +34,7 @@ impl<'a> Debug<'a> {
     pub fn invoke(&self) -> Result<(), ActionError> {
         // Create the command matchers
         let matcher_main = MainMatcher::with(self.cmd_matches).unwrap();
+        let matcher_debug = DebugMatcher::with(self.cmd_matches).unwrap();
 
         // Create a table for all debug information
         let mut table = Table::new();
@@ -41,7 +43,7 @@ impl<'a> Debug<'a> {
         // The default host
         table.add_row(Row::new(vec![
             Cell::new("host:"),
-            Cell::new(SEND_DEFAULT_HOST),
+            Cell::new(matcher_debug.host().as_str()),
         ]));
 
         // The history file

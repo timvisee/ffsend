@@ -21,6 +21,7 @@ impl CmdArg for ArgHost {
             .short("h")
             .value_name("URL")
             .default_value(SEND_DEFAULT_HOST)
+            .env("FFSEND_HOST")
             .help("The remote host to upload to")
     }
 }
