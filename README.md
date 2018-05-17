@@ -1,12 +1,19 @@
+[![Build status on Travis CI][travis-master-badge]][travis-link]
+
 # ffsend
 > Securely and easily share files from the command line.
 > A fully featured [Firefox Send][send] client.
 
 Securely and easily share files from the command line through a safe, private
 and encrypted link using a single simple command.
-Files are shared with [Mozillas][mozilla] [Send][send] service and may be up
+Files are shared using the [Send][send] service and may be up
 to 2GB. Others are able to download these files with this tool, or through
 their webbrowser.
+
+```bash
+$ ffsend upload my-file.txt
+Share link: https://send.firefox.com/#sample-share-url
+```
 
 All files are always encrypted on the client, and secrets are never shared with
 the remote host. An optional password may be specified, and a default file
@@ -16,8 +23,8 @@ This provides a secure platform to share your files.
 Find out more about security [here](#security).
 
 - [Features](#features)
-- [Requirements](#requirements)
 - [Usage](#usage)
+- [Requirements](#requirements)
 - [Install](#install)
 - [Build](#build)
 - [Help](#help)
@@ -41,16 +48,13 @@ _Note: this tool is currently in the alpha phase_
 - Accurate error reporting
 - Intended to be used in scripts without interaction
 
-## Requirements
-- Linux, macOS or Windows
-- Internet connection when uploading or downloading
-
 ## Usage
 Easily upload and download:
 
 ```bash
 # Simple upload
-ffsend upload my-file.txt
+$ ffsend upload my-file.txt
+Share link: https://send.firefox.com/#sample-share-url
 
 # Advanced upload
 # - Specify a download limit of 20
@@ -58,38 +62,58 @@ ffsend upload my-file.txt
 # - Archive the file before uploading
 # - Copy the shareable URL to your clipboard
 # - Open the shareable URL in your browser
-ffsend upload --downloads 20 --password --archive --copy --open my-file.txt
+$ ffsend upload --downloads 20 --password --archive --copy --open my-file.txt
+Password: ******
+Share link: https://send.firefox.com/#sample-share-url
 
 # Upload to your own host
-ffsend u -h https://example.com/ my-file.txt
+$ ffsend u -h https://example.com/ my-file.txt
+Share link: https://example.com/#sample-share-url
 
 # Simple download
-ffsend download https://send.firefox.com/#sample-share-url
+$ ffsend download https://send.firefox.com/#sample-share-url
 ```
 
 Inspect remote files:
 
 ```bash
 # Check if a file exists
-ffsend exists https://send.firefox.com/#sample-share-url
+$ ffsend exists https://send.firefox.com/#sample-share-url
+Exists: yes
 
-# View all file info
-ffsend info https://send.firefox.com/#sample-share-url
+# Fetch remote file info
+$ ffsend info https://send.firefox.com/#sample-share-url
+ID:         b087066715
+Name:       my-file.txt
+Size:       12 KiB
+MIME:       text/plain
+Downloads:  0 of 10
+Expiry:     18h2m (64928s)
 ```
 
 Other commands include:
 ```bash
 # View your file history
-ffsend history
+$ ffsend history
+#  URL                                         EXPIRY  OWNER TOKEN
+1  https://send.firefox.com/#sample-share-url  23h57m  eea9f544f6d5df8a5afd
+2  https://send.firefox.com/#other-sample-url  17h38m  1e9fef63fee3baaf54ce
+3  https://example.com/#sample-share-url       37m30s  8eb28bc1bc85cfdab0e4
 
 # Change the password after uploading
-ffsend password https://send.firefox.com/#sample-share-url
+$ ffsend password https://send.firefox.com/#sample-share-url
+Password: ******
 
 # Delete a file
-ffsend delete https://send.firefox.com/#sample-share-url
+$ ffsend delete https://send.firefox.com/#sample-share-url
 ```
 
 Use the `--help` flag, or see the [help][#help] section for all available subcommands.
+
+## Requirements
+- Linux, macOS or Windows
+- A terminal :sunglasses:
+- Internet connection when uploading or downloading
 
 ## Install
 Because `ffsend` is still in alpha, no prebuilt binaries or repositories are
@@ -216,3 +240,5 @@ Check out the [LICENSE](api/LICENSE) file for more information.
 [rust]: https://rust-lang.org/
 [rustup]: https://rustup.rs/
 [send]: https://send.firefox.com/
+[travis-master-badge]: https://travis-ci.org/timvisee/ffsend.svg?branch=master
+[travis-link]: https://travis-ci.org/timvisee/ffsend
