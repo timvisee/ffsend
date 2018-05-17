@@ -1,4 +1,4 @@
-#[cfg(feature = "clipboard")]
+#[cfg(all(feature = "clipboard", not(target_os = "linux")))]
 extern crate clipboard;
 extern crate colored;
 extern crate directories;
@@ -7,8 +7,6 @@ extern crate open;
 
 use std::borrow::Borrow;
 use std::env::{current_exe, var_os};
-#[cfg(feature = "clipboard")]
-use std::error::Error as StdError;
 use std::ffi::OsStr;
 use std::fmt::{Debug, Display};
 use std::io::{
@@ -17,16 +15,22 @@ use std::io::{
     stderr,
     Write,
 };
+#[cfg(feature = "clipboard")]
+use std::io::ErrorKind as IoErrorKind;
 use std::path::Path;
 #[cfg(feature = "history")]
 use std::path::PathBuf;
 use std::process::{exit, ExitStatus};
+#[cfg(all(feature = "clipboard", target_os = "linux"))]
+use std::process::{Command, Stdio};
 
 use chrono::Duration;
 use failure::{err_msg, Fail};
+#[cfg(all(feature = "clipboard", not(target_os = "linux")))]
+use failure::{Compat, Error};
 use ffsend_api::url::Url;
 use rpassword::prompt_password_stderr;
-#[cfg(feature = "clipboard")]
+#[cfg(all(feature = "clipboard", not(target_os = "linux")))]
 use self::clipboard::{ClipboardContext, ClipboardProvider};
 use self::colored::*;
 #[cfg(feature = "history")]
@@ -262,9 +266,69 @@ pub fn open_path(path: &str) -> Result<ExitStatus, IoError> {
 
 /// Set the clipboard of the user to the given `content` string.
 #[cfg(feature = "clipboard")]
-pub fn set_clipboard(content: String) -> Result<(), Box<StdError>> {
-    let mut context: ClipboardContext = ClipboardProvider::new()?;
-    context.set_contents(content)
+pub fn set_clipboard(content: String) -> Result<(), ClipboardError> {
+    #[cfg(not(target_os = "linux"))] {
+        ClipboardProvider::new()
+            .and_then(|mut context: ClipboardContext| context.set_contents(content))
+            .map_err(|err| format_err!("{}", err).compat())
+            .map_err(ClipboardError::Generic)
+    }
+
+    #[cfg(target_os = "linux")] {
+        // Open an xclip process
+        let mut process = match Command::new("xclip")
+            .arg("-sel")
+            .arg("clip")
+            .stdin(Stdio::piped())
+            .spawn()
+        {
+            Ok(process) => process,
+            Err(err) => return Err(match err.kind() {
+                IoErrorKind::NotFound => ClipboardError::NoXclip,
+                _ => ClipboardError::Xclip(err),
+            }),
+        };
+
+        // Write the contents to the xclip process
+        process.stdin.as_mut().unwrap()
+            .write_all(content.as_bytes())
+            .map_err(ClipboardError::Xclip)?;
+
+        // Wait for xclip to exit
+        let status = process.wait()
+            .map_err(ClipboardError::Xclip)?;
+        if !status.success() {
+            return Err(ClipboardError::XclipStatus(status.code().unwrap_or(0)));
+        }
+
+        Ok(())
+    }
+}
+
+#[cfg(feature = "clipboard")]
+#[derive(Debug, Fail)]
+pub enum ClipboardError {
+    /// A generic error occurred while setting the clipboard contents
+    #[cfg(not(target_os = "linux"))]
+    #[fail(display = "failed to access clipboard")]
+    Generic(#[cause] Compat<Error>),
+
+    /// Xclip is not installed on the system, which is required for clipboard support.
+    #[cfg(target_os = "linux")]
+    #[fail(display = "failed to access clipboard, xclip is not installed")]
+    NoXclip,
+
+    /// An error occurred while using xclip to set the clipboard contents.
+    /// This problem probably occurred when stargin the xclip process, or while piping the
+    /// clipboard contents to the process.
+    #[cfg(target_os = "linux")]
+    #[fail(display = "failed to access clipboard using xclip")]
+    Xclip(#[cause] IoError),
+
+    /// Xclip unexpectetly exited with a non-successful status code.
+    #[cfg(target_os = "linux")]
+    #[fail(display = "failed to use clipboard, xclip exited with status code {}", _0)]
+    XclipStatus(i32),
 }
 
 /// Check for an emtpy password in the given `password`.

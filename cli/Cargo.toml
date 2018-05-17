@@ -27,12 +27,10 @@ no-color = ["colored/no-color"]
 [dependencies]
 chrono = "0.4"
 clap = "2.31"
-clipboard = { version = "0.4", optional = true }
 colored = "1.6"
 derive_builder = "0.5"
 directories = "0.10"
 failure = "0.1"
-failure_derive = "0.1"
 ffsend-api = { version = "*", path = "../api" }
 fs2 = "0.4"
 lazy_static = "1.0"
@@ -46,3 +44,6 @@ tar = { version = "0.4", optional = true }
 tempfile = "3"
 toml = "0.4"
 version-compare = "0.0.6"
+
+[target.'cfg(not(target_os = "linux"))'.dependencies]
+clipboard = { version = "0.4", optional = true }

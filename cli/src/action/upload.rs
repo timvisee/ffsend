@@ -248,8 +248,10 @@ impl<'a> Upload<'a> {
 
         // Copy the URL in the user's clipboard
         #[cfg(feature = "clipboard")] {
-            if matcher_upload.copy() && set_clipboard(url.as_str().to_owned()).is_err() {
-                print_error_msg("failed to copy the URL to the clipboard");
+            if matcher_upload.copy() {
+                if let Err(err) = set_clipboard(url.as_str().to_owned()) {
+                    print_error(err.context("failed to copy the URL to the clipboard, ignoring"));
+                }
             }
         }
 

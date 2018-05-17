@@ -3,9 +3,8 @@ extern crate chrono;
 extern crate clap;
 #[macro_use]
 extern crate derive_builder;
-extern crate failure;
 #[macro_use]
-extern crate failure_derive;
+extern crate failure;
 extern crate ffsend_api;
 #[cfg(feature = "history")]
 #[macro_use]

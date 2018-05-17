@@ -3,8 +3,6 @@ The first release used for gathering feedback on the application by selected
 people.
 
 Features:
-- Allow unarchiving on download 
-- Use clipboard through `xclip` on Linux if available for persistence
 - Write complete README
 - Polish command outputs, make it consistent (format, color)
 - Automated releases through CI
