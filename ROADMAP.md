@@ -3,8 +3,6 @@ The first release used for gathering feedback on the application by selected
 people.
 
 Features:
-- Make use of stdout and stderr consistent
-- Allow file/directory archiving on upload
 - Allow unarchiving on download 
 - Use clipboard through `xclip` on Linux if available for persistence
 - Write complete README
@@ -16,6 +14,7 @@ Features:
 - Arch AUR package
 - Windows, macOS and Redox support
 - Implement verbose logging with `-v`
+- Make use of stdout and stderr consistent
 - Allow empty owner token for info command
 - Check and validate all errors, are some too verbose?
 
@@ -23,6 +22,7 @@ Features:
 The first public release.
 
 Features:
+- Do not write archives to the disk (temporarily), stream their contents
 - Implement error handling everywhere properly
 - Extract utility module
 - Embed/wrap request errors with failure
@@ -41,6 +41,8 @@ Features:
 - Host configuration file for host tags, to easily upload to other hosts
 
 # Other ideas
+- Check if extracting an archive overwrites files 
+- Flag to disable logging to stderr
 - Rework encrypted reader/writer
 - API actions contain duplicate code, create centralized functions
 - Only allow file extension renaming on upload with `-f` flag

@@ -16,6 +16,7 @@ extern crate serde;
 #[cfg(feature = "history")]
 #[macro_use]
 extern crate serde_derive;
+extern crate tempfile;
 
 mod action;
 #[cfg(feature = "archive")]

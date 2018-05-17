@@ -13,6 +13,9 @@ use serde_json;
 
 use crypto::b64;
 
+/// The MIME type string for a tar file.
+const MIME_TAR: &str = "application/x-tar";
+
 /// File metadata, which is send to the server.
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Metadata {
@@ -65,6 +68,14 @@ impl Metadata {
 
         // Create a sized array
         *array_ref!(decoded, 0, 12)
+    }
+
+    /**
+     * Check whether this MIME type is recognized as supported archive type.
+     * `true` is returned if it's an archive, `false` if not.
+     */
+    pub fn is_archive(&self) -> bool {
+        self.mime.to_lowercase() == MIME_TAR.to_lowercase()
     }
 }
 

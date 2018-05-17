@@ -7,7 +7,8 @@ pub struct CmdDownload;
 
 impl CmdDownload {
     pub fn build<'a, 'b>() -> App<'a, 'b> {
-        SubCommand::with_name("download")
+        // Build the subcommand
+        let mut cmd = SubCommand::with_name("download")
             .about("Download files")
             .visible_alias("d")
             .visible_alias("down")
@@ -20,6 +21,19 @@ impl CmdDownload {
                  .alias("out")
                  .alias("file")
                  .value_name("PATH")
-                 .help("The output file or directory"))
+                 .help("The output file or directory"));
+
+        // Optional archive support
+        #[cfg(feature = "archive")] {
+            cmd = cmd.arg(Arg::with_name("extract")
+                .long("extract")
+                .short("e")
+                .alias("archive")
+                .alias("arch")
+                .alias("a")
+                .help("Extract an archived file"))
+        }
+
+        cmd
     }
 }

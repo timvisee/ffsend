@@ -5,6 +5,7 @@ use ffsend_api::url::Url;
 
 use cmd::arg::{ArgPassword, ArgUrl, CmdArgOption};
 use super::Matcher;
+use util::env_var_present;
 
 /// The download command matcher.
 pub struct DownloadMatcher<'a> {
@@ -34,6 +35,12 @@ impl<'a: 'b, 'b> DownloadMatcher<'a> {
         self.matches.value_of("output")
             .map(PathBuf::from)
             .unwrap_or_else(|| PathBuf::from("./"))
+    }
+
+    /// Check whether to extract an archived file.
+    #[cfg(feature = "archive")]
+    pub fn extract(&self) -> bool {
+        self.matches.is_present("extract") || env_var_present("FFSEND_EXTRACT")
     }
 }
 

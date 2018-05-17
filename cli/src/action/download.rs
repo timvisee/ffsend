@@ -1,5 +1,6 @@
 use std::env::current_dir;
 use std::fs::create_dir_all;
+use std::io::Error as IoError;
 use std::path::{self, PathBuf};
 use std::sync::{Arc, Mutex};
 
@@ -20,7 +21,13 @@ use ffsend_api::action::metadata::{
 use ffsend_api::file::remote_file::{FileParseError, RemoteFile};
 use ffsend_api::reader::ProgressReporter;
 use ffsend_api::reqwest::Client;
+use tempfile::{
+    Builder as TempBuilder,
+    NamedTempFile,
+};
 
+#[cfg(feature = "archive")]
+use archive::archive::Archive;
 use cmd::matcher::{
     Matcher,
     download::DownloadMatcher,
@@ -92,12 +99,60 @@ impl<'a> Download<'a> {
             false,
         ).invoke(&client)?;
 
-        // Prepare the output path to use
-        let target = Self::prepare_path(
+        // A temporary archive file, only used when archiving
+        // The temporary file is stored here, to ensure it's lifetime exceeds the upload process
+        #[cfg(feature = "archive")]
+        let mut tmp_archive: Option<NamedTempFile> = None;
+
+        // Check whether to extract
+        #[cfg(feature = "archive")]
+        let mut extract = matcher_download.extract();
+
+        #[cfg(feature = "archive")] {
+            // Ask to extract if downloading an archive
+            if !extract && metadata.metadata().is_archive() {
+                if prompt_yes(
+                    "You're downloading an archive, extract it into the selected directory?",
+                    Some(true),
+                    &matcher_main,
+                ) {
+                    extract = true;
+                }
+            }
+        }
+
+        // Prepare the download target and output path to use
+        #[cfg(feature = "archive")]
+        let output_dir = !extract;
+        #[cfg(not(feature = "archive"))]
+        let output_dir = false;
+        let mut target = Self::prepare_path(
             &target,
             metadata.metadata().name(),
             &matcher_main,
+            output_dir,
         );
+        let output_path = target.clone();
+
+        #[cfg(feature = "archive")] {
+            // Allocate an archive file, and update the download and target paths
+            if extract {
+                // TODO: select the extention dynamically
+                let archive_extention = ".tar";
+
+                // Allocate a temporary file to download the archive to
+                tmp_archive = Some(
+                    TempBuilder::new()
+                        .prefix(&format!(".{}-archive-", crate_name!()))
+                        .suffix(archive_extention)
+                        .tempfile()
+                        .map_err(ExtractError::TempFile)?
+                );
+                if let Some(tmp_archive) = &tmp_archive {
+                    target = tmp_archive.path().to_path_buf();
+                }
+            }
+        }
 
         // Ensure there is enough disk space available when not being forced
         if !matcher_main.force() {
@@ -117,6 +172,18 @@ impl<'a> Download<'a> {
             Some(metadata),
         ).invoke(&client, &progress_reader)?;
 
+        // Extract the downloaded file if working with an archive
+        #[cfg(feature = "archive")] {
+            if extract {
+                eprintln!("Extracting...");
+
+                // Extract the downloaded file
+                Archive::new(tmp_archive.unwrap().into_file())
+                    .extract(output_path)
+                    .map_err(ExtractError::Extract)?;
+            }
+        }
+
         // Add the file to the history
         #[cfg(feature = "history")]
         history_tool::add(&matcher_main, file, true);
@@ -130,6 +197,8 @@ impl<'a> Download<'a> {
     /// This methods prepares a full file path to use for the file to
     /// download, based on the current directory, the original file name,
     /// and the user input.
+    /// If `file` is set to false, no file name is included and the path
+    /// will point to a directory.
     ///
     /// If no file name was given, the original file name is used.
     ///
@@ -143,12 +212,18 @@ impl<'a> Download<'a> {
         target: &PathBuf,
         name_hint: &str,
         main_matcher: &MainMatcher,
+        file: bool,
     ) -> PathBuf {
         // Select the path to use
-        let target = Self::select_path(&target, name_hint);
+        let mut target = Self::select_path(&target, name_hint);
+
+        // Use the parent directory, if we don't want a file
+        if !file {
+            target = target.parent().unwrap().to_path_buf();
+        }
 
         // Ask to overwrite
-        if target.exists() && !main_matcher.force() {
+        if file && target.exists() && !main_matcher.force() {
             eprintln!(
                 "The path '{}' already exists",
                 target.to_str().unwrap_or("?"),
@@ -159,14 +234,27 @@ impl<'a> Download<'a> {
             }
         }
 
-        // Validate the parent directory exists
-        match target.parent() {
-            Some(parent) => if !parent.is_dir() {
+        {
+            // Get the deepest directory, as we have to ensure it exists
+            let dir = if file {
+                match target.parent() {
+                    Some(parent) => parent,
+                    None => quit_error_msg(
+                        "invalid output file path",
+                        ErrorHints::default(),
+                    ),
+                }
+            } else {
+                &target
+            };
+
+            // Ensure the directory exists
+            if !dir.is_dir() {
                 // Prompt to create them if not forced
                 if !main_matcher.force() {
                     eprintln!(
                         "The directory '{}' doesn't exists",
-                        parent.to_str().unwrap_or("?"),
+                        dir.to_str().unwrap_or("?"),
                     );
                     if !prompt_yes("Create it?", Some(true), main_matcher) {
                         println!("Download cancelled");
@@ -175,16 +263,12 @@ impl<'a> Download<'a> {
                 }
 
                 // Create the parent directories
-                if let Err(err) = create_dir_all(parent) {
+                if let Err(err) = create_dir_all(dir) {
                     quit_error(err.context(
                         "failed to create parent directories for output file",
                     ), ErrorHints::default());
                 }
-            },
-            None => quit_error_msg(
-                "invalid output file path",
-                ErrorHints::default(),
-            ),
+            }
         }
 
         target
@@ -280,6 +364,10 @@ pub enum Error {
     #[fail(display = "")]
     Download(#[cause] DownloadError),
 
+    /// An error occurred while extracting the file.
+    #[fail(display = "failed the extraction procedure")]
+    Extract(#[cause] ExtractError),
+
     /// The given Send file has expired, or did never exist in the first place.
     #[fail(display = "the file has expired or did never exist")]
     Expired,
@@ -307,4 +395,21 @@ impl From<DownloadError> for Error {
     fn from(err: DownloadError) -> Error {
         Error::Download(err)
     }
+}
+
+impl From<ExtractError> for Error {
+    fn from(err: ExtractError) -> Error {
+        Error::Extract(err)
+    }
+}
+
+#[derive(Debug, Fail)]
+pub enum ExtractError {
+    /// An error occurred while creating the temporary archive file.
+    #[fail(display = "failed to create temporary archive file")]
+    TempFile(#[cause] IoError),
+
+    /// Failed to extract the file contents to the target directory.
+    #[fail(display = "failed to extract archive contents to target directory")]
+    Extract(#[cause] IoError),
 }

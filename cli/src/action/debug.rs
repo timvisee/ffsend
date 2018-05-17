@@ -14,7 +14,7 @@ use cmd::matcher::{
     Matcher,
 };
 use error::ActionError;
-use util::format_duration;
+use util::{format_bool, format_duration};
 
 /// A file debug action.
 pub struct Debug<'a> {
@@ -56,6 +56,12 @@ impl<'a> Debug<'a> {
         table.add_row(Row::new(vec![
             Cell::new("Default expiry:"),
             Cell::new(&format_duration(Duration::seconds(SEND_DEFAULT_EXPIRE_TIME))),
+        ]));
+
+        // Show whether verbose is used
+        table.add_row(Row::new(vec![
+            Cell::new("Verbose:"),
+            Cell::new(format_bool(matcher_main.verbose())),
         ]));
 
         // Print the debug table

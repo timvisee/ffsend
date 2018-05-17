@@ -1,5 +1,3 @@
-extern crate tempfile;
-
 use std::fs::File;
 use std::io::Error as IoError;
 use std::path::Path;
@@ -21,7 +19,7 @@ use prettytable::{
     row::Row,
     Table,
 };
-use self::tempfile::{
+use tempfile::{
     Builder as TempBuilder,
     NamedTempFile,
 };
@@ -137,8 +135,7 @@ impl<'a> Upload<'a> {
         // The temporary file is stored here, to ensure it's lifetime exceeds the upload process
         let mut tmp_archive: Option<NamedTempFile> = None;
 
-        #[cfg(feature = "archive")]
-        {
+        #[cfg(feature = "archive")] {
             // Determine whether to archive, ask if a directory was selected
             let mut archive = matcher_upload.archive();
             if !archive && path.is_dir() {
@@ -244,15 +241,13 @@ impl<'a> Upload<'a> {
         }
 
         // Copy the URL in the user's clipboard
-        #[cfg(feature = "clipboard")]
-        {
+        #[cfg(feature = "clipboard")] {
             if matcher_upload.copy() && set_clipboard(url.as_str().to_owned()).is_err() {
                 print_error_msg("failed to copy the URL to the clipboard");
             }
         }
 
-        #[cfg(feature = "archive")]
-        {
+        #[cfg(feature = "archive")] {
             // Close the temporary zip file, to ensure it's removed
             if let Some(tmp_archive) = tmp_archive.take() {
                 if let Err(err) = tmp_archive.close() {

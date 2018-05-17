@@ -561,6 +561,15 @@ pub fn format_duration(duration: impl Borrow<Duration>) -> String {
     components.join("")
 }
 
+/// Format the given boolean, as `yes` or `no`.
+pub fn format_bool(b: bool) -> &'static str {
+    if b {
+        "yes"
+    } else {
+        "no"
+    }
+}
+
 /// Get the name of the executable that was invoked.
 pub fn exe_name() -> String {
     current_exe()

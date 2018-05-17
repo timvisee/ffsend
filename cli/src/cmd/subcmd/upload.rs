@@ -43,7 +43,7 @@ impl CmdUpload {
                 .long("archive")
                 .short("a")
                 .alias("arch")
-                .help("Package the file as an archive"))
+                .help("Archive the upload in a single file"))
         }
 
         // Optional clipboard support
@@ -52,7 +52,8 @@ impl CmdUpload {
                 .long("copy")
                 .short("c")
                 .help("Copy the share link to your clipboard"));
-        } 
+        }
+
         cmd
     }
 }
