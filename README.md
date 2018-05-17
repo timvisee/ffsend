@@ -2,21 +2,18 @@
 > Securely and easily share files from the command line.
 > A fully featured [Firefox Send][send] client.
 
-This tool makes it easy to share your files securely from the command
-line with a shareable link for files up to 2GB. Files are shared through
-[Mozillas][mozilla] [Send][send] service. Others may download your files with
-this tool, or through their webbrowser.
+Securely and easily share files from the command line through a safe, private
+and encrypted link using a single simple command.
+Files are shared with [Mozillas][mozilla] [Send][send] service and may be up
+to 2GB. Others are able to download these files with this tool, or through
+their webbrowser.
 
-Encryption is done on the client, and keys are never shared with the remote
-host. An optional password may be specified, and a default file lifetime of
-1 (up to 20) download or 24 hours is enforced. This provides a secure bases to
-share your files. Read more about security here. TODO HERE
-
-The public [Send][send] service that is used as default host is provided by
-[Mozilla][mozilla].
-This application is not affiliated with [Mozilla][mozilla], [Firefox][firefox] or [Firefox Send][send].
-
-_Note: this tool is currently in the alpha phase_
+All files are always encrypted on the client, and secrets are never shared with
+the remote host. An optional password may be specified, and a default file
+lifetime of 1 (up to 20) download or 24 hours is enforced to ensure your stuff
+does not remain online forever.
+This provides a secure platform to share your files.
+Find out more about security [here](#security).
 
 - [Features](#features)
 - [Requirements](#requirements)
@@ -26,15 +23,22 @@ _Note: this tool is currently in the alpha phase_
 - [Help](#help)
 - [License](#license)
 
+The public [Send][send] service that is used as default host is provided by
+[Mozilla][mozilla].  
+This application is not affiliated with [Mozilla][mozilla], [Firefox][firefox] or [Firefox Send][send].
+
+_Note: this tool is currently in the alpha phase_
+
 ## Features
 - Fully featured and friendly command line tool
 - Upload and download files securely
-- Client side encryption
+- Always encrypted on the client
 - Additional password protection and configurable download limits
 - Built-in file and directory archiving and extraction
 - History tracking your files for easy management
 - Ability to use your own Send host
-- Check if a remote file exists, view it's info or delete files
+- Inspect or delete shared files
+- Accurate error reporting
 - Intended to be used in scripts without interaction
 
 ## Requirements
@@ -42,7 +46,7 @@ _Note: this tool is currently in the alpha phase_
 - Internet connection when uploading or downloading
 
 ## Usage
-Upload and download files:
+Easily upload and download:
 
 ```bash
 # Simple upload
@@ -56,27 +60,51 @@ ffsend upload my-file.txt
 # - Open the shareable URL in your browser
 ffsend upload --downloads 20 --password --archive --copy --open my-file.txt
 
+# Upload to your own host
+ffsend u -h https://example.com/ my-file.txt
+
 # Simple download
-ffsend download https://send.firefox.com/download/a5d76f6007/#apUoTcOwRB8lLFwAFdLykQ
+ffsend download https://send.firefox.com/#sample-share-url
+```
+
+Inspect remote files:
+
+```bash
+# Check if a file exists
+ffsend exists https://send.firefox.com/#sample-share-url
+
+# View all file info
+ffsend info https://send.firefox.com/#sample-share-url
+```
+
+Other commands include:
+```bash
+# View your file history
+ffsend history
+
+# Change the password after uploading
+ffsend password https://send.firefox.com/#sample-share-url
+
+# Delete a file
+ffsend delete https://send.firefox.com/#sample-share-url
 ```
 
 Use the `--help` flag, or see the [help][#help] section for all available subcommands.
 
 ## Install
 Because `ffsend` is still in alpha, no prebuilt binaries or repositories are
-available at this time.
+available at this time.  
 Build and install `ffsend` yourself using these fairly easy steps [here](#build).
 
 ## Build
-To build and install `ffsend` yourself, make sure you meet the following
-requirements before proceeding:
+To build and install `ffsend` yourself, you meet the following requirements
+before proceeding:
 
 ### Build requirements
-- Must meet the regular [requirements](#requirements)
-- [Git][git] must be installed
-- [Rust][rust] v1.26 or higher must be installed (install using [rustup][rustup])
-	- Should include the `cargo` package manager.
-- [OpenSSL][openssl] or LibreSSL libraries and headers must be available
+- Regular [requirements](#requirements)
+- [`git`][git]
+- [`rust`][rust] `v1.26` or higher (install using [`rustup`][rustup])
+- [OpenSSL][openssl] or [LibreSSL][libressl] libraries and headers must be available
 	- Linux:
 		- Ubuntu/Debian: `apt install pkg-config libssl-dev`
 		- CentOS/Red Hat/openSUSE: `yum install openssl-devel`
@@ -89,7 +117,7 @@ requirements before proceeding:
 		- See instructions here [here](https://github.com/sfackler/rust-openssl#windows-msvc)
 
 ### Compile and install
-Then, to compile `ffsend` walk through one of the following steps:
+Then, walk through one of the following steps to compile and install `ffsend`:
 
 <!--- Compile and install it directly from cargo: -->
 <!-- -->
@@ -106,16 +134,15 @@ Then, to compile `ffsend` walk through one of the following steps:
 	```bash
 	# Clone the project
 	git clone https://github.com/timvisee/ffsend.git
-	cd ffsend
+	cd ffsend/cli
 
 	# Compile and install
-	cargo install --path cli --force
+	cargo install -f
 
 	# Start using ffsend
 	ffsend --help
 
 	# or run it directly from cargo
-	cd cli
 	cargo run --release -- --help 
 	```
 
@@ -177,11 +204,13 @@ This application is not affiliated with Mozilla, Firefox or Firefox Send.
 This tool is released under the GNU GPL-3.0 license. Check out the
 [LICENSE](LICENSE) file for more information. 
 
-The included API library intended for use in other projects is released under
-the MIT license. Check out the [LICENSE](api/LICENSE) file for more information.
+The included API library located [here](api) is intended for use in other
+projects and is is released under the MIT license.
+Check out the [LICENSE](api/LICENSE) file for more information.
 
 [firefox]: https://firefox.com/
 [git]: https://git-scm.com/
+[libressl]: https://libressl.org/
 [mozilla]: https://mozzilla.org/
 [openssl]: https://www.openssl.org/
 [rust]: https://rust-lang.org/
