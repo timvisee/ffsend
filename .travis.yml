@@ -5,6 +5,10 @@ rust:
   - stable
   - beta
   - nightly
+matrix:
+  include:
+    - os: osx
+      rust: stable
 addons:
   apt:
     packages:
