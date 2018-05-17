@@ -122,14 +122,14 @@ impl<'a> Info<'a> {
         if let Some(metadata) = metadata {
             // The file name
             table.add_row(Row::new(vec![
-                Cell::new("name:"),
+                Cell::new("Name:"),
                 Cell::new(metadata.metadata().name()),
             ]));
 
             // The file size
             let size = metadata.size();
             table.add_row(Row::new(vec![
-                Cell::new("size:"),
+                Cell::new("Size:"),
                 Cell::new(
                     &if size >= 1024 {
                         format!("{} ({} B)", format_bytes(size), size)
@@ -148,13 +148,13 @@ impl<'a> Info<'a> {
 
         // The download count
         table.add_row(Row::new(vec![
-            Cell::new("downloads:"),
+            Cell::new("Downloads:"),
             Cell::new(&format!("{} of {}", info.download_count(), info.download_limit())),
         ]));
 
         // The time to live
         table.add_row(Row::new(vec![
-            Cell::new("expiry:"),
+            Cell::new("Expiry:"),
             Cell::new(
                 &if ttl_millis >= 60 * 1000 {
                     format!("{} ({}s)", format_duration(&ttl), ttl.num_seconds())

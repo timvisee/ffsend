@@ -1,5 +1,3 @@
-// TODO: remove all expect unwraps, replace them with proper errors
-
 extern crate tempfile;
 
 use std::fs::File;
@@ -17,6 +15,12 @@ use ffsend_api::action::upload::{
 use ffsend_api::config::{UPLOAD_SIZE_MAX, UPLOAD_SIZE_MAX_RECOMMENDED};
 use ffsend_api::reader::ProgressReporter;
 use ffsend_api::reqwest::Client;
+use prettytable::{
+    cell::Cell,
+    format::FormatBuilder,
+    row::Row,
+    Table,
+};
 use self::tempfile::{
     Builder as TempBuilder,
     NamedTempFile,
@@ -89,7 +93,7 @@ impl<'a> Upload<'a> {
             } else if size > UPLOAD_SIZE_MAX_RECOMMENDED && !matcher_main.force() {
                 // The file is larger than the recommended maximum, warn
                 eprintln!(
-                    "the file size is {}, bigger than the recommended maximum of {}",
+                    "The file size is {}, bigger than the recommended maximum of {}",
                     format_bytes(size),
                     format_bytes(UPLOAD_SIZE_MAX_RECOMMENDED),
                 );
@@ -135,9 +139,22 @@ impl<'a> Upload<'a> {
 
         #[cfg(feature = "archive")]
         {
-            // Archive the file if specified
-            if matcher_upload.archive() {
-                println!("Archiving file...");
+            // Determine whether to archive, ask if a directory was selected
+            let mut archive = matcher_upload.archive();
+            if !archive && path.is_dir() {
+                if prompt_yes(
+                    "You've selected a directory, only a single file may be uploaded.\n\
+                        Archive the directory into a single file?",
+                    Some(true),
+                    &matcher_main,
+                ) {
+                    archive = true;
+                }
+            }
+
+            // Archive the selected file or directory
+            if archive {
+                eprintln!("Archiving...");
                 let archive_extention = ".tar";
 
                 // Create a new temporary file to write the archive to
@@ -157,7 +174,6 @@ impl<'a> Upload<'a> {
 
                     // Select the file name to use if not set
                     if file_name.is_none() {
-                        // TODO: use canonical path here
                         file_name = Some(
                             path.canonicalize()
                                 .map_err(|err| ArchiveError::FileName(Some(err)))?
@@ -165,7 +181,7 @@ impl<'a> Upload<'a> {
                                 .ok_or(ArchiveError::FileName(None))?
                                 .to_str()
                                 .map(|s| s.to_owned())
-                                .expect("failed to create string from file name")
+                                .ok_or(ArchiveError::FileName(None))?
                         );
                     }
 
@@ -198,10 +214,19 @@ impl<'a> Upload<'a> {
             params,
         ).invoke(&client, &progress_reporter)?;
 
-        // Get the download URL, and report it in the console
+        // Get the download URL, and report it in the console in a table
         let url = file.download_url(true);
-        println!("Download URL: {}", url);
-        println!("Owner token: {}", file.owner_token().unwrap());
+        let mut table = Table::new();
+        table.set_format(FormatBuilder::new().padding(0, 2).build());
+        table.add_row(Row::new(vec![
+            Cell::new("Share URL:"),
+            Cell::new(url.as_str()),
+        ]));
+        table.add_row(Row::new(vec![
+            Cell::new("Owner token:"),
+            Cell::new(file.owner_token().unwrap()),
+        ]));
+        table.printstd();
 
         // Add the file to the history manager
         #[cfg(feature = "history")]

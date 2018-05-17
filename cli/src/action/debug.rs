@@ -42,19 +42,19 @@ impl<'a> Debug<'a> {
 
         // The default host
         table.add_row(Row::new(vec![
-            Cell::new("host:"),
+            Cell::new("Host:"),
             Cell::new(matcher_debug.host().as_str()),
         ]));
 
         // The history file
         table.add_row(Row::new(vec![
-            Cell::new("history file:"),
+            Cell::new("History file:"),
             Cell::new(matcher_main.history().to_str().unwrap_or("?")),
         ]));
 
         // The default host
         table.add_row(Row::new(vec![
-            Cell::new("default expiry:"),
+            Cell::new("Default expiry:"),
             Cell::new(&format_duration(Duration::seconds(SEND_DEFAULT_EXPIRE_TIME))),
         ]));
 

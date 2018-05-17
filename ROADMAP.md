@@ -32,6 +32,7 @@ Features:
 - Implement a quiet `-q` mode
 - Update all dependencies
 - Check all TODOs, solve them when possible
+- Allow multi file uploads (select more than one file or directory)
 
 # Future releases
 - Color usage flag
