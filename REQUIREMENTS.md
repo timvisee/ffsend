@@ -12,10 +12,12 @@ toolchain.
 
 ## Environment variables
 - `FFSEND_HOST`: upload host (string)
+- `FFSEND_HISTORY`: history file path (string)
+
+Temporarily disabled:
 - `FFSEND_FORCE`: upload host (present/boolean)
 - `FFSEND_NO_INTERACT`: upload host (present/boolean)
 - `FFSEND_YES`: upload host (present/boolean)
-- `FFSEND_HISTORY`: history file path (string)
 - `FFSEND_INCOGNITO`: incognito mode (present/boolean)
 - `FFSEND_OPEN`: open an uploaded file (present/boolean)
 - `FFSEND_ARCHIVE`: enable file archival (present/boolean)

@@ -30,6 +30,7 @@ Features:
 - Allow piping input/output files
 - Allow hiding the progress bar, and/or showing simple progress (with `-q`)
 - Implement a quiet `-q` mode
+- Update all dependencies
 - Check all TODOs, solve them when possible
 
 # Future releases

@@ -159,8 +159,10 @@ impl<'a> Upload<'a> {
                     if file_name.is_none() {
                         // TODO: use canonical path here
                         file_name = Some(
-                            path.file_name()
-                                .ok_or(ArchiveError::FileName)?
+                            path.canonicalize()
+                                .map_err(|err| ArchiveError::FileName(Some(err)))?
+                                .file_name()
+                                .ok_or(ArchiveError::FileName(None))?
                                 .to_str()
                                 .map(|s| s.to_owned())
                                 .expect("failed to create string from file name")
@@ -273,7 +275,7 @@ pub enum ArchiveError {
 
     /// Failed to infer a file name for the archive.
     #[fail(display = "failed to infer a file name for the archive")]
-    FileName,
+    FileName(Option<IoError>),
 
     /// Failed to add a file or directory to the archive.
     #[fail(display = "failed to add file to the archive")]
