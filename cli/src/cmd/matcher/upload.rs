@@ -6,7 +6,7 @@ use ffsend_api::url::Url;
 
 use cmd::arg::{ArgDownloadLimit, ArgHost, ArgPassword, CmdArgOption};
 use super::Matcher;
-use util::{ErrorHintsBuilder, quit_error_msg};
+use util::{env_var_present, ErrorHintsBuilder, quit_error_msg};
 
 /// The upload command matcher.
 pub struct UploadMatcher<'a> {
@@ -75,18 +75,18 @@ impl<'a: 'b, 'b> UploadMatcher<'a> {
     /// TODO: infer to use this flag if a directory is selected
     #[cfg(feature = "archive")]
     pub fn archive(&self) -> bool {
-        self.matches.is_present("archive")
+        self.matches.is_present("archive") || env_var_present("FFSEND_ARCHIVE")
     }
 
     /// Check whether to open the file URL in the user's browser.
     pub fn open(&self) -> bool {
-        self.matches.is_present("open")
+        self.matches.is_present("open") || env_var_present("FFSEND_OPEN")
     }
 
     /// Check whether to copy the file URL in the user's clipboard.
     #[cfg(feature = "clipboard")]
     pub fn copy(&self) -> bool {
-        self.matches.is_present("copy")
+        self.matches.is_present("copy") || env_var_present("FFSEND_COPY")
     }
 }
 

@@ -6,9 +6,10 @@ extern crate fs2;
 extern crate open;
 
 use std::borrow::Borrow;
-use std::env::current_exe;
+use std::env::{current_exe, var_os};
 #[cfg(feature = "clipboard")]
 use std::error::Error as StdError;
+use std::ffi::OsStr;
 use std::fmt::{Debug, Display};
 use std::io::{
     Error as IoError,
@@ -632,4 +633,11 @@ pub fn app_history_file_path_string() -> String {
     app_history_file_path().to_str()
         .unwrap()
         .to_owned()
+}
+
+/// Check whether an environment variable with the given key is present in the context of the
+/// current process. The environment variable doesn't have to hold any specific value.
+/// Returns `true` if present, `false` if not.
+pub fn env_var_present(key: impl AsRef<OsStr>) -> bool {
+    var_os(key).is_some()
 }

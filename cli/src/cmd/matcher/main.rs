@@ -5,7 +5,7 @@ use clap::ArgMatches;
 
 use super::Matcher;
 #[cfg(feature = "history")]
-use util::{ErrorHintsBuilder, quit_error_msg};
+use util::{env_var_present, ErrorHintsBuilder, quit_error_msg};
 
 /// The main command matcher.
 pub struct MainMatcher<'a> {
@@ -15,17 +15,17 @@ pub struct MainMatcher<'a> {
 impl<'a: 'b, 'b> MainMatcher<'a> {
     /// Check whether to force.
     pub fn force(&self) -> bool {
-        self.matches.is_present("force")
+        self.matches.is_present("force") || env_var_present("FFSEND_FORCE")
     }
 
     /// Check whether to use no-interact mode.
     pub fn no_interact(&self) -> bool {
-        self.matches.is_present("no-interact")
+        self.matches.is_present("no-interact") || env_var_present("FFSEND_NO_INTERACT")
     }
 
     /// Check whether to assume yes.
     pub fn assume_yes(&self) -> bool {
-        self.matches.is_present("yes")
+        self.matches.is_present("yes") || env_var_present("FFSEND_YES")
     }
 
     /// Get the history file to use.
@@ -52,7 +52,7 @@ impl<'a: 'b, 'b> MainMatcher<'a> {
     /// Check whether we are incognito from the file history.
     #[cfg(feature = "history")]
     pub fn incognito(&self) -> bool {
-        self.matches.is_present("incognito")
+        self.matches.is_present("incognito") || env_var_present("FFSEND_INCOGNITO")
     }
 }
 
