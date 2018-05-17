@@ -222,10 +222,12 @@ impl<'a> Upload<'a> {
             Cell::new("Share URL:"),
             Cell::new(url.as_str()),
         ]));
-        table.add_row(Row::new(vec![
-            Cell::new("Owner token:"),
-            Cell::new(file.owner_token().unwrap()),
-        ]));
+        if matcher_main.verbose() {
+            table.add_row(Row::new(vec![
+                Cell::new("Owner token:"),
+                Cell::new(file.owner_token().unwrap()),
+            ]));
+        }
         table.printstd();
 
         // Add the file to the history manager

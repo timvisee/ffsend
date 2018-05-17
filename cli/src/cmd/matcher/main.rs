@@ -54,6 +54,11 @@ impl<'a: 'b, 'b> MainMatcher<'a> {
     pub fn incognito(&self) -> bool {
         self.matches.is_present("incognito") || env_var_present("FFSEND_INCOGNITO")
     }
+
+    /// Check whether verbose mode is used.
+    pub fn verbose(&self) -> bool {
+        self.matches.is_present("verbose") || env_var_present("FFSEND_VERBOSE")
+    }
 }
 
 impl<'a> Matcher<'a> for MainMatcher<'a> {
