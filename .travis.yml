@@ -13,7 +13,6 @@ addons:
   apt:
     packages:
       - libssl-dev
-      - xorg-dev
 
 # Main build
 script:
