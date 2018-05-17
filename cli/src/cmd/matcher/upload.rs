@@ -73,6 +73,7 @@ impl<'a: 'b, 'b> UploadMatcher<'a> {
 
     /// Check whether to archive the file to upload.
     /// TODO: infer to use this flag if a directory is selected
+    #[cfg(feature = "archive")]
     pub fn archive(&self) -> bool {
         self.matches.is_present("archive")
     }

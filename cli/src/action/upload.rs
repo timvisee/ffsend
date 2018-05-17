@@ -22,6 +22,7 @@ use self::tempfile::{
     NamedTempFile,
 };
 
+#[cfg(feature = "archive")]
 use archive::archiver::Archiver;
 use cmd::matcher::{Matcher, MainMatcher, UploadMatcher};
 #[cfg(feature = "history")]
@@ -131,52 +132,55 @@ impl<'a> Upload<'a> {
         // A temporary archive file, only used when archiving
         // The temporary file is stored here, to ensure it's lifetime exceeds the upload process
         let mut tmp_archive: Option<NamedTempFile> = None;
-        let archive_extention = ".tar";
 
-        // Archive the file if specified
-        if matcher_upload.archive() {
-            println!("Archiving file...");
+        #[cfg(feature = "archive")]
+        {
+            // Archive the file if specified
+            if matcher_upload.archive() {
+                println!("Archiving file...");
+                let archive_extention = ".tar";
 
-            // Create a new temporary file to write the archive to
-            tmp_archive = Some(
-                TempBuilder::new()
-                    .prefix(&format!(".{}-archive-", crate_name!()))
-                    .suffix(archive_extention)
-                    .tempfile()
-                    .map_err(ArchiveError::TempFile)?
-            );
-            if let Some(tmp_archive) = &tmp_archive {
-                // Get the path, and the actual file
-                let archive_path = tmp_archive.path().to_path_buf();
-                let archive_file = tmp_archive.as_file()
-                    .try_clone()
-                    .map_err(ArchiveError::CloneHandle)?;
+                // Create a new temporary file to write the archive to
+                tmp_archive = Some(
+                    TempBuilder::new()
+                        .prefix(&format!(".{}-archive-", crate_name!()))
+                        .suffix(archive_extention)
+                        .tempfile()
+                        .map_err(ArchiveError::TempFile)?
+                );
+                if let Some(tmp_archive) = &tmp_archive {
+                    // Get the path, and the actual file
+                    let archive_path = tmp_archive.path().to_path_buf();
+                    let archive_file = tmp_archive.as_file()
+                        .try_clone()
+                        .map_err(ArchiveError::CloneHandle)?;
 
-                // Select the file name to use if not set
-                if file_name.is_none() {
-                    // TODO: use canonical path here
-                    file_name = Some(
-                        path.file_name()
-                            .ok_or(ArchiveError::FileName)?
-                            .to_str()
-                            .map(|s| s.to_owned())
-                            .expect("failed to create string from file name")
-                    );
+                    // Select the file name to use if not set
+                    if file_name.is_none() {
+                        // TODO: use canonical path here
+                        file_name = Some(
+                            path.file_name()
+                                .ok_or(ArchiveError::FileName)?
+                                .to_str()
+                                .map(|s| s.to_owned())
+                                .expect("failed to create string from file name")
+                        );
+                    }
+
+                    // Build an archiver and append the file
+                    let mut archiver = Archiver::new(archive_file);
+                    archiver.append_path(file_name.as_ref().unwrap(), &path)
+                        .map_err(ArchiveError::AddFile)?;
+
+                    // Finish the archival process, writes the archive file
+                    archiver.finish().map_err(ArchiveError::Write)?;
+
+                    // Append archive extention to name, set to upload archived file
+                    if let Some(ref mut file_name) = file_name {
+                        file_name.push_str(archive_extention);
+                    }
+                    path = archive_path;
                 }
-
-                // Build an archiver and append the file
-                let mut archiver = Archiver::new(archive_file);
-                archiver.append_path(file_name.as_ref().unwrap(), &path)
-                    .map_err(ArchiveError::AddFile)?;
-
-                // Finish the archival process, writes the archive file
-                archiver.finish().map_err(ArchiveError::Write)?;
-
-                // Append archive extention to name, set to upload archived file
-                if let Some(ref mut file_name) = file_name {
-                    file_name.push_str(archive_extention);
-                }
-                path = archive_path;
             }
         }
 
@@ -218,12 +222,15 @@ impl<'a> Upload<'a> {
             }
         }
 
-        // Close the temporary zip file, to ensure it's removed
-        if let Some(tmp_archive) = tmp_archive.take() {
-            if let Err(err) = tmp_archive.close() {
-                print_error(
-                    err.context("failed to clean up temporary archive file, ignoring").compat(),
-                );
+        #[cfg(feature = "archive")]
+        {
+            // Close the temporary zip file, to ensure it's removed
+            if let Some(tmp_archive) = tmp_archive.take() {
+                if let Err(err) = tmp_archive.close() {
+                    print_error(
+                        err.context("failed to clean up temporary archive file, ignoring").compat(),
+                    );
+                }
             }
         }
 

@@ -13,10 +13,13 @@ path = "src/main.rs"
 name = "ffsend"
 
 [features]
-default = ["clipboard", "history"]
+default = ["archive", "clipboard", "history"]
 
 # Compile with file history support
 history = []
+
+# Compile with file archiving support
+archive = []
 
 # Compile without colored output support
 no-color = ["colored/no-color"]
@@ -39,7 +42,7 @@ prettytable-rs = "0.6"
 rpassword = "2.0"
 serde = "1.0"
 serde_derive = "1.0"
-tar = "0.4"
+tar = { version = "0.4", option = true }
 tempfile = "3"
 toml = "0.4"
 version-compare = "0.0.6"

@@ -32,15 +32,19 @@ impl CmdUpload {
                 .alias("f")
                 .value_name("NAME")
                 .help("Rename the file being uploaded"))
-            .arg(Arg::with_name("archive")
-                .long("archive")
-                .short("a")
-                .alias("arch")
-                .help("Package the file as an archive"))
             .arg(Arg::with_name("open")
                 .long("open")
                 .short("o")
                 .help("Open the share link in your browser"));
+
+        // Optional archive support
+        #[cfg(feature = "archive")] {
+            cmd = cmd.arg(Arg::with_name("archive")
+                .long("archive")
+                .short("a")
+                .alias("arch")
+                .help("Package the file as an archive"))
+        }
 
         // Optional clipboard support
         #[cfg(feature = "clipboard")] {
