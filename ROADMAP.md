@@ -4,6 +4,9 @@ people.
 
 Features:
 - Write complete README
+	- Future features
+	- Binaries/repositories
+	- Information on encryption
 - Polish command outputs, make it consistent (format, color)
 - Automated releases through CI
 - Release binaries on GitHub
