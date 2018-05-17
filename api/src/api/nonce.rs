@@ -39,7 +39,7 @@ pub fn header_nonce(response: &Response)
                 .map_err(|_| NonceError::MalformedNonce)
             )?
             .split_terminator(' ')
-            .nth(2)
+            .nth(1)
             .ok_or(NonceError::MalformedNonce)?
     ).map_err(|_| NonceError::MalformedNonce)
 }

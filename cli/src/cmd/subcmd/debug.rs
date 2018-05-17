@@ -1,7 +1,5 @@
 use clap::{App, SubCommand};
 
-use cmd::arg::{ArgOwner, ArgPassword, ArgUrl, CmdArg};
-
 /// The debug command definition.
 pub struct CmdDebug;
 

@@ -16,6 +16,7 @@ Features:
 - Gentoo portage package
 - Arch AUR package
 - Windows, macOS and Redox support
+- Implement verbose logging with `-v`
 - Allow empty owner token for info command
 - Check and validate all errors, are some too verbose?
 
@@ -26,7 +27,6 @@ Features:
 - Implement error handling everywhere properly
 - Extract utility module
 - Embed/wrap request errors with failure
-- Implement verbose logging with `-v`
 - Box errors
 - Allow piping input/output files
 - Allow hiding the progress bar, and/or showing simple progress (with `-q`)

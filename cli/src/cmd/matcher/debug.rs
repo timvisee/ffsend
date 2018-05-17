@@ -1,12 +1,10 @@
-use ffsend_api::url::Url;
-
 use clap::ArgMatches;
 
-use cmd::arg::{ArgOwner, ArgPassword, ArgUrl, CmdArgOption};
 use super::Matcher;
 
 /// The debug command matcher.
 pub struct DebugMatcher<'a> {
+    #[allow(dead_code)]
     matches: &'a ArgMatches<'a>,
 }
 

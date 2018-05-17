@@ -129,7 +129,7 @@ impl<'a> Info<'a> {
             // The file size
             let size = metadata.size();
             table.add_row(Row::new(vec![
-                Cell::new("MIME:"),
+                Cell::new("size:"),
                 Cell::new(
                     &if size >= 1024 {
                         format!("{} ({} B)", format_bytes(size), size)
@@ -163,6 +163,9 @@ impl<'a> Info<'a> {
                 }
             ),
         ]));
+
+        // Print the info table
+        table.printstd();
 
         Ok(())
     }

@@ -9,14 +9,11 @@ use prettytable::{
 };
 
 use cmd::matcher::{
-    debug::DebugMatcher,
     main::MainMatcher,
     Matcher,
 };
 use error::ActionError;
-#[cfg(feature = "history")]
-use history_tool;
-use util::{ensure_owner_token, format_duration, print_success};
+use util::format_duration;
 
 /// A file debug action.
 pub struct Debug<'a> {
@@ -36,7 +33,6 @@ impl<'a> Debug<'a> {
     pub fn invoke(&self) -> Result<(), ActionError> {
         // Create the command matchers
         let matcher_main = MainMatcher::with(self.cmd_matches).unwrap();
-        let matcher_debug = DebugMatcher::with(self.cmd_matches).unwrap();
 
         // Create a table for all debug information
         let mut table = Table::new();
@@ -60,7 +56,7 @@ impl<'a> Debug<'a> {
             Cell::new(&format_duration(Duration::seconds(SEND_DEFAULT_EXPIRE_TIME))),
         ]));
 
-        // Print the table
+        // Print the debug table
         table.printstd();
 
         Ok(())
