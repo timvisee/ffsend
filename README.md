@@ -1,6 +1,6 @@
 [![Build status on Travis CI][travis-master-badge]][travis-link]
 
-# ffsend
+# ffsend [WIP]
 > Securely and easily share files from the command line.
 > A fully featured [Firefox Send][send] client.
 
@@ -10,7 +10,8 @@ Files are shared using the [Send][send] service and may be up
 to 2GB. Others are able to download these files with this tool, or through
 their webbrowser.
 
-[![ffsend usage demo](./res/ffsend-demo.gif)](./res/ffsend-demo.mp4)
+[![ffsend usage demo][usage-demo-gif]][usage-demo-mp4]
+_View as [asciinema][usage-demo-asciinema] or [MP4][usage-demo-mp4]._
 
 All files are always encrypted on the client, and secrets are never shared with
 the remote host. An optional password may be specified, and a default file
@@ -30,7 +31,8 @@ Find out more about security [here](#security).
 
 The public [Send][send] service that is used as default host is provided by
 [Mozilla][mozilla].  
-This application is not affiliated with [Mozilla][mozilla], [Firefox][firefox] or [Firefox Send][send].
+This application is not affiliated with [Mozilla][mozilla], [Firefox][firefox]
+or [Firefox Send][send] in any way.
 
 _Note: this tool is currently in the alpha phase_
 
@@ -61,8 +63,8 @@ Share link: https://send.firefox.com/#sample-share-url
 # - Specify a download limit of 20
 # - Enter a password to encrypt the file
 # - Archive the file before uploading
-# - Copy the shareable URL to your clipboard
-# - Open the shareable URL in your browser
+# - Copy the shareable link to your clipboard
+# - Open the shareable link in your browser
 $ ffsend upload --downloads 20 --password --archive --copy --open my-file.txt
 Password: ******
 Share link: https://send.firefox.com/#sample-share-url
@@ -302,6 +304,9 @@ The `ffsend-api` library that is part of this repository located [here](api),
 is intended for use in other projects and is is released under the MIT license.
 Check out the [LICENSE](api/LICENSE) file for more information.
 
+[usage-demo-asciinema]: https://asciinema.org/a/182225
+[usage-demo-gif]: ./res/ffsend-demo.gif
+[usage-demo-mp4]: ./res/ffsend-demo.mp4?raw=true
 [firefox]: https://firefox.com/
 [git]: https://git-scm.com/
 [libressl]: https://libressl.org/

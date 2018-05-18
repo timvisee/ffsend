@@ -4,50 +4,18 @@
   "height": 19,
   "duration": 78.431135,
   "command": null,
-  "title": null,
+  "title": "ffsend v0.0.1 demo",
   "env": {
     "TERM": "xterm-256color",
     "SHELL": "/bin/bash"
   },
   "stdout": [
     [
-      0.315246,
-      "\u001b[01;34m~/ffsend\u001b[00m $ "
-    ],
-    [
-      0.299284,
-      "c"
-    ],
-    [
-      0.075151,
-      "l"
-    ],
-    [
-      0.082658,
-      "e"
-    ],
-    [
-      0.005495,
-      "a"
-    ],
-    [
-      0.06475,
-      "r"
-    ],
-    [
-      0.05582,
-      "\r\n"
-    ],
-    [
-      0.002588,
-      "\u001b[3J\u001b[H\u001b[2J"
-    ],
-    [
       0.000446,
       "\u001b[01;34m~/ffsend\u001b[00m $ "
     ],
     [
-      2.747628,
+      1,
       "f"
     ],
     [
@@ -224,7 +192,7 @@
     ],
     [
       0.004434,
-      "\rEncrypt & Upload 116.93 KB / 116.93 KB [=======================================] 100.00 % 26.44 MB/s  \rUpload complete                                                                                       "
+      "\rEncrypt & Upload 116.93 KB / 116.93 KB [=======================================] 100.00 % 26.44 MB/s  \rUpload complete\r\n"
     ],
     [
       0.000379,
@@ -332,7 +300,7 @@
     ],
     [
       0.002159,
-      "\rDownload & Decrypt 116.93 KB / 116.93 KB [=====================================] 100.00 % 46.05 MB/s  \rDownload complete                                                                                     "
+      "\rDownload & Decrypt 116.93 KB / 116.93 KB [=====================================] 100.00 % 46.05 MB/s  \rDownload complete\r\n"
     ],
     [
       0.00258,
@@ -752,7 +720,7 @@
     ],
     [
       0.000241,
-      "\rUpload complete                                                                                       "
+      "\rUpload complete\r\n"
     ],
     [
       0.007118,
@@ -940,7 +908,7 @@
     ],
     [
       0.005111,
-      "\rDownload & Decrypt 589.02 KB / 589.02 KB [====================================] 100.00 % 105.05 MB/s  \rDownload complete                                                                                     "
+      "\rDownload & Decrypt 589.02 KB / 589.02 KB [====================================] 100.00 % 105.05 MB/s  \rDownload complete\r\n"
     ],
     [
       0.001558,

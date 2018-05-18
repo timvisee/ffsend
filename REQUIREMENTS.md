@@ -20,5 +20,5 @@ toolchain.
 - `FFSEND_OPEN`: open an uploaded file (present/boolean)
 - `FFSEND_ARCHIVE`: enable file archival (present/boolean)
 - `FFSEND_EXTRACT`: enable file extraction (present/boolean)
-- `FFSEND_COPY`: copy share URL to clipboard (present/boolean)
-- `FFSEND_VERBOSE`: copy share URL to clipboard (present/boolean)
+- `FFSEND_COPY`: copy share link to clipboard (present/boolean)
+- `FFSEND_VERBOSE`: copy share link to clipboard (present/boolean)

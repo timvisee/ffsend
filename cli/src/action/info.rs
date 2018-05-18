@@ -175,7 +175,7 @@ impl<'a> Info<'a> {
 pub enum Error {
     /// Failed to parse a share URL, it was invalid.
     /// This error is not related to a specific action.
-    #[fail(display = "invalid share URL")]
+    #[fail(display = "invalid share link")]
     InvalidUrl(#[cause] FileParseError),
 
     /// An error occurred while checking if the file exists.

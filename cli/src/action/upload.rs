@@ -241,7 +241,7 @@ impl<'a> Upload<'a> {
         if matcher_upload.open() {
             if let Err(err) = open_url(&url) {
                 print_error(
-                    err.context("failed to open the URL in the browser")
+                    err.context("failed to open the share link in the browser")
                 );
             };
         }
@@ -250,7 +250,7 @@ impl<'a> Upload<'a> {
         #[cfg(feature = "clipboard")] {
             if matcher_upload.copy() {
                 if let Err(err) = set_clipboard(url.as_str().to_owned()) {
-                    print_error(err.context("failed to copy the URL to the clipboard, ignoring"));
+                    print_error(err.context("failed to copy the share link to the clipboard, ignoring"));
                 }
             }
         }

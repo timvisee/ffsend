@@ -39,13 +39,13 @@ impl<'a> Delete<'a> {
         let matcher_main = MainMatcher::with(self.cmd_matches).unwrap();
         let matcher_delete = DeleteMatcher::with(self.cmd_matches).unwrap();
 
-        // Get the share URL
+        // Get the share link
         let url = matcher_delete.url();
 
         // Create a reqwest client
         let client = Client::new();
 
-        // Parse the remote file based on the share URL, derive the owner token from history
+        // Parse the remote file based on the share link, derive the owner token from history
         let mut file = RemoteFile::parse_url(url, matcher_delete.owner())?;
         #[cfg(feature = "history")]
         history_tool::derive_file_properties(&matcher_main, &mut file);
@@ -77,7 +77,7 @@ impl<'a> Delete<'a> {
 pub enum Error {
     /// Failed to parse a share URL, it was invalid.
     /// This error is not related to a specific action.
-    #[fail(display = "invalid share URL")]
+    #[fail(display = "invalid share link")]
     InvalidUrl(#[cause] FileParseError),
 
     /// Could not delete, the file has expired or did never exist.
