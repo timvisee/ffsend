@@ -113,6 +113,11 @@ Use the `--help` flag, or see the [help](#help) section for all available subcom
 ## Requirements
 - Linux, macOS or Windows
 - A terminal :sunglasses:
+- Linux specific:
+  - `xclip` for clipboard support (optional)
+    - Ubuntu/Debian: `apt install xclip`
+    - CentOS/Red Hat/openSUSE/Fedora: `yum install xclip`
+    - Arch: `pacman -S xclip`
 - Internet connection for uploading and downloading
 
 ## Install
@@ -185,9 +190,9 @@ Then, walk through one of the following steps to compile and install `ffsend`:
 	``` 
 
 ### Compile features / use flags
-Different use flags are available for `ffsend` to toggle the compilation of
-various features. The following features are available, some are enabled by
-default:
+Different use flags are available for `ffsend` to toggle whether to include
+various features.
+The following features are available, some of which are enabled by default:
 
 | Feature     | Enabled | Description                                                |
 | :---------: | :-----: | ---------------------------------------------------------- |
@@ -196,17 +201,18 @@ default:
 | `archive`   | Default | Support for archiving and extracting uploads and downloads |
 | `no-color`  |         | Compile without color support in error and help messages   |
 
-To compile with a different set of features, specify them with `--features
-<features, >` when building or installing with `cargo`.
-You may want to disable all default features first using `--no-default-features`.
+To enable features during building or installation, specify them with
+`--features <features, >` when using `cargo`.
+You may want to disable all default features first using
+`--no-default-features`.
 Here are some examples:
 
 ```bash
-# Defaults with no color, one of
+# Defaults set of features with no-color, one of
 cargo install --features no-color
 cargo build --release --features no-color
 
-# No features
+# None of the features
 cargo install --no-default-features
 
 # Only history and clipboard support
