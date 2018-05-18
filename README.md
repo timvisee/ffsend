@@ -121,6 +121,9 @@ Use the `--help` flag, or see the [help](#help) section for all available subcom
 - Internet connection for uploading and downloading
 
 ## Install
+<!-- Before installing, make sure you meet all requirements listed
+[here](#requirements) -->
+
 Because `ffsend` is still in alpha, no prebuilt binaries or repositories are
 available at this time.  
 Build and install `ffsend` yourself using these fairly easy steps [here](#build).
@@ -132,13 +135,14 @@ before proceeding:
 ### Build requirements
 - Regular [requirements](#requirements)
 - [`git`][git]
-- [`rust`][rust] `v1.lt26` or higher (install using [`rustup`][rustup])
+- [`rust`][rust] `v1.26` or higher (install using [`rustup`][rustup])
 - [OpenSSL][openssl] or [LibreSSL][libressl] libraries and headers must be available
 	- Linux:
 		- Ubuntu/Debian: `apt install pkg-config libssl-dev`
 		- CentOS/Red Hat/openSUSE: `yum install openssl-devel`
 		- Arch: `pacman -S openssl`
 		- Fedora: `dnf install openssl-devel`
+		- Or see instructions [here](https://github.com/sfackler/rust-openssl#linux)
 	- macOS:
 		- Using `brew`: `brew install openssl`
 		- Or see instructions [here](https://github.com/sfackler/rust-openssl#osx)

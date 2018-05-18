@@ -714,3 +714,22 @@ pub fn app_history_file_path_string() -> String {
 pub fn env_var_present(key: impl AsRef<OsStr>) -> bool {
     var_os(key).is_some()
 }
+
+/// Get a list of all features that were enabled during compilation.
+pub fn features_list() -> Vec<&'static str> {
+    // Build the list
+    #[allow(unused_mut)]
+    let mut features = Vec::new();
+
+    // Add each feature
+    #[cfg(feature = "archive")]
+    features.push("archive");
+    #[cfg(feature = "clipboard")]
+    features.push("clipboard");
+    #[cfg(feature = "history")]
+    features.push("history");
+    #[cfg(feature = "no-color")]
+    features.push("no-color");
+
+    features
+}
