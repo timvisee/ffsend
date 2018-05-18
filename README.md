@@ -27,6 +27,7 @@ Find out more about security [here](#security).
 - [Requirements](#requirements)
 - [Install](#install)
 - [Build](#build)
+- [Configuration and environment](#configuration-and-environment)
 - [Help](#help)
 - [License](#license)
 
@@ -199,7 +200,7 @@ various features.
 The following features are available, some of which are enabled by default:
 
 | Feature     | Enabled | Description                                                |
-| :---------: | :-----: | ---------------------------------------------------------- |
+| :---------: | :-----: | :--------------------------------------------------------- |
 | `clipboard` | Default | Support for copying links to the clipboard                 |
 | `history`   | Default | Support for tracking files in history                      |
 | `archive`   | Default | Support for archiving and extracting uploads and downloads |
@@ -207,7 +208,7 @@ The following features are available, some of which are enabled by default:
 
 To enable features during building or installation, specify them with
 `--features <features, >` when using `cargo`.
-You may want to disable all default features first using
+You may want to disable alisl default features first using
 `--no-default-features`.
 Here are some examples:
 
@@ -222,6 +223,34 @@ cargo install --no-default-features
 # Only history and clipboard support
 cargo install --no-default--features --features history,clipboard
 ```
+
+## Configuration and environment
+The following environment variables may be used to configure the following
+defaults:
+
+| Variable         | CLI flag    | Description       |
+| :--------------- | :---------: | :---------------- |
+| `FFSEND_HISTORY` | `-H <FILE>` | History file path |
+| `FFSEND_HOST`    | `-h <HOST>` | Upload host       |
+
+These environment variables may be used to toggle a flag, simply by making them
+available. The actual value of these variables is ignored, and variables may be
+empty.
+
+| Variable             | CLI flag | Description                       |
+| :------------------- | :------: | :-------------------------------- |
+| `FFSEND_FORCE`       | `-f`     | Force operations                  |
+| `FFSEND_NO_INTERACT` | `-I`     | No interaction for prompts        |
+| `FFSEND_YES`         | `-y`     | Assume yes for prompts            |
+| `FFSEND_INCOGNITO`   | `-i`     | Incognito mode, don't use history |
+| `FFSEND_OPEN`        | `-o`     | Open share link of uploaded file  |
+| `FFSEND_ARCHIVE`     | `-a`     | Archive files uploaded            |
+| `FFSEND_EXTRACT`     | `-e`     | Extract files downloaded          |
+| `FFSEND_COPY`        | `-c`     | Copy share link to clipboard      |
+| `FFSEND_VERBOSE`     | `-v`     | Log verbose information           |
+
+At this time, no configuration or _dotfile_ file support is available.
+This will be something added in a later release.
 
 ## Help
 ```
