@@ -222,7 +222,7 @@ impl<'a> Upload<'a> {
         let mut table = Table::new();
         table.set_format(FormatBuilder::new().padding(0, 2).build());
         table.add_row(Row::new(vec![
-            Cell::new("Share URL:"),
+            Cell::new("Share link:"),
             Cell::new(url.as_str()),
         ]));
         if matcher_main.verbose() {

@@ -57,7 +57,7 @@ impl<'a> History<'a> {
         table.set_format(FormatBuilder::new().padding(0, 2).build());
         table.add_row(Row::new(vec![
             Cell::new("#"),
-            Cell::new("URL"),
+            Cell::new("LINK"),
             Cell::new("EXPIRY"),
             Cell::new("OWNER TOKEN"),
         ]));

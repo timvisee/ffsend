@@ -10,10 +10,7 @@ Files are shared using the [Send][send] service and may be up
 to 2GB. Others are able to download these files with this tool, or through
 their webbrowser.
 
-```bash
-$ ffsend upload my-file.txt
-Share link: https://send.firefox.com/#sample-share-url
-```
+[![ffsend usage demo](./res/ffsend-demo.gif)](./res/ffsend-demo.mp4)
 
 All files are always encrypted on the client, and secrets are never shared with
 the remote host. An optional password may be specified, and a default file
@@ -48,6 +45,9 @@ _Note: this tool is currently in the alpha phase_
 - Inspect or delete shared files
 - Accurate error reporting
 - Intended to be used in scripts without interaction
+
+For a list of upcoming features and ideas, take a look at the
+[ROADMAP](ROADMAP.md) file.
 
 ## Usage
 Easily upload and download:
@@ -96,7 +96,7 @@ Other commands include:
 ```bash
 # View your file history
 $ ffsend history
-#  URL                                         EXPIRY  OWNER TOKEN
+#  LINK                                        EXPIRY  OWNER TOKEN
 1  https://send.firefox.com/#sample-share-url  23h57m  eea9f544f6d5df8a5afd
 2  https://send.firefox.com/#other-sample-url  17h38m  1e9fef63fee3baaf54ce
 3  https://example.com/#sample-share-url       37m30s  8eb28bc1bc85cfdab0e4
@@ -109,7 +109,8 @@ Password: ******
 $ ffsend delete https://send.firefox.com/#sample-share-url
 ```
 
-Use the `--help` flag, or see the [help](#help) section for all available subcommands.
+Use the `--help` flag, `help` subcommand, or see the [help](#help) section for
+all available subcommands.
 
 ## Requirements
 - Linux, macOS or Windows
@@ -226,28 +227,29 @@ cargo install --no-default--features --features history,clipboard
 
 ## Configuration and environment
 The following environment variables may be used to configure the following
-defaults:
+defaults. The CLI flag is shown along with it, to better describe the relation
+to command line arguments:
 
-| Variable         | CLI flag    | Description       |
-| :--------------- | :---------: | :---------------- |
-| `FFSEND_HISTORY` | `-H <FILE>` | History file path |
-| `FFSEND_HOST`    | `-h <HOST>` | Upload host       |
+| Variable         | CLI flag           | Description       |
+| :--------------- | :----------------: | :---------------- |
+| `FFSEND_HISTORY` | `--history <FILE>` | History file path |
+| `FFSEND_HOST`    | `--host <URL>`     | Upload host       |
 
 These environment variables may be used to toggle a flag, simply by making them
 available. The actual value of these variables is ignored, and variables may be
 empty.
 
-| Variable             | CLI flag | Description                       |
-| :------------------- | :------: | :-------------------------------- |
-| `FFSEND_FORCE`       | `-f`     | Force operations                  |
-| `FFSEND_NO_INTERACT` | `-I`     | No interaction for prompts        |
-| `FFSEND_YES`         | `-y`     | Assume yes for prompts            |
-| `FFSEND_INCOGNITO`   | `-i`     | Incognito mode, don't use history |
-| `FFSEND_OPEN`        | `-o`     | Open share link of uploaded file  |
-| `FFSEND_ARCHIVE`     | `-a`     | Archive files uploaded            |
-| `FFSEND_EXTRACT`     | `-e`     | Extract files downloaded          |
-| `FFSEND_COPY`        | `-c`     | Copy share link to clipboard      |
-| `FFSEND_VERBOSE`     | `-v`     | Log verbose information           |
+| Variable             | CLI flag        | Description                       |
+| :------------------- | :-------------: | :-------------------------------- |
+| `FFSEND_FORCE`       | `--force`       | Force operations                  |
+| `FFSEND_NO_INTERACT` | `--no-interact` | No interaction for prompts        |
+| `FFSEND_YES`         | `--yes`         | Assume yes for prompts            |
+| `FFSEND_INCOGNITO`   | `--incognito`   | Incognito mode, don't use history |
+| `FFSEND_OPEN`        | `--open`        | Open share link of uploaded file  |
+| `FFSEND_ARCHIVE`     | `--archive`     | Archive files uploaded            |
+| `FFSEND_EXTRACT`     | `--extract`     | Extract files downloaded          |
+| `FFSEND_COPY`        | `--copy`        | Copy share link to clipboard      |
+| `FFSEND_VERBOSE`     | `--verbose`     | Log verbose information           |
 
 At this time, no configuration or _dotfile_ file support is available.
 This will be something added in a later release.
@@ -293,11 +295,11 @@ This application is not affiliated with Mozilla, Firefox or Firefox Send.
 ```
 
 ## License
-This tool is released under the GNU GPL-3.0 license. Check out the
-[LICENSE](LICENSE) file for more information. 
+The tool `ffsend` itself is released under the GNU GPL-3.0 license.
+Check out the [LICENSE](LICENSE) file for more information. 
 
-The included API library located [here](api) is intended for use in other
-projects and is is released under the MIT license.
+The `ffsend-api` library that is part of this repository located [here](api),
+is intended for use in other projects and is is released under the MIT license.
 Check out the [LICENSE](api/LICENSE) file for more information.
 
 [firefox]: https://firefox.com/

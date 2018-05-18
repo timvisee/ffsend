@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# Create the frames directory
+mkdir frames
+
+# Extract the frames
+ffmpeg -i ./ffsend-demo.mp4 -r 6/1 frames/frame%04d.png
+
+# Create a gif
+gifski -o ffsend-demo.gif frames/frame*.png --width 850 --height 332 --fps 6 --quality 70
+
+echo "Done"
