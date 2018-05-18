@@ -4,8 +4,8 @@
 > Securely and easily share files from the command line.
 > A fully featured [Firefox Send][send] client.
 
-Securely and easily share files from the command line through a safe, private
-and encrypted link using a single simple command.
+Securely and easily share files and directories from the command line through a
+safe, private and encrypted link using a single simple command.
 Files are shared using the [Send][send] service and may be up
 to 2GB. Others are able to download these files with this tool, or through
 their webbrowser.
@@ -38,7 +38,7 @@ _Note: this tool is currently in the alpha phase_
 
 ## Features
 - Fully featured and friendly command line tool
-- Upload and download files securely
+- Upload and download files and directories securely
 - Always encrypted on the client
 - Additional password protection and configurable download limits
 - Built-in file and directory archiving and extraction
@@ -108,12 +108,12 @@ Password: ******
 $ ffsend delete https://send.firefox.com/#sample-share-url
 ```
 
-Use the `--help` flag, or see the [help][#help] section for all available subcommands.
+Use the `--help` flag, or see the [help](#help) section for all available subcommands.
 
 ## Requirements
 - Linux, macOS or Windows
 - A terminal :sunglasses:
-- Internet connection when uploading or downloading
+- Internet connection for uploading and downloading
 
 ## Install
 Because `ffsend` is still in alpha, no prebuilt binaries or repositories are
@@ -127,7 +127,7 @@ before proceeding:
 ### Build requirements
 - Regular [requirements](#requirements)
 - [`git`][git]
-- [`rust`][rust] `v1.26` or higher (install using [`rustup`][rustup])
+- [`rust`][rust] `v1.lt26` or higher (install using [`rustup`][rustup])
 - [OpenSSL][openssl] or [LibreSSL][libressl] libraries and headers must be available
 	- Linux:
 		- Ubuntu/Debian: `apt install pkg-config libssl-dev`
@@ -183,6 +183,35 @@ Then, walk through one of the following steps to compile and install `ffsend`:
 	# Start using ffsend
 	./target/release/ffsend --help
 	``` 
+
+### Compile features / use flags
+Different use flags are available for `ffsend` to toggle the compilation of
+various features. The following features are available, some are enabled by
+default:
+
+| Feature     | Enabled | Description                                                |
+| :---------: | :-----: | ---------------------------------------------------------- |
+| `clipboard` | Default | Support for copying links to the clipboard                 |
+| `history`   | Default | Support for tracking files in history                      |
+| `archive`   | Default | Support for archiving and extracting uploads and downloads |
+| `no-color`  |         | Compile without color support in error and help messages   |
+
+To compile with a different set of features, specify them with `--features
+<features, >` when building or installing with `cargo`.
+You may want to disable all default features first using `--no-default-features`.
+Here are some examples:
+
+```bash
+# Defaults with no color, one of
+cargo install --features no-color
+cargo build --release --features no-color
+
+# No features
+cargo install --no-default-features
+
+# Only history and clipboard support
+cargo install --no-default--features --features history,clipboard
+```
 
 ## Help
 ```

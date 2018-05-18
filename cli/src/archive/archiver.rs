@@ -28,8 +28,7 @@ impl<W: Write> Archiver<W> {
     /// archive.
     ///
     /// If no entry exists at the given `src_path`, an error is returned.
-    pub fn append_path<P, Q>(&mut self, path: P, src_path: Q)
-        -> Result<()>
+    pub fn append_path<P, Q>(&mut self, path: P, src_path: Q) -> Result<()>
         where
             P: AsRef<Path>,
             Q: AsRef<Path>,
@@ -46,8 +45,7 @@ impl<W: Write> Archiver<W> {
     }
 
     /// Append a file to the archive builder.
-    pub fn append_file<P>(&mut self, path: P, file: &mut File)
-        -> Result<()>
+    pub fn append_file<P>(&mut self, path: P, file: &mut File) -> Result<()>
         where
             P: AsRef<Path>,
     {
@@ -56,8 +54,7 @@ impl<W: Write> Archiver<W> {
 
     /// Append a directory to the archive builder.
     // TODO: Define a flag to add recursively or not
-    pub fn append_dir<P, Q>(&mut self, path: P, src_path: Q)
-        -> Result<()>
+    pub fn append_dir<P, Q>(&mut self, path: P, src_path: Q) -> Result<()>
         where
             P: AsRef<Path>,
             Q: AsRef<Path>,
