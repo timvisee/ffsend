@@ -1,7 +1,7 @@
 [package]
 name = "ffsend"
 description = """\
-    Securely and easily share files from the command line.\n\
+    Easily and securely share files from the command line.\n\
     A fully featured Firefox Send client.\
 """
 version = "0.0.1"

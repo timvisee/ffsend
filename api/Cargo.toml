@@ -1,6 +1,6 @@
 [package]
 name = "ffsend-api"
-description = "A simple Firefox Send API client."
+description = "A fully featured Firefox Send API client."
 version = "0.0.1"
 authors = ["Tim Visee <https://timvisee.com/>"]
 workspace = ".."

@@ -1,10 +1,10 @@
 [![Build status on Travis CI][travis-master-badge]][travis-link]
 
 # ffsend [WIP]
-> Securely and easily share files from the command line.
+> Easily and securely share files from the command line.
 > A fully featured [Firefox Send][send] client.
 
-Securely and easily share files and directories from the command line through a
+Easily and securely share files and directories from the command line through a
 safe, private and encrypted link using a single simple command.
 Files are shared using the [Send][send] service and may be up
 to 2GB. Others are able to download these files with this tool, or through
@@ -26,6 +26,7 @@ Find out more about security [here](#security).
 - [Install](#install)
 - [Build](#build)
 - [Configuration and environment](#configuration-and-environment)
+- [Security](#security)
 - [Help](#help)
 - [License](#license)
 
@@ -256,13 +257,56 @@ empty.
 At this time, no configuration or _dotfile_ file support is available.
 This will be something added in a later release.
 
+## Security
+In short; the `ffsend` tool and the [Send][send] service can be considered
+secure, and may be used to share sensitive files. Note though that the
+created share link for an upload will allow anyone to download the file. 
+Make sure you don't share this link with unauthorized people.
+
+For more detailed information on encryption, please read the rest of the
+paragraphs in this security section.
+
+_Note: even though the encryption method is considered secure, this `ffsend`
+tool does not provide any warranty in any way, shape or form for files that
+somehow got decrypted without proper authorization._
+
+#### Client side encryption
+`ffsend` uses client side encryption, to ensure your files are securely
+encrypted before they are uploaded to the remote host. This makes it impossible
+for third parties to decrypt your file without having the secret (encryption
+key). The file and it's metadata are encrypted using `128-bit AES-GCM`, and a
+`HMAC SHA-256` signing key is used for request authentication.
+This is consistent with the encryption documentation provided by the
+[Send][send] service, `ffsend` is a tool for.
+
+A detailed list on the encryption/decryption steps, and on what encryption is
+exactly used can be found [here][send-encryption] in the official service
+documentation.
+
+#### Note on share link security
+The encryption secret, that is used to decrypt the file when downloading,
+is included in the share URL behind the `#` (hash). This secret is never sent
+the remote server directly when using the share link in your browser.
+It would be possible however for a webpage to load some malicious JavaScript
+snippet that eventually steals the secret from the link once the page is loaded.
+Although this scenario is extremely unlikely, there are some options to prevent
+this from happening:
+
+- Only use this `ffsend` tool, do not use the share link in your browser.
+- Add additional protection by specifying a password using `--password` while
+  uploading, or using the `password` subcommand afterwards.
+- Host a secure [Send][send] service instance yourself.
+
+A complete overview on encryption can be found in the official service
+documentation [here][send-encryption].
+
 ## Help
 ```
 $ ffsend help
 
 ffsend 0.0.1
 Tim Visee <https://timvisee.com/>
-Securely and easily share files from the command line.
+Easily and securely share files from the command line.
 A fully featured Firefox Send client.
 
 USAGE:
@@ -315,5 +359,6 @@ Check out the [LICENSE](api/LICENSE) file for more information.
 [rust]: https://rust-lang.org/
 [rustup]: https://rustup.rs/
 [send]: https://send.firefox.com/
+[send-encryption]: https://github.com/mozilla/send/blob/master/docs/encryption.md
 [travis-master-badge]: https://travis-ci.org/timvisee/ffsend.svg?branch=master
 [travis-link]: https://travis-ci.org/timvisee/ffsend

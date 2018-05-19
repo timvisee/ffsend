@@ -3,10 +3,6 @@ The first release used for gathering feedback on the application by selected
 people.
 
 Features:
-- Write complete README
-	- Future features
-	- Binaries/repositories
-	- Information on encryption
 - Polish command outputs, make it consistent (format, color)
 - Automated releases through CI
 - Release binaries on GitHub
