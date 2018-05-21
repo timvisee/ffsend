@@ -6,7 +6,6 @@ license = "GPL-3.0"
 readme = "README.md"
 homepage = "https://github.com/timvisee/ffsend"
 repository = "https://github.com/timvisee/ffsend"
-documentation = "https://docs.rs/ffsend"
 description = """\
     Easily and securely share files from the command line.\n\
     A fully featured Firefox Send client.\
@@ -27,8 +26,8 @@ exclude = [
 travis-ci = { repository = "timvisee/ffsend", branch = "master" }
 
 [[bin]]
-path = "src/main.rs"
 name = "ffsend"
+path = "src/main.rs"
 
 [features]
 default = ["archive", "clipboard", "history"]

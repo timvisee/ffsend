@@ -1,4 +1,14 @@
 [![Build status on Travis CI][travis-master-badge]][travis-link]
+[![Newest release on crates.io][crate-version-badge]][crate-link]
+[![Number of downloads on crates.io][crate-download-badge]][crate-link]
+[![Project license][crate-license-badge]](LICENSE)
+
+[crate-link]: https://crates.io/crates/ffsend
+[crate-download-badge]: https://img.shields.io/crates/d/ffsend.svg
+[crate-version-badge]: https://img.shields.io/crates/v/ffsend.svg
+[crate-license-badge]: https://img.shields.io/crates/l/ffsend.svg
+[travis-master-badge]: https://travis-ci.org/timvisee/ffsend.svg?branch=master
+[travis-link]: https://travis-ci.org/timvisee/ffsend
 
 # ffsend [WIP]
 > Easily and securely share files from the command line.
@@ -165,7 +175,7 @@ Then, walk through one of the following steps to compile and install `ffsend`:
 	cargo install ffsend -f
 
 	# Start using ffsend
-	ffsend --help --
+	ffsend --help
 	```
 
 - Or clone the repository and install it with `cargo`:
@@ -357,5 +367,3 @@ Check out the [LICENSE](LICENSE) file for more information.
 [rustup]: https://rustup.rs/
 [send]: https://send.firefox.com/
 [send-encryption]: https://github.com/mozilla/send/blob/master/docs/encryption.md
-[travis-master-badge]: https://travis-ci.org/timvisee/ffsend.svg?branch=master
-[travis-link]: https://travis-ci.org/timvisee/ffsend
