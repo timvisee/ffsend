@@ -1,11 +1,31 @@
 [package]
 name = "ffsend"
+version = "0.0.1"
+authors = ["Tim Visee <https://timvisee.com/>"]
+license = "GPL-3.0"
+readme = "README.md"
+homepage = "https://github.com/timvisee/ffsend"
+repository = "https://github.com/timvisee/ffsend"
+documentation = "https://docs.rs/ffsend"
 description = """\
     Easily and securely share files from the command line.\n\
     A fully featured Firefox Send client.\
 """
-version = "0.0.1"
-authors = ["Tim Visee <https://timvisee.com/>"]
+keywords = ["send", "firefox", "cli"]
+categories = [
+    "authentication",
+    "command-line-interface",
+    "command-line-utilities",
+    "cryptography",
+    "filesystem",
+    "network-programming",
+]
+exclude = [
+    "res/*",
+]
+
+[badges]
+travis-cli = { repository = "timvisee/ffsend", branch = "master" }
 
 [[bin]]
 path = "src/main.rs"
@@ -30,7 +50,6 @@ colored = "1.6"
 derive_builder = "0.5"
 directories = "0.10"
 failure = "0.1"
-# ffsend-api = { version = "*", path = "../ffsend-api" }
 ffsend-api = "0.0"
 fs2 = "0.4"
 lazy_static = "1.0"
