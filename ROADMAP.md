@@ -3,6 +3,7 @@ The first release used for gathering feedback on the application by selected
 people.
 
 Features:
+- Ask to remove a file when downloading failed
 - Polish command outputs, make it consistent (format, color)
 - Automated releases through CI
 - Release binaries on GitHub
