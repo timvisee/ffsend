@@ -173,7 +173,7 @@ Then, walk through one of the following steps to compile and install `ffsend`:
 	```bash
 	# Clone the project
 	git clone https://github.com/timvisee/ffsend.git
-	cd ffsend/cli
+	cd ffsend
 
 	# Compile and install
 	cargo install -f
@@ -342,12 +342,8 @@ This application is not affiliated with Mozilla, Firefox or Firefox Send.
 ```
 
 ## License
-The tool `ffsend` itself is released under the GNU GPL-3.0 license.
+This project is released under the GNU GPL-3.0 license.
 Check out the [LICENSE](LICENSE) file for more information. 
-
-The `ffsend-api` library that is part of this repository located [here](api),
-is intended for use in other projects and is is released under the MIT license.
-Check out the [LICENSE](api/LICENSE) file for more information.
 
 [usage-demo-asciinema]: https://asciinema.org/a/182225
 [usage-demo-gif]: ./res/ffsend-demo.gif

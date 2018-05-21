@@ -1,5 +1,49 @@
-[workspace]
-members = [
-    "api",
-    "cli",
-]
+[package]
+name = "ffsend"
+description = """\
+    Easily and securely share files from the command line.\n\
+    A fully featured Firefox Send client.\
+"""
+version = "0.0.1"
+authors = ["Tim Visee <https://timvisee.com/>"]
+
+[[bin]]
+path = "src/main.rs"
+name = "ffsend"
+
+[features]
+default = ["archive", "clipboard", "history"]
+
+# Compile with file archiving support
+archive = ["tar"]
+
+# Compile with file history support
+history = []
+
+# Compile without colored output support
+no-color = ["colored/no-color"]
+
+[dependencies]
+chrono = "0.4"
+clap = "2.31"
+colored = "1.6"
+derive_builder = "0.5"
+directories = "0.10"
+failure = "0.1"
+# ffsend-api = { version = "*", path = "../ffsend-api" }
+ffsend-api = "0.0"
+fs2 = "0.4"
+lazy_static = "1.0"
+open = "1"
+pbr = "1"
+prettytable-rs = "0.6"
+rpassword = "2.0"
+serde = "1.0"
+serde_derive = "1.0"
+tar = { version = "0.4", optional = true }
+tempfile = "3"
+toml = "0.4"
+version-compare = "0.0.6"
+
+[target.'cfg(not(target_os = "linux"))'.dependencies]
+clipboard = { version = "0.4", optional = true }
