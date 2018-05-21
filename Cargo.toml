@@ -17,7 +17,6 @@ categories = [
     "command-line-interface",
     "command-line-utilities",
     "cryptography",
-    "filesystem",
     "network-programming",
 ]
 exclude = [
@@ -25,7 +24,7 @@ exclude = [
 ]
 
 [badges]
-travis-cli = { repository = "timvisee/ffsend", branch = "master" }
+travis-ci = { repository = "timvisee/ffsend", branch = "master" }
 
 [[bin]]
 path = "src/main.rs"

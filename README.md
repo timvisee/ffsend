@@ -158,17 +158,17 @@ before proceeding:
 ### Compile and install
 Then, walk through one of the following steps to compile and install `ffsend`:
 
-<!--- Compile and install it directly from cargo: -->
-<!-- -->
-<!--	```bash -->
-<!--	# Compile and install from cargo -->
-<!--	cargo install ffsend -f -->
-<!-- -->
-<!--	# Start using ffsend -->
-<!--	ffsend --help -- -->
-<!--	``` -->
+- Compile and install it directly from cargo:
 
-- Clone the repository and install it with `cargo`:
+	```bash
+	# Compile and install from cargo
+	cargo install ffsend -f
+
+	# Start using ffsend
+	ffsend --help --
+	```
+
+- Or clone the repository and install it with `cargo`:
 
 	```bash
 	# Clone the project
