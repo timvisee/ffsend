@@ -21,7 +21,7 @@ to 2GB. Others are able to download these files with this tool, or through
 their webbrowser.
 
 [![ffsend usage demo](./res/demo.svg)][usage-demo-asciinema]
-_Or view as [asciinema][usage-demo-asciinema]._
+_No demo visible here? View it on [asciinema][usage-demo-asciinema]._
 
 All files are always encrypted on the client, and secrets are never shared with
 the remote host. An optional password may be specified, and a default file
