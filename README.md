@@ -20,8 +20,8 @@ Files are shared using the [Send][send] service and may be up
 to 2GB. Others are able to download these files with this tool, or through
 their webbrowser.
 
-[![ffsend usage demo][usage-demo-gif]][usage-demo-mp4]
-_View as [asciinema][usage-demo-asciinema] or [MP4][usage-demo-mp4]._
+[![ffsend usage demo](./res/demo.svg)](./res/demo.svg?raw=true)
+_Or view as [asciinema][usage-demo-asciinema]._
 
 All files are always encrypted on the client, and secrets are never shared with
 the remote host. An optional password may be specified, and a default file
@@ -356,8 +356,6 @@ This project is released under the GNU GPL-3.0 license.
 Check out the [LICENSE](LICENSE) file for more information. 
 
 [usage-demo-asciinema]: https://asciinema.org/a/182225
-[usage-demo-gif]: ./res/ffsend-demo.gif
-[usage-demo-mp4]: ./res/ffsend-demo.mp4?raw=true
 [firefox]: https://firefox.com/
 [git]: https://git-scm.com/
 [libressl]: https://libressl.org/

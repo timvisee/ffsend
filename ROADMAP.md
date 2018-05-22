@@ -3,6 +3,8 @@ The first release used for gathering feedback on the application by selected
 people.
 
 Features:
+- Do not show default values for `--host`, see `ffsend help upload`
+- History clear command
 - Ask to remove a file when downloading failed
 - Polish command outputs, make it consistent (format, color)
 - Automated releases through CI

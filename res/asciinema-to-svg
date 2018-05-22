@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# Ensure svg-term is installed
+if ! [ -x "$(command -v svg-term)" ]; then
+    echo "svg-term is not installed, unable to create SVG, use:"
+    echo "sudo npm install -g svg-term-cli"
+    exit 1
+fi
+
+# Convert into a GIF
+echo "Generating SVG..."
+cat asciinema-demo.json | svg-term --out demo.svg --window
+echo "Done"
