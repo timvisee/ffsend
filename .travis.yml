@@ -43,11 +43,11 @@ jobs:
       script: *build-script-cross
     - stage: build
       rust: stable
-      env: TARGET=arm-unknown-linux-gnuabihf
+      env: TARGET=arm-unknown-linux-gnueabi
       script: *build-script-cross
     - stage: build
       rust: stable
-      env: TARGET=armv7-unknown-linux-gnuabihf
+      env: TARGET=armv7-unknown-linux-gnueabihf
       script: *build-script-cross
     # - stage: build
     #   rust: stable
