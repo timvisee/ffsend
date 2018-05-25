@@ -8,6 +8,11 @@ addons:
     packages:
       - libssl-dev
 
+      # Cross compiler dependencies for ARM
+      - gcc-arm-linux-gnueabihf
+      - libc6-armhf-cross
+      - libc6-dev-armhf-cross
+
 stages:
   - build
   - test
@@ -41,18 +46,18 @@ jobs:
       rust: stable
       env: TARGET=armv7-unknown-linux-gnuabifh
       script: *build-script-cross
-    - stage: build
-      rust: stable
-      env: TARGET=i686-unknown-freebsd
-      script: *build-script-cross
-    - stage: build
-      rust: stable
-      env: TARGET=x86_64-unknown-freebsd
-      script: *build-script-cross
-    - stage: build
-      rust: stable
-      env: TARGET=x86_64-unknown-netbsd
-      script: *build-script-cross
+    # - stage: build
+    #   rust: stable
+    #   env: TARGET=i686-unknown-freebsd
+    #   script: *build-script-cross
+    # - stage: build
+    #   rust: stable
+    #   env: TARGET=x86_64-unknown-freebsd
+    #   script: *build-script-cross
+    # - stage: build
+    #   rust: stable
+    #   env: TARGET=x86_64-unknown-netbsd
+    #   script: *build-script-cross
     - stage: build
       rust: beta
       env: TARGET=x86_64-unknown-linux-gnu
