@@ -1,27 +1,53 @@
 # Configuration for Travis CI
 language: rust
 sudo: false
-rust:
-  - stable
-  - beta
-  - nightly
-matrix:
-  include:
-    - os: osx
-      rust: stable
 addons:
   apt:
     packages:
       - libssl-dev
 
-# Main build
-script:
-  # Default features configuration
-- cargo build --verbose --all
+stages:
+  - build
+  - test
+  - name: release
+    if: tag =~ ^v(\d+\.)*\d+$
 
-  # Other feature combinations 
-- cargo build --no-default-features --verbose --all
-- cargo build --features no-color --verbose --all
+jobs:
+  include:
+    - stage: build
+      rust: stable
+      script: &build-script
+        - cargo build --verbose --all
+        - cargo build --no-default-features --verbose --all
+        - cargo build --features no-color --verbose --all
+      cache: cargo
+    - stage: build
+      rust: beta
+      script: *build-script
+    - stage: build
+      rust: nightly
+      script: *build-script
+    - stage: build
+      rust: stable
+      os: osx
+      script: *build-script
+    - stage: test
+      script: cargo test --verbose --all
+      cache: cargo
+    - stage: release
+      script: skip
+      deploy:
+        provider: releases
+        api_key: $GITHUB_OAUTH_TOKEN
+        skip_cleanup: true
+        on:
+          tags: true
+          branch: master
+    - stage: release
+      script:
+        - echo $CARGO_TOKEN | cargo login
+        - cargo publish --verbose
+      cache: cargo
 
-  # Tests
-- cargo test --verbose --all
+# TODO: enfore the git tag/crate version equality for releases
+# TODO: disable addons/rust installation for GitHub release job
