@@ -24,16 +24,19 @@ jobs:
     - stage: build
       rust: stable
       env: TARGET=x86_64-unknown-linux-gnu
+      script: &build-script
+        - cargo build --verbose --all
+        - cargo build --no-default-features --verbose --all
+        - cargo build --features no-color --verbose --all
+      cache: cargo
+    - stage: build
+      rust: stable
+      env: TARGET=i686-unknown-linux-gnu
       script: &build-script-cross
         - cargo install cross
         - cross build --target $TARGET --verbose --all
         - cross build --target $TARGET --no-default-features --verbose --all
         - cross build --target $TARGET --features no-color --verbose --all
-      cache: cargo
-    - stage: build
-      rust: stable
-      env: TARGET=i686-unknown-linux-gnu
-      script: *build-script-cross
     - stage: build
       rust: stable
       env: TARGET=aarch64-unknown-linux-gnu
@@ -101,7 +104,8 @@ jobs:
         - cargo publish --verbose
       cache: cargo
 
-# TODO: more architectures
+# TODO: add BSD architecture
+# TODO: use regular cargo commands for x86_64 linux
 # TODO: release a build for each architecture
 # TODO: enfore the git tag/crate version equality for releases
 # TODO: disable addons/rust installation for GitHub release job
