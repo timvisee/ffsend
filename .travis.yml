@@ -1,6 +1,8 @@
 # Configuration for Travis CI
 language: rust
-sudo: false
+sudo: required
+services:
+  - docker
 addons:
   apt:
     packages:
