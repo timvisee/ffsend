@@ -34,6 +34,26 @@ jobs:
       env: TARGET=aarch64-unknown-linux-gnu
       script: *build-script-cross
     - stage: build
+      rust: stable
+      env: TARGET=arm-unknown-linux-gnuabifh
+      script: *build-script-cross
+    - stage: build
+      rust: stable
+      env: TARGET=armv7-unknown-linux-gnuabifh
+      script: *build-script-cross
+    - stage: build
+      rust: stable
+      env: TARGET=i686-unknown-freebsd
+      script: *build-script-cross
+    - stage: build
+      rust: stable
+      env: TARGET=x86_64-unknown-freebsd
+      script: *build-script-cross
+    - stage: build
+      rust: stable
+      env: TARGET=x86_64-unknown-netbsd
+      script: *build-script-cross
+    - stage: build
       rust: beta
       env: TARGET=x86_64-unknown-linux-gnu
       script: *build-script-cross
@@ -50,7 +70,6 @@ jobs:
         - cargo build --no-default-features --verbose --all
         - cargo build --features no-color --verbose --all
     - stage: test
-      env: TARGET=x86_64-unknown-linux-gnu
       script: cargo test --verbose --all
       cache: cargo
     - stage: release
