@@ -9,9 +9,9 @@ addons:
       - libssl-dev
 
       # Cross compiler dependencies for ARM
-      - gcc-arm-linux-gnueabihf
-      - libc6-armhf-cross
-      - libc6-dev-armhf-cross
+      # - gcc-arm-linux-gnueabihf
+      # - libc6-armhf-cross
+      # - libc6-dev-armhf-cross
 
 stages:
   - build
@@ -40,11 +40,11 @@ jobs:
       script: *build-script-cross
     - stage: build
       rust: stable
-      env: TARGET=arm-unknown-linux-gnuabifh
+      env: TARGET=arm-unknown-linux-gnuabihf
       script: *build-script-cross
     - stage: build
       rust: stable
-      env: TARGET=armv7-unknown-linux-gnuabifh
+      env: TARGET=armv7-unknown-linux-gnuabihf
       script: *build-script-cross
     # - stage: build
     #   rust: stable
