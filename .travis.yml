@@ -83,6 +83,7 @@ jobs:
         on:
           tags: true
           branch: master
+      cache: cargo
     - stage: release
       rust: stable
       env: TARGET=i686-unknown-linux-gnu
