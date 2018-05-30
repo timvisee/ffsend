@@ -1,6 +1,6 @@
 [package]
 name = "ffsend"
-version = "0.0.2"
+version = "0.0.3"
 authors = ["Tim Visee <https://timvisee.com/>"]
 license = "GPL-3.0"
 readme = "README.md"
