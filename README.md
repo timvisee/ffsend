@@ -20,7 +20,7 @@ Files are shared using the [Send][send] service and may be up
 to 2GB. Others are able to download these files with this tool, or through
 their webbrowser.
 
-[![ffsend usage demo](./res/demo.svg)][usage-demo-asciinema]
+[![ffsend usage demo][usage-demo-svg]][usage-demo-asciinema]
 _No demo visible here? View it on [asciinema][usage-demo-asciinema]._
 
 All files are always encrypted on the client, and secrets are never shared with
@@ -356,6 +356,7 @@ This project is released under the GNU GPL-3.0 license.
 Check out the [LICENSE](LICENSE) file for more information. 
 
 [usage-demo-asciinema]: https://asciinema.org/a/182225
+[usage-demo-svg]: https://cdn.rawgit.com/timvisee/ffsend/6e8ef55b/res/demo.svg
 [firefox]: https://firefox.com/
 [git]: https://git-scm.com/
 [libressl]: https://libressl.org/
