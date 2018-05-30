@@ -102,6 +102,7 @@ jobs:
       deploy: *deploy-github-release
     - stage: release
       rust: stable
+      env: TARGET=arm-unknown-linux-gnueabi
       install: *install-github-release-cross
       script: *script-github-release
       deploy: *deploy-github-release
