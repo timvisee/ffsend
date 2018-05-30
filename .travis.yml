@@ -1,6 +1,8 @@
 # Configuration for Travis CI
 language: rust
-sudo: false
+sudo: required
+services:
+  - docker
 addons:
   apt:
     packages:
@@ -14,40 +16,127 @@ stages:
 
 jobs:
   include:
+    ################################
+    # Build stage                  #
+    ################################
+
+    # Linux with Rust stable/beta/nightly
     - stage: build
       rust: stable
+      env: TARGET=x86_64-unknown-linux-gnu
+      cache: cargo
       script: &build-script
         - cargo build --verbose --all
         - cargo build --no-default-features --verbose --all
         - cargo build --features no-color --verbose --all
-      cache: cargo
     - stage: build
       rust: beta
+      env: TARGET=x86_64-unknown-linux-gnu
+      cache: cargo
       script: *build-script
     - stage: build
       rust: nightly
+      env: TARGET=x86_64-unknown-linux-gnu
+      cache: cargo
       script: *build-script
+
+    # macOS with Rust stable
     - stage: build
       rust: stable
       os: osx
-      script: *build-script
-    - stage: test
-      script: cargo test --verbose --all
+      env: TARGET=x86_64-apple-darwin
       cache: cargo
+      script: *build-script
+
+    ################################
+    # Test stage                   #
+    ################################
+
+    - stage: test
+      env: TARGET=x86_64-unknown-linux-gnu
+      cache: cargo
+      script: cargo test --verbose --all
+
+    ################################
+    # Release stage                #
+    ################################
+
+    # Cargo crate release
     - stage: release
-      script: skip
-      deploy:
+      env: TARGET=x86_64-unknown-linux-gnu
+      cache: cargo
+      script:
+        - echo $CARGO_TOKEN | cargo login
+        - cargo publish --verbose
+
+    # GitHub binary release for Linux on x86/x86_64
+    - stage: release
+      rust: stable
+      env: TARGET=x86_64-unknown-linux-gnu
+      cache: cargo
+      script: &script-github-release
+        - |
+          if [ $TARGET == "x86_64-unknown-linux-gnu" ] || [ $TARGET == "x86_64-apple-darwin" ]; then
+            cargo build --release --verbose --all
+          else
+            echo 'Starting build using cross for cross compilation...'
+            cross build --target $TARGET --release --verbose --all
+          fi
+        - cd target/release
+        - tar -czvf $TRAVIS_BUILD_DIR/ffsend-$TARGET.tar.gz ffsend
+        - cd $TRAVIS_BUILD_DIR
+      deploy: &deploy-github-release
         provider: releases
         api_key: $GITHUB_OAUTH_TOKEN
         skip_cleanup: true
+        overwrite: false
+        file: ffsend-$TARGET.tar.gz
         on:
           tags: true
           branch: master
     - stage: release
-      script:
-        - echo $CARGO_TOKEN | cargo login
-        - cargo publish --verbose
+      rust: stable
+      env: TARGET=i686-unknown-linux-gnu
       cache: cargo
+      install: &install-github-release-cross
+        - cargo install cross
+      script: *script-github-release
+      deploy: *deploy-github-release
 
+    # GitHub binary release for Linux on arch
+    - stage: release
+      rust: stable
+      env: TARGET=aarch64-unknown-linux-gnu
+      cache: cargo
+      install: *install-github-release-cross
+      script: *script-github-release
+      deploy: *deploy-github-release
+    - stage: release
+      rust: stable
+      env: TARGET=arm-unknown-linux-gnueabi
+      cache: cargo
+      install: *install-github-release-cross
+      script: *script-github-release
+      deploy: *deploy-github-release
+    - stage: release
+      rust: stable
+      env: TARGET=armv7-unknown-linux-gnueabihf
+      cache: cargo
+      install: *install-github-release-cross
+      script: *script-github-release
+      deploy: *deploy-github-release
+
+    # GitHub binary release for macOX
+    - stage: release
+      rust: stable
+      os: osx
+      env: TARGET=x86_64-apple-darwin
+      cache: cargo
+      script: *script-github-release
+      deploy: *deploy-github-release
+
+# TODO: add (Free)BSD architecture
+# TODO: use regular cargo commands for x86_64 linux
+# TODO: release a build for each architecture
 # TODO: enfore the git tag/crate version equality for releases
 # TODO: disable addons/rust installation for GitHub release job
