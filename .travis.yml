@@ -66,6 +66,7 @@ jobs:
       env: TARGET=x86_64-unknown-linux-gnu
       cache: cargo
       script:
+        - echo "Creating release crate on crates.io..."
         - echo $CARGO_TOKEN | cargo login
         - cargo publish --verbose
 
@@ -77,14 +78,16 @@ jobs:
       script: &script-github-release
         - |
           if [ $TARGET == "x86_64-unknown-linux-gnu" ] || [ $TARGET == "x86_64-apple-darwin" ]; then
+            echo "Creating release binary on GitHub for $TARGET..."
             cargo build --release --verbose --all
+            cp target/release/ffsend ./ffsend
           else
-            echo 'Starting build using cross for cross compilation...'
+            echo "Creating release binary on GitHub for $TARGET (cross compiled)..."
             cross build --target $TARGET --release --verbose --all
+            cp target/$TARGET/release/ffsend ./ffsend
           fi
-        - cd target/release
-        - tar -czvf $TRAVIS_BUILD_DIR/ffsend-$TARGET.tar.gz ffsend
-        - cd $TRAVIS_BUILD_DIR
+        - tar -czvf $TRAVIS_BUILD_DIR/ffsend-$TARGET.tar.gz ./ffsend
+        - rm ./ffsend
       deploy: &deploy-github-release
         provider: releases
         api_key: $GITHUB_OAUTH_TOKEN
