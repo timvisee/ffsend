@@ -23,22 +23,29 @@ jobs:
     # Linux with Rust stable/beta/nightly
     - stage: build
       rust: stable
+      env: TARGET=x86_64-unknown-linux-gnu CACHE_NAME=$TARGET-stable
+      cache: cargo
       script: &build-script
         - cargo build --verbose --all
         - cargo build --no-default-features --verbose --all
         - cargo build --features no-color --verbose --all
-      cache: cargo
     - stage: build
       rust: beta
+      env: TARGET=x86_64-unknown-linux-gnu CACHE_NAME=$TARGET-beta
+      cache: cargo
       script: *build-script
     - stage: build
       rust: nightly
+      env: TARGET=x86_64-unknown-linux-gnu CACHE_NAME=$TARGET-nightly
+      cache: cargo
       script: *build-script
 
     # macOS with Rust stable
     - stage: build
       rust: stable
       os: osx
+      env: TARGET=x86_64-apple-darwin CACHE_NAME=$TARGET-stable
+      cache: cargo
       script: *build-script
 
     ################################
@@ -46,8 +53,9 @@ jobs:
     ################################
 
     - stage: test
-      script: cargo test --verbose --all
+      env: TARGET=x86_64-unknown-linux-gnu CACHE_NAME=$TARGET-stable
       cache: cargo
+      script: cargo test --verbose --all
 
     ################################
     # Release stage                #
@@ -55,15 +63,17 @@ jobs:
 
     # Cargo crate release
     - stage: release
+      env: TARGET=x86_64-unknown-linux-gnu CACHE_NAME=$TARGET-stable
+      cache: cargo
       script:
         - echo $CARGO_TOKEN | cargo login
         - cargo publish --verbose
-      cache: cargo
 
     # GitHub binary release for Linux on x86/x86_64
     - stage: release
       rust: stable
-      env: TARGET=x86_64-unknown-linux-gnu
+      env: TARGET=x86_64-unknown-linux-gnu CACHE_NAME=$TARGET-stable
+      cache: cargo
       script: &script-github-release
         - |
           if [ $TARGET == "x86_64-unknown-linux-gnu" ] || [ $TARGET == "x86_64-apple-darwin" ]; then
@@ -84,10 +94,10 @@ jobs:
         on:
           tags: true
           branch: master
-      cache: cargo
     - stage: release
       rust: stable
-      env: TARGET=i686-unknown-linux-gnu
+      env: TARGET=i686-unknown-linux-gnu CACHE_NAME=$TARGET-stable
+      cache: cargo
       install: &install-github-release-cross
         - cargo install cross
       script: *script-github-release
@@ -96,19 +106,22 @@ jobs:
     # GitHub binary release for Linux on arch
     - stage: release
       rust: stable
-      env: TARGET=aarch64-unknown-linux-gnu
+      env: TARGET=aarch64-unknown-linux-gnu CACHE_NAME=$TARGET-stable
+      cache: cargo
       install: *install-github-release-cross
       script: *script-github-release
       deploy: *deploy-github-release
     - stage: release
       rust: stable
-      env: TARGET=arm-unknown-linux-gnueabi
+      env: TARGET=arm-unknown-linux-gnueabi CACHE_NAME=$TARGET-stable
+      cache: cargo
       install: *install-github-release-cross
       script: *script-github-release
       deploy: *deploy-github-release
     - stage: release
       rust: stable
-      env: TARGET=armv7-unknown-linux-gnueabihf
+      env: TARGET=armv7-unknown-linux-gnueabihf CACHE_NAME=$TARGET-stable
+      cache: cargo
       install: *install-github-release-cross
       script: *script-github-release
       deploy: *deploy-github-release
@@ -117,7 +130,8 @@ jobs:
     - stage: release
       rust: stable
       os: osx
-      env: TARGET=x86_64-apple-darwin
+      env: TARGET=x86_64-apple-darwin CACHE_NAME=$TARGET-stable
+      cache: cargo
       script: *script-github-release
       deploy: *deploy-github-release
 
