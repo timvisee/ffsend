@@ -73,7 +73,7 @@ jobs:
     # GitHub binary release for Linux on x86/x86_64
     - stage: release
       rust: stable
-      env: TARGET=x86_64-unknown-linux-gnu
+      env: TARGET=x86_64-unknown-linux-gnu TARGET_SIMPLE=linux-x64
       cache: cargo
       script: &script-github-release
         - |
@@ -86,20 +86,22 @@ jobs:
             cross build --target $TARGET --release --verbose --all
             cp target/$TARGET/release/ffsend ./ffsend
           fi
-        - tar -czvf $TRAVIS_BUILD_DIR/ffsend-$TARGET.tar.gz ./ffsend
-        - rm ./ffsend
+        - tar -czvf ./ffsend-$TARGET_SIMPLE-$TRAVIS_TAG.tar.gz ./ffsend
+        - mv ./ffsend ./ffsend-$TARGET_SIMPLE-$TRAVIS_TAG
       deploy: &deploy-github-release
         provider: releases
         api_key: $GITHUB_OAUTH_TOKEN
         skip_cleanup: true
-        overwrite: false
-        file: ffsend-$TARGET.tar.gz
+        overwrite: true
+        file:
+          - ffsend-$TARGET_SIMPLE-$TRAVIS_TAG.tar.gz
+          - ffsend-$TARGET_SIMPLE-$TRAVIS_TAG
         on:
           tags: true
           branch: master
     - stage: release
       rust: stable
-      env: TARGET=i686-unknown-linux-gnu
+      env: TARGET=i686-unknown-linux-gnu TARGET_SIMPLE=linux-i686
       cache: cargo
       install: &install-github-release-cross
         - cargo install cross
@@ -109,21 +111,21 @@ jobs:
     # GitHub binary release for Linux on arch
     - stage: release
       rust: stable
-      env: TARGET=aarch64-unknown-linux-gnu
+      env: TARGET=aarch64-unknown-linux-gnu TARGET_SIMPLE=linux-aarch64
       cache: cargo
       install: *install-github-release-cross
       script: *script-github-release
       deploy: *deploy-github-release
     - stage: release
       rust: stable
-      env: TARGET=arm-unknown-linux-gnueabi
+      env: TARGET=arm-unknown-linux-gnueabi TARGET_SIMPLE=linux-arm
       cache: cargo
       install: *install-github-release-cross
       script: *script-github-release
       deploy: *deploy-github-release
     - stage: release
       rust: stable
-      env: TARGET=armv7-unknown-linux-gnueabihf
+      env: TARGET=armv7-unknown-linux-gnueabihf TARGET_SIMPLE=linux-armv7
       cache: cargo
       install: *install-github-release-cross
       script: *script-github-release
@@ -133,7 +135,7 @@ jobs:
     - stage: release
       rust: stable
       os: osx
-      env: TARGET=x86_64-apple-darwin
+      env: TARGET=x86_64-apple-darwin TARGET_SIMPLE=osx-x64
       cache: cargo
       script: *script-github-release
       deploy: *deploy-github-release
