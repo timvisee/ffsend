@@ -8,11 +8,6 @@ addons:
     packages:
       - libssl-dev
 
-      # Cross compiler dependencies for ARM
-      # - gcc-arm-linux-gnueabihf
-      # - libc6-armhf-cross
-      # - libc6-dev-armhf-cross
-
 stages:
   - build
   - test
@@ -69,12 +64,18 @@ jobs:
     - stage: release
       rust: stable
       env: TARGET=x86_64-unknown-linux-gnu
-      script:
-        - cargo build --release --verbose --all
+      script: &script-github-release
+        - |
+          if [ $TARGET == "x86_64-unknown-linux-gnu" ] || [ $TARGET == "x86_64-apple-darwin" ]; then
+            cargo build --release --verbose --all
+          else
+            echo 'Starting build using cross for cross compilation...'
+            cross build --target $TARGET --release --verbose --all
+          fi
         - cd target/release
         - tar -czvf $TRAVIS_BUILD_DIR/ffsend-$TARGET.tar.gz ffsend
         - cd $TRAVIS_BUILD_DIR
-      deploy: &deploy-github-release-cross
+      deploy: &deploy-github-release
         provider: releases
         api_key: $GITHUB_OAUTH_TOKEN
         skip_cleanup: true
@@ -89,43 +90,35 @@ jobs:
       env: TARGET=i686-unknown-linux-gnu
       install: &install-github-release-cross
         - cargo install cross
-      script: &script-github-release-cross
-        - cross build --target $TARGET --release --verbose --all
-        - cd target/release
-        - tar -czvf $TRAVIS_BUILD_DIR/ffsend-$TARGET.tar.gz ffsend
-        - cd $TRAVIS_BUILD_DIR
-      deploy: *deploy-github-release-cross
+      script: *script-github-release
+      deploy: *deploy-github-release
 
     # GitHub binary release for Linux on arch
     - stage: release
       rust: stable
       env: TARGET=aarch64-unknown-linux-gnu
       install: *install-github-release-cross
-      script: *script-github-release-cross
-      deploy: *deploy-github-release-cross
+      script: *script-github-release
+      deploy: *deploy-github-release
     - stage: release
       rust: stable
       install: *install-github-release-cross
-      script: *script-github-release-cross
-      deploy: *deploy-github-release-cross
+      script: *script-github-release
+      deploy: *deploy-github-release
     - stage: release
       rust: stable
       env: TARGET=armv7-unknown-linux-gnueabihf
       install: *install-github-release-cross
-      script: *script-github-release-cross
-      deploy: *deploy-github-release-cross
+      script: *script-github-release
+      deploy: *deploy-github-release
 
     # GitHub binary release for macOX
     - stage: release
       rust: stable
       os: osx
       env: TARGET=x86_64-apple-darwin
-      script:
-        - cargo build --release --verbose --all
-        - cd target/release
-        - tar -czvf $TRAVIS_BUILD_DIR/ffsend-$TARGET.tar.gz ffsend
-        - cd $TRAVIS_BUILD_DIR
-      deploy: *deploy-github-release-cross
+      script: *script-github-release
+      deploy: *deploy-github-release
 
 # TODO: add (Free)BSD architecture
 # TODO: use regular cargo commands for x86_64 linux
