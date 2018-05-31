@@ -86,12 +86,12 @@ jobs:
             cross build --target $TARGET --release --verbose --all
             cp target/$TARGET/release/ffsend ./ffsend
           fi
-        - tar -czvf ./ffsend-$TARGET_SIMPLE-$TRAVIS_TAG.tar.gz ffsend
+        - tar -czvf ./ffsend-$TRAVIS_TAG-$TARGET_SIMPLE.tar.gz ffsend
         - |
           if [ -n "$DEB_ARCH" ]; then
             ./pkg/create_deb
           fi
-        - mv ./ffsend ./ffsend-$TARGET_SIMPLE-$TRAVIS_TAG
+        - mv ./ffsend ./ffsend-$TRAVIS_TAG-$TARGET_SIMPLE
       deploy: &deploy-github-release
         provider: releases
         api_key: $GITHUB_OAUTH_TOKEN
@@ -100,14 +100,14 @@ jobs:
         file_glob: true
         file:
           - ffsend_*.deb
-          - ffsend-$TARGET_SIMPLE-$TRAVIS_TAG.tar.gz
-          - ffsend-$TARGET_SIMPLE-$TRAVIS_TAG
+          - ffsend-$TRAVIS_TAG-$TARGET_SIMPLE.tar.gz
+          - ffsend-$TRAVIS_TAG-$TARGET_SIMPLE
         on:
           tags: true
           branch: master
     - stage: release
       rust: stable
-      env: TARGET=i686-unknown-linux-gnu TARGET_SIMPLE=linux-i686 DEB_ARCH=i386
+      env: TARGET=i686-unknown-linux-gnu TARGET_SIMPLE=linux-i386 DEB_ARCH=i386
       cache: cargo
       install: &install-github-release-cross
         - cargo install cross
