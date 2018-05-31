@@ -349,7 +349,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "ffsend"
-version = "0.0.3"
+version = "0.0.6"
 dependencies = [
  "chrono 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "clap 2.31.2 (registry+https://github.com/rust-lang/crates.io-index)",
