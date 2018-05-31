@@ -22,6 +22,25 @@ exclude = [
     "res/*",
 ]
 
+[package.metadata.deb]
+section = "utils"
+extended-description = """\
+Easily and securely share files and directories from the command line through
+a safe, private and encrypted link using a single simple command. \
+Files are shared using the Send service and may be up to 2GB. \
+Others are able to download these files with this tool, \
+or through their webbrowser.\n\
+\n\
+All files are always encrypted on the client, \
+and secrets are never shared with the remote host. \
+An optional password may be specified, and a default file lifetime of 1 \
+(up to 20) download or 24 hours is enforced to ensure your stuff does not \
+remain online forever. This provides a secure platform to share your files."""
+priority = "standard"
+license-file = ["LICENSE", "3"]
+depends = "$auto, xclip"
+maintainer-scripts = "pkg/deb"
+
 [badges]
 travis-ci = { repository = "timvisee/ffsend", branch = "master" }
 
