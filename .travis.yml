@@ -3,10 +3,6 @@ language: rust
 sudo: required
 services:
   - docker
-addons:
-  apt:
-    packages:
-      - libssl-dev
 
 stages:
   - build
