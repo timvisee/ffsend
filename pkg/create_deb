@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+
+set -e
+
+# Ensure the version tag is valid
+if [[ ! $TRAVIS_TAG =~ ^v([0-9]+\.)*[0-9]+$ ]]; then
+    echo "Error: invalid Git tag in \$TRAVIS_TAG, must be in 'v0.0.0' format"
+    exit 1
+fi
+
+# Ensure the debian architecture is set
+if [[ -z "$DEB_ARCH" ]]; then
+    echo "Error: debian architecture not configured in \$DEB_ARCH"
+    exit 1
+fi
+
+# Define some useful variables
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+VERSION=${TRAVIS_TAG:1}
+
+# Ensure the binary file exists
+if [[ ! -f "$DIR/../ffsend" ]]; then
+    echo "Error: missing 'ffsend' binary in repository root"
+    exit 1
+fi
+
+# Create an application directory, copy the binary into it
+mkdir -p $DIR/ffsend-$VERSION
+cp $DIR/../ffsend $DIR/ffsend-$VERSION/ffsend
+
+# Create an application tarbal
+cd $DIR/..
+git archive --format tar.gz -o $DIR/ffsend-$VERSION/ffsend-$VERSION.tar.gz $TRAVIS_TAG
+
+# Change into the app directory
+cd $DIR/ffsend-$VERSION
+
+# Build the debian package
+# TODO: define GPG?
+dh_make -e "timvisee@gmail.com" -c gpl3 -f ffsend-$VERSION.tar.gz -s -y
+rm *.ex README.Debian README.source
+
+# Remove the project tar ball, we're not using it anymore
+rm $DIR/ffsend-$VERSION/ffsend-$VERSION.tar.gz
+
+# TODO: configure the debian/control file
+# TODO: configure copyright file
+
+
+
+
+
+# # Update version and architecture in the control file
+# sed -i "/Version:\.*/c\\Version: $VERSION" $DIR/deb/DEBIAN/control
+# sed -i "/Architecture:\.*/c\\Architecture: $DEB_ARCH" $DIR/deb/DEBIAN/control
+
+# # Build the debian package
+# echo "Building debian package..."
+# dpkg-deb --verbose --build $DIR/deb .

@@ -23,7 +23,7 @@ exclude = [
 ]
 
 [package.metadata.deb]
-section = "utils"
+section = "utility"
 extended-description = """\
 Easily and securely share files and directories from the command line through
 a safe, private and encrypted link using a single simple command. \
