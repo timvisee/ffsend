@@ -86,7 +86,7 @@ jobs:
             cross build --target $TARGET --release --verbose --all
             cp target/$TARGET/release/ffsend ./ffsend
           fi
-        - tar -czvf ./ffsend-$TARGET_SIMPLE-$TRAVIS_TAG.tar.gz ./ffsend
+        - tar -czvf ./ffsend-$TARGET_SIMPLE-$TRAVIS_TAG.tar.gz ffsend
         - |
           if [ -n "$DEB_ARCH" ]; then
             ./pkg/create_deb
