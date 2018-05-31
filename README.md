@@ -140,9 +140,18 @@ all available subcommands.
 <!-- Before installing, make sure you meet all requirements listed
 [here](#requirements) -->
 
-Because `ffsend` is still in alpha, no prebuilt binaries or repositories are
-available at this time.  
-Build and install `ffsend` yourself using these fairly easy steps [here](#build).
+Because `ffsend` is still in alpha, only limited installation options are
+available right now.  
+
+A set of pre-build binaries for Linux and macOS can be found as asset of the
+[latest release][github-latest-release]. When downloading such release, mark
+the binary as executable using `chmod a+x ffsend`, and move it into `/usr/bin/`.
+
+A Windows binary and packaged versions for various Linux distributions is
+currently being worked on.
+
+It is recommended to build and install `ffsend` yourself using these fairly
+easy steps [here](#build).
 
 ## Build
 To build and install `ffsend` yourself, you meet the following requirements
@@ -315,7 +324,7 @@ documentation [here][send-encryption].
 ```
 $ ffsend help
 
-ffsend 0.0.5
+ffsend 0.0.6
 Tim Visee <https://timvisee.com/>
 Easily and securely share files from the command line.
 A fully featured Firefox Send client.
@@ -366,3 +375,4 @@ Check out the [LICENSE](LICENSE) file for more information.
 [rustup]: https://rustup.rs/
 [send]: https://send.firefox.com/
 [send-encryption]: https://github.com/mozilla/send/blob/master/docs/encryption.md
+[github-latest-release]: https://github.com/timvisee/ffsend/releases/latest
