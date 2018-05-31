@@ -73,7 +73,7 @@ jobs:
     # GitHub binary release for Linux on x86/x86_64
     - stage: release
       rust: stable
-      env: TARGET=x86_64-unknown-linux-gnu TARGET_SIMPLE=linux-x64
+      env: TARGET=x86_64-unknown-linux-gnu TARGET_SIMPLE=linux-x64 DEB_ARCH=amd64
       cache: cargo
       script: &script-github-release
         - |
@@ -86,14 +86,20 @@ jobs:
             cross build --target $TARGET --release --verbose --all
             cp target/$TARGET/release/ffsend ./ffsend
           fi
-        - tar -czvf ./ffsend-$TARGET_SIMPLE-$TRAVIS_TAG.tar.gz ./ffsend
+        - tar -czvf ./ffsend-$TARGET_SIMPLE-$TRAVIS_TAG.tar.gz ffsend
+        - |
+          if [ -n "$DEB_ARCH" ]; then
+            ./pkg/create_deb
+          fi
         - mv ./ffsend ./ffsend-$TARGET_SIMPLE-$TRAVIS_TAG
       deploy: &deploy-github-release
         provider: releases
         api_key: $GITHUB_OAUTH_TOKEN
         skip_cleanup: true
         overwrite: true
+        file_glob: true
         file:
+          - ffsend_*.deb
           - ffsend-$TARGET_SIMPLE-$TRAVIS_TAG.tar.gz
           - ffsend-$TARGET_SIMPLE-$TRAVIS_TAG
         on:
@@ -101,7 +107,7 @@ jobs:
           branch: master
     - stage: release
       rust: stable
-      env: TARGET=i686-unknown-linux-gnu TARGET_SIMPLE=linux-i686
+      env: TARGET=i686-unknown-linux-gnu TARGET_SIMPLE=linux-i686 DEB_ARCH=i386
       cache: cargo
       install: &install-github-release-cross
         - cargo install cross
@@ -140,8 +146,7 @@ jobs:
       script: *script-github-release
       deploy: *deploy-github-release
 
+# TODO: add Windows architecture (using AppVeyor)
 # TODO: add (Free)BSD architecture
-# TODO: use regular cargo commands for x86_64 linux
-# TODO: release a build for each architecture
 # TODO: enfore the git tag/crate version equality for releases
 # TODO: disable addons/rust installation for GitHub release job

@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+# Create an ffs alias
+if [[ ! -f /usr/bin/ffs ]]; then
+    echo "Creating ffs alias for ffsend..."
+    ln -s /usr/bin/ffsend /usr/bin/ffs
+fi
