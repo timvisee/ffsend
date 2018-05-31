@@ -73,8 +73,17 @@ jobs:
     # GitHub binary release for Linux on x86/x86_64
     - stage: release
       rust: stable
-      env: TARGET=x86_64-unknown-linux-gnu TARGET_SIMPLE=linux-x64 DEB_ARCH=amd64
+      env: TARGET=x86_64-unknown-linux-gnu TARGET_SIMPLE=linux-x64 DEB=y
       cache: cargo
+      install: &install-github-release
+        - |
+          if [ ! $TARGET == "x86_64-unknown-linux-gnu" ] && [ ! $TARGET == "x86_64-apple-darwin" ]; then
+            cargo install cross
+          fi
+        - |
+          if [ -n "$DEB" ]; then
+            cargo install cargo-deb
+          fi
       script: &script-github-release
         - |
           if [ $TARGET == "x86_64-unknown-linux-gnu" ] || [ $TARGET == "x86_64-apple-darwin" ]; then
@@ -88,8 +97,8 @@ jobs:
           fi
         - tar -czvf ./ffsend-$TRAVIS_TAG-$TARGET_SIMPLE.tar.gz ffsend
         - |
-          if [ -n "$DEB_ARCH" ]; then
-            ./pkg/create_deb
+          if [ -n "$DEB" ]; then
+            cargo deb --verbose
           fi
         - mv ./ffsend ./ffsend-$TRAVIS_TAG-$TARGET_SIMPLE
       deploy: &deploy-github-release
@@ -99,7 +108,7 @@ jobs:
         overwrite: true
         file_glob: true
         file:
-          - ffsend_*.deb
+          - target/debian/ffsend_*.deb
           - ffsend-$TRAVIS_TAG-$TARGET_SIMPLE.tar.gz
           - ffsend-$TRAVIS_TAG-$TARGET_SIMPLE
         on:
@@ -107,10 +116,9 @@ jobs:
           branch: master
     - stage: release
       rust: stable
-      env: TARGET=i686-unknown-linux-gnu TARGET_SIMPLE=linux-i386 DEB_ARCH=i386
+      env: TARGET=i686-unknown-linux-gnu TARGET_SIMPLE=linux-i386 DEB=y
       cache: cargo
-      install: &install-github-release-cross
-        - cargo install cross
+      install: *install-github-release
       script: *script-github-release
       deploy: *deploy-github-release
 
@@ -119,21 +127,21 @@ jobs:
       rust: stable
       env: TARGET=aarch64-unknown-linux-gnu TARGET_SIMPLE=linux-aarch64
       cache: cargo
-      install: *install-github-release-cross
+      install: *install-github-release
       script: *script-github-release
       deploy: *deploy-github-release
     - stage: release
       rust: stable
       env: TARGET=arm-unknown-linux-gnueabi TARGET_SIMPLE=linux-arm
       cache: cargo
-      install: *install-github-release-cross
+      install: *install-github-release
       script: *script-github-release
       deploy: *deploy-github-release
     - stage: release
       rust: stable
       env: TARGET=armv7-unknown-linux-gnueabihf TARGET_SIMPLE=linux-armv7
       cache: cargo
-      install: *install-github-release-cross
+      install: *install-github-release
       script: *script-github-release
       deploy: *deploy-github-release
 
@@ -143,6 +151,7 @@ jobs:
       os: osx
       env: TARGET=x86_64-apple-darwin TARGET_SIMPLE=osx-x64
       cache: cargo
+      install: *install-github-release
       script: *script-github-release
       deploy: *deploy-github-release
 

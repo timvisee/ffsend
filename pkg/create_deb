@@ -24,14 +24,36 @@ if [[ ! -f "$DIR/../ffsend" ]]; then
     exit 1
 fi
 
-# Copy the binary into the package directory
-mkdir -p $DIR/deb/usr/bin
-cp $DIR/../ffsend $DIR/deb/usr/bin/ffsend
+# Create an application directory, copy the binary into it
+mkdir -p $DIR/ffsend-$VERSION
+cp $DIR/../ffsend $DIR/ffsend-$VERSION/ffsend
 
-# Update version and architecture in the control file
-sed -i "/Version:\.*/c\\Version: $VERSION" $DIR/deb/DEBIAN/control
-sed -i "/Architecture:\.*/c\\Architecture: $DEB_ARCH" $DIR/deb/DEBIAN/control
+# Create an application tarbal
+cd $DIR/..
+git archive --format tar.gz -o $DIR/ffsend-$VERSION/ffsend-$VERSION.tar.gz $TRAVIS_TAG
+
+# Change into the app directory
+cd $DIR/ffsend-$VERSION
 
 # Build the debian package
-echo "Building debian package..."
-dpkg-deb --verbose --build $DIR/deb .
+# TODO: define GPG?
+dh_make -e "timvisee@gmail.com" -c gpl3 -f ffsend-$VERSION.tar.gz -s -y
+rm *.ex README.Debian README.source
+
+# Remove the project tar ball, we're not using it anymore
+rm $DIR/ffsend-$VERSION/ffsend-$VERSION.tar.gz
+
+# TODO: configure the debian/control file
+# TODO: configure copyright file
+
+
+
+
+
+# # Update version and architecture in the control file
+# sed -i "/Version:\.*/c\\Version: $VERSION" $DIR/deb/DEBIAN/control
+# sed -i "/Architecture:\.*/c\\Architecture: $DEB_ARCH" $DIR/deb/DEBIAN/control
+
+# # Build the debian package
+# echo "Building debian package..."
+# dpkg-deb --verbose --build $DIR/deb .
