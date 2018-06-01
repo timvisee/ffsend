@@ -38,6 +38,7 @@ Find out more about security [here](#security).
 - [Configuration and environment](#configuration-and-environment)
 - [Security](#security)
 - [Help](#help)
+- [Special thanks](#special-thanks)
 - [License](#license)
 
 The public [Send][send] service that is used as default host is provided by
@@ -360,6 +361,13 @@ The public Send service that is used as default host is provided by Mozilla.
 This application is not affiliated with Mozilla, Firefox or Firefox Send.
 ```
 
+## Special thanks
+- to [Mozilla][mozilla] for building and hosting the amazing
+  [Firefox Send][send] service
+- to everyone involved with [asciinema][asciinema] and [svg-term][svg-term] for
+  providing tools to make great visual demos
+- to everyone involved in all crate dependencies used
+
 ## License
 This project is released under the GNU GPL-3.0 license.
 Check out the [LICENSE](LICENSE) file for more information. 
@@ -375,4 +383,6 @@ Check out the [LICENSE](LICENSE) file for more information.
 [rustup]: https://rustup.rs/
 [send]: https://send.firefox.com/
 [send-encryption]: https://github.com/mozilla/send/blob/master/docs/encryption.md
+[asciinema]: https://asciinema.org/
+[svg-term]: https://github.com/marionebl/svg-term-cli
 [github-latest-release]: https://github.com/timvisee/ffsend/releases/latest
