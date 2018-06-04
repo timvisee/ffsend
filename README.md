@@ -20,7 +20,7 @@ Files are shared using the [Send][send] service and may be up
 to 2GB. Others are able to download these files with this tool, or through
 their webbrowser.
 
-[![ffsend usage demo][usage-demo-svg]][usage-demo-asciinema]
+[![ffsend usage demo][usage-demo-svg]][usage-demo-asciinema]  
 _No demo visible here? View it on [asciinema][usage-demo-asciinema]._
 
 All files are always encrypted on the client, and secrets are never shared with

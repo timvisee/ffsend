@@ -4,8 +4,8 @@ version = "0.0.7"
 authors = ["Tim Visee <timvisee@gmail.com>"]
 license = "GPL-3.0"
 readme = "README.md"
-homepage = "https://github.com/timvisee/ffsend"
-repository = "https://github.com/timvisee/ffsend"
+homepage = "https://gitlab.com/timvisee/ffsend"
+repository = "https://gitlab.com/timvisee/ffsend"
 description = """\
     Easily and securely share files from the command line.\n\
     A fully featured Firefox Send client.\

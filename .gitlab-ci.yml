@@ -1,0 +1,60 @@
+image: "rust:slim"
+
+stages:
+  - check
+  - test
+  - integration
+  - release
+
+variables:
+  RUST_VERSION: stable
+
+# Cargo artifacts caching per Rust version
+cache:
+  key: "$RUST_VERSION"
+  paths:
+    - /usr/local/rustup/
+    - /usr/local/cargo/
+    - target/
+
+# Install compiler and OpenSSL dependencies
+before_script:
+  - apt-get update -y
+  - apt-get install -y --no-install-recommends build-essential pkg-config libssl-dev
+  - rustup install $RUST_VERSION && rustup default $RUST_VERSION
+  - rustc --version && cargo --version
+
+# Check on stable, beta and nightly 
+.check-base: &check-base
+  stage: check
+  script:
+    - cargo check --all --verbose
+    - cargo check --no-default-features --all --verbose
+    - cargo check --features no-color --all --verbose
+check-stable:
+  <<: *check-base
+  variables:
+    RUST_VERSION: stable
+check-beta:
+  <<: *check-base
+  variables:
+    RUST_VERSION: beta
+check-nightly:
+  <<: *check-base
+  variables:
+    RUST_VERSION: nightly
+
+# Run unit tests
+test-unit:
+  stage: test
+  script:
+    - cargo test --all --verbose
+
+# Run integration test with the public Send service
+integration-send:
+  stage: integration
+  script:
+    - cargo build
+    - head -c 1M </dev/urandom >testfile
+    - cargo run -- upload testfile -n testfile.bin -a -d 10 -p secret -I
+    # TODO: download this file, compare checksums
