@@ -272,11 +272,11 @@ impl From<SaveError> for Error {
 #[derive(Debug, Fail)]
 pub enum LoadError {
     /// Failed to read the file contents from the given file.
-    #[fail(display = "Failed to read from the history file")]
+    #[fail(display = "failed to read from the history file")]
     Read(#[cause] IoError),
 
     /// Failed to parse the loaded file.
-    #[fail(display = "Failed to parse the file contents")]
+    #[fail(display = "failed to parse the file contents")]
     Parse(#[cause] DeError),
 }
 
