@@ -13,8 +13,8 @@ variables:
 cache:
   key: "$RUST_VERSION"
   paths:
-    - /usr/local/rustup/*
-    - /usr/local/cargo/*
+    - /usr/local/rustup/
+    - /usr/local/cargo/
     - target/
 
 # Install compiler and OpenSSL dependencies
@@ -36,25 +36,25 @@ variables:
     - cargo check --all --verbose
     - cargo check --no-default-features --all --verbose
     - cargo check --features no-color --all --verbose
-check-stable:
+rust-stable:
   <<: *check-base
-check-beta:
+rust-beta:
   <<: *check-base
   variables:
     RUST_VERSION: beta
-check-nightly:
+rust-nightly:
   <<: *check-base
   variables:
     RUST_VERSION: nightly
 
 # Run the unit tests through Cargo
-test-cargo:
+cargo-test:
   stage: test
   script:
     - cargo test --all --verbose
 
 # Run integration test with the public Send service
-test-public-send:
+public-send-test:
   stage: integration
   script:
     - cargo build
@@ -76,22 +76,21 @@ crate:
     # - cargo publish --verbose
 
 # GitHub binary release for Linux on x86/x86_64
-bin-linux-x64:
+linux-x64:
   stage: release
   image: docker:stable
   variables:
     TARGET: x86_64-unknown-linux-gnu
     TARGET_SIMPLE: linux-x64
     DEB: y
-  before_script: &release-bin-before-script
-    - apt-get update -y
-    - apt-get install -y --no-install-recommends build-essential pkg-config libssl-dev curl
+  before_script: &release-before-script
+    - apk add curl openssl-dev sh pkgconfig
     - curl https://sh.rustup.rs -sSf | sh -s -- -y --no-modify-path --default-toolchain $RUST_VERSION
     - export PATH=/usr/local/cargo/bin:$PATH
     - export RUSTUP_HOME=/usr/local/rustup
     - export CARGO_HOME=/usr/local/cargo
     - rustc --version && cargo --version
-  script: &release-bin-script
+  script: &release-script
     - echo Install release dependencies
     - |
       if [ ! $TARGET == "x86_64-unknown-linux-gnu" ]; then
@@ -133,55 +132,55 @@ bin-linux-x64:
   #     tags: true
   #     branch: master
 
-bin-linux-i368:
+linux-i368:
   stage: release
   image: docker:stable
   variables:
     TARGET: i686-unknown-linux-gnu
     TARGET_SIMPLE: linux-i386
     DEB: y
-  before_script: *release-bin-before-script
-  script: *release-bin-script
+  before_script: *release-before-script
+  script: *release-script
   # deploy: *deploy-github-release
 
 # GitHub binary release for Linux on arch
-bin-linux-aarch64:
+linux-aarch64:
   stage: release
   image: docker:stable
   variables:
     TARGET: aarch64-unknown-linux-gnu
     TARGET_SIMPLE: linux-aarch64
-  before_script: *release-bin-before-script
-  script: *release-bin-script
+  before_script: *release-before-script
+  script: *release-script
   # deploy: *deploy-github-release
 
-bin-linux-arm:
+linux-arm:
   stage: release
   image: docker:stable
   variables:
     TARGET: arm-unknown-linux-gnueabi
     TARGET_SIMPLE: linux-arm
-  before_script: *release-bin-before-script
-  script: *release-bin-script
+  before_script: *release-before-script
+  script: *release-script
   # deploy: *deploy-github-release
 
-bin-linux-armv7:
+linux-armv7:
   stage: release
   image: docker:stable
   variables:
     TARGET: armv7-unknown-linux-gnueabihf
     TARGET_SIMPLE: linux-armv7
-  before_script: *release-bin-before-script
-  script: *release-bin-script
+  before_script: *release-before-script
+  script: *release-script
   # deploy: *deploy-github-release
 
 # GitHub binary release for macOX
-bin-osx-x64:
+osx-x64:
   stage: release
   image: docker:stable
   variables:
     TARGET: x86_64-apple-darwin
     TARGET_SIMPLE: osx-x64
-  before_script: *release-bin-before-script
-  script: *release-bin-script
+  before_script: *release-before-script
+  script: *release-script
   # deploy: *deploy-github-release
