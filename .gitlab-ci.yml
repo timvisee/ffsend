@@ -13,8 +13,8 @@ variables:
 cache:
   key: "$RUST_VERSION"
   paths:
-    - /usr/local/rustup/
-    - /usr/local/cargo/
+    - /usr/local/rustup/*
+    - /usr/local/cargo/*
     - target/
 
 # Install compiler and OpenSSL dependencies
@@ -65,7 +65,7 @@ test-public-send:
 # TODO: only build releases when running CI for version tags
 
 # Cargo crate release
-cargo-linux-x64:
+crate:
   stage: release
   variables:
     TARGET: x86_64-unknown-linux-gnu
@@ -78,10 +78,19 @@ cargo-linux-x64:
 # GitHub binary release for Linux on x86/x86_64
 bin-linux-x64:
   stage: release
+  image: docker:stable
   variables:
     TARGET: x86_64-unknown-linux-gnu
     TARGET_SIMPLE: linux-x64
     DEB: y
+  before_script: &release-bin-before-script
+    - apt-get update -y
+    - apt-get install -y --no-install-recommends build-essential pkg-config libssl-dev curl
+    - curl https://sh.rustup.rs -sSf | sh -s -y --no-modify-path --default-toolchain $RUST_VERSION
+    - export PATH=/usr/local/cargo/bin:$PATH
+    - export RUSTUP_HOME=/usr/local/rustup
+    - export CARGO_HOME=/usr/local/cargo
+    - rustc --version && cargo --version
   script: &release-bin-script
     - echo Install release dependencies
     - |
@@ -126,43 +135,53 @@ bin-linux-x64:
 
 bin-linux-i368:
   stage: release
+  image: docker:stable
   variables:
     TARGET: i686-unknown-linux-gnu
     TARGET_SIMPLE: linux-i386
     DEB: y
+  before_script: *release-bin-before-script
   script: *release-bin-script
   # deploy: *deploy-github-release
 
 # GitHub binary release for Linux on arch
 bin-linux-aarch64:
   stage: release
+  image: docker:stable
   variables:
     TARGET: aarch64-unknown-linux-gnu
     TARGET_SIMPLE: linux-aarch64
+  before_script: *release-bin-before-script
   script: *release-bin-script
   # deploy: *deploy-github-release
 
 bin-linux-arm:
   stage: release
+  image: docker:stable
   variables:
     TARGET: arm-unknown-linux-gnueabi
     TARGET_SIMPLE: linux-arm
+  before_script: *release-bin-before-script
   script: *release-bin-script
   # deploy: *deploy-github-release
 
 bin-linux-armv7:
   stage: release
+  image: docker:stable
   variables:
     TARGET: armv7-unknown-linux-gnueabihf
     TARGET_SIMPLE: linux-armv7
+  before_script: *release-bin-before-script
   script: *release-bin-script
   # deploy: *deploy-github-release
 
 # GitHub binary release for macOX
 bin-osx-x64:
   stage: release
+  image: docker:stable
   variables:
     TARGET: x86_64-apple-darwin
     TARGET_SIMPLE: osx-x64
+  before_script: *release-bin-before-script
   script: *release-bin-script
   # deploy: *deploy-github-release
