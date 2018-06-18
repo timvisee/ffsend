@@ -86,7 +86,7 @@ bin-linux-x64:
   before_script: &release-bin-before-script
     - apt-get update -y
     - apt-get install -y --no-install-recommends build-essential pkg-config libssl-dev curl
-    - curl https://sh.rustup.rs -sSf | sh -s -y --no-modify-path --default-toolchain $RUST_VERSION
+    - curl https://sh.rustup.rs -sSf | sh -s -- -y --no-modify-path --default-toolchain $RUST_VERSION
     - export PATH=/usr/local/cargo/bin:$PATH
     - export RUSTUP_HOME=/usr/local/rustup
     - export CARGO_HOME=/usr/local/cargo
