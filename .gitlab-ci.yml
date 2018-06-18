@@ -84,6 +84,7 @@ linux-x64:
     TARGET_SIMPLE: linux-x64
     DEB: y
   before_script: &release-before-script
+    - apk update
     - apk add curl openssl-dev sh pkgconfig
     - curl https://sh.rustup.rs -sSf | sh -s -- -y --no-modify-path --default-toolchain $RUST_VERSION
     - export PATH=/usr/local/cargo/bin:$PATH
