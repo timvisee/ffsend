@@ -28,6 +28,10 @@ before_script:
 .check-base: &check-base
   stage: check
   script:
+    # Test: cargo and rust environment
+    - env
+    - cat ~/.profile
+
     - cargo check --all --verbose
     - cargo check --no-default-features --all --verbose
     - cargo check --features no-color --all --verbose
@@ -44,14 +48,14 @@ check-nightly:
   variables:
     RUST_VERSION: nightly
 
-# Run unit tests
-test-unit:
+# Run the unit tests through Cargo
+test-cargo:
   stage: test
   script:
     - cargo test --all --verbose
 
 # Run integration test with the public Send service
-integration-send:
+test-public-send:
   stage: integration
   script:
     - cargo build
