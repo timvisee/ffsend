@@ -24,6 +24,11 @@ before_script:
   - rustup install $RUST_VERSION && rustup default $RUST_VERSION
   - rustc --version && cargo --version
 
+# Variable defaults
+variables:
+  RUST_VERSION: stable
+  CI_COMMIT_TAG: 0.0.0
+
 # Check on stable, beta and nightly 
 .check-base: &check-base
   stage: check
@@ -33,8 +38,6 @@ before_script:
     - cargo check --features no-color --all --verbose
 check-stable:
   <<: *check-base
-  variables:
-    RUST_VERSION: stable
 check-beta:
   <<: *check-base
   variables:
@@ -58,3 +61,108 @@ test-public-send:
     - head -c 1M </dev/urandom >testfile
     - cargo run -- upload testfile -n testfile.bin -a -d 10 -p secret -I
     # TODO: download this file, compare checksums
+
+# TODO: only build releases when running CI for version tags
+
+# Cargo crate release
+cargo-linux-x64:
+  stage: release
+  variables:
+    TARGET: x86_64-unknown-linux-gnu
+  script:
+    - echo "Creating release crate on crates.io..."
+    - echo $CARGO_TOKEN | cargo login
+    # TODO: enable after the test succeeds
+    # - cargo publish --verbose
+
+# GitHub binary release for Linux on x86/x86_64
+bin-linux-x64:
+  stage: release
+  variables:
+    TARGET: x86_64-unknown-linux-gnu
+    TARGET_SIMPLE: linux-x64
+    DEB: y
+  script: &release-bin-script
+    - echo Install release dependencies
+    - |
+      if [ ! $TARGET == "x86_64-unknown-linux-gnu" ]; then
+        cargo install cross
+      fi
+    - |
+      if [ -n "$DEB" ]; then
+        cargo install cargo-deb
+      fi
+    - echo Build release
+    - |
+      if [ $TARGET == "x86_64-unknown-linux-gnu" ]; then
+        echo "Creating release binary on GitHub for $TARGET..."
+        cargo build --release --verbose --all
+        cp target/release/ffsend ./ffsend
+      else
+        echo "Creating release binary on GitHub for $TARGET (cross compiled)..."
+        cross build --target $TARGET --release --verbose --all
+        cp target/$TARGET/release/ffsend ./ffsend
+      fi
+    - tar -czvf ./ffsend-$CI_COMMIT_TAG-$TARGET_SIMPLE.tar.gz ffsend
+    - |
+      if [ -n "$DEB" ]; then
+        cargo deb --verbose
+      fi
+    - mv ./ffsend ./ffsend-$CI_COMMIT_TAG-$TARGET_SIMPLE
+  # TODO: this is in Travis CI style, convert this to GitLab CI
+  # deploy: &deploy-github-release
+  #   provider: releases
+  #   api_key: $GITHUB_OAUTH_TOKEN
+  #   skip_cleanup: true
+  #   overwrite: true
+  #   file_glob: true
+  #   file:
+  #     - target/debian/ffsend_*.deb
+  #     - ffsend-$CI_COMMIT_TAG-$TARGET_SIMPLE.tar.gz
+  #     - ffsend-$CI_COMMIT_TAG-$TARGET_SIMPLE
+  #   on:
+  #     tags: true
+  #     branch: master
+
+bin-linux-i368:
+  stage: release
+  variables:
+    TARGET: i686-unknown-linux-gnu
+    TARGET_SIMPLE: linux-i386
+    DEB: y
+  script: *release-bin-script
+  # deploy: *deploy-github-release
+
+# GitHub binary release for Linux on arch
+bin-linux-aarch64:
+  stage: release
+  variables:
+    TARGET: aarch64-unknown-linux-gnu
+    TARGET_SIMPLE: linux-aarch64
+  script: *release-bin-script
+  # deploy: *deploy-github-release
+
+bin-linux-arm:
+  stage: release
+  variables:
+    TARGET: arm-unknown-linux-gnueabi
+    TARGET_SIMPLE: linux-arm
+  script: *release-bin-script
+  # deploy: *deploy-github-release
+
+bin-linux-armv7:
+  stage: release
+  variables:
+    TARGET: armv7-unknown-linux-gnueabihf
+    TARGET_SIMPLE: linux-armv7
+  script: *release-bin-script
+  # deploy: *deploy-github-release
+
+# GitHub binary release for macOX
+bin-osx-x64:
+  stage: release
+  variables:
+    TARGET: x86_64-apple-darwin
+    TARGET_SIMPLE: osx-x64
+  script: *release-bin-script
+  # deploy: *deploy-github-release
