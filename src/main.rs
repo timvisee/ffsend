@@ -9,6 +9,7 @@ extern crate ffsend_api;
 #[cfg(feature = "history")]
 #[macro_use]
 extern crate lazy_static;
+extern crate openssl_probe;
 extern crate prettytable;
 extern crate rpassword;
 extern crate serde;
@@ -46,6 +47,9 @@ use util::{ErrorHints, exe_name, highlight, quit_error};
 
 /// Application entrypoint.
 fn main() {
+    // Probe for OpenSSL certificates
+    openssl_probe::init_ssl_cert_env_vars();
+
     // Parse CLI arguments
     let cmd_handler = Handler::parse();
 
