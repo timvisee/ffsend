@@ -2,14 +2,14 @@ image: "rust:slim"
 
 stages:
   - check
+  - build
   - test
-  - integration
   - release
 
 variables:
   RUST_VERSION: stable
 
-# Cargo artifacts caching per Rust version
+# Cargo artifacts caching per Rust version and pipeline
 cache:
   key: "$RUST_VERSION"
   paths:
@@ -19,10 +19,14 @@ cache:
 
 # Install compiler and OpenSSL dependencies
 before_script:
-  - apt-get update -y
+  - apt-get update
   - apt-get install -y --no-install-recommends build-essential pkg-config libssl-dev
-  - rustup install $RUST_VERSION && rustup default $RUST_VERSION
-  - rustc --version && cargo --version
+  - |
+    rustup install $RUST_VERSION
+    rustup default $RUST_VERSION
+  - |
+    rustc --version
+    cargo --version
 
 # Variable defaults
 variables:
@@ -32,31 +36,83 @@ variables:
 .check-base: &check-base
   stage: check
   script:
-    - cargo check --all --verbose
-    - cargo check --no-default-features --all --verbose
-    - cargo check --features no-color --all --verbose
+    - cargo check --verbose
+    - cargo check --no-default-features --verbose
+    - cargo check --features no-color --verbose
 rust-stable:
   <<: *check-base
 rust-beta:
   <<: *check-base
   variables:
     RUST_VERSION: beta
+  cache: {}
 rust-nightly:
   <<: *check-base
   variables:
     RUST_VERSION: nightly
+  cache: {}
+
+# Build using Rust stable
+build:
+  stage: build
+  script:
+    - cargo build --release --verbose
+    - mv target/release/ffsend ./ffsend
+  artifacts:
+    name: build-dynamic
+    paths:
+      - ffsend
+    expire_in: 1 month
+
+# Build a static version
+build-static:
+  stage: build
+  script:
+    # Install the static target
+    - rustup target add x86_64-unknown-linux-musl
+
+    # Build OpenSSL statically
+    - apt install -y build-essential wget musl-tools
+    - wget https://www.openssl.org/source/openssl-1.0.2o.tar.gz
+    - tar xzvf openssl-1.0.2o.tar.gz
+    - cd openssl-1.0.2o
+    - ./config -fPIC --openssldir=/usr/local/ssl --prefix=/usr/local
+    - make
+    - make install
+    - cd ..
+
+    # Statically build ffsend
+    - export OPENSSL_STATIC=1
+    - export OPENSSL_LIB_DIR=/usr/local/lib
+    - export OPENSSL_INCLUDE_DIR=/usr/local/include
+    - cargo build --target=x86_64-unknown-linux-musl --release --verbose
+
+    # Prepare the release artifact
+    - find . -name ffsend -exec ls -lah {} \;
+    - mv target/x86_64-unknown-linux-musl/release/ffsend ./ffsend
+  artifacts:
+    name: build-static
+    paths:
+      - ffsend
+    expire_in: 1 month
 
 # Run the unit tests through Cargo
 cargo-test:
   stage: test
+  dependencies: []
   script:
-    - cargo test --all --verbose
+    - cargo test --verbose
 
 # Run integration test with the public Send service
 public-send-test:
-  stage: integration
+  stage: test
+  dependencies:
+    - build-static
+  variables:
+    GIT_STRATEGY: none
+  cache: {}
+  before_script: []
   script:
-    - cargo build
-    - head -c 1M </dev/urandom >testfile
-    - cargo run -- upload testfile -n testfile.bin -a -d 10 -p secret -I
+    - head -c1m </dev/urandom >testfile
+    - ./ffsend upload testfile -n testfile.bin -a -d 10 -p secret -I
     # TODO: download this file, compare checksums
