@@ -52,7 +52,7 @@ _Note: this tool is currently in the alpha phase_
 - Fully featured and friendly command line tool
 - Upload and download files and directories securely
 - Always encrypted on the client
-- Additional password protection and configurable download limits
+- Additional password protection, generation and configurable download limits
 - Built-in file and directory archiving and extraction
 - History tracking your files for easy management
 - Ability to use your own Send host
@@ -325,8 +325,8 @@ documentation [here][send-encryption].
 ```
 $ ffsend help
 
-ffsend 0.0.7
-Tim Visee <https://timvisee.com/>
+ffsend 0.0.8
+Tim Visee <timvisee@gmail.com>
 Easily and securely share files from the command line.
 A fully featured Firefox Send client.
 

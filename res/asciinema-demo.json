@@ -4,7 +4,7 @@
   "height": 19,
   "duration": 78.431135,
   "command": null,
-  "title": "ffsend v0.0.1 demo",
+  "title": "ffsend v0.0.8 demo",
   "env": {
     "TERM": "xterm-256color",
     "SHELL": "/bin/bash"
@@ -44,7 +44,7 @@
     ],
     [
       0.004048,
-      "ffsend 0.0.1\r\nUsage: ffsend [FLAGS] <SUBCOMMAND> ...\r\n\r\nSecurely and easily share files from the command line.\r\nA fully featured Firefox Send client.\r\n\r\nMissing subcommand. Here are the most used:\r\n"
+      "ffsend 0.0.7\r\nUsage: ffsend [FLAGS] <SUBCOMMAND> ...\r\n\r\nSecurely and easily share files from the command line.\r\nA fully featured Firefox Send client.\r\n\r\nMissing subcommand. Here are the most used:\r\n"
     ],
     [
       0.000148,
