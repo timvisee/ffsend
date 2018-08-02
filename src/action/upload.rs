@@ -208,12 +208,18 @@ impl<'a> Upload<'a> {
         // Build the progress reporter
         let progress_reporter: Arc<Mutex<ProgressReporter>> = progress_bar;
 
+        // Get the password to use and whether it was generated
+        let password = matcher_upload.password();
+        let (password, password_generated) = password
+            .map(|(p, g)| (Some(p), g))
+            .unwrap_or((None, false));
+
         // Execute an upload action
         let file = ApiUpload::new(
             host,
             path.clone(),
             file_name,
-            matcher_upload.password(),
+            password.clone(),
             params,
         ).invoke(&client, &progress_reporter)?;
 
@@ -225,6 +231,12 @@ impl<'a> Upload<'a> {
             Cell::new("Share link:"),
             Cell::new(url.as_str()),
         ]));
+        if password_generated {
+            table.add_row(Row::new(vec![
+                Cell::new("Passphrase:"),
+                Cell::new(&password.unwrap_or("?".into())),
+            ]));
+        }
         if matcher_main.verbose() {
             table.add_row(Row::new(vec![
                 Cell::new("Owner token:"),

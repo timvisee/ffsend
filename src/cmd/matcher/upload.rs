@@ -4,7 +4,14 @@ use ffsend_api::action::params::{
 };
 use ffsend_api::url::Url;
 
-use cmd::arg::{ArgDownloadLimit, ArgHost, ArgPassword, CmdArgOption};
+use cmd::arg::{
+    ArgDownloadLimit,
+    ArgGenPassphrase,
+    ArgHost,
+    ArgPassword,
+    CmdArgFlag,
+    CmdArgOption,
+};
 use super::Matcher;
 use util::{env_var_present, ErrorHintsBuilder, quit_error_msg};
 
@@ -55,9 +62,24 @@ impl<'a: 'b, 'b> UploadMatcher<'a> {
     }
 
     /// Get the password.
-    /// `None` is returned if no password was specified.
-    pub fn password(&'a self) -> Option<String> {
+    /// A generated passphrase will be returned if the user requested so,
+    /// otherwise the specified password is returned.
+    /// If no password was set, `None` is returned instead.
+    ///
+    /// The password is returned in the following format:
+    /// `(password, generated)`
+    pub fn password(&'a self) -> Option<(String, bool)> {
+        // Generate a passphrase if requested
+        if ArgGenPassphrase::is_present(self.matches) {
+            return Some((
+                ArgGenPassphrase::gen_passphrase(),
+                true,
+            ));
+        }
+
+        // Use a specified password or use nothing
         ArgPassword::value(self.matches)
+            .map(|password| (password, false))
     }
 
     /// Get the download limit.
