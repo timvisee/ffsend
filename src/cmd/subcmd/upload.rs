@@ -3,9 +3,15 @@ use ffsend_api::action::params::{
     PARAMS_DEFAULT_DOWNLOAD_STR as DOWNLOAD_DEFAULT,
 };
 
-use cmd::arg::{ArgDownloadLimit, ArgHost, ArgPassword, CmdArg};
+use cmd::arg::{
+    ArgDownloadLimit,
+    ArgGenPassphrase,
+    ArgHost,
+    ArgPassword,
+    CmdArg,
+};
 
-/// The uplaod command definition.
+/// The upload command definition.
 pub struct CmdUpload;
 
 impl CmdUpload {
@@ -22,6 +28,7 @@ impl CmdUpload {
                 .multiple(false))
             .arg(ArgPassword::build()
                  .help("Protect the file with a password"))
+            .arg(ArgGenPassphrase::build())
             .arg(ArgDownloadLimit::build()
                  .default_value(DOWNLOAD_DEFAULT))
             .arg(ArgHost::build())

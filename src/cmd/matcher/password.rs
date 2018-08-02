@@ -2,7 +2,14 @@ use clap::ArgMatches;
 use ffsend_api::url::Url;
 use rpassword::prompt_password_stderr;
 
-use cmd::arg::{ArgOwner, ArgPassword, ArgUrl, CmdArgOption};
+use cmd::arg::{
+    ArgGenPassphrase,
+    ArgOwner,
+    ArgPassword,
+    ArgUrl,
+    CmdArgFlag,
+    CmdArgOption,
+};
 use cmd::matcher::{MainMatcher, Matcher};
 use util::check_empty_password;
 
@@ -29,7 +36,15 @@ impl<'a: 'b, 'b> PasswordMatcher<'a> {
     }
 
     /// Get the password.
-    pub fn password(&'a self) -> String {
+    ///
+    /// The password is returned in the following format:
+    /// `(password, generated)`
+    pub fn password(&'a self) -> (String, bool) {
+        // Generate a passphrase if requested
+        if ArgGenPassphrase::is_present(self.matches) {
+            return (ArgGenPassphrase::gen_passphrase(), true);
+        }
+
         // Get the password, or prompt for it
         let password = match ArgPassword::value(self.matches) {
             Some(password) => password,
@@ -48,7 +63,7 @@ impl<'a: 'b, 'b> PasswordMatcher<'a> {
         // Check for empty passwords
         check_empty_password(&password, &matcher_main);
 
-        password
+        (password, false)
     }
 }
 

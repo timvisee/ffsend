@@ -1,6 +1,6 @@
 use clap::{App, SubCommand};
 
-use cmd::arg::{ArgOwner, ArgPassword, ArgUrl, CmdArg};
+use cmd::arg::{ArgGenPassphrase, ArgOwner, ArgPassword, ArgUrl, CmdArg};
 
 /// The password command definition.
 pub struct CmdPassword;
@@ -14,6 +14,7 @@ impl CmdPassword {
             .arg(ArgUrl::build())
             .arg(ArgPassword::build()
                  .help("Specify a password, do not prompt"))
+            .arg(ArgGenPassphrase::build())
             .arg(ArgOwner::build())
     }
 }
