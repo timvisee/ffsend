@@ -377,7 +377,7 @@ Check out the [LICENSE](LICENSE) file for more information.
 [firefox]: https://firefox.com/
 [git]: https://git-scm.com/
 [libressl]: https://libressl.org/
-[mozilla]: https://mozzilla.org/
+[mozilla]: https://mozilla.org/
 [openssl]: https://www.openssl.org/
 [rust]: https://rust-lang.org/
 [rustup]: https://rustup.rs/
