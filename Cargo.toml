@@ -1,6 +1,6 @@
 [package]
 name = "ffsend"
-version = "0.0.7"
+version = "0.0.8"
 authors = ["Tim Visee <timvisee@gmail.com>"]
 license = "GPL-3.0"
 readme = "README.md"
@@ -61,6 +61,7 @@ history = []
 no-color = ["colored/no-color"]
 
 [dependencies]
+chbs = "0.0.1"
 chrono = "0.4"
 clap = "2.31"
 colored = "1.6"
