@@ -3,8 +3,8 @@ use std::path::PathBuf;
 use clap::ArgMatches;
 use ffsend_api::url::Url;
 
-use cmd::arg::{ArgPassword, ArgUrl, CmdArgOption};
 use super::Matcher;
+use cmd::arg::{ArgPassword, ArgUrl, CmdArgOption};
 #[cfg(feature = "archive")]
 use util::env_var_present;
 
@@ -33,7 +33,8 @@ impl<'a: 'b, 'b> DownloadMatcher<'a> {
     /// If a directory is given, the file name of the original uploaded file
     /// will be used.
     pub fn output(&'a self) -> PathBuf {
-        self.matches.value_of("output")
+        self.matches
+            .value_of("output")
             .map(PathBuf::from)
             .unwrap_or_else(|| PathBuf::from("./"))
     }
@@ -47,11 +48,8 @@ impl<'a: 'b, 'b> DownloadMatcher<'a> {
 
 impl<'a> Matcher<'a> for DownloadMatcher<'a> {
     fn with(matches: &'a ArgMatches) -> Option<Self> {
-        matches.subcommand_matches("download")
-            .map(|matches|
-                 DownloadMatcher {
-                     matches,
-                 }
-            )
+        matches
+            .subcommand_matches("download")
+            .map(|matches| DownloadMatcher { matches })
     }
 }

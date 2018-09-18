@@ -2,14 +2,7 @@ use clap::ArgMatches;
 use ffsend_api::url::Url;
 use rpassword::prompt_password_stderr;
 
-use cmd::arg::{
-    ArgGenPassphrase,
-    ArgOwner,
-    ArgPassword,
-    ArgUrl,
-    CmdArgFlag,
-    CmdArgOption,
-};
+use cmd::arg::{ArgGenPassphrase, ArgOwner, ArgPassword, ArgUrl, CmdArgFlag, CmdArgOption};
 use cmd::matcher::{MainMatcher, Matcher};
 use util::check_empty_password;
 
@@ -31,8 +24,7 @@ impl<'a: 'b, 'b> PasswordMatcher<'a> {
     /// Get the owner token.
     pub fn owner(&'a self) -> Option<String> {
         // TODO: just return a string reference here?
-        ArgOwner::value(self.matches)
-            .map(|token| token.to_owned())
+        ArgOwner::value(self.matches).map(|token| token.to_owned())
     }
 
     /// Get the password.
@@ -54,7 +46,7 @@ impl<'a: 'b, 'b> PasswordMatcher<'a> {
                 // TODO: create utility function for this
                 prompt_password_stderr("New password: ")
                     .expect("failed to read password from stdin")
-            },
+            }
         };
 
         // Create a main matcher
@@ -69,11 +61,8 @@ impl<'a: 'b, 'b> PasswordMatcher<'a> {
 
 impl<'a> Matcher<'a> for PasswordMatcher<'a> {
     fn with(matches: &'a ArgMatches) -> Option<Self> {
-        matches.subcommand_matches("password")
-            .map(|matches|
-                 PasswordMatcher {
-                     matches,
-                 }
-            )
+        matches
+            .subcommand_matches("password")
+            .map(|matches| PasswordMatcher { matches })
     }
 }

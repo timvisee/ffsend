@@ -1,19 +1,9 @@
 use clap::ArgMatches;
-use ffsend_api::action::delete::{
-    Error as DeleteError,
-    Delete as ApiDelete,
-};
-use ffsend_api::file::remote_file::{
-    FileParseError,
-    RemoteFile,
-};
+use ffsend_api::action::delete::{Delete as ApiDelete, Error as DeleteError};
+use ffsend_api::file::remote_file::{FileParseError, RemoteFile};
 use ffsend_api::reqwest::Client;
 
-use cmd::matcher::{
-    Matcher,
-    delete::DeleteMatcher,
-    main::MainMatcher,
-};
+use cmd::matcher::{delete::DeleteMatcher, main::MainMatcher, Matcher};
 use error::ActionError;
 #[cfg(feature = "history")]
 use history_tool;
@@ -27,9 +17,7 @@ pub struct Delete<'a> {
 impl<'a> Delete<'a> {
     /// Construct a new delete action.
     pub fn new(cmd_matches: &'a ArgMatches<'a>) -> Self {
-        Self {
-            cmd_matches,
-        }
+        Self { cmd_matches }
     }
 
     /// Invoke the delete action.

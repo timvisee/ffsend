@@ -1,8 +1,8 @@
 use clap::ArgMatches;
 use ffsend_api::url::Url;
 
-use cmd::arg::{ArgOwner, ArgUrl, CmdArgOption};
 use super::Matcher;
+use cmd::arg::{ArgOwner, ArgUrl, CmdArgOption};
 
 /// The delete command matcher.
 pub struct DeleteMatcher<'a> {
@@ -22,18 +22,14 @@ impl<'a: 'b, 'b> DeleteMatcher<'a> {
     /// Get the owner token.
     pub fn owner(&'a self) -> Option<String> {
         // TODO: just return a string reference here?
-        ArgOwner::value(self.matches)
-            .map(|token| token.to_owned())
+        ArgOwner::value(self.matches).map(|token| token.to_owned())
     }
 }
 
 impl<'a> Matcher<'a> for DeleteMatcher<'a> {
     fn with(matches: &'a ArgMatches) -> Option<Self> {
-        matches.subcommand_matches("delete")
-            .map(|matches|
-                 DeleteMatcher {
-                     matches,
-                 }
-            )
+        matches
+            .subcommand_matches("delete")
+            .map(|matches| DeleteMatcher { matches })
     }
 }

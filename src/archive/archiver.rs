@@ -1,8 +1,5 @@
 use std::fs::File;
-use std::io::{
-    Error as IoError,
-    Write,
-};
+use std::io::{Error as IoError, Write};
 use std::path::Path;
 
 use super::tar::Builder as TarBuilder;
@@ -29,9 +26,9 @@ impl<W: Write> Archiver<W> {
     ///
     /// If no entry exists at the given `src_path`, an error is returned.
     pub fn append_path<P, Q>(&mut self, path: P, src_path: Q) -> Result<()>
-        where
-            P: AsRef<Path>,
-            Q: AsRef<Path>,
+    where
+        P: AsRef<Path>,
+        Q: AsRef<Path>,
     {
         // Append the path as file or directory
         if src_path.as_ref().is_file() {
@@ -46,8 +43,8 @@ impl<W: Write> Archiver<W> {
 
     /// Append a file to the archive builder.
     pub fn append_file<P>(&mut self, path: P, file: &mut File) -> Result<()>
-        where
-            P: AsRef<Path>,
+    where
+        P: AsRef<Path>,
     {
         self.inner.append_file(path, file)
     }
@@ -55,9 +52,9 @@ impl<W: Write> Archiver<W> {
     /// Append a directory to the archive builder.
     // TODO: Define a flag to add recursively or not
     pub fn append_dir<P, Q>(&mut self, path: P, src_path: Q) -> Result<()>
-        where
-            P: AsRef<Path>,
-            Q: AsRef<Path>,
+    where
+        P: AsRef<Path>,
+        Q: AsRef<Path>,
     {
         self.inner.append_dir_all(path, src_path)
     }

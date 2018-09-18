@@ -1,20 +1,9 @@
 use clap::ArgMatches;
-use prettytable::{
-    cell::Cell,
-    format::FormatBuilder,
-    row::Row,
-    Table,
-};
+use prettytable::{cell::Cell, format::FormatBuilder, row::Row, Table};
 
-use cmd::matcher::{
-    Matcher,
-    main::MainMatcher,
-};
+use cmd::matcher::{main::MainMatcher, Matcher};
 use error::ActionError;
-use history::{
-    History as HistoryManager,
-    LoadError as HistoryLoadError,
-};
+use history::{History as HistoryManager, LoadError as HistoryLoadError};
 use util::format_duration;
 
 /// A history action.
@@ -25,9 +14,7 @@ pub struct History<'a> {
 impl<'a> History<'a> {
     /// Construct a new history action.
     pub fn new(cmd_matches: &'a ArgMatches<'a>) -> Self {
-        Self {
-            cmd_matches,
-        }
+        Self { cmd_matches }
     }
 
     /// Invoke the history action.

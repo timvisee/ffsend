@@ -6,7 +6,7 @@ use clap::ArgMatches;
 use super::Matcher;
 use util::env_var_present;
 #[cfg(feature = "history")]
-use util::{ErrorHintsBuilder, quit_error_msg};
+use util::{quit_error_msg, ErrorHintsBuilder};
 
 /// The main command matcher.
 pub struct MainMatcher<'a> {
@@ -33,8 +33,7 @@ impl<'a: 'b, 'b> MainMatcher<'a> {
     #[cfg(feature = "history")]
     pub fn history(&self) -> PathBuf {
         // Get the path
-        let path = self.matches.value_of("history")
-            .map(PathBuf::from);
+        let path = self.matches.value_of("history").map(PathBuf::from);
 
         // Ensure the path is correct
         match path {
@@ -64,10 +63,6 @@ impl<'a: 'b, 'b> MainMatcher<'a> {
 
 impl<'a> Matcher<'a> for MainMatcher<'a> {
     fn with(matches: &'a ArgMatches) -> Option<Self> {
-        Some(
-            MainMatcher {
-                matches,
-            }
-        )
+        Some(MainMatcher { matches })
     }
 }

@@ -9,14 +9,9 @@ use std::borrow::Borrow;
 use std::env::{current_exe, var_os};
 use std::ffi::OsStr;
 use std::fmt::{Debug, Display};
-use std::io::{
-    Error as IoError,
-    stdin,
-    stderr,
-    Write,
-};
 #[cfg(feature = "clipboard")]
 use std::io::ErrorKind as IoErrorKind;
+use std::io::{stderr, stdin, Error as IoError, Write};
 use std::path::Path;
 #[cfg(feature = "history")]
 use std::path::PathBuf;
@@ -24,18 +19,18 @@ use std::process::{exit, ExitStatus};
 #[cfg(all(feature = "clipboard", target_os = "linux"))]
 use std::process::{Command, Stdio};
 
-use chrono::Duration;
-use failure::{err_msg, Fail};
-#[cfg(all(feature = "clipboard", not(target_os = "linux")))]
-use failure::{Compat, Error};
-use ffsend_api::url::Url;
-use rpassword::prompt_password_stderr;
 #[cfg(all(feature = "clipboard", not(target_os = "linux")))]
 use self::clipboard::{ClipboardContext, ClipboardProvider};
 use self::colored::*;
 #[cfg(feature = "history")]
 use self::directories::ProjectDirs;
 use self::fs2::available_space;
+use chrono::Duration;
+use failure::{err_msg, Fail};
+#[cfg(all(feature = "clipboard", not(target_os = "linux")))]
+use failure::{Compat, Error};
+use ffsend_api::url::Url;
+use rpassword::prompt_password_stderr;
 
 use cmd::matcher::MainMatcher;
 
@@ -48,28 +43,35 @@ pub fn print_success(msg: &str) {
 /// with it's causes.
 pub fn print_error<E: Fail>(err: impl Borrow<E>) {
     // Report each printable error, count them
-    let count = err.borrow()
+    let count = err
+        .borrow()
         .causes()
         .map(|err| format!("{}", err))
         .filter(|err| !err.is_empty())
         .enumerate()
-        .map(|(i, err)| if i == 0 {
-            eprintln!("{} {}", highlight_error("error:"), err);
-        } else {
-            eprintln!("{} {}", highlight_error("caused by:"), err);
-        })
-        .count();
+        .map(|(i, err)| {
+            if i == 0 {
+                eprintln!("{} {}", highlight_error("error:"), err);
+            } else {
+                eprintln!("{} {}", highlight_error("caused by:"), err);
+            }
+        }).count();
 
     // Fall back to a basic message
     if count == 0 {
-        eprintln!("{} {}", highlight_error("error:"), "an undefined error occurred");
+        eprintln!(
+            "{} {}",
+            highlight_error("error:"),
+            "an undefined error occurred"
+        );
     }
-} 
+}
+
 /// Print the given error message in a proper format for the user,
 /// with it's causes.
 pub fn print_error_msg<S>(err: S)
-    where
-        S: AsRef<str> + Display + Debug + Sync + Send + 'static
+where
+    S: AsRef<str> + Display + Debug + Sync + Send + 'static,
 {
     print_error(err_msg(err).compat());
 }
@@ -77,8 +79,8 @@ pub fn print_error_msg<S>(err: S)
 /// Print a warning.
 #[cfg(feature = "history")]
 pub fn print_warning<S>(err: S)
-    where
-        S: AsRef<str> + Display + Debug + Sync + Send + 'static
+where
+    S: AsRef<str> + Display + Debug + Sync + Send + 'static,
 {
     eprintln!("{} {}", highlight_warning("warning:"), err);
 }
@@ -104,8 +106,8 @@ pub fn quit_error<E: Fail>(err: E, hints: impl Borrow<ErrorHints>) -> ! {
 /// Quit the application with an error code,
 /// and print the given error message.
 pub fn quit_error_msg<S>(err: S, hints: impl Borrow<ErrorHints>) -> !
-    where
-        S: AsRef<str> + Display + Debug + Sync + Send + 'static
+where
+    S: AsRef<str> + Display + Debug + Sync + Send + 'static,
 {
     quit_error(err_msg(err).compat(), hints);
 }
@@ -142,11 +144,7 @@ impl ErrorHints {
     pub fn any(&self) -> bool {
         // Determine the result
         #[allow(unused_mut)]
-        let mut result = self.password
-            || self.owner
-            || self.force
-            || self.verbose
-            || self.help;
+        let mut result = self.password || self.owner || self.force || self.verbose || self.help;
 
         // Factor in the history hint when enabled
         #[cfg(feature = "history")]
@@ -173,15 +171,24 @@ impl ErrorHints {
 
         // Print hints
         if self.password {
-            eprintln!("Use '{}' to specify a password", highlight("--password <PASSWORD>"));
+            eprintln!(
+                "Use '{}' to specify a password",
+                highlight("--password <PASSWORD>")
+            );
         }
         if self.owner {
-            eprintln!("Use '{}' to specify an owner token", highlight("--owner <TOKEN>"));
+            eprintln!(
+                "Use '{}' to specify an owner token",
+                highlight("--owner <TOKEN>")
+            );
         }
         #[cfg(feature = "history")]
         {
             if self.history {
-                eprintln!("Use '{}' to specify a history file", highlight("--history <FILE>"));
+                eprintln!(
+                    "Use '{}' to specify a history file",
+                    highlight("--history <FILE>")
+                );
             }
         }
         if self.force {
@@ -267,14 +274,16 @@ pub fn open_path(path: &str) -> Result<ExitStatus, IoError> {
 /// Set the clipboard of the user to the given `content` string.
 #[cfg(feature = "clipboard")]
 pub fn set_clipboard(content: String) -> Result<(), ClipboardError> {
-    #[cfg(not(target_os = "linux"))] {
+    #[cfg(not(target_os = "linux"))]
+    {
         ClipboardProvider::new()
             .and_then(|mut context: ClipboardContext| context.set_contents(content))
             .map_err(|err| format_err!("{}", err).compat())
             .map_err(ClipboardError::Generic)
     }
 
-    #[cfg(target_os = "linux")] {
+    #[cfg(target_os = "linux")]
+    {
         // Open an xclip process
         let mut process = match Command::new("xclip")
             .arg("-sel")
@@ -283,20 +292,24 @@ pub fn set_clipboard(content: String) -> Result<(), ClipboardError> {
             .spawn()
         {
             Ok(process) => process,
-            Err(err) => return Err(match err.kind() {
-                IoErrorKind::NotFound => ClipboardError::NoXclip,
-                _ => ClipboardError::Xclip(err),
-            }),
+            Err(err) => {
+                return Err(match err.kind() {
+                    IoErrorKind::NotFound => ClipboardError::NoXclip,
+                    _ => ClipboardError::Xclip(err),
+                })
+            }
         };
 
         // Write the contents to the xclip process
-        process.stdin.as_mut().unwrap()
+        process
+            .stdin
+            .as_mut()
+            .unwrap()
             .write_all(content.as_bytes())
             .map_err(ClipboardError::Xclip)?;
 
         // Wait for xclip to exit
-        let status = process.wait()
-            .map_err(ClipboardError::Xclip)?;
+        let status = process.wait().map_err(ClipboardError::Xclip)?;
         if !status.success() {
             return Err(ClipboardError::XclipStatus(status.code().unwrap_or(0)));
         }
@@ -327,7 +340,10 @@ pub enum ClipboardError {
 
     /// Xclip unexpectetly exited with a non-successful status code.
     #[cfg(target_os = "linux")]
-    #[fail(display = "failed to use clipboard, xclip exited with status code {}", _0)]
+    #[fail(
+        display = "failed to use clipboard, xclip exited with status code {}",
+        _0
+    )]
     XclipStatus(i32),
 }
 
@@ -367,9 +383,10 @@ pub fn prompt_password(main_matcher: &MainMatcher) -> String {
     // Prompt for the password
     match prompt_password_stderr("Password: ") {
         Ok(password) => password,
-        Err(err) => quit_error(err.context(
-            "failed to read password from password prompt"
-        ), ErrorHints::default()),
+        Err(err) => quit_error(
+            err.context("failed to read password from password prompt"),
+            ErrorHints::default(),
+        ),
     }
 }
 
@@ -380,11 +397,7 @@ pub fn prompt_password(main_matcher: &MainMatcher) -> String {
 /// This method will prompt the user for a password, if one is required but
 /// wasn't set. An ignore message will be shown if it was not required while it
 /// was set.
-pub fn ensure_password(
-    password: &mut Option<String>,
-    needs: bool,
-    main_matcher: &MainMatcher,
-) {
+pub fn ensure_password(password: &mut Option<String>, needs: bool, main_matcher: &MainMatcher) {
     // Return if we're fine
     if password.is_some() == needs {
         return;
@@ -406,10 +419,13 @@ pub fn ensure_password(
 pub fn prompt(msg: &str, main_matcher: &MainMatcher) -> String {
     // Quit with an error if we may not interact
     if main_matcher.no_interact() {
-        quit_error_msg(format!(
-            "could not prompt for '{}' in no-interact mode, maybe specify it",
-            msg,
-        ), ErrorHints::default());
+        quit_error_msg(
+            format!(
+                "could not prompt for '{}' in no-interact mode, maybe specify it",
+                msg,
+            ),
+            ErrorHints::default(),
+        );
     }
 
     // Show the prompt
@@ -419,9 +435,10 @@ pub fn prompt(msg: &str, main_matcher: &MainMatcher) -> String {
     // Get the input
     let mut input = String::new();
     if let Err(err) = stdin().read_line(&mut input) {
-        quit_error(err.context(
-            "failed to read input from prompt"
-        ), ErrorHints::default());
+        quit_error(
+            err.context("failed to read input from prompt"),
+            ErrorHints::default(),
+        );
     }
 
     // Trim and return
@@ -433,19 +450,19 @@ pub fn prompt(msg: &str, main_matcher: &MainMatcher) -> String {
 ///
 /// A default may be given, which is chosen if no-interact mode is
 /// enabled, or if enter was pressed by the user without entering anything.
-pub fn prompt_yes(
-    msg: &str,
-    def: Option<bool>,
-    main_matcher: &MainMatcher,
-) -> bool {
+pub fn prompt_yes(msg: &str, def: Option<bool>, main_matcher: &MainMatcher) -> bool {
     // Define the available options string
-    let options = format!("[{}/{}]", match def {
-        Some(def) if def => "Y",
-        _ => "y",
-    }, match def {
-        Some(def) if !def => "N",
-        _ => "n",
-    });
+    let options = format!(
+        "[{}/{}]",
+        match def {
+            Some(def) if def => "Y",
+            _ => "y",
+        },
+        match def {
+            Some(def) if !def => "N",
+            _ => "n",
+        }
+    );
 
     // Assume yes
     if main_matcher.assume_yes() {
@@ -456,17 +473,16 @@ pub fn prompt_yes(
     // Autoselect if in no-interact mode
     if main_matcher.no_interact() {
         if let Some(def) = def {
-            eprintln!("{} {}: {}", msg, options, if def {
-                "yes"
-            } else {
-                "no"
-            });
+            eprintln!("{} {}: {}", msg, options, if def { "yes" } else { "no" });
             return def;
         } else {
-            quit_error_msg(format!(
-                "could not prompt question '{}' in no-interact mode, maybe specify it",
-                msg,
-            ), ErrorHints::default());
+            quit_error_msg(
+                format!(
+                    "could not prompt question '{}' in no-interact mode, maybe specify it",
+                    msg,
+                ),
+                ErrorHints::default(),
+            );
         }
     }
 
@@ -495,7 +511,7 @@ fn derive_bool(input: &str) -> Option<bool> {
     match input.as_str() {
         "y" | "ye" | "t" | "1" => return Some(true),
         "n" | "f" | "0" => return Some(false),
-        _ => {},
+        _ => {}
     }
 
     // Handle complete answers with any suffix
@@ -520,10 +536,7 @@ pub fn prompt_owner_token(main_matcher: &MainMatcher) -> String {
 /// parameter.
 ///
 /// This method will prompt the user for the token, if it wasn't set.
-pub fn ensure_owner_token(
-    token: &mut Option<String>,
-    main_matcher: &MainMatcher,
-) {
+pub fn ensure_owner_token(token: &mut Option<String>, main_matcher: &MainMatcher) {
     // Check whehter we allow interaction
     let interact = !main_matcher.no_interact();
 
@@ -658,7 +671,7 @@ pub fn ensure_enough_space<P: AsRef<Path>>(path: P, size: u64) {
         Err(err) => {
             print_error(err.context("failed to check available space on disk, ignoring"));
             return;
-        },
+        }
     };
 
     // Return if enough disk space is avaiable
@@ -703,9 +716,7 @@ pub fn app_history_file_path() -> PathBuf {
 /// Get the default path to use for the history file, as a string.
 #[cfg(feature = "history")]
 pub fn app_history_file_path_string() -> String {
-    app_history_file_path().to_str()
-        .unwrap()
-        .to_owned()
+    app_history_file_path().to_str().unwrap().to_owned()
 }
 
 /// Check whether an environment variable with the given key is present in the context of the

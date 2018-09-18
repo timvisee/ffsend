@@ -1,8 +1,8 @@
 use clap::ArgMatches;
 use ffsend_api::url::Url;
 
-use cmd::arg::{ArgDownloadLimit, ArgOwner, ArgUrl, CmdArgOption};
 use super::Matcher;
+use cmd::arg::{ArgDownloadLimit, ArgOwner, ArgUrl, CmdArgOption};
 
 /// The params command matcher.
 pub struct ParamsMatcher<'a> {
@@ -22,8 +22,7 @@ impl<'a: 'b, 'b> ParamsMatcher<'a> {
     /// Get the owner token.
     pub fn owner(&'a self) -> Option<String> {
         // TODO: just return a string reference here?
-        ArgOwner::value(self.matches)
-            .map(|token| token.to_owned())
+        ArgOwner::value(self.matches).map(|token| token.to_owned())
     }
 
     /// Get the download limit.
@@ -34,11 +33,8 @@ impl<'a: 'b, 'b> ParamsMatcher<'a> {
 
 impl<'a> Matcher<'a> for ParamsMatcher<'a> {
     fn with(matches: &'a ArgMatches) -> Option<Self> {
-        matches.subcommand_matches("parameters")
-            .map(|matches|
-                 ParamsMatcher {
-                     matches,
-                 }
-            )
+        matches
+            .subcommand_matches("parameters")
+            .map(|matches| ParamsMatcher { matches })
     }
 }

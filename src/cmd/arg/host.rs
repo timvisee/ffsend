@@ -3,12 +3,12 @@ use failure::Fail;
 use ffsend_api::config::SEND_DEFAULT_HOST;
 use ffsend_api::url::Url;
 
-use host::parse_host;
 use super::{CmdArg, CmdArgOption};
-use util::{ErrorHints, quit_error};
+use host::parse_host;
+use util::{quit_error, ErrorHints};
 
 /// The host argument.
-pub struct ArgHost { }
+pub struct ArgHost {}
 
 impl CmdArg for ArgHost {
     fn name() -> &'static str {

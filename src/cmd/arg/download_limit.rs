@@ -1,15 +1,14 @@
 use clap::{Arg, ArgMatches};
 use ffsend_api::action::params::{
-    PARAMS_DOWNLOAD_MIN as DOWNLOAD_MIN,
-    PARAMS_DOWNLOAD_MAX as DOWNLOAD_MAX,
+    PARAMS_DOWNLOAD_MAX as DOWNLOAD_MAX, PARAMS_DOWNLOAD_MIN as DOWNLOAD_MIN,
 };
 
 use super::{CmdArg, CmdArgFlag, CmdArgOption};
 
-use util::{ErrorHintsBuilder, quit_error_msg};
+use util::{quit_error_msg, ErrorHintsBuilder};
 
 /// The download limit argument.
-pub struct ArgDownloadLimit { }
+pub struct ArgDownloadLimit {}
 
 impl CmdArg for ArgDownloadLimit {
     fn name() -> &'static str {
@@ -27,7 +26,7 @@ impl CmdArg for ArgDownloadLimit {
     }
 }
 
-impl CmdArgFlag for ArgDownloadLimit { }
+impl CmdArgFlag for ArgDownloadLimit {}
 
 impl<'a> CmdArgOption<'a> for ArgDownloadLimit {
     type Value = Option<u8>;
@@ -43,8 +42,7 @@ impl<'a> CmdArgOption<'a> for ArgDownloadLimit {
                     quit_error_msg(
                         format!(
                             "invalid download limit, must be between {} and {}",
-                            DOWNLOAD_MIN,
-                            DOWNLOAD_MAX,
+                            DOWNLOAD_MIN, DOWNLOAD_MAX,
                         ),
                         ErrorHintsBuilder::default()
                             .force(false)

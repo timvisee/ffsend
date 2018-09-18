@@ -12,8 +12,7 @@ impl CmdPassword {
             .visible_alias("pass")
             .visible_alias("p")
             .arg(ArgUrl::build())
-            .arg(ArgPassword::build()
-                 .help("Specify a password, do not prompt"))
+            .arg(ArgPassword::build().help("Specify a password, do not prompt"))
             .arg(ArgGenPassphrase::build())
             .arg(ArgOwner::build())
     }

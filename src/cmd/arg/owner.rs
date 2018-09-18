@@ -1,11 +1,11 @@
 use clap::{Arg, ArgMatches};
 
-use cmd::matcher::{MainMatcher, Matcher};
 use super::{CmdArg, CmdArgFlag, CmdArgOption};
+use cmd::matcher::{MainMatcher, Matcher};
 use util::prompt_owner_token;
 
 /// The owner argument.
-pub struct ArgOwner { }
+pub struct ArgOwner {}
 
 impl CmdArg for ArgOwner {
     fn name() -> &'static str {
@@ -24,7 +24,7 @@ impl CmdArg for ArgOwner {
     }
 }
 
-impl CmdArgFlag for ArgOwner { }
+impl CmdArgFlag for ArgOwner {}
 
 impl<'a> CmdArgOption<'a> for ArgOwner {
     type Value = Option<String>;
@@ -37,7 +37,7 @@ impl<'a> CmdArgOption<'a> for ArgOwner {
 
         // Get the owner token from the argument if set
         match Self::value_raw(matches) {
-            None => {},
+            None => {}
             p => return p.map(|p| p.into()),
         }
 

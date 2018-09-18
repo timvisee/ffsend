@@ -1,22 +1,10 @@
 use clap::ArgMatches;
-use ffsend_api::action::password::{
-    Error as PasswordError,
-    Password as ApiPassword,
-};
+use ffsend_api::action::password::{Error as PasswordError, Password as ApiPassword};
 use ffsend_api::file::remote_file::RemoteFile;
 use ffsend_api::reqwest::Client;
-use prettytable::{
-    cell::Cell,
-    format::FormatBuilder,
-    row::Row,
-    Table,
-};
+use prettytable::{cell::Cell, format::FormatBuilder, row::Row, Table};
 
-use cmd::matcher::{
-    main::MainMatcher,
-    Matcher,
-    password::PasswordMatcher,
-};
+use cmd::matcher::{main::MainMatcher, password::PasswordMatcher, Matcher};
 use error::ActionError;
 #[cfg(feature = "history")]
 use history_tool;
@@ -30,9 +18,7 @@ pub struct Password<'a> {
 impl<'a> Password<'a> {
     /// Construct a new password action.
     pub fn new(cmd_matches: &'a ArgMatches<'a>) -> Self {
-        Self {
-            cmd_matches,
-        }
+        Self { cmd_matches }
     }
 
     /// Invoke the password action.
@@ -60,11 +46,7 @@ impl<'a> Password<'a> {
         let (password, password_generated) = matcher_password.password();
 
         // Execute an password action
-        let result = ApiPassword::new(
-            &file,
-            &password,
-            None,
-        ).invoke(&client);
+        let result = ApiPassword::new(&file, &password, None).invoke(&client);
         if let Err(PasswordError::Expired) = result {
             // Remove the file from the history if expired
             #[cfg(feature = "history")]

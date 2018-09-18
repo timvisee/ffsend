@@ -8,9 +8,7 @@ pub struct CmdParams;
 impl CmdParams {
     pub fn build<'a, 'b>() -> App<'a, 'b> {
         // Create a list of parameter arguments, of which one is required
-        let param_args = [
-            ArgDownloadLimit::name(),
-        ];
+        let param_args = [ArgDownloadLimit::name()];
 
         SubCommand::with_name("parameters")
             .about("Change parameters of a shared file")

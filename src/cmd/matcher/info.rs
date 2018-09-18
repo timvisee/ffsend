@@ -2,8 +2,8 @@ use ffsend_api::url::Url;
 
 use clap::ArgMatches;
 
-use cmd::arg::{ArgOwner, ArgPassword, ArgUrl, CmdArgOption};
 use super::Matcher;
+use cmd::arg::{ArgOwner, ArgPassword, ArgUrl, CmdArgOption};
 
 /// The info command matcher.
 pub struct InfoMatcher<'a> {
@@ -23,8 +23,7 @@ impl<'a: 'b, 'b> InfoMatcher<'a> {
     /// Get the owner token.
     pub fn owner(&'a self) -> Option<String> {
         // TODO: just return a string reference here?
-        ArgOwner::value(self.matches)
-            .map(|token| token.to_owned())
+        ArgOwner::value(self.matches).map(|token| token.to_owned())
     }
 
     /// Get the password.
@@ -36,11 +35,8 @@ impl<'a: 'b, 'b> InfoMatcher<'a> {
 
 impl<'a> Matcher<'a> for InfoMatcher<'a> {
     fn with(matches: &'a ArgMatches) -> Option<Self> {
-        matches.subcommand_matches("info")
-            .map(|matches|
-                 InfoMatcher {
-                     matches,
-                 }
-            )
+        matches
+            .subcommand_matches("info")
+            .map(|matches| InfoMatcher { matches })
     }
 }

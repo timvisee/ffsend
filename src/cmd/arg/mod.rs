@@ -47,5 +47,6 @@ pub trait CmdArgOption<'a>: CmdArg {
 
     /// Get the raw argument value, as a string reference.
     fn value_raw<'b: 'a>(matches: &'a ArgMatches<'b>) -> Option<&'a str> {
-        matches.value_of(Self::name()) }
+        matches.value_of(Self::name())
+    }
 }

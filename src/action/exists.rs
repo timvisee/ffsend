@@ -1,14 +1,11 @@
 use clap::ArgMatches;
-use ffsend_api::action::exists::{
-    Error as ExistsError,
-    Exists as ApiExists,
-};
+use ffsend_api::action::exists::{Error as ExistsError, Exists as ApiExists};
 use ffsend_api::file::remote_file::{FileParseError, RemoteFile};
 use ffsend_api::reqwest::Client;
 
-use cmd::matcher::{Matcher, exists::ExistsMatcher};
 #[cfg(feature = "history")]
 use cmd::matcher::main::MainMatcher;
+use cmd::matcher::{exists::ExistsMatcher, Matcher};
 use error::ActionError;
 #[cfg(feature = "history")]
 use history_tool;
@@ -21,9 +18,7 @@ pub struct Exists<'a> {
 impl<'a> Exists<'a> {
     /// Construct a new exists action.
     pub fn new(cmd_matches: &'a ArgMatches<'a>) -> Self {
-        Self {
-            cmd_matches,
-        }
+        Self { cmd_matches }
     }
 
     /// Invoke the exists action.
@@ -44,8 +39,7 @@ impl<'a> Exists<'a> {
         let file = RemoteFile::parse_url(url, None)?;
 
         // Make sure the file exists
-        let exists_response = ApiExists::new(&file)
-            .invoke(&client)?;
+        let exists_response = ApiExists::new(&file).invoke(&client)?;
         let exists = exists_response.exists();
 
         // Print the results

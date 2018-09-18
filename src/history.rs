@@ -5,14 +5,11 @@ use std::fs;
 use std::io::Error as IoError;
 use std::path::PathBuf;
 
-use failure::Fail;
-use ffsend_api::file::remote_file::RemoteFile;
 use self::toml::de::Error as DeError;
 use self::toml::ser::Error as SerError;
-use self::version_compare::{
-    CompOp,
-    VersionCompare,
-};
+use self::version_compare::{CompOp, VersionCompare};
+use failure::Fail;
+use ffsend_api::file::remote_file::RemoteFile;
 
 use util::{print_error, print_warning};
 
@@ -59,7 +56,7 @@ impl History {
         history.autosave = Some(path);
 
         // Make sure the file version is supported
-        if history.version.is_none() { 
+        if history.version.is_none() {
             print_warning("History file has no version, ignoring");
             history.version = Some(crate_version!().into());
         } else {
@@ -97,15 +94,12 @@ impl History {
         self.gc();
 
         // Get the path
-        let path = self.autosave
-            .as_ref()
-            .ok_or(SaveError::NoPath)?;
+        let path = self.autosave.as_ref().ok_or(SaveError::NoPath)?;
 
         // If we have no files, remove the history file if it exists
         if self.files.is_empty() {
             if path.is_file() {
-                fs::remove_file(&path)
-                    .map_err(SaveError::Delete)?;
+                fs::remove_file(&path).map_err(SaveError::Delete)?;
             }
             return Ok(());
         }
@@ -135,7 +129,9 @@ impl History {
         // Merge any existing file with the same ID
         {
             // Find anything to merge
-            let merge_info: Vec<bool> = self.files.iter_mut()
+            let merge_info: Vec<bool> = self
+                .files
+                .iter_mut()
                 .filter(|f| f.id() == file.id())
                 .map(|ref mut f| f.merge(&file, overwrite))
                 .collect();
@@ -161,7 +157,9 @@ impl History {
     /// If any file was removed, true is returned.
     pub fn remove(&mut self, file: &RemoteFile) -> bool {
         // Get the indices of files that have expired
-        let expired_indices: Vec<usize> = self.files.iter()
+        let expired_indices: Vec<usize> = self
+            .files
+            .iter()
             .enumerate()
             .filter(|&(_, f)| f.id() == file.id())
             .map(|(i, _)| i)
@@ -189,7 +187,9 @@ impl History {
     /// If multiple files exist within the history that are equal, only one is returned.
     /// If no matching file was found, `None` is returned.
     pub fn get_file(&self, file: &RemoteFile) -> Option<&RemoteFile> {
-        self.files.iter().find(|f| f.id() == file.id() && f.host() == file.host())
+        self.files
+            .iter()
+            .find(|f| f.id() == file.id() && f.host() == file.host())
     }
 
     /// Garbage collect (remove) all files that have been expired,
@@ -200,7 +200,8 @@ impl History {
     /// The number of exired files is returned.
     pub fn gc(&mut self) -> usize {
         // Get a list of expired files
-        let expired: Vec<RemoteFile> = self.files
+        let expired: Vec<RemoteFile> = self
+            .files
             .iter()
             .filter(|f| f.has_expired())
             .cloned()
@@ -227,9 +228,7 @@ impl Drop for History {
         if self.autosave.is_some() && self.changed {
             // Save and report errors
             if let Err(err) = self.save() {
-                print_error(
-                    err.context("failed to auto save history, ignoring"),
-                );
+                print_error(err.context("failed to auto save history, ignoring"));
             }
         }
     }

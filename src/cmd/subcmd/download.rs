@@ -15,24 +15,29 @@ impl CmdDownload {
             .visible_alias("down")
             .arg(ArgUrl::build())
             .arg(ArgPassword::build())
-            .arg(Arg::with_name("output")
-                 .long("output")
-                 .short("o")
-                 .alias("output-file")
-                 .alias("out")
-                 .alias("file")
-                 .value_name("PATH")
-                 .help("The output file or directory"));
+            .arg(
+                Arg::with_name("output")
+                    .long("output")
+                    .short("o")
+                    .alias("output-file")
+                    .alias("out")
+                    .alias("file")
+                    .value_name("PATH")
+                    .help("The output file or directory"),
+            );
 
         // Optional archive support
-        #[cfg(feature = "archive")] {
-            cmd = cmd.arg(Arg::with_name("extract")
-                .long("extract")
-                .short("e")
-                .alias("archive")
-                .alias("arch")
-                .alias("a")
-                .help("Extract an archived file"))
+        #[cfg(feature = "archive")]
+        {
+            cmd = cmd.arg(
+                Arg::with_name("extract")
+                    .long("extract")
+                    .short("e")
+                    .alias("archive")
+                    .alias("arch")
+                    .alias("a")
+                    .help("Extract an archived file"),
+            )
         }
 
         cmd

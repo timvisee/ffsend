@@ -1,17 +1,9 @@
 use clap::ArgMatches;
-use ffsend_api::action::params::{
-    Error as ParamsError,
-    Params as ApiParams,
-    ParamsDataBuilder,
-};
+use ffsend_api::action::params::{Error as ParamsError, Params as ApiParams, ParamsDataBuilder};
 use ffsend_api::file::remote_file::RemoteFile;
 use ffsend_api::reqwest::Client;
 
-use cmd::matcher::{
-    Matcher,
-    main::MainMatcher,
-    params::ParamsMatcher,
-};
+use cmd::matcher::{main::MainMatcher, params::ParamsMatcher, Matcher};
 use error::ActionError;
 #[cfg(feature = "history")]
 use history_tool;
@@ -25,9 +17,7 @@ pub struct Params<'a> {
 impl<'a> Params<'a> {
     /// Construct a new parameters action.
     pub fn new(cmd_matches: &'a ArgMatches<'a>) -> Self {
-        Self {
-            cmd_matches,
-        }
+        Self { cmd_matches }
     }
 
     /// Invoke the parameters action.

@@ -1,18 +1,9 @@
 use chrono::Duration;
 use clap::ArgMatches;
 use ffsend_api::config::SEND_DEFAULT_EXPIRE_TIME;
-use prettytable::{
-    cell::Cell,
-    format::FormatBuilder,
-    row::Row,
-    Table,
-};
+use prettytable::{cell::Cell, format::FormatBuilder, row::Row, Table};
 
-use cmd::matcher::{
-    debug::DebugMatcher,
-    main::MainMatcher,
-    Matcher,
-};
+use cmd::matcher::{debug::DebugMatcher, main::MainMatcher, Matcher};
 use error::ActionError;
 use util::{features_list, format_bool, format_duration};
 
@@ -24,9 +15,7 @@ pub struct Debug<'a> {
 impl<'a> Debug<'a> {
     /// Construct a new debug action.
     pub fn new(cmd_matches: &'a ArgMatches<'a>) -> Self {
-        Self {
-            cmd_matches,
-        }
+        Self { cmd_matches }
     }
 
     /// Invoke the debug action.
@@ -56,7 +45,9 @@ impl<'a> Debug<'a> {
         // The default host
         table.add_row(Row::new(vec![
             Cell::new("Default expiry:"),
-            Cell::new(&format_duration(Duration::seconds(SEND_DEFAULT_EXPIRE_TIME))),
+            Cell::new(&format_duration(Duration::seconds(
+                SEND_DEFAULT_EXPIRE_TIME,
+            ))),
         ]));
 
         // Render a list of compiled features

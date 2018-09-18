@@ -2,10 +2,7 @@ use failure::Fail;
 use ffsend_api::file::remote_file::RemoteFile;
 
 use cmd::matcher::MainMatcher;
-use history::{
-    Error as HistoryError,
-    History,
-};
+use history::{Error as HistoryError, History};
 use util::print_error;
 
 /// Load the history from the given path, add the given file, and save it
@@ -16,9 +13,11 @@ use util::print_error;
 /// overwrite properties in the already existing file when merging.
 ///
 /// If there is no file at the given path, new history will be created.
-fn add_error(matcher_main: &MainMatcher, file: RemoteFile, overwrite: bool)
-    -> Result<(), HistoryError>
-{
+fn add_error(
+    matcher_main: &MainMatcher,
+    file: RemoteFile,
+    overwrite: bool,
+) -> Result<(), HistoryError> {
     // Ignore if incognito
     if matcher_main.incognito() {
         return Ok(());
@@ -41,18 +40,14 @@ fn add_error(matcher_main: &MainMatcher, file: RemoteFile, overwrite: bool)
 /// If an error occurred, the error is printed and ignored.
 pub fn add(matcher_main: &MainMatcher, file: RemoteFile, overwrite: bool) {
     if let Err(err) = add_error(matcher_main, file, overwrite) {
-        print_error(err.context(
-            "failed to add file to local history, ignoring",
-        ));
+        print_error(err.context("failed to add file to local history, ignoring"));
     }
 }
 
 /// Load the history from the given path, remove the given file by it's
 /// ID, and save it again.
 /// True is returned if any file was removed.
-fn remove_error(matcher_main: &MainMatcher, file: &RemoteFile)
-    -> Result<bool, HistoryError>
-{
+fn remove_error(matcher_main: &MainMatcher, file: &RemoteFile) -> Result<bool, HistoryError> {
     // Ignore if incognito
     if matcher_main.incognito() {
         return Ok(false);
@@ -72,9 +67,7 @@ pub fn remove(matcher_main: &MainMatcher, file: &RemoteFile) -> bool {
     let result = remove_error(matcher_main, file);
     let ok = result.is_ok();
     if let Err(err) = result {
-        print_error(err.context(
-            "failed to remove file from local history, ignoring",
-        ));
+        print_error(err.context("failed to remove file from local history, ignoring"));
     }
     ok
 }
@@ -104,9 +97,7 @@ pub fn derive_file_properties(matcher_main: &MainMatcher, file: &mut RemoteFile)
     let history = match History::load_or_new(matcher_main.history()) {
         Ok(history) => history,
         Err(err) => {
-            print_error(err.context(
-                "failed to derive file properties from history, ignoring",
-            ));
+            print_error(err.context("failed to derive file properties from history, ignoring"));
             return false;
         }
     };
@@ -126,7 +117,7 @@ pub fn derive_file_properties(matcher_main: &MainMatcher, file: &mut RemoteFile)
 
             // Return whether any property was derived
             f.has_secret() || f.has_owner_token()
-        },
+        }
         None => false,
     }
 }

@@ -1,11 +1,11 @@
 use clap::{Arg, ArgMatches};
 
-use cmd::matcher::{MainMatcher, Matcher};
 use super::{CmdArg, CmdArgFlag, CmdArgOption};
+use cmd::matcher::{MainMatcher, Matcher};
 use util::{check_empty_password, prompt_password};
 
 /// The password argument.
-pub struct ArgPassword { }
+pub struct ArgPassword {}
 
 impl CmdArg for ArgPassword {
     fn name() -> &'static str {
@@ -23,7 +23,7 @@ impl CmdArg for ArgPassword {
     }
 }
 
-impl CmdArgFlag for ArgPassword { }
+impl CmdArgFlag for ArgPassword {}
 
 impl<'a> CmdArgOption<'a> for ArgPassword {
     type Value = Option<String>;

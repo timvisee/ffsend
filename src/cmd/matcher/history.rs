@@ -10,11 +10,8 @@ pub struct HistoryMatcher<'a> {
 
 impl<'a> Matcher<'a> for HistoryMatcher<'a> {
     fn with(matches: &'a ArgMatches) -> Option<Self> {
-        matches.subcommand_matches("history")
-            .map(|matches|
-                 HistoryMatcher {
-                     matches,
-                 }
-            )
+        matches
+            .subcommand_matches("history")
+            .map(|matches| HistoryMatcher { matches })
     }
 }

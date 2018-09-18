@@ -1,42 +1,17 @@
 use chrono::Duration;
 use clap::ArgMatches;
 use failure::Fail;
-use ffsend_api::action::exists::{
-    Error as ExistsError,
-    Exists as ApiExists,
-};
-use ffsend_api::action::info::{
-    Error as InfoError,
-    Info as ApiInfo,
-};
+use ffsend_api::action::exists::{Error as ExistsError, Exists as ApiExists};
+use ffsend_api::action::info::{Error as InfoError, Info as ApiInfo};
 use ffsend_api::action::metadata::Metadata as ApiMetadata;
-use ffsend_api::file::remote_file::{
-    FileParseError,
-    RemoteFile,
-};
+use ffsend_api::file::remote_file::{FileParseError, RemoteFile};
 use ffsend_api::reqwest::Client;
-use prettytable::{
-    cell::Cell,
-    format::FormatBuilder,
-    row::Row,
-    Table,
-};
+use prettytable::{cell::Cell, format::FormatBuilder, row::Row, Table};
 
-
-use cmd::matcher::{
-    Matcher,
-    info::InfoMatcher,
-    main::MainMatcher,
-};
+use cmd::matcher::{info::InfoMatcher, main::MainMatcher, Matcher};
 #[cfg(feature = "history")]
 use history_tool;
-use util::{
-    ensure_owner_token,
-    ensure_password,
-    format_bytes,
-    format_duration,
-    print_error,
-};
+use util::{ensure_owner_token, ensure_password, format_bytes, format_duration, print_error};
 
 /// A file info action.
 pub struct Info<'a> {
@@ -46,9 +21,7 @@ pub struct Info<'a> {
 impl<'a> Info<'a> {
     /// Construct a new info action.
     pub fn new(cmd_matches: &'a ArgMatches<'a>) -> Self {
-        Self {
-            cmd_matches,
-        }
+        Self { cmd_matches }
     }
 
     /// Invoke the info action.
@@ -92,10 +65,9 @@ impl<'a> Info<'a> {
         let info = ApiInfo::new(&file, None).invoke(&client)?;
         let metadata = ApiMetadata::new(&file, password, false)
             .invoke(&client)
-            .map_err(|err| print_error(err.context(
-                "failed to fetch file metadata, showing limited info",
-            )))
-            .ok();
+            .map_err(|err| {
+                print_error(err.context("failed to fetch file metadata, showing limited info"))
+            }).ok();
 
         // Get the TTL duration
         let ttl_millis = info.ttl_millis() as i64;
@@ -113,10 +85,7 @@ impl<'a> Info<'a> {
         table.set_format(FormatBuilder::new().padding(0, 2).build());
 
         // Add the ID
-        table.add_row(Row::new(vec![
-            Cell::new("ID:"),
-            Cell::new(file.id()),
-        ]));
+        table.add_row(Row::new(vec![Cell::new("ID:"), Cell::new(file.id())]));
 
         // Metadata related details
         if let Some(metadata) = metadata {
@@ -130,13 +99,11 @@ impl<'a> Info<'a> {
             let size = metadata.size();
             table.add_row(Row::new(vec![
                 Cell::new("Size:"),
-                Cell::new(
-                    &if size >= 1024 {
-                        format!("{} ({} B)", format_bytes(size), size)
-                    } else {
-                        format_bytes(size)
-                    }
-                ),
+                Cell::new(&if size >= 1024 {
+                    format!("{} ({} B)", format_bytes(size), size)
+                } else {
+                    format_bytes(size)
+                }),
             ]));
 
             // The file MIME
@@ -149,19 +116,21 @@ impl<'a> Info<'a> {
         // The download count
         table.add_row(Row::new(vec![
             Cell::new("Downloads:"),
-            Cell::new(&format!("{} of {}", info.download_count(), info.download_limit())),
+            Cell::new(&format!(
+                "{} of {}",
+                info.download_count(),
+                info.download_limit()
+            )),
         ]));
 
         // The time to live
         table.add_row(Row::new(vec![
             Cell::new("Expiry:"),
-            Cell::new(
-                &if ttl_millis >= 60 * 1000 {
-                    format!("{} ({}s)", format_duration(&ttl), ttl.num_seconds())
-                } else {
-                    format_duration(&ttl)
-                }
-            ),
+            Cell::new(&if ttl_millis >= 60 * 1000 {
+                format!("{} ({}s)", format_duration(&ttl), ttl.num_seconds())
+            } else {
+                format_duration(&ttl)
+            }),
         ]));
 
         // Print the info table

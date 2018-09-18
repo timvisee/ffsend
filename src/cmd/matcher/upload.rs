@@ -1,19 +1,12 @@
 use clap::ArgMatches;
-use ffsend_api::action::params::{
-    PARAMS_DEFAULT_DOWNLOAD as DOWNLOAD_DEFAULT,
-};
+use ffsend_api::action::params::PARAMS_DEFAULT_DOWNLOAD as DOWNLOAD_DEFAULT;
 use ffsend_api::url::Url;
 
-use cmd::arg::{
-    ArgDownloadLimit,
-    ArgGenPassphrase,
-    ArgHost,
-    ArgPassword,
-    CmdArgFlag,
-    CmdArgOption,
-};
 use super::Matcher;
-use util::{env_var_present, ErrorHintsBuilder, quit_error_msg};
+use cmd::arg::{
+    ArgDownloadLimit, ArgGenPassphrase, ArgHost, ArgPassword, CmdArgFlag, CmdArgOption,
+};
+use util::{env_var_present, quit_error_msg, ErrorHintsBuilder};
 
 /// The upload command matcher.
 pub struct UploadMatcher<'a> {
@@ -24,7 +17,8 @@ impl<'a: 'b, 'b> UploadMatcher<'a> {
     /// Get the selected file to upload.
     // TODO: maybe return a file or path instance here
     pub fn file(&'a self) -> &'a str {
-        self.matches.value_of("FILE")
+        self.matches
+            .value_of("FILE")
             .expect("no file specified to upload")
     }
 
@@ -71,26 +65,21 @@ impl<'a: 'b, 'b> UploadMatcher<'a> {
     pub fn password(&'a self) -> Option<(String, bool)> {
         // Generate a passphrase if requested
         if ArgGenPassphrase::is_present(self.matches) {
-            return Some((
-                ArgGenPassphrase::gen_passphrase(),
-                true,
-            ));
+            return Some((ArgGenPassphrase::gen_passphrase(), true));
         }
 
         // Use a specified password or use nothing
-        ArgPassword::value(self.matches)
-            .map(|password| (password, false))
+        ArgPassword::value(self.matches).map(|password| (password, false))
     }
 
     /// Get the download limit.
     /// If the download limit was the default, `None` is returned to not
     /// explicitly set it.
     pub fn download_limit(&'a self) -> Option<u8> {
-        ArgDownloadLimit::value(self.matches)
-            .and_then(|d| match d {
-                DOWNLOAD_DEFAULT => None,
-                d => Some(d),
-            })
+        ArgDownloadLimit::value(self.matches).and_then(|d| match d {
+            DOWNLOAD_DEFAULT => None,
+            d => Some(d),
+        })
     }
 
     /// Check whether to archive the file to upload.
@@ -113,11 +102,8 @@ impl<'a: 'b, 'b> UploadMatcher<'a> {
 
 impl<'a> Matcher<'a> for UploadMatcher<'a> {
     fn with(matches: &'a ArgMatches) -> Option<Self> {
-        matches.subcommand_matches("upload")
-            .map(|matches|
-                 UploadMatcher {
-                     matches,
-                 }
-            )
+        matches
+            .subcommand_matches("upload")
+            .map(|matches| UploadMatcher { matches })
     }
 }

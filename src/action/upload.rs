@@ -7,43 +7,26 @@ use std::sync::{Arc, Mutex};
 use clap::ArgMatches;
 use failure::Fail;
 use ffsend_api::action::params::ParamsDataBuilder;
-use ffsend_api::action::upload::{
-    Error as UploadError,
-    Upload as ApiUpload,
-};
+use ffsend_api::action::upload::{Error as UploadError, Upload as ApiUpload};
 use ffsend_api::config::{UPLOAD_SIZE_MAX, UPLOAD_SIZE_MAX_RECOMMENDED};
 use ffsend_api::reader::ProgressReporter;
 use ffsend_api::reqwest::Client;
-use prettytable::{
-    cell::Cell,
-    format::FormatBuilder,
-    row::Row,
-    Table,
-};
+use prettytable::{cell::Cell, format::FormatBuilder, row::Row, Table};
 #[cfg(feature = "archive")]
-use tempfile::{
-    Builder as TempBuilder,
-    NamedTempFile,
-};
+use tempfile::{Builder as TempBuilder, NamedTempFile};
 
 #[cfg(feature = "archive")]
 use archive::archiver::Archiver;
-use cmd::matcher::{Matcher, MainMatcher, UploadMatcher};
+use cmd::matcher::{MainMatcher, Matcher, UploadMatcher};
 #[cfg(feature = "history")]
 use history_tool;
 use progress::ProgressBar;
-use util::{
-    ErrorHintsBuilder,
-    format_bytes,
-    open_url,
-    print_error,
-    print_error_msg,
-    prompt_yes,
-    quit,
-    quit_error_msg,
-};
 #[cfg(feature = "clipboard")]
 use util::set_clipboard;
+use util::{
+    format_bytes, open_url, print_error, print_error_msg, prompt_yes, quit, quit_error_msg,
+    ErrorHintsBuilder,
+};
 
 /// A file upload action.
 pub struct Upload<'a> {
@@ -53,9 +36,7 @@ pub struct Upload<'a> {
 impl<'a> Upload<'a> {
     /// Construct a new upload action.
     pub fn new(cmd_matches: &'a ArgMatches<'a>) -> Self {
-        Self {
-            cmd_matches,
-        }
+        Self { cmd_matches }
     }
 
     /// Invoke the upload action.
@@ -141,13 +122,14 @@ impl<'a> Upload<'a> {
         #[cfg(feature = "archive")]
         let mut tmp_archive: Option<NamedTempFile> = None;
 
-        #[cfg(feature = "archive")] {
+        #[cfg(feature = "archive")]
+        {
             // Determine whether to archive, ask if a directory was selected
             let mut archive = matcher_upload.archive();
             if !archive && path.is_dir() {
                 if prompt_yes(
                     "You've selected a directory, only a single file may be uploaded.\n\
-                        Archive the directory into a single file?",
+                     Archive the directory into a single file?",
                     Some(true),
                     &matcher_main,
                 ) {
@@ -166,12 +148,13 @@ impl<'a> Upload<'a> {
                         .prefix(&format!(".{}-archive-", crate_name!()))
                         .suffix(archive_extention)
                         .tempfile()
-                        .map_err(ArchiveError::TempFile)?
+                        .map_err(ArchiveError::TempFile)?,
                 );
                 if let Some(tmp_archive) = &tmp_archive {
                     // Get the path, and the actual file
                     let archive_path = tmp_archive.path().to_path_buf();
-                    let archive_file = tmp_archive.as_file()
+                    let archive_file = tmp_archive
+                        .as_file()
                         .try_clone()
                         .map_err(ArchiveError::CloneHandle)?;
 
@@ -184,13 +167,14 @@ impl<'a> Upload<'a> {
                                 .ok_or(ArchiveError::FileName(None))?
                                 .to_str()
                                 .map(|s| s.to_owned())
-                                .ok_or(ArchiveError::FileName(None))?
+                                .ok_or(ArchiveError::FileName(None))?,
                         );
                     }
 
                     // Build an archiver and append the file
                     let mut archiver = Archiver::new(archive_file);
-                    archiver.append_path(file_name.as_ref().unwrap(), &path)
+                    archiver
+                        .append_path(file_name.as_ref().unwrap(), &path)
                         .map_err(ArchiveError::AddFile)?;
 
                     // Finish the archival process, writes the archive file
@@ -210,18 +194,12 @@ impl<'a> Upload<'a> {
 
         // Get the password to use and whether it was generated
         let password = matcher_upload.password();
-        let (password, password_generated) = password
-            .map(|(p, g)| (Some(p), g))
-            .unwrap_or((None, false));
+        let (password, password_generated) =
+            password.map(|(p, g)| (Some(p), g)).unwrap_or((None, false));
 
         // Execute an upload action
-        let file = ApiUpload::new(
-            host,
-            path.clone(),
-            file_name,
-            password.clone(),
-            params,
-        ).invoke(&client, &progress_reporter)?;
+        let file = ApiUpload::new(host, path.clone(), file_name, password.clone(), params)
+            .invoke(&client, &progress_reporter)?;
 
         // Get the download URL, and report it in the console in a table
         let url = file.download_url(true);
@@ -252,27 +230,30 @@ impl<'a> Upload<'a> {
         // Open the URL in the browser
         if matcher_upload.open() {
             if let Err(err) = open_url(&url) {
-                print_error(
-                    err.context("failed to open the share link in the browser")
-                );
+                print_error(err.context("failed to open the share link in the browser"));
             };
         }
 
         // Copy the URL in the user's clipboard
-        #[cfg(feature = "clipboard")] {
+        #[cfg(feature = "clipboard")]
+        {
             if matcher_upload.copy() {
                 if let Err(err) = set_clipboard(url.as_str().to_owned()) {
-                    print_error(err.context("failed to copy the share link to the clipboard, ignoring"));
+                    print_error(
+                        err.context("failed to copy the share link to the clipboard, ignoring"),
+                    );
                 }
             }
         }
 
-        #[cfg(feature = "archive")] {
+        #[cfg(feature = "archive")]
+        {
             // Close the temporary zip file, to ensure it's removed
             if let Some(tmp_archive) = tmp_archive.take() {
                 if let Err(err) = tmp_archive.close() {
                     print_error(
-                        err.context("failed to clean up temporary archive file, ignoring").compat(),
+                        err.context("failed to clean up temporary archive file, ignoring")
+                            .compat(),
                     );
                 }
             }

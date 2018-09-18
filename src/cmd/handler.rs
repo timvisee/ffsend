@@ -2,31 +2,17 @@ extern crate directories;
 
 use clap::{App, AppSettings, Arg, ArgMatches};
 
-use super::matcher::{
-    DebugMatcher,
-    DeleteMatcher,
-    DownloadMatcher,
-    ExistsMatcher,
-    InfoMatcher,
-    Matcher,
-    ParamsMatcher,
-    PasswordMatcher,
-    UploadMatcher,
-};
 #[cfg(feature = "history")]
 use super::matcher::HistoryMatcher;
-use super::subcmd::{
-    CmdDebug,
-    CmdDelete,
-    CmdDownload,
-    CmdExists,
-    CmdInfo,
-    CmdParams,
-    CmdPassword,
-    CmdUpload,
+use super::matcher::{
+    DebugMatcher, DeleteMatcher, DownloadMatcher, ExistsMatcher, InfoMatcher, Matcher,
+    ParamsMatcher, PasswordMatcher, UploadMatcher,
 };
 #[cfg(feature = "history")]
 use super::subcmd::CmdHistory;
+use super::subcmd::{
+    CmdDebug, CmdDelete, CmdDownload, CmdExists, CmdInfo, CmdParams, CmdPassword, CmdUpload,
+};
 #[cfg(feature = "history")]
 use util::app_history_file_path_string;
 
@@ -50,38 +36,43 @@ impl<'a: 'b, 'b> Handler<'a> {
             .version(crate_version!())
             .author(crate_authors!())
             .about(crate_description!())
-            .after_help("\
-                The public Send service that is used as default host is provided by Mozilla.\n\
-                This application is not affiliated with Mozilla, Firefox or Firefox Send.\
-            ")
-            .global_setting(AppSettings::GlobalVersion)
+            .after_help(
+                "\
+                 The public Send service that is used as default host is provided by Mozilla.\n\
+                 This application is not affiliated with Mozilla, Firefox or Firefox Send.\
+                 ",
+            ).global_setting(AppSettings::GlobalVersion)
             .global_setting(AppSettings::VersionlessSubcommands)
             // TODO: enable below command when it doesn't break `p` anymore.
             // .global_setting(AppSettings::InferSubcommands)
-            .arg(Arg::with_name("force")
-                .long("force")
-                .short("f")
-                .global(true)
-                .help("Force the action, ignore warnings"))
-            .arg(Arg::with_name("no-interact")
-                .long("no-interact")
-                .short("I")
-                .alias("no-interactive")
-                .global(true)
-                .help("Not interactive, do not prompt"))
-            .arg(Arg::with_name("yes")
-                .long("yes")
-                .short("y")
-                .alias("assume-yes")
-                .global(true)
-                .help("Assume yes for prompts"))
-            .arg(Arg::with_name("verbose")
-                .long("verbose")
-                .short("v")
-                .multiple(true)
-                .global(true)
-                .help("Enable verbose information and logging"))
-            .subcommand(CmdDebug::build())
+            .arg(
+                Arg::with_name("force")
+                    .long("force")
+                    .short("f")
+                    .global(true)
+                    .help("Force the action, ignore warnings"),
+            ).arg(
+                Arg::with_name("no-interact")
+                    .long("no-interact")
+                    .short("I")
+                    .alias("no-interactive")
+                    .global(true)
+                    .help("Not interactive, do not prompt"),
+            ).arg(
+                Arg::with_name("yes")
+                    .long("yes")
+                    .short("y")
+                    .alias("assume-yes")
+                    .global(true)
+                    .help("Assume yes for prompts"),
+            ).arg(
+                Arg::with_name("verbose")
+                    .long("verbose")
+                    .short("v")
+                    .multiple(true)
+                    .global(true)
+                    .help("Enable verbose information and logging"),
+            ).subcommand(CmdDebug::build())
             .subcommand(CmdDelete::build())
             .subcommand(CmdDownload::build().display_order(2))
             .subcommand(CmdExists::build())
@@ -92,25 +83,28 @@ impl<'a: 'b, 'b> Handler<'a> {
 
         // With history support, a flag for the history file and incognito mode
         #[cfg(feature = "history")]
-        let app = app.arg(Arg::with_name("history")
-                .long("history")
-                .short("H")
-                .value_name("FILE")
-                .global(true)
-                .help("Use the specified history file")
-                .default_value(&DEFAULT_HISTORY_FILE)
-                .hide_default_value(true)
-                .env("FFSEND_HISTORY")
-                .hide_env_values(true))
-            .arg(Arg::with_name("incognito")
-                .long("incognito")
-                .short("i")
-                .alias("incog")
-                .alias("private")
-                .alias("priv")
-                .global(true)
-                .help("Don't update local history for actions"))
-            .subcommand(CmdHistory::build());
+        let app = app
+            .arg(
+                Arg::with_name("history")
+                    .long("history")
+                    .short("H")
+                    .value_name("FILE")
+                    .global(true)
+                    .help("Use the specified history file")
+                    .default_value(&DEFAULT_HISTORY_FILE)
+                    .hide_default_value(true)
+                    .env("FFSEND_HISTORY")
+                    .hide_env_values(true),
+            ).arg(
+                Arg::with_name("incognito")
+                    .long("incognito")
+                    .short("i")
+                    .alias("incog")
+                    .alias("private")
+                    .alias("priv")
+                    .global(true)
+                    .help("Don't update local history for actions"),
+            ).subcommand(CmdHistory::build());
 
         // Disable color usage if compiled without color support
         #[cfg(feature = "no-color")]

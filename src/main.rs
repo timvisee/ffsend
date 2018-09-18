@@ -44,7 +44,7 @@ use action::password::Password;
 use action::upload::Upload;
 use cmd::Handler;
 use error::Error;
-use util::{ErrorHints, exe_name, highlight, quit_error};
+use util::{exe_name, highlight, quit_error, ErrorHints};
 
 /// Application entrypoint.
 fn main() {
@@ -67,25 +67,29 @@ fn main() {
 fn invoke_action(handler: &Handler) -> Result<(), Error> {
     // Match the debug command
     if handler.debug().is_some() {
-        return Debug::new(handler.matches()).invoke()
+        return Debug::new(handler.matches())
+            .invoke()
             .map_err(|err| err.into());
     }
 
     // Match the delete command
     if handler.delete().is_some() {
-        return Delete::new(handler.matches()).invoke()
+        return Delete::new(handler.matches())
+            .invoke()
             .map_err(|err| err.into());
     }
 
     // Match the download command
     if handler.download().is_some() {
-        return Download::new(handler.matches()).invoke()
+        return Download::new(handler.matches())
+            .invoke()
             .map_err(|err| err.into());
     }
 
     // Match the exists command
     if handler.exists().is_some() {
-        return Exists::new(handler.matches()).invoke()
+        return Exists::new(handler.matches())
+            .invoke()
             .map_err(|err| err.into());
     }
 
@@ -93,32 +97,37 @@ fn invoke_action(handler: &Handler) -> Result<(), Error> {
     #[cfg(feature = "history")]
     {
         if handler.history().is_some() {
-            return History::new(handler.matches()).invoke()
+            return History::new(handler.matches())
+                .invoke()
                 .map_err(|err| err.into());
         }
     }
 
     // Match the info command
     if handler.info().is_some() {
-        return Info::new(handler.matches()).invoke()
+        return Info::new(handler.matches())
+            .invoke()
             .map_err(|err| err.into());
     }
 
     // Match the parameters command
     if handler.params().is_some() {
-        return Params::new(handler.matches()).invoke()
+        return Params::new(handler.matches())
+            .invoke()
             .map_err(|err| err.into());
     }
 
     // Match the password command
     if handler.password().is_some() {
-        return Password::new(handler.matches()).invoke()
+        return Password::new(handler.matches())
+            .invoke()
             .map_err(|err| err.into());
     }
 
     // Match the upload command
     if handler.upload().is_some() {
-        return Upload::new(handler.matches()).invoke()
+        return Upload::new(handler.matches())
+            .invoke()
             .map_err(|err| err.into());
     }
 

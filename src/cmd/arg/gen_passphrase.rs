@@ -1,10 +1,10 @@
-use clap::Arg;
 use chbs;
+use clap::Arg;
 
 use super::{CmdArg, CmdArgFlag};
 
 /// The passphrase generation argument.
-pub struct ArgGenPassphrase { }
+pub struct ArgGenPassphrase {}
 
 impl ArgGenPassphrase {
     /// Generate a cryptographically secure passphrase that is easily
@@ -30,4 +30,4 @@ impl CmdArg for ArgGenPassphrase {
     }
 }
 
-impl CmdArgFlag for ArgGenPassphrase { }
+impl CmdArgFlag for ArgGenPassphrase {}

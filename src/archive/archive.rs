@@ -1,7 +1,4 @@
-use std::io::{
-    Error as IoError,
-    Read,
-};
+use std::io::{Error as IoError, Read};
 use std::path::Path;
 
 use super::tar::Archive as TarArchive;

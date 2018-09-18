@@ -1,8 +1,8 @@
 use clap::ArgMatches;
 use ffsend_api::url::Url;
 
-use cmd::arg::{ArgHost, CmdArgOption};
 use super::Matcher;
+use cmd::arg::{ArgHost, CmdArgOption};
 
 /// The debug command matcher.
 pub struct DebugMatcher<'a> {
@@ -22,11 +22,8 @@ impl<'a: 'b, 'b> DebugMatcher<'a> {
 
 impl<'a> Matcher<'a> for DebugMatcher<'a> {
     fn with(matches: &'a ArgMatches) -> Option<Self> {
-        matches.subcommand_matches("debug")
-            .map(|matches|
-                 DebugMatcher {
-                     matches,
-                 }
-            )
+        matches
+            .subcommand_matches("debug")
+            .map(|matches| DebugMatcher { matches })
     }
 }

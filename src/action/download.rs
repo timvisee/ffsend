@@ -7,45 +7,23 @@ use std::sync::{Arc, Mutex};
 
 use clap::ArgMatches;
 use failure::Fail;
-use ffsend_api::action::download::{
-    Download as ApiDownload,
-    Error as DownloadError,
-};
-use ffsend_api::action::exists::{
-    Error as ExistsError,
-    Exists as ApiExists,
-};
-use ffsend_api::action::metadata::{
-    Error as MetadataError,
-    Metadata as ApiMetadata,
-};
+use ffsend_api::action::download::{Download as ApiDownload, Error as DownloadError};
+use ffsend_api::action::exists::{Error as ExistsError, Exists as ApiExists};
+use ffsend_api::action::metadata::{Error as MetadataError, Metadata as ApiMetadata};
 use ffsend_api::file::remote_file::{FileParseError, RemoteFile};
 use ffsend_api::reader::ProgressReporter;
 use ffsend_api::reqwest::Client;
 #[cfg(feature = "archive")]
-use tempfile::{
-    Builder as TempBuilder,
-    NamedTempFile,
-};
+use tempfile::{Builder as TempBuilder, NamedTempFile};
 
 #[cfg(feature = "archive")]
 use archive::archive::Archive;
-use cmd::matcher::{
-    Matcher,
-    download::DownloadMatcher,
-    main::MainMatcher,
-};
+use cmd::matcher::{download::DownloadMatcher, main::MainMatcher, Matcher};
 #[cfg(feature = "history")]
 use history_tool;
 use progress::ProgressBar;
 use util::{
-    ensure_enough_space,
-    ensure_password,
-    ErrorHints,
-    prompt_yes,
-    quit,
-    quit_error,
-    quit_error_msg,
+    ensure_enough_space, ensure_password, prompt_yes, quit, quit_error, quit_error_msg, ErrorHints,
 };
 
 /// A file download action.
@@ -56,9 +34,7 @@ pub struct Download<'a> {
 impl<'a> Download<'a> {
     /// Construct a new download action.
     pub fn new(cmd_matches: &'a ArgMatches<'a>) -> Self {
-        Self {
-            cmd_matches,
-        }
+        Self { cmd_matches }
     }
 
     /// Invoke the download action.
@@ -95,11 +71,7 @@ impl<'a> Download<'a> {
         ensure_password(&mut password, exists.has_password(), &matcher_main);
 
         // Fetch the file metadata
-        let metadata = ApiMetadata::new(
-            &file,
-            password.clone(),
-            false,
-        ).invoke(&client)?;
+        let metadata = ApiMetadata::new(&file, password.clone(), false).invoke(&client)?;
 
         // A temporary archive file, only used when archiving
         // The temporary file is stored here, to ensure it's lifetime exceeds the upload process
@@ -110,7 +82,8 @@ impl<'a> Download<'a> {
         #[cfg(feature = "archive")]
         let mut extract = matcher_download.extract();
 
-        #[cfg(feature = "archive")] {
+        #[cfg(feature = "archive")]
+        {
             // Ask to extract if downloading an archive
             if !extract && metadata.metadata().is_archive() {
                 if prompt_yes(
@@ -138,7 +111,8 @@ impl<'a> Download<'a> {
         #[cfg(feature = "archive")]
         let output_path = target.clone();
 
-        #[cfg(feature = "archive")] {
+        #[cfg(feature = "archive")]
+        {
             // Allocate an archive file, and update the download and target paths
             if extract {
                 // TODO: select the extention dynamically
@@ -150,7 +124,7 @@ impl<'a> Download<'a> {
                         .prefix(&format!(".{}-archive-", crate_name!()))
                         .suffix(archive_extention)
                         .tempfile()
-                        .map_err(ExtractError::TempFile)?
+                        .map_err(ExtractError::TempFile)?,
                 );
                 if let Some(tmp_archive) = &tmp_archive {
                     target = tmp_archive.path().to_path_buf();
@@ -168,16 +142,12 @@ impl<'a> Download<'a> {
         let progress_reader: Arc<Mutex<ProgressReporter>> = progress_bar;
 
         // Execute an download action
-        ApiDownload::new(
-            &file,
-            target,
-            password,
-            false,
-            Some(metadata),
-        ).invoke(&client, &progress_reader)?;
+        ApiDownload::new(&file, target, password, false, Some(metadata))
+            .invoke(&client, &progress_reader)?;
 
         // Extract the downloaded file if working with an archive
-        #[cfg(feature = "archive")] {
+        #[cfg(feature = "archive")]
+        {
             if extract {
                 eprintln!("Extracting...");
 
@@ -243,10 +213,7 @@ impl<'a> Download<'a> {
             let dir = if file {
                 match target.parent() {
                     Some(parent) => parent,
-                    None => quit_error_msg(
-                        "invalid output file path",
-                        ErrorHints::default(),
-                    ),
+                    None => quit_error_msg("invalid output file path", ErrorHints::default()),
                 }
             } else {
                 &target
@@ -268,9 +235,10 @@ impl<'a> Download<'a> {
 
                 // Create the parent directories
                 if let Err(err) = create_dir_all(dir) {
-                    quit_error(err.context(
-                        "failed to create parent directories for output file",
-                    ), ErrorHints::default());
+                    quit_error(
+                        err.context("failed to create parent directories for output file"),
+                        ErrorHints::default(),
+                    );
                 }
             }
         }
@@ -314,15 +282,14 @@ impl<'a> Download<'a> {
         let path = target.to_str();
 
         // If the path is emtpy, use the working directory with the name hint
-        let use_workdir = path
-            .map(|path| path.trim().is_empty())
-            .unwrap_or(true);
+        let use_workdir = path.map(|path| path.trim().is_empty()).unwrap_or(true);
         if use_workdir {
             match current_dir() {
                 Ok(target) => return target.join(name_hint),
-                Err(err) => quit_error(err.context(
-                    "failed to determine working directory to use for the output file"
-                ), ErrorHints::default()),
+                Err(err) => quit_error(
+                    err.context("failed to determine working directory to use for the output file"),
+                    ErrorHints::default(),
+                ),
             }
         }
         let path = path.unwrap();
@@ -339,9 +306,10 @@ impl<'a> Download<'a> {
         if target.is_relative() {
             match current_dir() {
                 Ok(workdir) => target = workdir.join(target),
-                Err(err) => quit_error(err.context(
-                        "failed to determine working directory to use for the output file"
-                    ), ErrorHints::default()),
+                Err(err) => quit_error(
+                    err.context("failed to determine working directory to use for the output file"),
+                    ErrorHints::default(),
+                ),
             }
         }
 

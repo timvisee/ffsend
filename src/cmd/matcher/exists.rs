@@ -2,8 +2,8 @@ use ffsend_api::url::Url;
 
 use clap::ArgMatches;
 
-use cmd::arg::{ArgUrl, CmdArgOption};
 use super::Matcher;
+use cmd::arg::{ArgUrl, CmdArgOption};
 
 /// The exists command matcher.
 pub struct ExistsMatcher<'a> {
@@ -23,11 +23,8 @@ impl<'a: 'b, 'b> ExistsMatcher<'a> {
 
 impl<'a> Matcher<'a> for ExistsMatcher<'a> {
     fn with(matches: &'a ArgMatches) -> Option<Self> {
-        matches.subcommand_matches("exists")
-            .map(|matches|
-                 ExistsMatcher {
-                     matches,
-                 }
-            )
+        matches
+            .subcommand_matches("exists")
+            .map(|matches| ExistsMatcher { matches })
     }
 }
