@@ -58,7 +58,7 @@ _Note: this tool is currently in the alpha phase_
 - Ability to use your own Send host
 - Inspect or delete shared files
 - Accurate error reporting
-- Low memory footprint, due to encryption, download and upload streaming
+- Low memory footprint, due to encryption and download/upload streaming
 - Intended to be used in scripts without interaction
 
 For a list of upcoming features and ideas, take a look at the
