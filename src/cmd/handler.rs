@@ -41,7 +41,8 @@ impl<'a: 'b, 'b> Handler<'a> {
                  The public Send service that is used as default host is provided by Mozilla.\n\
                  This application is not affiliated with Mozilla, Firefox or Firefox Send.\
                  ",
-            ).global_setting(AppSettings::GlobalVersion)
+            )
+            .global_setting(AppSettings::GlobalVersion)
             .global_setting(AppSettings::VersionlessSubcommands)
             // TODO: enable below command when it doesn't break `p` anymore.
             // .global_setting(AppSettings::InferSubcommands)
@@ -51,28 +52,32 @@ impl<'a: 'b, 'b> Handler<'a> {
                     .short("f")
                     .global(true)
                     .help("Force the action, ignore warnings"),
-            ).arg(
+            )
+            .arg(
                 Arg::with_name("no-interact")
                     .long("no-interact")
                     .short("I")
                     .alias("no-interactive")
                     .global(true)
                     .help("Not interactive, do not prompt"),
-            ).arg(
+            )
+            .arg(
                 Arg::with_name("yes")
                     .long("yes")
                     .short("y")
                     .alias("assume-yes")
                     .global(true)
                     .help("Assume yes for prompts"),
-            ).arg(
+            )
+            .arg(
                 Arg::with_name("verbose")
                     .long("verbose")
                     .short("v")
                     .multiple(true)
                     .global(true)
                     .help("Enable verbose information and logging"),
-            ).subcommand(CmdDebug::build())
+            )
+            .subcommand(CmdDebug::build())
             .subcommand(CmdDelete::build())
             .subcommand(CmdDownload::build().display_order(2))
             .subcommand(CmdExists::build())
@@ -95,7 +100,8 @@ impl<'a: 'b, 'b> Handler<'a> {
                     .hide_default_value(true)
                     .env("FFSEND_HISTORY")
                     .hide_env_values(true),
-            ).arg(
+            )
+            .arg(
                 Arg::with_name("incognito")
                     .long("incognito")
                     .short("i")
@@ -104,7 +110,8 @@ impl<'a: 'b, 'b> Handler<'a> {
                     .alias("priv")
                     .global(true)
                     .help("Don't update local history for actions"),
-            ).subcommand(CmdHistory::build());
+            )
+            .subcommand(CmdHistory::build());
 
         // Disable color usage if compiled without color support
         #[cfg(feature = "no-color")]

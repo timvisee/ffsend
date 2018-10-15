@@ -67,7 +67,8 @@ impl<'a> Info<'a> {
             .invoke(&client)
             .map_err(|err| {
                 print_error(err.context("failed to fetch file metadata, showing limited info"))
-            }).ok();
+            })
+            .ok();
 
         // Get the TTL duration
         let ttl_millis = info.ttl_millis() as i64;

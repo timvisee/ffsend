@@ -55,7 +55,8 @@ pub fn print_error<E: Fail>(err: impl Borrow<E>) {
             } else {
                 eprintln!("{} {}", highlight_error("caused by:"), err);
             }
-        }).count();
+        })
+        .count();
 
     // Fall back to a basic message
     if count == 0 {
