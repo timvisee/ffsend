@@ -19,7 +19,8 @@ impl CmdUpload {
                     .help("The file to upload")
                     .required(true)
                     .multiple(false),
-            ).arg(ArgPassword::build().help("Protect the file with a password"))
+            )
+            .arg(ArgPassword::build().help("Protect the file with a password"))
             .arg(ArgGenPassphrase::build())
             .arg(ArgDownloadLimit::build().default_value(DOWNLOAD_DEFAULT))
             .arg(ArgHost::build())
@@ -31,7 +32,8 @@ impl CmdUpload {
                     .alias("f")
                     .value_name("NAME")
                     .help("Rename the file being uploaded"),
-            ).arg(
+            )
+            .arg(
                 Arg::with_name("open")
                     .long("open")
                     .short("o")
