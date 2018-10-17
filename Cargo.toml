@@ -68,7 +68,7 @@ colored = "1.6"
 derive_builder = "0.6"
 directories = "0.10"
 failure = "0.1"
-ffsend-api = "0.0"
+ffsend-api = "0.0.4"
 fs2 = "0.4"
 lazy_static = "1.0"
 open = "1"
@@ -85,13 +85,3 @@ version-compare = "0.0.6"
 
 [target.'cfg(not(target_os = "linux"))'.dependencies]
 clipboard = { version = "0.4", optional = true }
-
-# Patch until an ffsend-api update is released
-[patch.crates-io.ffsend-api]
-git = "https://github.com/timvisee/ffsend-api.git"
-rev = "e0b171f"
-
-# Patch until an hkdf update is released
-[patch.crates-io.hkdf]
-git = "https://github.com/timvisee/KDFs.git"
-rev = "277cf5d"

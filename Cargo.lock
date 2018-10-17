@@ -410,7 +410,7 @@ dependencies = [
  "derive_builder 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "directories 0.10.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "failure 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "ffsend-api 0.0.3 (git+https://github.com/timvisee/ffsend-api.git?rev=e0b171f)",
+ "ffsend-api 0.0.4 (registry+https://github.com/rust-lang/crates.io-index)",
  "fs2 0.4.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "lazy_static 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "open 1.2.2 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -428,8 +428,8 @@ dependencies = [
 
 [[package]]
 name = "ffsend-api"
-version = "0.0.3"
-source = "git+https://github.com/timvisee/ffsend-api.git?rev=e0b171f#e0b171f3225c3cb74389063b9147d864bf549cf9"
+version = "0.0.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "arrayref 0.3.5 (registry+https://github.com/rust-lang/crates.io-index)",
  "base64 0.9.3 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -437,7 +437,7 @@ dependencies = [
  "derive_builder 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "failure 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "failure_derive 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "hkdf 0.6.1-alpha.0 (git+https://github.com/timvisee/KDFs.git?rev=277cf5d)",
+ "hkdf 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "hyper 0.12.11 (registry+https://github.com/rust-lang/crates.io-index)",
  "mime 0.3.12 (registry+https://github.com/rust-lang/crates.io-index)",
  "mime_guess 2.0.0-alpha.6 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -545,8 +545,8 @@ dependencies = [
 
 [[package]]
 name = "hkdf"
-version = "0.6.1-alpha.0"
-source = "git+https://github.com/timvisee/KDFs.git?rev=277cf5d#277cf5dee76df51f3713201a666d16705c590ec5"
+version = "0.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "digest 0.8.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "hmac 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1826,7 +1826,7 @@ dependencies = [
 "checksum failure 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)" = "7efb22686e4a466b1ec1a15c2898f91fa9cb340452496dca654032de20ff95b9"
 "checksum failure_derive 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)" = "946d0e98a50d9831f5d589038d2ca7f8f455b1c21028c0db0e84116a12696426"
 "checksum fake-simd 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)" = "e88a8acf291dafb59c2d96e8f59828f3838bb1a70398823ade51a84de6a6deed"
-"checksum ffsend-api 0.0.3 (git+https://github.com/timvisee/ffsend-api.git?rev=e0b171f)" = "<none>"
+"checksum ffsend-api 0.0.4 (registry+https://github.com/rust-lang/crates.io-index)" = "6c1d8862d4ccebfe966e868df4344416b66a534f38dcb9c4610055128dda63de"
 "checksum filetime 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)" = "da4b9849e77b13195302c174324b5ba73eec9b236b24c221a61000daefb95c5f"
 "checksum fnv 1.0.6 (registry+https://github.com/rust-lang/crates.io-index)" = "2fad85553e09a6f881f739c29f0b00b0f01357c743266d478b68951ce23285f3"
 "checksum foreign-types 0.3.2 (registry+https://github.com/rust-lang/crates.io-index)" = "f6f339eb8adc052cd2ca78910fda869aefa38d22d5cb648e6485e4d3fc06f3b1"
@@ -1838,7 +1838,7 @@ dependencies = [
 "checksum futures-cpupool 0.1.8 (registry+https://github.com/rust-lang/crates.io-index)" = "ab90cde24b3319636588d0c35fe03b1333857621051837ed769faefb4c2162e4"
 "checksum generic-array 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)" = "3c0f28c2f5bfb5960175af447a2da7c18900693738343dc896ffbcabd9839592"
 "checksum h2 0.1.12 (registry+https://github.com/rust-lang/crates.io-index)" = "a27e7ed946e8335bdf9a191bc1b9b14a03ba822d013d2f58437f4fabcbd7fc2c"
-"checksum hkdf 0.6.1-alpha.0 (git+https://github.com/timvisee/KDFs.git?rev=277cf5d)" = "<none>"
+"checksum hkdf 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)" = "1a89c4638cf4e02d9db29750659d2af13d9001b508716f77d4693ec8a1f8bda8"
 "checksum hmac 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)" = "f127a908633569f208325f86f71255d3363c79721d7f9fe31cd5569908819771"
 "checksum http 0.1.13 (registry+https://github.com/rust-lang/crates.io-index)" = "24f58e8c2d8e886055c3ead7b28793e1455270b5fb39650984c224bc538ba581"
 "checksum httparse 1.3.3 (registry+https://github.com/rust-lang/crates.io-index)" = "e8734b0cfd3bc3e101ec59100e101c2eecd19282202e87808b3037b442777a83"
