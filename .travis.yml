@@ -57,14 +57,14 @@ jobs:
     # Release stage                #
     ################################
 
-    # Cargo crate release
-    - stage: release
-      env: TARGET=x86_64-unknown-linux-gnu
-      cache: cargo
-      script:
-        - echo "Creating release crate on crates.io..."
-        - echo $CARGO_TOKEN | cargo login
-        - cargo publish --verbose
+    # # Cargo crate release
+    # - stage: release
+    #   env: TARGET=x86_64-unknown-linux-gnu
+    #   cache: cargo
+    #   script:
+    #     - echo "Creating release crate on crates.io..."
+    #     - echo $CARGO_TOKEN | cargo login
+    #     - cargo publish --verbose
 
     # GitHub binary release for Linux on x86/x86_64
     - stage: release

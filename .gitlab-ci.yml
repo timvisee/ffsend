@@ -116,3 +116,14 @@ public-send-test:
     - head -c1m </dev/urandom >testfile
     - ./ffsend upload testfile -n testfile.bin -a -d 10 -p secret -I
     # TODO: download this file, compare checksums
+
+# Cargo crate release
+crate:
+  stage: release
+  only:
+    - /^v(\d+\.)*\d+$/
+  script:
+    - echo "Creating release crate to publish on crates.io..."
+    - echo $CARGO_TOKEN | cargo login
+    - echo "Publishing crate to crates.io..."
+    - cargo publish --verbose
