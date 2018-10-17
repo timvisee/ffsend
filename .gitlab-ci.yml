@@ -126,4 +126,4 @@ crate:
     - echo "Creating release crate to publish on crates.io..."
     - echo $CARGO_TOKEN | cargo login
     - echo "Publishing crate to crates.io..."
-    - cargo publish --verbose
+    - cargo publish --verbose --allow-dirty
