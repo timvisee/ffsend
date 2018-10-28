@@ -706,6 +706,7 @@ pub fn ensure_enough_space<P: AsRef<Path>>(path: P, size: u64) {
 #[cfg(feature = "history")]
 pub fn app_project_dirs() -> ProjectDirs {
     ProjectDirs::from("", "", crate_name!())
+        .expect("failed to determine location of project directories")
 }
 
 /// Get the default path to use for the history file.
