@@ -1,7 +1,7 @@
 use chrono::Duration;
 use clap::ArgMatches;
 use ffsend_api::config::SEND_DEFAULT_EXPIRE_TIME;
-use prettytable::{cell::Cell, format::FormatBuilder, row::Row, Table};
+use prettytable::{Cell, format::FormatBuilder, Row, Table};
 
 use cmd::matcher::{debug::DebugMatcher, main::MainMatcher, Matcher};
 use error::ActionError;

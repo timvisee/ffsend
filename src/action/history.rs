@@ -1,5 +1,5 @@
 use clap::ArgMatches;
-use prettytable::{cell::Cell, format::FormatBuilder, row::Row, Table};
+use prettytable::{Cell, format::FormatBuilder, Row, Table};
 
 use cmd::matcher::{main::MainMatcher, Matcher};
 use error::ActionError;

@@ -11,7 +11,7 @@ use ffsend_api::action::upload::{Error as UploadError, Upload as ApiUpload};
 use ffsend_api::config::{UPLOAD_SIZE_MAX, UPLOAD_SIZE_MAX_RECOMMENDED};
 use ffsend_api::reader::ProgressReporter;
 use ffsend_api::reqwest::Client;
-use prettytable::{cell::Cell, format::FormatBuilder, row::Row, Table};
+use prettytable::{Cell, format::FormatBuilder, Row, Table};
 #[cfg(feature = "archive")]
 use tempfile::{Builder as TempBuilder, NamedTempFile};
 

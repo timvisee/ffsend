@@ -6,7 +6,7 @@ use ffsend_api::action::info::{Error as InfoError, Info as ApiInfo};
 use ffsend_api::action::metadata::Metadata as ApiMetadata;
 use ffsend_api::file::remote_file::{FileParseError, RemoteFile};
 use ffsend_api::reqwest::Client;
-use prettytable::{cell::Cell, format::FormatBuilder, row::Row, Table};
+use prettytable::{Cell, format::FormatBuilder, Row, Table};
 
 use cmd::matcher::{info::InfoMatcher, main::MainMatcher, Matcher};
 #[cfg(feature = "history")]
