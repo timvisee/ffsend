@@ -7,7 +7,6 @@ extern crate derive_builder;
 #[macro_use]
 extern crate failure;
 extern crate ffsend_api;
-#[cfg(feature = "history")]
 #[macro_use]
 extern crate lazy_static;
 extern crate openssl_probe;

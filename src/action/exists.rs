@@ -3,7 +3,6 @@ use ffsend_api::action::exists::{Error as ExistsError, Exists as ApiExists};
 use ffsend_api::file::remote_file::{FileParseError, RemoteFile};
 
 use client::create_client;
-#[cfg(feature = "history")]
 use cmd::matcher::main::MainMatcher;
 use cmd::matcher::{exists::ExistsMatcher, Matcher};
 use error::ActionError;
@@ -26,7 +25,6 @@ impl<'a> Exists<'a> {
     pub fn invoke(&self) -> Result<(), ActionError> {
         // Create the command matchers
         let matcher_exists = ExistsMatcher::with(self.cmd_matches).unwrap();
-        #[cfg(feature = "history")]
         let matcher_main = MainMatcher::with(self.cmd_matches).unwrap();
 
         // Get the share URL

@@ -21,7 +21,9 @@ use util::app_history_file_path_string;
 lazy_static! {
     /// The default history file
     static ref DEFAULT_HISTORY_FILE: String = app_history_file_path_string();
+}
 
+lazy_static! {
     /// The default client timeout in seconds as a string
     static ref DEFAULT_TIMEOUT: String = format!("{}", CLIENT_TIMEOUT);
 
