@@ -9,14 +9,6 @@ stages:
 variables:
   RUST_VERSION: stable
 
-# Cargo artifacts caching per Rust version and pipeline
-cache:
-  key: "$RUST_VERSION"
-  paths:
-    - /usr/local/rustup/
-    - /usr/local/cargo/
-    - target/
-
 # Install compiler and OpenSSL dependencies
 before_script:
   - apt-get update
@@ -45,12 +37,10 @@ rust-beta:
   <<: *check-base
   variables:
     RUST_VERSION: beta
-  cache: {}
 rust-nightly:
   <<: *check-base
   variables:
     RUST_VERSION: nightly
-  cache: {}
 
 # Build using Rust stable
 build:
@@ -110,7 +100,6 @@ public-send-test:
     - build-static
   variables:
     GIT_STRATEGY: none
-  cache: {}
   before_script: []
   script:
     - head -c1m </dev/urandom >testfile
