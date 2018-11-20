@@ -327,8 +327,8 @@ documentation [here][send-encryption].
 ```
 $ ffsend help
 
-ffsend 0.0.9
-Tim Visee <timvisee@gmail.com>
+ffsend 0.1.0
+Tim Visee <timvisee.com>
 Easily and securely share files from the command line.
 A fully featured Firefox Send client.
 
@@ -345,7 +345,9 @@ FLAGS:
     -y, --yes            Assume yes for prompts
 
 OPTIONS:
-    -H, --history <FILE>    Use the specified history file [env: FFSEND_HISTORY]
+    -H, --history <FILE>                Use the specified history file [env: FFSEND_HISTORY]
+    -t, --timeout <SECONDS>             Request timeout (0 to disable) [env: FFSEND_TIMEOUT]
+    -T, --transfer-timeout <SECONDS>    Transfer timeout (0 to disable) [env: FFSEND_TRANSFER_TIMEOUT]
 
 SUBCOMMANDS:
     upload        Upload files [aliases: u, up]
