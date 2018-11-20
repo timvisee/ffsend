@@ -9,6 +9,16 @@ stages:
 variables:
   RUST_VERSION: stable
 
+# Cache rust/cargo/build artifacts
+cache:
+  key: "$CI_PIPELINE_ID-$RUST_VERSION"
+  untracked: true
+  paths:
+    - /usr/local/cargo/registry/
+    - /usr/local/rustup/toolchains/
+    - /usr/local/rustup/update-hashes/
+    - target/
+
 # Install compiler and OpenSSL dependencies
 before_script:
   - apt-get update
