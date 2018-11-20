@@ -22,7 +22,9 @@ extern crate tempfile;
 mod action;
 #[cfg(feature = "archive")]
 mod archive;
+mod client;
 mod cmd;
+mod config;
 mod error;
 #[cfg(feature = "history")]
 mod history;

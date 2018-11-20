@@ -1,9 +1,9 @@
 use clap::ArgMatches;
 use ffsend_api::action::password::{Error as PasswordError, Password as ApiPassword};
 use ffsend_api::file::remote_file::RemoteFile;
-use ffsend_api::reqwest::Client;
 use prettytable::{Cell, format::FormatBuilder, Row, Table};
 
+use client::create_client;
 use cmd::matcher::{main::MainMatcher, password::PasswordMatcher, Matcher};
 use error::ActionError;
 #[cfg(feature = "history")]
@@ -32,7 +32,7 @@ impl<'a> Password<'a> {
         let url = matcher_password.url();
 
         // Create a reqwest client
-        let client = Client::new();
+        let client = create_client();
 
         // Parse the remote file based on the share URL, derive the owner token from history
         let mut file = RemoteFile::parse_url(url, matcher_password.owner())?;

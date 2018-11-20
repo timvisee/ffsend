@@ -12,12 +12,12 @@ use ffsend_api::action::exists::{Error as ExistsError, Exists as ApiExists};
 use ffsend_api::action::metadata::{Error as MetadataError, Metadata as ApiMetadata};
 use ffsend_api::file::remote_file::{FileParseError, RemoteFile};
 use ffsend_api::reader::ProgressReporter;
-use ffsend_api::reqwest::Client;
 #[cfg(feature = "archive")]
 use tempfile::{Builder as TempBuilder, NamedTempFile};
 
 #[cfg(feature = "archive")]
 use archive::archive::Archive;
+use client::create_transfer_client;
 use cmd::matcher::{download::DownloadMatcher, main::MainMatcher, Matcher};
 #[cfg(feature = "history")]
 use history_tool;
@@ -47,8 +47,8 @@ impl<'a> Download<'a> {
         // Get the share URL
         let url = matcher_download.url();
 
-        // Create a reqwest client
-        let client = Client::new();
+        // Create a reqwest client capable for downloading files
+        let client = create_transfer_client();
 
         // Parse the remote file based on the share URL
         let file = RemoteFile::parse_url(url, None)?;

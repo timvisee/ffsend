@@ -5,9 +5,9 @@ use ffsend_api::action::exists::{Error as ExistsError, Exists as ApiExists};
 use ffsend_api::action::info::{Error as InfoError, Info as ApiInfo};
 use ffsend_api::action::metadata::Metadata as ApiMetadata;
 use ffsend_api::file::remote_file::{FileParseError, RemoteFile};
-use ffsend_api::reqwest::Client;
 use prettytable::{Cell, format::FormatBuilder, Row, Table};
 
+use client::create_client;
 use cmd::matcher::{info::InfoMatcher, main::MainMatcher, Matcher};
 #[cfg(feature = "history")]
 use history_tool;
@@ -35,7 +35,7 @@ impl<'a> Info<'a> {
         let url = matcher_info.url();
 
         // Create a reqwest client
-        let client = Client::new();
+        let client = create_client();
 
         // Parse the remote file based on the share URL, derive the owner token from history
         let mut file = RemoteFile::parse_url(url, matcher_info.owner())?;

@@ -1,8 +1,8 @@
 use clap::ArgMatches;
 use ffsend_api::action::exists::{Error as ExistsError, Exists as ApiExists};
 use ffsend_api::file::remote_file::{FileParseError, RemoteFile};
-use ffsend_api::reqwest::Client;
 
+use client::create_client;
 #[cfg(feature = "history")]
 use cmd::matcher::main::MainMatcher;
 use cmd::matcher::{exists::ExistsMatcher, Matcher};
@@ -33,7 +33,7 @@ impl<'a> Exists<'a> {
         let url = matcher_exists.url();
 
         // Create a reqwest client
-        let client = Client::new();
+        let client = create_client();
 
         // Parse the remote file based on the share URL
         let file = RemoteFile::parse_url(url, None)?;

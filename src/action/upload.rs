@@ -10,13 +10,13 @@ use ffsend_api::action::params::ParamsDataBuilder;
 use ffsend_api::action::upload::{Error as UploadError, Upload as ApiUpload};
 use ffsend_api::config::{UPLOAD_SIZE_MAX, UPLOAD_SIZE_MAX_RECOMMENDED};
 use ffsend_api::reader::ProgressReporter;
-use ffsend_api::reqwest::Client;
 use prettytable::{Cell, format::FormatBuilder, Row, Table};
 #[cfg(feature = "archive")]
 use tempfile::{Builder as TempBuilder, NamedTempFile};
 
 #[cfg(feature = "archive")]
 use archive::archiver::Archiver;
+use client::create_transfer_client;
 use cmd::matcher::{MainMatcher, Matcher, UploadMatcher};
 #[cfg(feature = "history")]
 use history_tool;
@@ -90,8 +90,8 @@ impl<'a> Upload<'a> {
             print_error_msg("failed to check the file size, ignoring");
         }
 
-        // Create a reqwest client
-        let client = Client::new();
+        // Create a reqwest client capable for uploading files
+        let client = create_transfer_client();
 
         // Create a progress bar reporter
         let progress_bar = Arc::new(Mutex::new(ProgressBar::new_upload()));

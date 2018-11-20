@@ -1,8 +1,8 @@
 use clap::ArgMatches;
 use ffsend_api::action::params::{Error as ParamsError, Params as ApiParams, ParamsDataBuilder};
 use ffsend_api::file::remote_file::RemoteFile;
-use ffsend_api::reqwest::Client;
 
+use client::create_client;
 use cmd::matcher::{main::MainMatcher, params::ParamsMatcher, Matcher};
 use error::ActionError;
 #[cfg(feature = "history")]
@@ -31,7 +31,7 @@ impl<'a> Params<'a> {
         let url = matcher_params.url();
 
         // Create a reqwest client
-        let client = Client::new();
+        let client = create_client();
 
         // Parse the remote file based on the share URL, derive the owner token from history
         let mut file = RemoteFile::parse_url(url, matcher_params.owner())?;
