@@ -27,7 +27,7 @@ fn create_custom_client(timeout: Option<Duration>) -> Client {
 }
 
 /// Convert the given number of seconds into an optional duration, used for clients.
-fn to_duration(secs: u64) -> Option<Duration> {
+pub fn to_duration(secs: u64) -> Option<Duration> {
     if secs > 0 {
         Some(Duration::from_secs(secs))
     } else {
