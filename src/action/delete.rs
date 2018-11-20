@@ -32,7 +32,7 @@ impl<'a> Delete<'a> {
 
         // Create a reqwest client
         // TODO: create transfer client when draining downloads
-        let client = create_client();
+        let client = create_client(&matcher_main);
 
         // Parse the remote file based on the share link, derive the owner token from history
         let mut file = RemoteFile::parse_url(url, matcher_delete.owner())?;

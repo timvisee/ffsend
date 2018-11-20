@@ -48,7 +48,7 @@ impl<'a> Download<'a> {
         let url = matcher_download.url();
 
         // Create a reqwest client capable for downloading files
-        let client = create_transfer_client();
+        let client = create_transfer_client(&matcher_main);
 
         // Parse the remote file based on the share URL
         let file = RemoteFile::parse_url(url, None)?;

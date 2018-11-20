@@ -91,7 +91,7 @@ impl<'a> Upload<'a> {
         }
 
         // Create a reqwest client capable for uploading files
-        let client = create_transfer_client();
+        let client = create_transfer_client(&matcher_main);
 
         // Create a progress bar reporter
         let progress_bar = Arc::new(Mutex::new(ProgressBar::new_upload()));

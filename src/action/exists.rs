@@ -33,7 +33,7 @@ impl<'a> Exists<'a> {
         let url = matcher_exists.url();
 
         // Create a reqwest client
-        let client = create_client();
+        let client = create_client(&matcher_main);
 
         // Parse the remote file based on the share URL
         let file = RemoteFile::parse_url(url, None)?;

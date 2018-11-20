@@ -49,6 +49,22 @@ impl<'a: 'b, 'b> MainMatcher<'a> {
         }
     }
 
+    /// Get the timeout in seconds
+    pub fn timeout(&self) -> u64 {
+        self.matches
+            .value_of("timeout")
+            .and_then(|arg| arg.parse().ok())
+            .expect("invalid timeout value")
+    }
+
+    /// Get the transfer timeout in seconds
+    pub fn transfer_timeout(&self) -> u64 {
+        self.matches
+            .value_of("transfer-timeout")
+            .and_then(|arg| arg.parse().ok())
+            .expect("invalid transfer-timeout value")
+    }
+
     /// Check whether we are incognito from the file history.
     #[cfg(feature = "history")]
     pub fn incognito(&self) -> bool {

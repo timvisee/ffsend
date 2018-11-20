@@ -2,6 +2,7 @@ extern crate directories;
 
 use clap::{App, AppSettings, Arg, ArgMatches};
 
+use config::{CLIENT_TIMEOUT, CLIENT_TRANSFER_TIMEOUT};
 #[cfg(feature = "history")]
 use super::matcher::HistoryMatcher;
 use super::matcher::{
@@ -20,6 +21,12 @@ use util::app_history_file_path_string;
 lazy_static! {
     /// The default history file
     static ref DEFAULT_HISTORY_FILE: String = app_history_file_path_string();
+
+    /// The default client timeout in seconds as a string
+    static ref DEFAULT_TIMEOUT: String = format!("{}", CLIENT_TIMEOUT);
+
+    /// The default client transfer timeout in seconds as a string
+    static ref DEFAULT_TRANSFER_TIMEOUT: String = format!("{}", CLIENT_TRANSFER_TIMEOUT);
 }
 
 /// CLI argument handler.
@@ -68,6 +75,51 @@ impl<'a: 'b, 'b> Handler<'a> {
                     .alias("assume-yes")
                     .global(true)
                     .help("Assume yes for prompts"),
+            )
+            .arg(
+                Arg::with_name("timeout")
+                    .long("timeout")
+                    .short("t")
+                    .alias("time")
+                    .global(true)
+                    .value_name("SECONDS")
+                    .help("Request timeout (0 to disable)")
+                    .default_value(&DEFAULT_TIMEOUT)
+                    .hide_default_value(true)
+                    .env("FFSEND_TIMEOUT")
+                    .hide_env_values(true)
+                    .validator(|arg| arg
+                        .parse::<u64>()
+                        .map(|_| ())
+                        .map_err(|_| String::from(
+                                "Timeout time must be a positive number of seconds, or 0 to disable."
+                        ))
+                    ),
+            )
+            .arg(
+                Arg::with_name("transfer-timeout")
+                    .long("transfer-timeout")
+                    .short("T")
+                    .alias("trans-time")
+                    .alias("trans-timeout")
+                    .alias("transfer-time")
+                    .alias("time-trans")
+                    .alias("timeout-trans")
+                    .alias("time-transfer")
+                    .global(true)
+                    .value_name("SECONDS")
+                    .help("Transfer timeout (0 to disable)")
+                    .default_value(&DEFAULT_TRANSFER_TIMEOUT)
+                    .hide_default_value(true)
+                    .env("FFSEND_TRANSFER_TIMEOUT")
+                    .hide_env_values(true)
+                    .validator(|arg| arg
+                        .parse::<u64>()
+                        .map(|_| ())
+                        .map_err(|_| String::from(
+                                "Timeout time must be a positive number of seconds, or 0 to disable."
+                        ))
+                    ),
             )
             .arg(
                 Arg::with_name("verbose")

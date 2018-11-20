@@ -32,7 +32,7 @@ impl<'a> Password<'a> {
         let url = matcher_password.url();
 
         // Create a reqwest client
-        let client = create_client();
+        let client = create_client(&matcher_main);
 
         // Parse the remote file based on the share URL, derive the owner token from history
         let mut file = RemoteFile::parse_url(url, matcher_password.owner())?;
