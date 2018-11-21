@@ -79,6 +79,12 @@ impl<'a> Debug<'a> {
             Cell::new(&features_list().join(", ")),
         ]));
 
+        // Show whether quiet is used
+        table.add_row(Row::new(vec![
+            Cell::new("Quiet:"),
+            Cell::new(format_bool(matcher_main.quiet())),
+        ]));
+
         // Show whether verbose is used
         table.add_row(Row::new(vec![
             Cell::new("Verbose:"),
