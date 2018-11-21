@@ -649,7 +649,7 @@ pub fn format_bool(b: bool) -> &'static str {
 }
 
 /// Get the name of the executable that was invoked.
-pub fn exe_name() -> String {
+pub fn bin_name() -> String {
     current_exe()
         .ok()
         .and_then(|p| p.file_name().map(|n| n.to_owned()))

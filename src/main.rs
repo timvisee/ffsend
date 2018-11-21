@@ -43,9 +43,12 @@ use action::info::Info;
 use action::params::Params;
 use action::password::Password;
 use action::upload::Upload;
-use cmd::Handler;
+use cmd::{
+    Handler,
+    matcher::{MainMatcher, Matcher},
+};
 use error::Error;
-use util::{exe_name, highlight, quit_error, ErrorHints};
+use util::{bin_name, highlight, quit_error, ErrorHints};
 
 /// Application entrypoint.
 fn main() {
@@ -132,26 +135,31 @@ fn invoke_action(handler: &Handler) -> Result<(), Error> {
             .map_err(|err| err.into());
     }
 
+    // Get the main matcher
+    let main_matcher = MainMatcher::with(handler.matches()).unwrap();
+
     // Print the main info and return
-    print_main_info();
+    if !main_matcher.quiet() {
+        print_main_info();
+    }
     Ok(())
 }
 
 /// Print the main info, shown when no subcommands were supplied.
 pub fn print_main_info() {
     // Get the name of the used executable
-    let exe = exe_name();
+    let bin = bin_name();
 
     // Print the main info
     println!("{} {}", crate_name!(), crate_version!());
-    println!("Usage: {} [FLAGS] <SUBCOMMAND> ...", exe);
+    println!("Usage: {} [FLAGS] <SUBCOMMAND> ...", bin);
     println!();
     println!(crate_description!());
     println!();
     println!("Missing subcommand. Here are the most used:");
-    println!("    {}", highlight(&format!("{} upload <FILE> ...", exe)));
-    println!("    {}", highlight(&format!("{} download <URL> ...", exe)));
+    println!("    {}", highlight(&format!("{} upload <FILE> ...", bin)));
+    println!("    {}", highlight(&format!("{} download <URL> ...", bin)));
     println!();
     println!("To show all subcommands, features and other help:");
-    println!("    {}", highlight(&format!("{} help [SUBCOMMAND]", exe)));
+    println!("    {}", highlight(&format!("{} help [SUBCOMMAND]", bin)));
 }
