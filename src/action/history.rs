@@ -39,15 +39,18 @@ impl<'a> History<'a> {
             return Ok(());
         }
 
+        // Build the list of column names
+        let mut columns = vec!["#", "LINK", "EXPIRY"];
+        if matcher_main.verbose() {
+            columns.push("OWNER TOKEN");
+        }
+
         // Create a new table
         let mut table = Table::new();
         table.set_format(FormatBuilder::new().padding(0, 2).build());
-        table.add_row(Row::new(vec![
-            Cell::new("#"),
-            Cell::new("LINK"),
-            Cell::new("EXPIRY"),
-            Cell::new("OWNER TOKEN"),
-        ]));
+        table.add_row(Row::new(
+            columns.into_iter().map(Cell::new).collect(),
+        ));
 
         // Get the list of files, and sort the first expiring files to be last
         let mut files = history.files().clone();
@@ -67,13 +70,20 @@ impl<'a> History<'a> {
                 None => "?".into(),
             };
 
+            // Define the cell values
+            let mut cells: Vec<String>= vec![
+                format!("{}", i + 1),
+                file.download_url(true).into_string(),
+                expiry,
+            ];
+            if matcher_main.verbose() {
+                cells.push(owner_token);
+            }
+
             // Add the row
-            table.add_row(Row::new(vec![
-                Cell::new(&format!("{}", i + 1)),
-                Cell::new(file.download_url(true).as_str()),
-                Cell::new(&expiry),
-                Cell::new(&owner_token),
-            ]));
+            table.add_row(Row::new(
+                cells.into_iter().map(|c| Cell::new(&c)).collect(),
+            ));
         }
 
         // Print the table
