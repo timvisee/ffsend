@@ -142,8 +142,13 @@ impl<'a> Download<'a> {
         let progress_reader: Arc<Mutex<ProgressReporter>> = progress_bar;
 
         // Execute an download action
+        let progress = if !matcher_main.quiet() {
+            Some(&progress_reader)
+        } else {
+            None
+        };
         ApiDownload::new(&file, target, password, false, Some(metadata))
-            .invoke(&client, &progress_reader)?;
+            .invoke(&client, progress)?;
 
         // Extract the downloaded file if working with an archive
         #[cfg(feature = "archive")]

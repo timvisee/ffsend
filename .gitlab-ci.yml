@@ -50,6 +50,10 @@ rust-nightly:
   <<: *check-base
   variables:
     RUST_VERSION: nightly
+# rust-old:
+#   <<: *check-base
+#   variables:
+#     RUST_VERSION: "1.26"
 
 # Build using Rust stable
 build:

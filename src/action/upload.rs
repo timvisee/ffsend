@@ -197,31 +197,41 @@ impl<'a> Upload<'a> {
         let (password, password_generated) =
             password.map(|(p, g)| (Some(p), g)).unwrap_or((None, false));
 
-        // Execute an upload action
+        // Execute an upload action, obtain the URL
+        let reporter = if !matcher_main.quiet() {
+            Some(&progress_reporter)
+        } else {
+            None
+        };
         let file = ApiUpload::new(host, path.clone(), file_name, password.clone(), params)
-            .invoke(&client, &progress_reporter)?;
-
-        // Get the download URL, and report it in the console in a table
+            .invoke(&client, reporter)?;
         let url = file.download_url(true);
-        let mut table = Table::new();
-        table.set_format(FormatBuilder::new().padding(0, 2).build());
-        table.add_row(Row::new(vec![
-            Cell::new("Share link:"),
-            Cell::new(url.as_str()),
-        ]));
-        if password_generated {
+
+        // Report the result
+        if !matcher_main.quiet() {
+            // Show a table
+            let mut table = Table::new();
+            table.set_format(FormatBuilder::new().padding(0, 2).build());
             table.add_row(Row::new(vec![
-                Cell::new("Passphrase:"),
-                Cell::new(&password.unwrap_or("?".into())),
+                Cell::new("Share link:"),
+                Cell::new(url.as_str()),
             ]));
+            if password_generated {
+                table.add_row(Row::new(vec![
+                    Cell::new("Passphrase:"),
+                    Cell::new(&password.unwrap_or("?".into())),
+                ]));
+            }
+            if matcher_main.verbose() {
+                table.add_row(Row::new(vec![
+                    Cell::new("Owner token:"),
+                    Cell::new(file.owner_token().unwrap()),
+                ]));
+            }
+            table.printstd();
+        } else {
+            println!("{}", url);
         }
-        if matcher_main.verbose() {
-            table.add_row(Row::new(vec![
-                Cell::new("Owner token:"),
-                Cell::new(file.owner_token().unwrap()),
-            ]));
-        }
-        table.printstd();
 
         // Add the file to the history manager
         #[cfg(feature = "history")]
