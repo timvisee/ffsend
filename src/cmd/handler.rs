@@ -2,7 +2,6 @@ extern crate directories;
 
 use clap::{App, AppSettings, Arg, ArgMatches};
 
-use config::{CLIENT_TIMEOUT, CLIENT_TRANSFER_TIMEOUT};
 #[cfg(feature = "history")]
 use super::matcher::HistoryMatcher;
 use super::matcher::{
@@ -14,6 +13,7 @@ use super::subcmd::CmdHistory;
 use super::subcmd::{
     CmdDebug, CmdDelete, CmdDownload, CmdExists, CmdInfo, CmdParams, CmdPassword, CmdUpload,
 };
+use config::{CLIENT_TIMEOUT, CLIENT_TRANSFER_TIMEOUT};
 #[cfg(feature = "history")]
 use util::app_history_file_path_string;
 

@@ -1,7 +1,7 @@
 use clap::ArgMatches;
 use ffsend_api::action::password::{Error as PasswordError, Password as ApiPassword};
 use ffsend_api::file::remote_file::RemoteFile;
-use prettytable::{Cell, format::FormatBuilder, Row, Table};
+use prettytable::{format::FormatBuilder, Cell, Row, Table};
 
 use client::create_client;
 use cmd::matcher::{main::MainMatcher, password::PasswordMatcher, Matcher};

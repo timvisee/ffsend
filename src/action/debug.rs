@@ -1,7 +1,7 @@
 use chrono::Duration;
 use clap::ArgMatches;
 use ffsend_api::config::SEND_DEFAULT_EXPIRE_TIME;
-use prettytable::{Cell, format::FormatBuilder, Row, Table};
+use prettytable::{format::FormatBuilder, Cell, Row, Table};
 
 use client::to_duration;
 use cmd::matcher::{debug::DebugMatcher, main::MainMatcher, Matcher};
@@ -48,20 +48,25 @@ impl<'a> Debug<'a> {
             Cell::new("Timeout:"),
             Cell::new(
                 &to_duration(matcher_main.timeout())
-                    .map(|t| format_duration(
-                        Duration::from_std(t).expect("failed to convert timeout duration"),
-                    ))
-                    .unwrap_or("disabled".into())
+                    .map(|t| {
+                        format_duration(
+                            Duration::from_std(t).expect("failed to convert timeout duration"),
+                        )
+                    })
+                    .unwrap_or("disabled".into()),
             ),
         ]));
         table.add_row(Row::new(vec![
             Cell::new("Transfer timeout:"),
             Cell::new(
                 &to_duration(matcher_main.transfer_timeout())
-                    .map(|t| format_duration(
-                        Duration::from_std(t).expect("failed to convert transfer timeout duration"),
-                    ))
-                    .unwrap_or("disabled".into())
+                    .map(|t| {
+                        format_duration(
+                            Duration::from_std(t)
+                                .expect("failed to convert transfer timeout duration"),
+                        )
+                    })
+                    .unwrap_or("disabled".into()),
             ),
         ]));
 

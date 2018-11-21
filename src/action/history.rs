@@ -1,5 +1,5 @@
 use clap::ArgMatches;
-use prettytable::{Cell, format::FormatBuilder, Row, Table};
+use prettytable::{format::FormatBuilder, Cell, Row, Table};
 
 use cmd::matcher::{main::MainMatcher, Matcher};
 use error::ActionError;
@@ -58,9 +58,7 @@ impl<'a> History<'a> {
             // Create a new table
             let mut table = Table::new();
             table.set_format(FormatBuilder::new().padding(0, 2).build());
-            table.add_row(Row::new(
-                columns.into_iter().map(Cell::new).collect(),
-            ));
+            table.add_row(Row::new(columns.into_iter().map(Cell::new).collect()));
 
             // Add an entry for each file
             for (i, file) in files.iter().enumerate() {
@@ -77,7 +75,7 @@ impl<'a> History<'a> {
                 };
 
                 // Define the cell values
-                let mut cells: Vec<String>= vec![
+                let mut cells: Vec<String> = vec![
                     format!("{}", i + 1),
                     file.download_url(true).into_string(),
                     expiry,
@@ -87,16 +85,15 @@ impl<'a> History<'a> {
                 }
 
                 // Add the row
-                table.add_row(Row::new(
-                    cells.into_iter().map(|c| Cell::new(&c)).collect(),
-                ));
+                table.add_row(Row::new(cells.into_iter().map(|c| Cell::new(&c)).collect()));
             }
 
             // Print the table
             table.printstd();
-
         } else {
-            files.iter().for_each(|f| println!("{}", f.download_url(true)));
+            files
+                .iter()
+                .for_each(|f| println!("{}", f.download_url(true)));
         }
 
         Ok(())

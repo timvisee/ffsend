@@ -44,8 +44,8 @@ use action::params::Params;
 use action::password::Password;
 use action::upload::Upload;
 use cmd::{
-    Handler,
     matcher::{MainMatcher, Matcher},
+    Handler,
 };
 use error::Error;
 use util::{bin_name, highlight, quit_error, ErrorHints};

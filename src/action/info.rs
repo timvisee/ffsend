@@ -5,7 +5,7 @@ use ffsend_api::action::exists::{Error as ExistsError, Exists as ApiExists};
 use ffsend_api::action::info::{Error as InfoError, Info as ApiInfo};
 use ffsend_api::action::metadata::Metadata as ApiMetadata;
 use ffsend_api::file::remote_file::{FileParseError, RemoteFile};
-use prettytable::{Cell, format::FormatBuilder, Row, Table};
+use prettytable::{format::FormatBuilder, Cell, Row, Table};
 
 use client::create_client;
 use cmd::matcher::{info::InfoMatcher, main::MainMatcher, Matcher};
