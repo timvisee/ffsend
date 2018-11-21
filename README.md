@@ -275,6 +275,7 @@ empty.
 | `FFSEND_ARCHIVE`     | `--archive`     | Archive files uploaded            |
 | `FFSEND_EXTRACT`     | `--extract`     | Extract files downloaded          |
 | `FFSEND_COPY`        | `--copy`        | Copy share link to clipboard      |
+| `FFSEND_QUIET`       | `--quiet`       | Log quiet information           |
 | `FFSEND_VERBOSE`     | `--verbose`     | Log verbose information           |
 
 At this time, no configuration or _dotfile_ file support is available.

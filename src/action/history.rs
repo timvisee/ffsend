@@ -26,7 +26,9 @@ impl<'a> History<'a> {
         // Get the history path, make sure it exists
         let history_path = matcher_main.history();
         if !history_path.is_file() {
-            eprintln!("No files in history");
+            if !matcher_main.quiet() {
+                eprintln!("No files in history");
+            }
             return Ok(());
         }
 
@@ -35,59 +37,67 @@ impl<'a> History<'a> {
 
         // Do not report any files if there aren't any
         if history.files().is_empty() {
-            eprintln!("No files in history");
+            if !matcher_main.quiet() {
+                eprintln!("No files in history");
+            }
             return Ok(());
         }
-
-        // Build the list of column names
-        let mut columns = vec!["#", "LINK", "EXPIRY"];
-        if matcher_main.verbose() {
-            columns.push("OWNER TOKEN");
-        }
-
-        // Create a new table
-        let mut table = Table::new();
-        table.set_format(FormatBuilder::new().padding(0, 2).build());
-        table.add_row(Row::new(
-            columns.into_iter().map(Cell::new).collect(),
-        ));
 
         // Get the list of files, and sort the first expiring files to be last
         let mut files = history.files().clone();
         files.sort_by(|a, b| b.expire_at().cmp(&a.expire_at()));
 
-        // Add an entry for each file
-        for (i, file) in files.iter().enumerate() {
-            // Build the expiry time string
-            let mut expiry = format_duration(&file.expire_duration());
-            if file.expire_uncertain() {
-                expiry.insert(0, '~');
-            }
-
-            // Get the owner token
-            let owner_token: String = match file.owner_token() {
-                Some(token) => token.clone(),
-                None => "?".into(),
-            };
-
-            // Define the cell values
-            let mut cells: Vec<String>= vec![
-                format!("{}", i + 1),
-                file.download_url(true).into_string(),
-                expiry,
-            ];
+        // Log a history table, or just the URLs in quiet mode
+        if !matcher_main.quiet() {
+            // Build the list of column names
+            let mut columns = vec!["#", "LINK", "EXPIRY"];
             if matcher_main.verbose() {
-                cells.push(owner_token);
+                columns.push("OWNER TOKEN");
             }
 
-            // Add the row
+            // Create a new table
+            let mut table = Table::new();
+            table.set_format(FormatBuilder::new().padding(0, 2).build());
             table.add_row(Row::new(
-                cells.into_iter().map(|c| Cell::new(&c)).collect(),
+                columns.into_iter().map(Cell::new).collect(),
             ));
-        }
 
-        // Print the table
-        table.printstd();
+            // Add an entry for each file
+            for (i, file) in files.iter().enumerate() {
+                // Build the expiry time string
+                let mut expiry = format_duration(&file.expire_duration());
+                if file.expire_uncertain() {
+                    expiry.insert(0, '~');
+                }
+
+                // Get the owner token
+                let owner_token: String = match file.owner_token() {
+                    Some(token) => token.clone(),
+                    None => "?".into(),
+                };
+
+                // Define the cell values
+                let mut cells: Vec<String>= vec![
+                    format!("{}", i + 1),
+                    file.download_url(true).into_string(),
+                    expiry,
+                ];
+                if matcher_main.verbose() {
+                    cells.push(owner_token);
+                }
+
+                // Add the row
+                table.add_row(Row::new(
+                    cells.into_iter().map(|c| Cell::new(&c)).collect(),
+                ));
+            }
+
+            // Print the table
+            table.printstd();
+
+        } else {
+            files.iter().for_each(|f| println!("{}", f.download_url(true)));
+        }
 
         Ok(())
     }

@@ -124,6 +124,13 @@ impl<'a: 'b, 'b> Handler<'a> {
                     ),
             )
             .arg(
+                Arg::with_name("quiet")
+                    .long("quiet")
+                    .short("q")
+                    .global(true)
+                    .help("Produce output suitable for logging and automation"),
+            )
+            .arg(
                 Arg::with_name("verbose")
                     .long("verbose")
                     .short("v")
