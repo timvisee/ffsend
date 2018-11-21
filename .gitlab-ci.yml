@@ -113,8 +113,8 @@ public-send-test:
   script:
     # Generate random file, upload/download and assert equality
     - "head -c16m </dev/urandom >testfile"
-    - "./ffsend upload testfile -n testfile.bin -a -d 10 -p secret -I"
-    - "./ffsend download $(./ffsend history -q) -p secret -I -o downloadfile"
+    - "./ffsend upload testfile -d=10 -p=secret -I"
+    - "./ffsend download $(./ffsend history -q) -p=secret -I -o=downloadfile"
     - "cmp --silent ./testfile ./downloadfile || (echo ERROR: Downloaded file is different than original; exit 1)"
 
 # Cargo crate release

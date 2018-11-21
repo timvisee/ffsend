@@ -136,10 +136,10 @@ fn invoke_action(handler: &Handler) -> Result<(), Error> {
     }
 
     // Get the main matcher
-    let main_matcher = MainMatcher::with(handler.matches()).unwrap();
+    let matcher_main = MainMatcher::with(handler.matches()).unwrap();
 
     // Print the main info and return
-    if !main_matcher.quiet() {
+    if !matcher_main.quiet() {
         print_main_info();
     }
     Ok(())
