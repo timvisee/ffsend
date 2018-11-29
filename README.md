@@ -341,6 +341,7 @@ FLAGS:
     -h, --help           Prints help information
     -i, --incognito      Don't update local history for actions
     -I, --no-interact    Not interactive, do not prompt
+    -q, --quiet          Produce output suitable for logging and automation
     -V, --version        Prints version information
     -v, --verbose        Enable verbose information and logging
     -y, --yes            Assume yes for prompts
