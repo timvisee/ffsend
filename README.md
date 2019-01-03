@@ -129,6 +129,8 @@ all available subcommands.
 
 ## Requirements
 - Linux, macOS or Windows
+- OpenSSL / CA certificates:
+  - Ubuntu/Debian: `apt install openssl ca-certificates`
 - A terminal :sunglasses:
 - Linux specific:
   - `xclip` for clipboard support (optional)
