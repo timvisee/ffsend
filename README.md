@@ -18,7 +18,7 @@ Easily and securely share files and directories from the command line through a
 safe, private and encrypted link using a single simple command.
 Files are shared using the [Send][send] service and may be up
 to 2GB. Others are able to download these files with this tool, or through
-their webbrowser.
+their web browser.
 
 [![ffsend usage demo][usage-demo-svg]][usage-demo-asciinema]  
 _No demo visible here? View it on [asciinema][usage-demo-asciinema]._
