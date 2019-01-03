@@ -38,7 +38,7 @@ An optional password may be specified, and a default file lifetime of 1 \
 remain online forever. This provides a secure platform to share your files."""
 priority = "standard"
 license-file = ["LICENSE", "3"]
-depends = "$auto, xclip"
+depends = "$auto, libssl1.1, ca-certificates, xclip"
 maintainer-scripts = "pkg/deb"
 
 [badges]
