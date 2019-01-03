@@ -131,3 +131,22 @@ crate:
     - echo $CARGO_TOKEN | cargo login
     - echo "Publishing crate to crates.io..."
     - cargo publish --verbose --allow-dirty
+
+# Snap release
+snap:
+  image: snapcore/snapcraft
+  stage: release
+  # only:
+  #   - /^v(\d+\.)*\d+$/
+  before_script: []
+  script:
+    - echo "Building snap package..."
+    - cd pkg/snap
+    - snapcraft
+    # TODO: See: https://docs.snapcraft.io/rust-applications/7826
+    # TODO: - login to registry
+    # TODO: - test built snap
+    # TODO: - push snap to snapcraft.io
+    # - echo "Publishing snap package..."
+    # - echo "$SNAP_USER\n&SNAP_PASS" | snapcraft login
+    # - snapcraft push --release=edge ffsend_amd64.snap
