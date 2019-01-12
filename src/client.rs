@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use ffsend_api::reqwest::{Client, ClientBuilder};
 
-use cmd::matcher::MainMatcher;
+use crate::cmd::matcher::MainMatcher;
 
 /// Create the default client, which is used for generic Send requests.
 ///

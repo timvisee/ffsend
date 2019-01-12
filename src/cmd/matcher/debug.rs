@@ -2,7 +2,7 @@ use clap::ArgMatches;
 use ffsend_api::url::Url;
 
 use super::Matcher;
-use cmd::arg::{ArgHost, CmdArgOption};
+use crate::cmd::arg::{ArgHost, CmdArgOption};
 
 /// The debug command matcher.
 pub struct DebugMatcher<'a> {

@@ -1,6 +1,6 @@
 use clap::{App, SubCommand};
 
-use cmd::arg::{ArgHost, CmdArg};
+use crate::cmd::arg::{ArgHost, CmdArg};
 
 /// The debug command definition.
 pub struct CmdDebug;

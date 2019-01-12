@@ -1,6 +1,6 @@
 use clap::{App, SubCommand};
 
-use cmd::arg::{ArgOwner, ArgUrl, CmdArg};
+use crate::cmd::arg::{ArgOwner, ArgUrl, CmdArg};
 
 /// The delete command definition.
 pub struct CmdDelete;

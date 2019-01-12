@@ -4,11 +4,11 @@ use ffsend_api::action::params::Error as ParamsError;
 use ffsend_api::action::password::Error as PasswordError;
 use ffsend_api::file::remote_file::FileParseError;
 
-use action::download::Error as CliDownloadError;
+use crate::action::download::Error as CliDownloadError;
 #[cfg(feature = "history")]
-use action::history::Error as CliHistoryError;
-use action::info::Error as CliInfoError;
-use action::upload::Error as CliUploadError;
+use crate::action::history::Error as CliHistoryError;
+use crate::action::info::Error as CliInfoError;
+use crate::action::upload::Error as CliUploadError;
 
 #[derive(Fail, Debug)]
 pub enum Error {

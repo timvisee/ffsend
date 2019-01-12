@@ -7,11 +7,13 @@ use ffsend_api::action::metadata::Metadata as ApiMetadata;
 use ffsend_api::file::remote_file::{FileParseError, RemoteFile};
 use prettytable::{format::FormatBuilder, Cell, Row, Table};
 
-use client::create_client;
-use cmd::matcher::{info::InfoMatcher, main::MainMatcher, Matcher};
+use crate::client::create_client;
+use crate::cmd::matcher::{info::InfoMatcher, main::MainMatcher, Matcher};
 #[cfg(feature = "history")]
-use history_tool;
-use util::{ensure_owner_token, ensure_password, format_bytes, format_duration, print_error};
+use crate::history_tool;
+use crate::util::{
+    ensure_owner_token, ensure_password, format_bytes, format_duration, print_error,
+};
 
 /// A file info action.
 pub struct Info<'a> {

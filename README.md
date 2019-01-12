@@ -146,7 +146,7 @@ all available subcommands.
 Because `ffsend` is still in alpha, only limited installation options are
 available right now.  
 
-### Arch AUR package
+#### Arch AUR package
 [» `ffsend` on `aur.archlinux.org`][aur-ffsend]
 
 ```bash

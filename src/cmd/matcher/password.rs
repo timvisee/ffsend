@@ -2,9 +2,9 @@ use clap::ArgMatches;
 use ffsend_api::url::Url;
 use rpassword::prompt_password_stderr;
 
-use cmd::arg::{ArgGenPassphrase, ArgOwner, ArgPassword, ArgUrl, CmdArgFlag, CmdArgOption};
-use cmd::matcher::{MainMatcher, Matcher};
-use util::check_empty_password;
+use crate::cmd::arg::{ArgGenPassphrase, ArgOwner, ArgPassword, ArgUrl, CmdArgFlag, CmdArgOption};
+use crate::cmd::matcher::{MainMatcher, Matcher};
+use crate::util::check_empty_password;
 
 /// The password command matcher.
 pub struct PasswordMatcher<'a> {

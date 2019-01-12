@@ -2,12 +2,12 @@ use clap::ArgMatches;
 use ffsend_api::action::exists::{Error as ExistsError, Exists as ApiExists};
 use ffsend_api::file::remote_file::{FileParseError, RemoteFile};
 
-use client::create_client;
-use cmd::matcher::main::MainMatcher;
-use cmd::matcher::{exists::ExistsMatcher, Matcher};
-use error::ActionError;
+use crate::client::create_client;
+use crate::cmd::matcher::main::MainMatcher;
+use crate::cmd::matcher::{exists::ExistsMatcher, Matcher};
+use crate::error::ActionError;
 #[cfg(feature = "history")]
-use history_tool;
+use crate::history_tool;
 
 /// A file exists action.
 pub struct Exists<'a> {

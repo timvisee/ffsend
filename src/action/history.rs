@@ -1,10 +1,10 @@
 use clap::ArgMatches;
 use prettytable::{format::FormatBuilder, Cell, Row, Table};
 
-use cmd::matcher::{main::MainMatcher, Matcher};
-use error::ActionError;
-use history::{History as HistoryManager, LoadError as HistoryLoadError};
-use util::format_duration;
+use crate::cmd::matcher::{main::MainMatcher, Matcher};
+use crate::error::ActionError;
+use crate::history::{History as HistoryManager, LoadError as HistoryLoadError};
+use crate::util::format_duration;
 
 /// A history action.
 pub struct History<'a> {

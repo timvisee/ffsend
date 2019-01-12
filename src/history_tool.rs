@@ -1,9 +1,9 @@
 use failure::Fail;
 use ffsend_api::file::remote_file::RemoteFile;
 
-use cmd::matcher::MainMatcher;
-use history::{Error as HistoryError, History};
-use util::print_error;
+use crate::cmd::matcher::MainMatcher;
+use crate::history::{Error as HistoryError, History};
+use crate::util::print_error;
 
 /// Load the history from the given path, add the given file, and save it
 /// again.

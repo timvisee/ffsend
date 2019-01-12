@@ -1,6 +1,6 @@
 use clap::{App, SubCommand};
 
-use cmd::arg::{ArgUrl, CmdArg};
+use crate::cmd::arg::{ArgUrl, CmdArg};
 
 /// The exists command definition.
 pub struct CmdExists;

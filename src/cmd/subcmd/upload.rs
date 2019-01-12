@@ -1,7 +1,7 @@
 use clap::{App, Arg, SubCommand};
 use ffsend_api::action::params::PARAMS_DEFAULT_DOWNLOAD_STR as DOWNLOAD_DEFAULT;
 
-use cmd::arg::{ArgDownloadLimit, ArgGenPassphrase, ArgHost, ArgPassword, CmdArg};
+use crate::cmd::arg::{ArgDownloadLimit, ArgGenPassphrase, ArgHost, ArgPassword, CmdArg};
 
 /// The upload command definition.
 pub struct CmdUpload;

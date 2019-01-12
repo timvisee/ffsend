@@ -3,10 +3,10 @@ use clap::ArgMatches;
 use ffsend_api::config::SEND_DEFAULT_EXPIRE_TIME;
 use prettytable::{format::FormatBuilder, Cell, Row, Table};
 
-use client::to_duration;
-use cmd::matcher::{debug::DebugMatcher, main::MainMatcher, Matcher};
-use error::ActionError;
-use util::{features_list, format_bool, format_duration};
+use crate::client::to_duration;
+use crate::cmd::matcher::{debug::DebugMatcher, main::MainMatcher, Matcher};
+use crate::error::ActionError;
+use crate::util::{features_list, format_bool, format_duration};
 
 /// A file debug action.
 pub struct Debug<'a> {

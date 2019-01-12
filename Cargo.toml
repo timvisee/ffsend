@@ -21,6 +21,7 @@ categories = [
 exclude = [
     "res/*",
 ]
+edition = "2018"
 
 [package.metadata.deb]
 section = "utility"

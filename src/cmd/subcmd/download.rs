@@ -1,6 +1,6 @@
 use clap::{App, Arg, SubCommand};
 
-use cmd::arg::{ArgPassword, ArgUrl, CmdArg};
+use crate::cmd::arg::{ArgPassword, ArgUrl, CmdArg};
 
 /// The download command definition.
 pub struct CmdDownload;

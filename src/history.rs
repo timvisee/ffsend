@@ -11,7 +11,7 @@ use self::version_compare::{CompOp, VersionCompare};
 use failure::Fail;
 use ffsend_api::file::remote_file::RemoteFile;
 
-use util::{print_error, print_warning};
+use crate::util::{print_error, print_warning};
 
 /// The minimum supported history file version.
 const VERSION_MIN: &str = "0.0.1";

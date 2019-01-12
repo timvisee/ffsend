@@ -2,12 +2,12 @@ use clap::ArgMatches;
 use ffsend_api::action::delete::{Delete as ApiDelete, Error as DeleteError};
 use ffsend_api::file::remote_file::{FileParseError, RemoteFile};
 
-use client::create_client;
-use cmd::matcher::{delete::DeleteMatcher, main::MainMatcher, Matcher};
-use error::ActionError;
+use crate::client::create_client;
+use crate::cmd::matcher::{delete::DeleteMatcher, main::MainMatcher, Matcher};
+use crate::error::ActionError;
 #[cfg(feature = "history")]
-use history_tool;
-use util::{ensure_owner_token, print_success};
+use crate::history_tool;
+use crate::util::{ensure_owner_token, print_success};
 
 /// A file delete action.
 pub struct Delete<'a> {

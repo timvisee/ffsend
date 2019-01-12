@@ -5,7 +5,7 @@ use ffsend_api::action::params::{
 
 use super::{CmdArg, CmdArgFlag, CmdArgOption};
 
-use util::{quit_error_msg, ErrorHintsBuilder};
+use crate::util::{quit_error_msg, ErrorHintsBuilder};
 
 /// The download limit argument.
 pub struct ArgDownloadLimit {}

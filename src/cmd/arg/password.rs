@@ -1,8 +1,8 @@
 use clap::{Arg, ArgMatches};
 
 use super::{CmdArg, CmdArgFlag, CmdArgOption};
-use cmd::matcher::{MainMatcher, Matcher};
-use util::{check_empty_password, prompt_password};
+use crate::cmd::matcher::{MainMatcher, Matcher};
+use crate::util::{check_empty_password, prompt_password};
 
 /// The password argument.
 pub struct ArgPassword {}

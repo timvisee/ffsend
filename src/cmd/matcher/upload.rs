@@ -3,10 +3,10 @@ use ffsend_api::action::params::PARAMS_DEFAULT_DOWNLOAD as DOWNLOAD_DEFAULT;
 use ffsend_api::url::Url;
 
 use super::Matcher;
-use cmd::arg::{
+use crate::cmd::arg::{
     ArgDownloadLimit, ArgGenPassphrase, ArgHost, ArgPassword, CmdArgFlag, CmdArgOption,
 };
-use util::{env_var_present, quit_error_msg, ErrorHintsBuilder};
+use crate::util::{env_var_present, quit_error_msg, ErrorHintsBuilder};
 
 /// The upload command matcher.
 pub struct UploadMatcher<'a> {
