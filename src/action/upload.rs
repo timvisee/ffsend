@@ -99,7 +99,7 @@ impl<'a> Upload<'a> {
         // Build a parameters object to set for the file
         let params = {
             // Build the parameters data object
-            let mut params = ParamsDataBuilder::default()
+            let params = ParamsDataBuilder::default()
                 .download_limit(matcher_upload.download_limit())
                 .build()
                 .unwrap();
