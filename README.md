@@ -175,7 +175,7 @@ before proceeding:
 ### Build requirements
 - Regular [requirements](#requirements)
 - [`git`][git]
-- [`rust`][rust] `v1.26` or higher (install using [`rustup`][rustup])
+- [`rust`][rust] `v1.31` or higher (install using [`rustup`][rustup])
 - [OpenSSL][openssl] or [LibreSSL][libressl] libraries and headers must be available
 	- Linux:
 		- Ubuntu/Debian: `apt install pkg-config libssl-dev`
