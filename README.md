@@ -146,15 +146,27 @@ all available subcommands.
 Because `ffsend` is still in alpha, only limited installation options are
 available right now.  
 
-A set of pre-build binaries for Linux and macOS can be found as asset of the
+### Arch AUR package
+[» `ffsend` on `aur.archlinux.org`][aur-ffsend]
+
+```bash
+yaourt -S ffsend
+# or
+yay ffsend
+# or using any other AUR installer
+```
+
+#### Prebuilt binaries
+A set of prebuilt binaries for Linux and macOS can be found as asset of the
 [latest release][github-latest-release]. When downloading such release, mark
 the binary as executable using `chmod a+x ffsend`, and move it into `/usr/bin/`.
 
+#### Other
 A Windows binary and packaged versions for various Linux distributions is
 currently being worked on.
 
 It is recommended to build and install `ffsend` yourself using these fairly
-easy steps [here](#build).
+easy steps [below](#build).
 
 ## Build
 To build and install `ffsend` yourself, you meet the following requirements
@@ -394,3 +406,4 @@ Check out the [LICENSE](LICENSE) file for more information.
 [asciinema]: https://asciinema.org/
 [svg-term]: https://github.com/marionebl/svg-term-cli
 [github-latest-release]: https://github.com/timvisee/ffsend/releases/latest
+[aur-ffsend]: https://aur.archlinux.org/packages/ffsend/
