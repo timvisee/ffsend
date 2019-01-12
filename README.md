@@ -342,7 +342,7 @@ documentation [here][send-encryption].
 ```
 $ ffsend help
 
-ffsend 0.1.1
+ffsend 0.1.2
 Tim Visee <timvisee.com>
 Easily and securely share files from the command line.
 A fully featured Firefox Send client.
