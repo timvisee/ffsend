@@ -131,3 +131,49 @@ crate:
     - echo $CARGO_TOKEN | cargo login
     - echo "Publishing crate to crates.io..."
     - cargo publish --verbose --allow-dirty
+
+# AUR package release
+pkg-aur:
+  image: base/archlinux
+  stage: release
+  only:
+    - /^v(\d+\.)*\d+$/
+  before_script: []
+  script:
+    - cd ./pkg/aur
+
+      # Update version number in PKGBUILD
+    - VERSION=$(echo $CI_COMMIT_REF_NAME | cut -c 2-)
+    - echo "Determined binary version number 'v$VERSION', updating PKGBUILD..."
+    - sed "s/^pkgver=.*\$/pkgver=$VERSION/" -i PKGBUILD
+
+      # Install dependencies
+    - echo "Installing required build packages..."
+    - pacman -Syu --noconfirm sudo base-devel binutils openssh rust cargo cmake git openssl
+
+      # Make AUR package
+    - echo "Making AUR package..."
+    - mkdir -p /.cargo
+    - chmod -R 777 /.cargo
+    - sudo -u nobody makepkg -c
+    - sudo -u nobody makepkg --printsrcinfo > .SRCINFO
+
+      # Publish: set up SSH key, clone AUR repo, commit update and push
+    - mkdir -p /root/.ssh
+    - cp ./aur.pub /root/.ssh/id_rsa.pub
+    - echo "$AUR_SSH_PRIVATE" > /root/.ssh/id_rsa
+    - echo "Host aur.archlinux.org" >> /root/.ssh/config
+    - echo "  IdentityFile /root/.ssh/aur" >> /root/.ssh/config
+    - echo "  User aur" >> /root/.ssh/config
+    - chmod 600 /root/.ssh/{id_rsa*,config}
+    - eval `ssh-agent -s`
+    - ssh-add /root/.ssh/id_rsa
+    - ssh-keyscan -H aur.archlinux.org >> /root/.ssh/known_hosts
+    - git config --global user.name "timvisee"
+    - git config --global user.email "timvisee@gmail.com"
+    - git clone ssh://aur@aur.archlinux.org/ffsend.git aur-ffsend
+    - cd aur-ffsend
+    - cp ../{PKGBUILD,.SRCINFO} ./
+    - git add PKGBUILD .SRCINFO
+    - git commit -m "Release v$VERSION"
+    - git push
