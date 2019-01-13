@@ -216,7 +216,7 @@ xattr-0.2.2
 xcb-0.8.2
 "
 
-inherit cargo eutils
+inherit cargo
 
 DESCRIPTION="Easily and securely share files from the command line. A fully featured Firefox Send client."
 HOMEPAGE="https://gitlab.com/timvisee/ffsend"
@@ -225,12 +225,16 @@ RESTRICT="mirror"
 LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS="~amd64 ~x86"
-IUSE=""
+IUSE="archive clipboard history"
 
-DEPEND=">=dev-libs/openssl-1.0.2q
-    dev-util/cmake"
-RDEPEND="x11-misc/xclip
-    app-misc/ca-certificates"
+DEPEND="
+    >=dev-libs/openssl-1.0.2q
+    dev-util/cmake
+"
+RDEPEND="
+    app-misc/ca-certificates
+    clipboard? ( x11-misc/xclip )
+"
 
 DOCS=( README.md )
 
