@@ -216,11 +216,11 @@ xattr-0.2.2
 xcb-0.8.2
 "
 
-inherit cargo
+inherit cargo eutils
 
 DESCRIPTION="Easily and securely share files from the command line. A fully featured Firefox Send client."
 HOMEPAGE="https://gitlab.com/timvisee/ffsend"
-SRC_URI="https://gitlab.com/timvisee/ffsend.git"
+SRC_URI="$(cargo_crate_uris ${CRATES})"
 RESTRICT="mirror"
 LICENSE="GPL-3"
 SLOT="0"
@@ -231,3 +231,11 @@ DEPEND=">=dev-libs/openssl-1.0.2q
     dev-util/cmake"
 RDEPEND="x11-misc/xclip
     app-misc/ca-certificates"
+
+DOCS=( README.md )
+
+src_install() {
+	cargo_src_install --path ./
+
+	einstalldocs
+}
