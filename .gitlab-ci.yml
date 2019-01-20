@@ -134,7 +134,7 @@ crate:
 
 # Snap release
 snap:
-  image: snapcore/snapcraft:beta
+  image: snapcore/snapcraft:edge
   stage: release
   # only:
   #   - /^v(\d+\.)*\d+$/
