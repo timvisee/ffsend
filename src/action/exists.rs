@@ -43,7 +43,7 @@ impl<'a> Exists<'a> {
         // Print the results
         println!("Exists: {:?}", exists);
         if exists {
-            println!("Password: {:?}", exists_response.has_password());
+            println!("Password: {:?}", exists_response.requires_password());
         }
 
         // Add or remove the file from the history
