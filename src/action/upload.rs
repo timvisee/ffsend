@@ -15,15 +15,15 @@ use prettytable::{format::FormatBuilder, Cell, Row, Table};
 use tempfile::{Builder as TempBuilder, NamedTempFile};
 
 #[cfg(feature = "archive")]
-use archive::archiver::Archiver;
-use client::create_transfer_client;
-use cmd::matcher::{MainMatcher, Matcher, UploadMatcher};
+use crate::archive::archiver::Archiver;
+use crate::client::create_transfer_client;
+use crate::cmd::matcher::{MainMatcher, Matcher, UploadMatcher};
 #[cfg(feature = "history")]
-use history_tool;
-use progress::ProgressBar;
+use crate::history_tool;
+use crate::progress::ProgressBar;
 #[cfg(feature = "clipboard")]
-use util::set_clipboard;
-use util::{
+use crate::util::set_clipboard;
+use crate::util::{
     format_bytes, open_url, print_error, print_error_msg, prompt_yes, quit, quit_error_msg,
     ErrorHintsBuilder,
 };
@@ -99,7 +99,7 @@ impl<'a> Upload<'a> {
         // Build a parameters object to set for the file
         let params = {
             // Build the parameters data object
-            let mut params = ParamsDataBuilder::default()
+            let params = ParamsDataBuilder::default()
                 .download_limit(matcher_upload.download_limit())
                 .build()
                 .unwrap();

@@ -3,7 +3,7 @@ use ffsend_api::url::Url;
 use clap::ArgMatches;
 
 use super::Matcher;
-use cmd::arg::{ArgUrl, CmdArgOption};
+use crate::cmd::arg::{ArgUrl, CmdArgOption};
 
 /// The exists command matcher.
 pub struct ExistsMatcher<'a> {

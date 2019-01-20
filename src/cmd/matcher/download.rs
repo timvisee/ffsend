@@ -4,9 +4,9 @@ use clap::ArgMatches;
 use ffsend_api::url::Url;
 
 use super::Matcher;
-use cmd::arg::{ArgPassword, ArgUrl, CmdArgOption};
+use crate::cmd::arg::{ArgPassword, ArgUrl, CmdArgOption};
 #[cfg(feature = "archive")]
-use util::env_var_present;
+use crate::util::env_var_present;
 
 /// The download command matcher.
 pub struct DownloadMatcher<'a> {

@@ -1,8 +1,8 @@
 use clap::{Arg, ArgMatches};
 
 use super::{CmdArg, CmdArgFlag, CmdArgOption};
-use cmd::matcher::{MainMatcher, Matcher};
-use util::prompt_owner_token;
+use crate::cmd::matcher::{MainMatcher, Matcher};
+use crate::util::prompt_owner_token;
 
 /// The owner argument.
 pub struct ArgOwner {}

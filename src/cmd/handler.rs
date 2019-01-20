@@ -13,9 +13,9 @@ use super::subcmd::CmdHistory;
 use super::subcmd::{
     CmdDebug, CmdDelete, CmdDownload, CmdExists, CmdInfo, CmdParams, CmdPassword, CmdUpload,
 };
-use config::{CLIENT_TIMEOUT, CLIENT_TRANSFER_TIMEOUT};
+use crate::config::{CLIENT_TIMEOUT, CLIENT_TRANSFER_TIMEOUT};
 #[cfg(feature = "history")]
-use util::app_history_file_path_string;
+use crate::util::app_history_file_path_string;
 
 #[cfg(feature = "history")]
 lazy_static! {

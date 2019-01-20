@@ -4,9 +4,9 @@ use std::path::PathBuf;
 use clap::ArgMatches;
 
 use super::Matcher;
-use util::env_var_present;
+use crate::util::env_var_present;
 #[cfg(feature = "history")]
-use util::{quit_error_msg, ErrorHintsBuilder};
+use crate::util::{quit_error_msg, ErrorHintsBuilder};
 
 /// The main command matcher.
 pub struct MainMatcher<'a> {

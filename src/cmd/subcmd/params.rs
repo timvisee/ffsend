@@ -1,6 +1,6 @@
 use clap::{App, SubCommand};
 
-use cmd::arg::{ArgDownloadLimit, ArgOwner, ArgUrl, CmdArg};
+use crate::cmd::arg::{ArgDownloadLimit, ArgOwner, ArgUrl, CmdArg};
 
 /// The params command definition.
 pub struct CmdParams;

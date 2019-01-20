@@ -1,6 +1,6 @@
 use clap::{App, SubCommand};
 
-use cmd::arg::{ArgOwner, ArgPassword, ArgUrl, CmdArg};
+use crate::cmd::arg::{ArgOwner, ArgPassword, ArgUrl, CmdArg};
 
 /// The info command definition.
 pub struct CmdInfo;

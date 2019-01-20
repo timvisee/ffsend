@@ -3,8 +3,8 @@ use failure::Fail;
 use ffsend_api::url::Url;
 
 use super::{CmdArg, CmdArgOption};
-use host::parse_host;
-use util::{quit_error, ErrorHints};
+use crate::host::parse_host;
+use crate::util::{quit_error, ErrorHints};
 
 /// The URL argument.
 pub struct ArgUrl {}

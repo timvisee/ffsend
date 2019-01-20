@@ -146,15 +146,25 @@ all available subcommands.
 Because `ffsend` is still in alpha, only limited installation options are
 available right now.  
 
-A set of pre-build binaries for Linux and macOS can be found as asset of the
+It is recommended to build and install `ffsend` yourself using these fairly
+easy steps [below](#build).
+
+#### Arch AUR package
+[» `ffsend` on `aur.archlinux.org`][aur-ffsend]
+
+```bash
+yaourt -S ffsend
+# or
+yay ffsend
+# or using any other AUR installer
+```
+
+#### Prebuilt binaries
+A set of prebuilt binaries for Linux and macOS can be found as asset of the
 [latest release][github-latest-release]. When downloading such release, mark
 the binary as executable using `chmod a+x ffsend`, and move it into `/usr/bin/`.
-
-A Windows binary and packaged versions for various Linux distributions is
-currently being worked on.
-
-It is recommended to build and install `ffsend` yourself using these fairly
-easy steps [here](#build).
+If running the binary fails (probably due to some linked library), please feel
+free to [open an issue](https://gitlab.com/timvisee/ffsend/issues).
 
 ## Build
 To build and install `ffsend` yourself, you meet the following requirements
@@ -163,16 +173,17 @@ before proceeding:
 ### Build requirements
 - Regular [requirements](#requirements)
 - [`git`][git]
-- [`rust`][rust] `v1.26` or higher (install using [`rustup`][rustup])
+- [`rust`][rust] `v1.31` or higher (install using [`rustup`][rustup])
 - [OpenSSL][openssl] or [LibreSSL][libressl] libraries and headers must be available
 	- Linux:
-		- Ubuntu/Debian: `apt install pkg-config libssl-dev`
-		- CentOS/Red Hat/openSUSE: `yum install openssl-devel`
-		- Arch: `pacman -S openssl`
-		- Fedora: `dnf install openssl-devel`
+		- Ubuntu/Debian: `apt install build-essential cmake pkg-config libssl-dev`
+		- CentOS/Red Hat/openSUSE: `yum install gcc gcc-c++ make cmake openssl-devel`
+		- Arch: `pacman -S openssl base-devel`
+    - Gentoo: `emerge -a dev-util/pkgconfig dev-util/cmake dev-libs/openssl`
+		- Fedora: `dnf install gcc gcc-c++ make cmake openssl-devel`
 		- Or see instructions [here](https://github.com/sfackler/rust-openssl#linux)
 	- macOS:
-		- Using `brew`: `brew install openssl`
+		- Using `brew`: `brew install cmake pkg-config openssl`
 		- Or see instructions [here](https://github.com/sfackler/rust-openssl#osx)
 	- Windows:
 		- See instructions here [here](https://github.com/sfackler/rust-openssl#windows-msvc)
@@ -330,7 +341,7 @@ documentation [here][send-encryption].
 ```
 $ ffsend help
 
-ffsend 0.1.1
+ffsend 0.1.2
 Tim Visee <timvisee.com>
 Easily and securely share files from the command line.
 A fully featured Firefox Send client.
@@ -394,3 +405,4 @@ Check out the [LICENSE](LICENSE) file for more information.
 [asciinema]: https://asciinema.org/
 [svg-term]: https://github.com/marionebl/svg-term-cli
 [github-latest-release]: https://github.com/timvisee/ffsend/releases/latest
+[aur-ffsend]: https://aur.archlinux.org/packages/ffsend/

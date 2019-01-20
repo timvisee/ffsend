@@ -1,6 +1,6 @@
 use clap::{App, SubCommand};
 
-use cmd::arg::{ArgGenPassphrase, ArgOwner, ArgPassword, ArgUrl, CmdArg};
+use crate::cmd::arg::{ArgGenPassphrase, ArgOwner, ArgPassword, ArgUrl, CmdArg};
 
 /// The password command definition.
 pub struct CmdPassword;

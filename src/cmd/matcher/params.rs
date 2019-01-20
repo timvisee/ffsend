@@ -2,7 +2,7 @@ use clap::ArgMatches;
 use ffsend_api::url::Url;
 
 use super::Matcher;
-use cmd::arg::{ArgDownloadLimit, ArgOwner, ArgUrl, CmdArgOption};
+use crate::cmd::arg::{ArgDownloadLimit, ArgOwner, ArgUrl, CmdArgOption};
 
 /// The params command matcher.
 pub struct ParamsMatcher<'a> {

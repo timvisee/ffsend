@@ -3,12 +3,12 @@ use ffsend_api::action::password::{Error as PasswordError, Password as ApiPasswo
 use ffsend_api::file::remote_file::RemoteFile;
 use prettytable::{format::FormatBuilder, Cell, Row, Table};
 
-use client::create_client;
-use cmd::matcher::{main::MainMatcher, password::PasswordMatcher, Matcher};
-use error::ActionError;
+use crate::client::create_client;
+use crate::cmd::matcher::{main::MainMatcher, password::PasswordMatcher, Matcher};
+use crate::error::ActionError;
 #[cfg(feature = "history")]
-use history_tool;
-use util::{ensure_owner_token, print_success};
+use crate::history_tool;
+use crate::util::{ensure_owner_token, print_success};
 
 /// A file password action.
 pub struct Password<'a> {

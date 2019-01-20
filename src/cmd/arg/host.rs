@@ -4,8 +4,8 @@ use ffsend_api::config::SEND_DEFAULT_HOST;
 use ffsend_api::url::Url;
 
 use super::{CmdArg, CmdArgOption};
-use host::parse_host;
-use util::{quit_error, ErrorHints};
+use crate::host::parse_host;
+use crate::util::{quit_error, ErrorHints};
 
 /// The host argument.
 pub struct ArgHost {}

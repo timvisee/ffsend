@@ -2,7 +2,7 @@ use clap::ArgMatches;
 use ffsend_api::url::Url;
 
 use super::Matcher;
-use cmd::arg::{ArgOwner, ArgUrl, CmdArgOption};
+use crate::cmd::arg::{ArgOwner, ArgUrl, CmdArgOption};
 
 /// The delete command matcher.
 pub struct DeleteMatcher<'a> {

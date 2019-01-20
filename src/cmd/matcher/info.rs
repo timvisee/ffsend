@@ -3,7 +3,7 @@ use ffsend_api::url::Url;
 use clap::ArgMatches;
 
 use super::Matcher;
-use cmd::arg::{ArgOwner, ArgPassword, ArgUrl, CmdArgOption};
+use crate::cmd::arg::{ArgOwner, ArgPassword, ArgUrl, CmdArgOption};
 
 /// The info command matcher.
 pub struct InfoMatcher<'a> {

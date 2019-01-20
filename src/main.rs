@@ -33,22 +33,22 @@ mod host;
 mod progress;
 mod util;
 
-use action::debug::Debug;
-use action::delete::Delete;
-use action::download::Download;
-use action::exists::Exists;
+use crate::action::debug::Debug;
+use crate::action::delete::Delete;
+use crate::action::download::Download;
+use crate::action::exists::Exists;
 #[cfg(feature = "history")]
-use action::history::History;
-use action::info::Info;
-use action::params::Params;
-use action::password::Password;
-use action::upload::Upload;
-use cmd::{
+use crate::action::history::History;
+use crate::action::info::Info;
+use crate::action::params::Params;
+use crate::action::password::Password;
+use crate::action::upload::Upload;
+use crate::cmd::{
     matcher::{MainMatcher, Matcher},
     Handler,
 };
-use error::Error;
-use util::{bin_name, highlight, quit_error, ErrorHints};
+use crate::error::Error;
+use crate::util::{bin_name, highlight, quit_error, ErrorHints};
 
 /// Application entrypoint.
 fn main() {

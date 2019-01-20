@@ -32,7 +32,7 @@ use failure::{Compat, Error};
 use ffsend_api::url::Url;
 use rpassword::prompt_password_stderr;
 
-use cmd::matcher::MainMatcher;
+use crate::cmd::matcher::MainMatcher;
 
 /// Print a success message.
 pub fn print_success(msg: &str) {
@@ -297,7 +297,7 @@ pub fn set_clipboard(content: String) -> Result<(), ClipboardError> {
                 return Err(match err.kind() {
                     IoErrorKind::NotFound => ClipboardError::NoXclip,
                     _ => ClipboardError::Xclip(err),
-                })
+                });
             }
         };
 

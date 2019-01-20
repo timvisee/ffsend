@@ -16,13 +16,13 @@ use ffsend_api::reader::ProgressReporter;
 use tempfile::{Builder as TempBuilder, NamedTempFile};
 
 #[cfg(feature = "archive")]
-use archive::archive::Archive;
-use client::create_transfer_client;
-use cmd::matcher::{download::DownloadMatcher, main::MainMatcher, Matcher};
+use crate::archive::archive::Archive;
+use crate::client::create_transfer_client;
+use crate::cmd::matcher::{download::DownloadMatcher, main::MainMatcher, Matcher};
 #[cfg(feature = "history")]
-use history_tool;
-use progress::ProgressBar;
-use util::{
+use crate::history_tool;
+use crate::progress::ProgressBar;
+use crate::util::{
     ensure_enough_space, ensure_password, prompt_yes, quit, quit_error, quit_error_msg, ErrorHints,
 };
 
