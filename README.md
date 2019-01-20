@@ -146,6 +146,9 @@ all available subcommands.
 Because `ffsend` is still in alpha, only limited installation options are
 available right now.  
 
+It is recommended to build and install `ffsend` yourself using these fairly
+easy steps [below](#build).
+
 #### Arch AUR package
 [» `ffsend` on `aur.archlinux.org`][aur-ffsend]
 
@@ -160,13 +163,8 @@ yay ffsend
 A set of prebuilt binaries for Linux and macOS can be found as asset of the
 [latest release][github-latest-release]. When downloading such release, mark
 the binary as executable using `chmod a+x ffsend`, and move it into `/usr/bin/`.
-
-#### Other
-A Windows binary and packaged versions for various Linux distributions is
-currently being worked on.
-
-It is recommended to build and install `ffsend` yourself using these fairly
-easy steps [below](#build).
+If running the binary fails (probably due to some linked library), please feel
+free to [open an issue](https://gitlab.com/timvisee/ffsend/issues).
 
 ## Build
 To build and install `ffsend` yourself, you meet the following requirements
@@ -178,13 +176,14 @@ before proceeding:
 - [`rust`][rust] `v1.31` or higher (install using [`rustup`][rustup])
 - [OpenSSL][openssl] or [LibreSSL][libressl] libraries and headers must be available
 	- Linux:
-		- Ubuntu/Debian: `apt install pkg-config libssl-dev`
-		- CentOS/Red Hat/openSUSE: `yum install openssl-devel`
-		- Arch: `pacman -S openssl`
-		- Fedora: `dnf install openssl-devel`
+		- Ubuntu/Debian: `apt install build-essential cmake pkg-config libssl-dev`
+		- CentOS/Red Hat/openSUSE: `yum install gcc gcc-c++ make cmake openssl-devel`
+		- Arch: `pacman -S openssl base-devel`
+    - Gentoo: `emerge -a dev-util/pkgconfig dev-util/cmake dev-libs/openssl`
+		- Fedora: `dnf install gcc gcc-c++ make cmake openssl-devel`
 		- Or see instructions [here](https://github.com/sfackler/rust-openssl#linux)
 	- macOS:
-		- Using `brew`: `brew install openssl`
+		- Using `brew`: `brew install cmake pkg-config openssl`
 		- Or see instructions [here](https://github.com/sfackler/rust-openssl#osx)
 	- Windows:
 		- See instructions here [here](https://github.com/sfackler/rust-openssl#windows-msvc)
