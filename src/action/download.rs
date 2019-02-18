@@ -11,7 +11,7 @@ use ffsend_api::action::download::{Download as ApiDownload, Error as DownloadErr
 use ffsend_api::action::exists::{Error as ExistsError, Exists as ApiExists};
 use ffsend_api::action::metadata::{Error as MetadataError, Metadata as ApiMetadata};
 use ffsend_api::file::remote_file::{FileParseError, RemoteFile};
-use ffsend_api::reader::ProgressReporter;
+use ffsend_api::pipe::ProgressReporter;
 #[cfg(feature = "archive")]
 use tempfile::{Builder as TempBuilder, NamedTempFile};
 
@@ -143,7 +143,7 @@ impl<'a> Download<'a> {
 
         // Execute an download action
         let progress = if !matcher_main.quiet() {
-            Some(&progress_reader)
+            Some(progress_reader)
         } else {
             None
         };

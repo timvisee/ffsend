@@ -9,7 +9,7 @@ use failure::Fail;
 use ffsend_api::action::params::ParamsDataBuilder;
 use ffsend_api::action::upload::{Error as UploadError, Upload as ApiUpload};
 use ffsend_api::config::{UPLOAD_SIZE_MAX, UPLOAD_SIZE_MAX_RECOMMENDED};
-use ffsend_api::reader::ProgressReporter;
+use ffsend_api::pipe::ProgressReporter;
 use prettytable::{format::FormatBuilder, Cell, Row, Table};
 #[cfg(feature = "archive")]
 use tempfile::{Builder as TempBuilder, NamedTempFile};
