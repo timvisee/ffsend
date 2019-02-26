@@ -43,6 +43,7 @@ use crate::action::info::Info;
 use crate::action::params::Params;
 use crate::action::password::Password;
 use crate::action::upload::Upload;
+use crate::action::version::Version;
 use crate::cmd::{
     matcher::{MainMatcher, Matcher},
     Handler,
@@ -131,6 +132,13 @@ fn invoke_action(handler: &Handler) -> Result<(), Error> {
     // Match the upload command
     if handler.upload().is_some() {
         return Upload::new(handler.matches())
+            .invoke()
+            .map_err(|err| err.into());
+    }
+
+    // Match the version command
+    if handler.version().is_some() {
+        return Version::new(handler.matches())
             .invoke()
             .map_err(|err| err.into());
     }

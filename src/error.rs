@@ -2,6 +2,7 @@ use ffsend_api::action::delete::Error as DeleteError;
 use ffsend_api::action::exists::Error as ExistsError;
 use ffsend_api::action::params::Error as ParamsError;
 use ffsend_api::action::password::Error as PasswordError;
+use ffsend_api::action::version::Error as VersionError;
 use ffsend_api::file::remote_file::FileParseError;
 
 use crate::action::download::Error as CliDownloadError;
@@ -72,6 +73,10 @@ pub enum ActionError {
     #[fail(display = "failed to change the password")]
     Password(#[cause] PasswordError),
 
+    /// An error occurred while invoking the version action.
+    #[fail(display = "failed to determine server version")]
+    Version(#[cause] VersionError),
+
     /// An error occurred while invoking the upload action.
     #[fail(display = "failed to upload the specified file")]
     Upload(#[cause] CliUploadError),
@@ -110,6 +115,12 @@ impl From<ParamsError> for ActionError {
 impl From<PasswordError> for ActionError {
     fn from(err: PasswordError) -> ActionError {
         ActionError::Password(err)
+    }
+}
+
+impl From<VersionError> for ActionError {
+    fn from(err: VersionError) -> ActionError {
+        ActionError::Version(err)
     }
 }
 

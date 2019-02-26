@@ -9,8 +9,9 @@ pub mod main;
 pub mod params;
 pub mod password;
 pub mod upload;
+pub mod version;
 
-// Reexport to matcher module
+// Re-export to matcher module
 pub use self::debug::DebugMatcher;
 pub use self::delete::DeleteMatcher;
 pub use self::download::DownloadMatcher;
@@ -22,6 +23,7 @@ pub use self::main::MainMatcher;
 pub use self::params::ParamsMatcher;
 pub use self::password::PasswordMatcher;
 pub use self::upload::UploadMatcher;
+pub use self::version::VersionMatcher;
 
 use clap::ArgMatches;
 
