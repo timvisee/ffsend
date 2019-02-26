@@ -55,6 +55,7 @@ _Note: this tool is currently in the alpha phase_
 - Additional password protection, generation and configurable download limits
 - Built-in file and directory archiving and extraction
 - History tracking your files for easy management
+- Supports Send v2 (current) & v3 (unreleased)
 - Ability to use your own Send host
 - Inspect or delete shared files
 - Accurate error reporting
