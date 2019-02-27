@@ -751,6 +751,10 @@ pub fn features_list() -> Vec<&'static str> {
     features.push("history");
     #[cfg(feature = "no-color")]
     features.push("no-color");
+    #[cfg(feature = "send2")]
+    features.push("send2");
+    #[cfg(feature = "send3")]
+    features.push("send3");
 
     features
 }

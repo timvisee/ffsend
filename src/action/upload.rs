@@ -8,8 +8,7 @@ use clap::ArgMatches;
 use failure::Fail;
 use ffsend_api::action::params::ParamsDataBuilder;
 use ffsend_api::action::upload::{Error as UploadError, Upload as ApiUpload};
-use ffsend_api::action::version::{Version as ApiVersion, Error as VersionError};
-use ffsend_api::api::Version;
+use ffsend_api::action::version::Error as VersionError;
 use ffsend_api::config::{UPLOAD_SIZE_MAX, UPLOAD_SIZE_MAX_RECOMMENDED};
 use ffsend_api::pipe::ProgressReporter;
 use prettytable::{format::FormatBuilder, Cell, Row, Table};
@@ -18,7 +17,7 @@ use tempfile::{Builder as TempBuilder, NamedTempFile};
 
 #[cfg(feature = "archive")]
 use crate::archive::archiver::Archiver;
-use crate::client::{create_client, create_transfer_client};
+use crate::client::create_transfer_client;
 use crate::cmd::matcher::{MainMatcher, Matcher, UploadMatcher};
 #[cfg(feature = "history")]
 use crate::history_tool;

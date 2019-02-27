@@ -1,13 +1,10 @@
 use clap::ArgMatches;
 use ffsend_api::action::version::{Error as VersionError, Version as ApiVersion};
-use ffsend_api::file::remote_file::{FileParseError, RemoteFile};
 
 use crate::client::create_client;
 use crate::cmd::matcher::main::MainMatcher;
 use crate::cmd::matcher::{version::VersionMatcher, Matcher};
 use crate::error::ActionError;
-#[cfg(feature = "history")]
-use crate::history_tool;
 
 /// A file version action.
 pub struct Version<'a> {

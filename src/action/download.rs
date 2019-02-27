@@ -10,8 +10,7 @@ use failure::Fail;
 use ffsend_api::action::download::{Download as ApiDownload, Error as DownloadError};
 use ffsend_api::action::exists::{Error as ExistsError, Exists as ApiExists};
 use ffsend_api::action::metadata::{Error as MetadataError, Metadata as ApiMetadata};
-use ffsend_api::action::version::{Version as ApiVersion, Error as VersionError};
-use ffsend_api::api::Version;
+use ffsend_api::action::version::Error as VersionError;
 use ffsend_api::file::remote_file::{FileParseError, RemoteFile};
 use ffsend_api::pipe::ProgressReporter;
 #[cfg(feature = "archive")]
