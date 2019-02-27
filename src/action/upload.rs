@@ -49,7 +49,8 @@ impl<'a> Upload<'a> {
         let matcher_upload = UploadMatcher::with(self.cmd_matches).unwrap();
 
         // Get API parameters
-        let path = Path::new(matcher_upload.file()).to_path_buf();
+        #[allow(unused_mut)]
+        let mut path = Path::new(matcher_upload.file()).to_path_buf();
         let host = matcher_upload.host();
 
         // Create a reqwest client capable for uploading files
