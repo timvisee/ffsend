@@ -38,7 +38,8 @@ variables:
   stage: check
   script:
     - cargo check --verbose
-    - cargo check --no-default-features --verbose
+    - cargo check --no-default-features --features send2 --verbose
+    - cargo check --no-default-features --features send3 --verbose
     - cargo check --features no-color --verbose
 rust-stable:
   <<: *check-base
