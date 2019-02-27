@@ -22,6 +22,10 @@ impl CmdArg for ArgApi {
             .hide_env_values(true)
             .global(true)
             .help("Server API version to use, '-' to lookup")
+            .long_help("Server API version to use, one of:\n\
+                2, 3: Firefox Send API versions\n\
+                auto, -: probe server to determine\
+            ")
     }
 }
 
@@ -36,7 +40,7 @@ impl<'a> CmdArgOption<'a> for ArgApi {
         };
 
         // Parse the lookup version string
-        if version.trim() == "-" {
+        if is_auto(version) {
             return DesiredVersion::Lookup;
         }
 
@@ -49,4 +53,11 @@ impl<'a> CmdArgOption<'a> for ArgApi {
             ),
         }
     }
+}
+
+/// Check whether the given API version argument means we've to probe the server for the proper
+/// version.
+fn is_auto(arg: &str) -> bool {
+    let arg = arg.trim().to_lowercase();
+    arg == "a" || arg == "auto" || arg == "-"
 }
