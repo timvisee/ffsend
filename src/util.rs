@@ -758,3 +758,18 @@ pub fn features_list() -> Vec<&'static str> {
 
     features
 }
+
+/// Get a list of supported API versions.
+pub fn api_version_list() -> Vec<&'static str> {
+    // Build the list
+    #[allow(unused_mut)]
+    let mut versions = Vec::new();
+
+    // Add each feature
+    #[cfg(feature = "send2")]
+    versions.push("v2");
+    #[cfg(feature = "send3")]
+    versions.push("v3");
+
+    versions
+}

@@ -6,7 +6,7 @@ use prettytable::{format::FormatBuilder, Cell, Row, Table};
 use crate::client::to_duration;
 use crate::cmd::matcher::{debug::DebugMatcher, main::MainMatcher, Matcher};
 use crate::error::ActionError;
-use crate::util::{features_list, format_bool, format_duration};
+use crate::util::{api_version_list, features_list, format_bool, format_duration};
 
 /// A file debug action.
 pub struct Debug<'a> {
@@ -82,6 +82,12 @@ impl<'a> Debug<'a> {
         table.add_row(Row::new(vec![
             Cell::new("Features:"),
             Cell::new(&features_list().join(", ")),
+        ]));
+
+        // Render a list of compiled features
+        table.add_row(Row::new(vec![
+            Cell::new("API support:"),
+            Cell::new(&api_version_list().join(", ")),
         ]));
 
         // Show whether quiet is used
