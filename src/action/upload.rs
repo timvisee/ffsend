@@ -8,6 +8,8 @@ use clap::ArgMatches;
 use failure::Fail;
 use ffsend_api::action::params::ParamsDataBuilder;
 use ffsend_api::action::upload::{Error as UploadError, Upload as ApiUpload};
+use ffsend_api::action::version::{Version as ApiVersion, Error as VersionError};
+use ffsend_api::api::Version;
 use ffsend_api::config::{UPLOAD_SIZE_MAX, UPLOAD_SIZE_MAX_RECOMMENDED};
 use ffsend_api::pipe::ProgressReporter;
 use prettytable::{format::FormatBuilder, Cell, Row, Table};
@@ -16,7 +18,7 @@ use tempfile::{Builder as TempBuilder, NamedTempFile};
 
 #[cfg(feature = "archive")]
 use crate::archive::archiver::Archiver;
-use crate::client::create_transfer_client;
+use crate::client::{create_client, create_transfer_client};
 use crate::cmd::matcher::{MainMatcher, Matcher, UploadMatcher};
 #[cfg(feature = "history")]
 use crate::history_tool;
@@ -27,6 +29,7 @@ use crate::util::{
     format_bytes, open_url, print_error, print_error_msg, prompt_yes, quit, quit_error_msg,
     ErrorHintsBuilder,
 };
+use super::select_api_version;
 
 /// A file upload action.
 pub struct Upload<'a> {
@@ -47,9 +50,16 @@ impl<'a> Upload<'a> {
         let matcher_upload = UploadMatcher::with(self.cmd_matches).unwrap();
 
         // Get API parameters
-        #[allow(unused_mut)]
         let mut path = Path::new(matcher_upload.file()).to_path_buf();
         let host = matcher_upload.host();
+
+        // Create a reqwest client capable for uploading files
+        let client = create_transfer_client(&matcher_main);
+
+        // Determine the API version to use
+        let mut desired_version = matcher_main.api();
+        select_api_version(&client, host.clone(), &mut desired_version)?;
+        let api_version = desired_version.version().unwrap();
 
         // TODO: ensure the file exists and is accessible
 
@@ -91,7 +101,7 @@ impl<'a> Upload<'a> {
         }
 
         // Create a reqwest client capable for uploading files
-        let client = create_transfer_client(&matcher_main);
+        let transfer_client = create_transfer_client(&matcher_main);
 
         // Create a progress bar reporter
         let progress_bar = Arc::new(Mutex::new(ProgressBar::new_upload()));
@@ -203,8 +213,14 @@ impl<'a> Upload<'a> {
         } else {
             None
         };
-        let file = ApiUpload::new(host, path.clone(), file_name, password.clone(), params)
-            .invoke(&client, reporter)?;
+        let file = ApiUpload::new(
+            api_version,
+            host,
+            path.clone(),
+            file_name,
+            password.clone(),
+            params,
+        ).invoke(&transfer_client, reporter)?;
         let url = file.download_url(true);
 
         // Report the result
@@ -275,6 +291,11 @@ impl<'a> Upload<'a> {
 
 #[derive(Debug, Fail)]
 pub enum Error {
+    /// Selecting the API version to use failed.
+    // TODO: enable `api` hint!
+    #[fail(display = "failed to select API version to use")]
+    Version(#[cause] VersionError),
+
     /// An error occurred while archiving the file to upload.
     #[cfg(feature = "archive")]
     #[fail(display = "failed to archive file to upload")]
@@ -283,6 +304,12 @@ pub enum Error {
     /// An error occurred while uploading the file.
     #[fail(display = "")]
     Upload(#[cause] UploadError),
+}
+
+impl From<VersionError> for Error {
+    fn from(err: VersionError) -> Error {
+        Error::Version(err)
+    }
 }
 
 #[cfg(feature = "archive")]

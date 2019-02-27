@@ -78,7 +78,6 @@ where
 }
 
 /// Print a warning.
-#[cfg(feature = "history")]
 pub fn print_warning<S>(err: S)
 where
     S: AsRef<str> + Display + Debug + Sync + Send + 'static,
@@ -117,6 +116,9 @@ where
 #[derive(Clone, Builder)]
 #[builder(default)]
 pub struct ErrorHints {
+    /// Show about specifying an API version.
+    api: bool,
+
     /// A list of info messages to print along with the error.
     info: Vec<String>,
 
@@ -171,6 +173,12 @@ impl ErrorHints {
         eprint!("\n");
 
         // Print hints
+        if self.api {
+            eprintln!(
+                "Use '{}' to select a server API version",
+                highlight("--api <VERSION>")
+            );
+        }
         if self.password {
             eprintln!(
                 "Use '{}' to specify a password",
@@ -210,6 +218,7 @@ impl ErrorHints {
 impl Default for ErrorHints {
     fn default() -> Self {
         ErrorHints {
+            api: false,
             info: Vec::new(),
             password: false,
             owner: false,
@@ -250,7 +259,6 @@ pub fn highlight_error(msg: &str) -> ColoredString {
 }
 
 /// Highlight the given text with an warning color.
-#[cfg(feature = "history")]
 pub fn highlight_warning(msg: &str) -> ColoredString {
     highlight(msg).bold()
 }

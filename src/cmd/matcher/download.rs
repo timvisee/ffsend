@@ -23,6 +23,17 @@ impl<'a: 'b, 'b> DownloadMatcher<'a> {
         ArgUrl::value(self.matches)
     }
 
+    /// Guess the file share host, based on the file share URL.
+    ///
+    /// See `Self::url`.
+    pub fn guess_host(&'a self) -> Url {
+        let mut url = self.url();
+        url.set_path("");
+        url.set_query(None);
+        url.set_fragment(None);
+        url
+    }
+
     /// Get the password.
     /// `None` is returned if no password was specified.
     pub fn password(&'a self) -> Option<String> {

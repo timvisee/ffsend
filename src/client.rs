@@ -1,6 +1,7 @@
 use std::time::Duration;
 
-use ffsend_api::reqwest::{Client, ClientBuilder};
+pub use ffsend_api::reqwest::Client;
+use ffsend_api::reqwest::ClientBuilder;
 
 use crate::cmd::matcher::MainMatcher;
 

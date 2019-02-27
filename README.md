@@ -268,12 +268,13 @@ The following environment variables may be used to configure the following
 defaults. The CLI flag is shown along with it, to better describe the relation
 to command line arguments:
 
-| Variable                  | CLI flag                       | Description                     |
-| :------------------------ | :----------------------------: | :------------------------------ |
-| `FFSEND_HISTORY`          | `--history <FILE>`             | History file path               |
-| `FFSEND_HOST`             | `--host <URL>`                 | Upload host                     |
-| `FFSEND_TIMEOUT`          | `--timeout <SECONDS>`          | Request timeout (0 to disable)  |
-| `FFSEND_TRANSFER_TIMEOUT` | `--transfer-timeout <SECONDS>` | Transfer timeout (0 to disable) |
+| Variable                  | CLI flag                       | Description                       |
+| :------------------------ | :----------------------------: | :-------------------------------- |
+| `FFSEND_HISTORY`          | `--history <FILE>`             | History file path                 |
+| `FFSEND_HOST`             | `--host <URL>`                 | Upload host                       |
+| `FFSEND_TIMEOUT`          | `--timeout <SECONDS>`          | Request timeout (0 to disable)    |
+| `FFSEND_TRANSFER_TIMEOUT` | `--transfer-timeout <SECONDS>` | Transfer timeout (0 to disable)   |
+| `FFSEND_API`              | `--api <VERSION>`              | Server API version, `-` to lookup |
 
 These environment variables may be used to toggle a flag, simply by making them
 available. The actual value of these variables is ignored, and variables may be
@@ -289,7 +290,7 @@ empty.
 | `FFSEND_ARCHIVE`     | `--archive`     | Archive files uploaded            |
 | `FFSEND_EXTRACT`     | `--extract`     | Extract files downloaded          |
 | `FFSEND_COPY`        | `--copy`        | Copy share link to clipboard      |
-| `FFSEND_QUIET`       | `--quiet`       | Log quiet information           |
+| `FFSEND_QUIET`       | `--quiet`       | Log quiet information             |
 | `FFSEND_VERBOSE`     | `--verbose`     | Log verbose information           |
 
 At this time, no configuration or _dotfile_ file support is available.
@@ -376,6 +377,7 @@ SUBCOMMANDS:
     info          Fetch info about a shared file [aliases: i]
     parameters    Change parameters of a shared file [aliases: params]
     password      Change the password of a shared file [aliases: pass, p]
+    version       Determine the Send server version [aliases: v]
 
 The public Send service that is used as default host is provided by Mozilla.
 This application is not affiliated with Mozilla, Firefox or Firefox Send.

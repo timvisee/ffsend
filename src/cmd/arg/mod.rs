@@ -1,3 +1,4 @@
+pub mod api;
 pub mod download_limit;
 pub mod gen_passphrase;
 pub mod host;
@@ -5,7 +6,8 @@ pub mod owner;
 pub mod password;
 pub mod url;
 
-// Reexport to arg module
+// Re-eexport to arg module
+pub use self::api::ArgApi;
 pub use self::download_limit::ArgDownloadLimit;
 pub use self::gen_passphrase::ArgGenPassphrase;
 pub use self::host::ArgHost;

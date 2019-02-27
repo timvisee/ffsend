@@ -74,7 +74,7 @@ impl<'a> Debug<'a> {
         table.add_row(Row::new(vec![
             Cell::new("Default expiry:"),
             Cell::new(&format_duration(Duration::seconds(
-                SEND_DEFAULT_EXPIRE_TIME,
+                SEND_DEFAULT_EXPIRE_TIME as i64,
             ))),
         ]));
 

@@ -2,6 +2,7 @@ extern crate directories;
 
 use clap::{App, AppSettings, Arg, ArgMatches};
 
+use super::arg::{ArgApi, CmdArg};
 #[cfg(feature = "history")]
 use super::matcher::HistoryMatcher;
 use super::matcher::{
@@ -139,6 +140,7 @@ impl<'a: 'b, 'b> Handler<'a> {
                     .global(true)
                     .help("Enable verbose information and logging"),
             )
+            .arg(ArgApi::build())
             .subcommand(CmdDebug::build())
             .subcommand(CmdDelete::build())
             .subcommand(CmdDownload::build().display_order(2))
