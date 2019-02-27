@@ -3,6 +3,7 @@ use ffsend_api::api::{DesiredVersion, Version};
 
 use super::{CmdArg, CmdArgOption};
 use crate::config::API_VERSION_DESIRED_DEFAULT;
+use crate::util::{ErrorHints, quit_error_msg};
 
 /// The api argument.
 pub struct ArgApi {}
@@ -42,15 +43,10 @@ impl<'a> CmdArgOption<'a> for ArgApi {
         // Parse the given API version
         match Version::parse(version) {
             Ok(version) => DesiredVersion::Use(version),
-            Err(_) => {
-                panic!("failed to determine given server API version, version unknown");
-
-                // TODO: properly quit with an application error instead
-                // quit_error(
-                //     err.context("failed to determine given server API version, version unknown"),
-                //     ErrorHints::default(),
-                // )
-            },
+            Err(_) => quit_error_msg(
+                "failed to determine given server API version, version unknown",
+                ErrorHints::default(),
+            ),
         }
     }
 }
