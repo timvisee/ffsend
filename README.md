@@ -53,9 +53,9 @@ _Note: this tool is currently in the alpha phase_
 - Upload and download files and directories securely
 - Always encrypted on the client
 - Additional password protection, generation and configurable download limits
+- Supports old and new Firefox Send versions
 - Built-in file and directory archiving and extraction
 - History tracking your files for easy management
-- Supports Send v2 (current) & v3 (unreleased)
 - Ability to use your own Send host
 - Inspect or delete shared files
 - Accurate error reporting
@@ -240,6 +240,8 @@ The following features are available, some of which are enabled by default:
 
 | Feature     | Enabled | Description                                                |
 | :---------: | :-----: | :--------------------------------------------------------- |
+| `send2`     | Default | Compile with support for Firefox Send v2 servers           |
+| `send3`     | Default | Compile with support for Firefox Send v3 servers           |
 | `clipboard` | Default | Support for copying links to the clipboard                 |
 | `history`   | Default | Support for tracking files in history                      |
 | `archive`   | Default | Support for archiving and extracting uploads and downloads |
