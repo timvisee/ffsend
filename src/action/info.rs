@@ -61,7 +61,7 @@ impl<'a> Info<'a> {
         let mut password = matcher_info.password();
 
         // Ensure a password is set when required
-        ensure_password(&mut password, exists.has_password(), &matcher_main);
+        ensure_password(&mut password, exists.requires_password(), &matcher_main);
 
         // Fetch both file info and metadata
         let info = ApiInfo::new(&file, None).invoke(&client)?;

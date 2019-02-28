@@ -53,6 +53,7 @@ _Note: this tool is currently in the alpha phase_
 - Upload and download files and directories securely
 - Always encrypted on the client
 - Additional password protection, generation and configurable download limits
+- Supports old and new Firefox Send versions
 - Built-in file and directory archiving and extraction
 - History tracking your files for easy management
 - Ability to use your own Send host
@@ -239,6 +240,8 @@ The following features are available, some of which are enabled by default:
 
 | Feature     | Enabled | Description                                                |
 | :---------: | :-----: | :--------------------------------------------------------- |
+| `send2`     | Default | Compile with support for Firefox Send v2 servers           |
+| `send3`     | Default | Compile with support for Firefox Send v3 servers           |
 | `clipboard` | Default | Support for copying links to the clipboard                 |
 | `history`   | Default | Support for tracking files in history                      |
 | `archive`   | Default | Support for archiving and extracting uploads and downloads |
@@ -267,12 +270,13 @@ The following environment variables may be used to configure the following
 defaults. The CLI flag is shown along with it, to better describe the relation
 to command line arguments:
 
-| Variable                  | CLI flag                       | Description                     |
-| :------------------------ | :----------------------------: | :------------------------------ |
-| `FFSEND_HISTORY`          | `--history <FILE>`             | History file path               |
-| `FFSEND_HOST`             | `--host <URL>`                 | Upload host                     |
-| `FFSEND_TIMEOUT`          | `--timeout <SECONDS>`          | Request timeout (0 to disable)  |
-| `FFSEND_TRANSFER_TIMEOUT` | `--transfer-timeout <SECONDS>` | Transfer timeout (0 to disable) |
+| Variable                  | CLI flag                       | Description                       |
+| :------------------------ | :----------------------------: | :-------------------------------- |
+| `FFSEND_HISTORY`          | `--history <FILE>`             | History file path                 |
+| `FFSEND_HOST`             | `--host <URL>`                 | Upload host                       |
+| `FFSEND_TIMEOUT`          | `--timeout <SECONDS>`          | Request timeout (0 to disable)    |
+| `FFSEND_TRANSFER_TIMEOUT` | `--transfer-timeout <SECONDS>` | Transfer timeout (0 to disable)   |
+| `FFSEND_API`              | `--api <VERSION>`              | Server API version, `-` to lookup |
 
 These environment variables may be used to toggle a flag, simply by making them
 available. The actual value of these variables is ignored, and variables may be
@@ -288,7 +292,7 @@ empty.
 | `FFSEND_ARCHIVE`     | `--archive`     | Archive files uploaded            |
 | `FFSEND_EXTRACT`     | `--extract`     | Extract files downloaded          |
 | `FFSEND_COPY`        | `--copy`        | Copy share link to clipboard      |
-| `FFSEND_QUIET`       | `--quiet`       | Log quiet information           |
+| `FFSEND_QUIET`       | `--quiet`       | Log quiet information             |
 | `FFSEND_VERBOSE`     | `--verbose`     | Log verbose information           |
 
 At this time, no configuration or _dotfile_ file support is available.
@@ -375,6 +379,7 @@ SUBCOMMANDS:
     info          Fetch info about a shared file [aliases: i]
     parameters    Change parameters of a shared file [aliases: params]
     password      Change the password of a shared file [aliases: pass, p]
+    version       Determine the Send server version [aliases: v]
 
 The public Send service that is used as default host is provided by Mozilla.
 This application is not affiliated with Mozilla, Firefox or Firefox Send.

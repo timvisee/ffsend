@@ -38,7 +38,8 @@ variables:
   stage: check
   script:
     - cargo check --verbose
-    - cargo check --no-default-features --verbose
+    - cargo check --no-default-features --features send2 --verbose
+    - cargo check --no-default-features --features send3 --verbose
     - cargo check --features no-color --verbose
 rust-stable:
   <<: *check-base
@@ -109,6 +110,7 @@ cargo-test:
 # Run integration test with the public Send service
 public-send-test:
   stage: test
+  allow_failure: true
   dependencies:
     - build-static
   variables:
@@ -116,10 +118,15 @@ public-send-test:
   before_script: []
   script:
     # Generate random file, upload/download and assert equality
-    - "head -c16m </dev/urandom >testfile"
+    - "head -c2m </dev/urandom >testfile"
     - "./ffsend upload testfile -d=10 -p=secret -I"
     - "./ffsend download $(./ffsend history -q) -p=secret -I -o=downloadfile"
     - "cmp --silent ./testfile ./downloadfile || (echo ERROR: Downloaded file is different than original; exit 1)"
+
+    # Also test Firefox Send v3
+    - "./ffsend upload --host http://send2.dev.lcip.org/ testfile -d=10 -p=secret -I"
+    - "./ffsend download $(./ffsend history -q) -p=secret -I -o=downloadfile2"
+    - "cmp --silent ./testfile ./downloadfile2 || (echo ERROR: Downloaded file is different than original; exit 1)"
 
 # Cargo crate release
 crate:
@@ -177,3 +184,22 @@ pkg-aur:
     - git add PKGBUILD .SRCINFO
     - git commit -m "Release v$VERSION"
     - git push
+
+# # Snap release
+# snap:
+#   image: snapcore/snapcraft:edge
+#   stage: release
+#   # only:
+#   #   - /^v(\d+\.)*\d+$/
+#   before_script: []
+#   script:
+#     - echo "Building snap package..."
+#     - cd pkg/snap
+#     - snapcraft
+#     # TODO: See: https://docs.snapcraft.io/rust-applications/7826
+#     # TODO: - login to registry
+#     # TODO: - test built snap
+#     # TODO: - push snap to snapcraft.io
+#     # - echo "Publishing snap package..."
+#     # - echo "$SNAP_USER\n&SNAP_PASS" | snapcraft login
+#     # - snapcraft push --release=edge ffsend_amd64.snap

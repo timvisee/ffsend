@@ -50,7 +50,7 @@ name = "ffsend"
 path = "src/main.rs"
 
 [features]
-default = ["archive", "clipboard", "history"]
+default = ["archive", "clipboard", "history", "send2", "send3"]
 
 # Compile with file archiving support
 archive = ["tar"]
@@ -61,6 +61,12 @@ history = []
 # Compile without colored output support
 no-color = ["colored/no-color"]
 
+# Support for Firefox Send v2
+send2 = ["ffsend-api/send2"]
+
+# Support for Firefox Send v3
+send3 = ["ffsend-api/send3"]
+
 [dependencies]
 chbs = "0.0.8"
 chrono = "0.4"
@@ -69,7 +75,7 @@ colored = "1.7"
 derive_builder = "0.7"
 directories = "1.0"
 failure = "0.1"
-ffsend-api = "0.1.1"
+ffsend-api = { version = "0.2.0", default-features = false }
 fs2 = "0.4"
 lazy_static = "1.0"
 open = "1"

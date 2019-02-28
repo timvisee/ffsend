@@ -2,16 +2,18 @@ extern crate directories;
 
 use clap::{App, AppSettings, Arg, ArgMatches};
 
+use super::arg::{ArgApi, CmdArg};
 #[cfg(feature = "history")]
 use super::matcher::HistoryMatcher;
 use super::matcher::{
     DebugMatcher, DeleteMatcher, DownloadMatcher, ExistsMatcher, InfoMatcher, Matcher,
-    ParamsMatcher, PasswordMatcher, UploadMatcher,
+    ParamsMatcher, PasswordMatcher, UploadMatcher, VersionMatcher,
 };
 #[cfg(feature = "history")]
 use super::subcmd::CmdHistory;
 use super::subcmd::{
     CmdDebug, CmdDelete, CmdDownload, CmdExists, CmdInfo, CmdParams, CmdPassword, CmdUpload,
+    CmdVersion,
 };
 use crate::config::{CLIENT_TIMEOUT, CLIENT_TRANSFER_TIMEOUT};
 #[cfg(feature = "history")]
@@ -138,6 +140,7 @@ impl<'a: 'b, 'b> Handler<'a> {
                     .global(true)
                     .help("Enable verbose information and logging"),
             )
+            .arg(ArgApi::build())
             .subcommand(CmdDebug::build())
             .subcommand(CmdDelete::build())
             .subcommand(CmdDownload::build().display_order(2))
@@ -145,7 +148,8 @@ impl<'a: 'b, 'b> Handler<'a> {
             .subcommand(CmdInfo::build())
             .subcommand(CmdParams::build())
             .subcommand(CmdPassword::build())
-            .subcommand(CmdUpload::build().display_order(1));
+            .subcommand(CmdUpload::build().display_order(1))
+            .subcommand(CmdVersion::build());
 
         // With history support, a flag for the history file and incognito mode
         #[cfg(feature = "history")]
@@ -238,5 +242,10 @@ impl<'a: 'b, 'b> Handler<'a> {
     /// Get the upload sub command, if matched.
     pub fn upload(&'a self) -> Option<UploadMatcher> {
         UploadMatcher::with(&self.matches)
+    }
+
+    /// Get the version sub command, if matched.
+    pub fn version(&'a self) -> Option<VersionMatcher> {
+        VersionMatcher::with(&self.matches)
     }
 }

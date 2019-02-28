@@ -2,8 +2,10 @@
 use std::path::PathBuf;
 
 use clap::ArgMatches;
+use ffsend_api::api::DesiredVersion;
 
 use super::Matcher;
+use crate::cmd::arg::{ArgApi, CmdArgOption};
 use crate::util::env_var_present;
 #[cfg(feature = "history")]
 use crate::util::{quit_error_msg, ErrorHintsBuilder};
@@ -27,6 +29,11 @@ impl<'a: 'b, 'b> MainMatcher<'a> {
     /// Check whether to assume yes.
     pub fn assume_yes(&self) -> bool {
         self.matches.is_present("yes") || env_var_present("FFSEND_YES")
+    }
+
+    /// Get the desired API version to use.
+    pub fn api(&'a self) -> DesiredVersion {
+        ArgApi::value(self.matches)
     }
 
     /// Get the history file to use.

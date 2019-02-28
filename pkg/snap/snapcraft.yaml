@@ -1,0 +1,32 @@
+name: ffsend
+version: git
+summary: Easily and securely share files from the command line.
+description: |
+  Easily and securely share files and directories from the command line through
+  a safe, private and encrypted link using a single simple command.
+  Files are shared using the Send service and may be up to 2GB.
+  Others are able to download these files with this tool
+  or through their web browser.
+
+  All files are always encrypted on the client,
+  and secrets are never shared with the remote host.
+  An optional password may be specified, and a default file lifetime of 1
+  (up to 20) download or 24 hours is enforced to ensure your stuff does not
+  remain online forever. This provides a secure platform to share your files.
+
+grade: devel
+confinement: devmode
+
+apps:
+  ffsend:
+    command: ffsend
+    plugs: [home, removable-media]
+
+parts:
+  ffsend:
+    source: ../../
+    plugin: rust
+    build-attributes: [no-system-libraries]
+    build-packages: [make, cmake, pkg-config]
+    # build-packages: [g++, libudev-dev, libssl-dev, make, pkg-config]
+    stage-packages: [libssl1.0.0, xclip]

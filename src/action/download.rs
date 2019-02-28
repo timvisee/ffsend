@@ -10,8 +10,9 @@ use failure::Fail;
 use ffsend_api::action::download::{Download as ApiDownload, Error as DownloadError};
 use ffsend_api::action::exists::{Error as ExistsError, Exists as ApiExists};
 use ffsend_api::action::metadata::{Error as MetadataError, Metadata as ApiMetadata};
+use ffsend_api::action::version::Error as VersionError;
 use ffsend_api::file::remote_file::{FileParseError, RemoteFile};
-use ffsend_api::reader::ProgressReporter;
+use ffsend_api::pipe::ProgressReporter;
 #[cfg(feature = "archive")]
 use tempfile::{Builder as TempBuilder, NamedTempFile};
 
@@ -25,6 +26,7 @@ use crate::progress::ProgressBar;
 use crate::util::{
     ensure_enough_space, ensure_password, prompt_yes, quit, quit_error, quit_error_msg, ErrorHints,
 };
+use super::select_api_version;
 
 /// A file download action.
 pub struct Download<'a> {
@@ -44,11 +46,17 @@ impl<'a> Download<'a> {
         let matcher_main = MainMatcher::with(self.cmd_matches).unwrap();
         let matcher_download = DownloadMatcher::with(self.cmd_matches).unwrap();
 
-        // Get the share URL
+        // Get the share URL, derive the host
         let url = matcher_download.url();
+        let host = matcher_download.guess_host();
 
         // Create a reqwest client capable for downloading files
         let client = create_transfer_client(&matcher_main);
+
+        // Determine the API version to use
+        let mut desired_version = matcher_main.api();
+        select_api_version(&client, host, &mut desired_version)?;
+        let api_version = desired_version.version().unwrap();
 
         // Parse the remote file based on the share URL
         let file = RemoteFile::parse_url(url, None)?;
@@ -68,7 +76,7 @@ impl<'a> Download<'a> {
         }
 
         // Ensure a password is set when required
-        ensure_password(&mut password, exists.has_password(), &matcher_main);
+        ensure_password(&mut password, exists.requires_password(), &matcher_main);
 
         // Fetch the file metadata
         let metadata = ApiMetadata::new(&file, password.clone(), false).invoke(&client)?;
@@ -143,11 +151,11 @@ impl<'a> Download<'a> {
 
         // Execute an download action
         let progress = if !matcher_main.quiet() {
-            Some(&progress_reader)
+            Some(progress_reader)
         } else {
             None
         };
-        ApiDownload::new(&file, target, password, false, Some(metadata))
+        ApiDownload::new(api_version, &file, target, password, false, Some(metadata))
             .invoke(&client, progress)?;
 
         // Extract the downloaded file if working with an archive
@@ -324,6 +332,11 @@ impl<'a> Download<'a> {
 
 #[derive(Debug, Fail)]
 pub enum Error {
+    /// Selecting the API version to use failed.
+    // TODO: enable `api` hint!
+    #[fail(display = "failed to select API version to use")]
+    Version(#[cause] VersionError),
+
     /// Failed to parse a share URL, it was invalid.
     /// This error is not related to a specific action.
     #[fail(display = "invalid share link")]
@@ -349,6 +362,12 @@ pub enum Error {
     /// The given Send file has expired, or did never exist in the first place.
     #[fail(display = "the file has expired or did never exist")]
     Expired,
+}
+
+impl From<VersionError> for Error {
+    fn from(err: VersionError) -> Error {
+        Error::Version(err)
+    }
 }
 
 impl From<FileParseError> for Error {
