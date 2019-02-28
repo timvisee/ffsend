@@ -75,9 +75,7 @@ colored = "1.7"
 derive_builder = "0.7"
 directories = "1.0"
 failure = "0.1"
-# TODO: revert to crates.io package when merged to master
-#ffsend-api = { version = "0.1.1", default-features = false }
-ffsend-api = { version = "*", git = "https://gitlab.com/timvisee/ffsend-api.git", rev = "send3", default-features = false }
+ffsend-api = { version = "0.2.0", default-features = false }
 fs2 = "0.4"
 lazy_static = "1.0"
 open = "1"
