@@ -185,21 +185,21 @@ pkg-aur:
     - git commit -m "Release v$VERSION"
     - git push
 
-# Snap release
-snap:
-  image: snapcore/snapcraft:edge
-  stage: release
-  # only:
-  #   - /^v(\d+\.)*\d+$/
-  before_script: []
-  script:
-    - echo "Building snap package..."
-    - cd pkg/snap
-    - snapcraft
-    # TODO: See: https://docs.snapcraft.io/rust-applications/7826
-    # TODO: - login to registry
-    # TODO: - test built snap
-    # TODO: - push snap to snapcraft.io
-    # - echo "Publishing snap package..."
-    # - echo "$SNAP_USER\n&SNAP_PASS" | snapcraft login
-    # - snapcraft push --release=edge ffsend_amd64.snap
+# # Snap release
+# snap:
+#   image: snapcore/snapcraft:edge
+#   stage: release
+#   # only:
+#   #   - /^v(\d+\.)*\d+$/
+#   before_script: []
+#   script:
+#     - echo "Building snap package..."
+#     - cd pkg/snap
+#     - snapcraft
+#     # TODO: See: https://docs.snapcraft.io/rust-applications/7826
+#     # TODO: - login to registry
+#     # TODO: - test built snap
+#     # TODO: - push snap to snapcraft.io
+#     # - echo "Publishing snap package..."
+#     # - echo "$SNAP_USER\n&SNAP_PASS" | snapcraft login
+#     # - snapcraft push --release=edge ffsend_amd64.snap
