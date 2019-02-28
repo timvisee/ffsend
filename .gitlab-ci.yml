@@ -110,6 +110,7 @@ cargo-test:
 # Run integration test with the public Send service
 public-send-test:
   stage: test
+  allow_failure: true
   dependencies:
     - build-static
   variables:
