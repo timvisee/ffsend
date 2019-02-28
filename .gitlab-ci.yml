@@ -141,7 +141,7 @@ crate:
 
 # AUR package release
 pkg-aur:
-  image: base/archlinux
+  image: archlinux/base
   stage: release
   only:
     - /^v(\d+\.)*\d+$/
