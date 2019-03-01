@@ -1,14 +1,14 @@
-[![Build status on Travis CI][travis-master-badge]][travis-link]
+[![Build status on GitLab CI][gitlab-ci-master-badge]][gitlab-ci-link]
 [![Newest release on crates.io][crate-version-badge]][crate-link]
 [![Number of downloads on crates.io][crate-download-badge]][crate-link]
 [![Project license][crate-license-badge]](LICENSE)
 
-[crate-link]: https://crates.io/crates/ffsend
 [crate-download-badge]: https://img.shields.io/crates/d/ffsend.svg
-[crate-version-badge]: https://img.shields.io/crates/v/ffsend.svg
 [crate-license-badge]: https://img.shields.io/crates/l/ffsend.svg
-[travis-master-badge]: https://travis-ci.org/timvisee/ffsend.svg?branch=master
-[travis-link]: https://travis-ci.org/timvisee/ffsend
+[crate-link]: https://crates.io/crates/ffsend
+[crate-version-badge]: https://img.shields.io/crates/v/ffsend.svg
+[gitlab-ci-link]: https://gitlab.com/timvisee/ffsend/pipelines
+[gitlab-ci-master-badge]: https://gitlab.com/timvisee/ffsend/badges/master/pipeline.svg
 
 # ffsend [WIP]
 > Easily and securely share files from the command line.
