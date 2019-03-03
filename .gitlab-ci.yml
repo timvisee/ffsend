@@ -176,7 +176,7 @@ github-release:
     - ./github-release upload --token "$GITHUB_TOKEN" --owner 'timvisee' --repo 'ffsend' --tag "$CI_COMMIT_REF_NAME" --file ffsend-x86_64-linux-gnu --name ffsend-$CI_COMMIT_REF_NAME-linux-x64
     - ./github-release upload --token "$GITHUB_TOKEN" --owner 'timvisee' --repo 'ffsend' --tag "$CI_COMMIT_REF_NAME" --file ffsend-x86_64-linux-musl --name ffsend-$CI_COMMIT_REF_NAME-linux-x64-static
 
-# AUR package release
+# AUR packages release
 pkg-aur:
   image: archlinux/base
   stage: release
@@ -188,8 +188,9 @@ pkg-aur:
 
     # Update version number in PKGBUILD
     - VERSION=$(echo $CI_COMMIT_REF_NAME | cut -c 2-)
-    - echo "Determined binary version number 'v$VERSION', updating PKGBUILD..."
-    - sed "s/^pkgver=.*\$/pkgver=$VERSION/" -i PKGBUILD
+    - echo "Determined binary version number 'v$VERSION', updating PKGBUILDs..."
+    - sed "s/^pkgver=.*\$/pkgver=$VERSION/" -i bin/PKGBUILD
+    - sed "s/^pkgver=.*\$/pkgver=$VERSION/" -i git/PKGBUILD
 
     # Install dependencies
     - echo "Installing required build packages..."
@@ -199,10 +200,17 @@ pkg-aur:
     - echo "Making AUR package..."
     - mkdir -p /.cargo
     - chmod -R 777 /.cargo
+    - cd bin/
+    - echo "Making binary package..."
     - sudo -u nobody makepkg -c
     - sudo -u nobody makepkg --printsrcinfo > .SRCINFO
+    - cd ../git
+    - echo "Making git source package..."
+    - sudo -u nobody makepkg -c
+    - sudo -u nobody makepkg --printsrcinfo > .SRCINFO
+    - cd ..
 
-      # Publish: set up SSH key, clone AUR repo, commit update and push
+      # Set up SSH for publishing
     - mkdir -p /root/.ssh
     - cp ./aur.pub /root/.ssh/id_rsa.pub
     - echo "$AUR_SSH_PRIVATE" > /root/.ssh/id_rsa
@@ -214,13 +222,25 @@ pkg-aur:
     - ssh-add /root/.ssh/id_rsa
     - ssh-keyscan -H aur.archlinux.org >> /root/.ssh/known_hosts
     - git config --global user.name "timvisee"
-    - git config --global user.email "timvisee@gmail.com"
-    - git clone ssh://aur@aur.archlinux.org/ffsend.git aur-ffsend
-    - cd aur-ffsend
-    - cp ../{PKGBUILD,.SRCINFO} ./
+    - git config --global user.email "tim@visee.me"
+
+      # Publish binary package: clone AUR repo, commit update and push
+    - git clone ssh://aur@aur.archlinux.org/ffsend.git aur-ffsend-bin
+    - cd aur-ffsend-bin
+    - cp ../bin/{PKGBUILD,.SRCINFO} ./
     - git add PKGBUILD .SRCINFO
     - git commit -m "Release v$VERSION"
     - git push
+    - cd ..
+
+      # Publish git package: clone AUR repo, commit update and push
+    - git clone ssh://aur@aur.archlinux.org/ffsend-git.git aur-ffsend-git
+    - cd aur-ffsend-git
+    - cp ../git/{PKGBUILD,.SRCINFO} ./
+    - git add PKGBUILD .SRCINFO
+    - git commit -m "Release v$VERSION"
+    - git push
+    - cd ..
 
 # # Snap release
 # snap:
@@ -240,3 +260,5 @@ pkg-aur:
 #     # - echo "Publishing snap package..."
 #     # - echo "$SNAP_USER\n&SNAP_PASS" | snapcraft login
 #     # - snapcraft push --release=edge ffsend_amd64.snap
+
+# TODO: add job to test ffsend{-git} AUR packages
