@@ -1,3 +1,10 @@
+# GitLab CI configuration for ffsend builds, tests and releases
+#
+# To add a new release:
+# - configure a new 'build-*' job with the proper target
+# - export a build artifact from the new job
+# - manually upload artifact to GitHub in the 'github-release' job
+
 image: "rust:slim"
 
 stages:
@@ -63,6 +70,7 @@ build-x86_64-linux-gnu:
   script:
     - cargo build --target=$RUST_TARGET --release --verbose
     - mv target/$RUST_TARGET/release/ffsend ./ffsend-$RUST_TARGET
+    - strip -g ./ffsend-$RUST_TARGET
   artifacts:
     name: ffsend-x86_64-linux-gnu
     paths:
@@ -94,9 +102,10 @@ build-x86_64-linux-musl:
     - export OPENSSL_INCLUDE_DIR=/usr/local/include
     - cargo build --target=$RUST_TARGET --release --verbose
 
-    # Prepare the release artifact
+    # Prepare the release artifact, strip it
     - find . -name ffsend -exec ls -lah {} \;
     - mv target/$RUST_TARGET/release/ffsend ./ffsend-$RUST_TARGET
+    - strip -g ./ffsend-$RUST_TARGET
   artifacts:
     name: ffsend-x86_64-linux-musl
     paths:
