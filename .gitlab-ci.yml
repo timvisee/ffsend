@@ -124,11 +124,13 @@ public-send-test:
     - "head -c2m </dev/urandom >testfile"
     - "./ffsend upload testfile -d=10 -p=secret -I"
     - "./ffsend download $(./ffsend history -q) -p=secret -I -o=downloadfile"
+    - "./ffsend delete $(./ffsend history -q)"
     - "cmp --silent ./testfile ./downloadfile || (echo ERROR: Downloaded file is different than original; exit 1)"
 
     # Also test Firefox Send v3
     - "./ffsend upload --host http://send2.dev.lcip.org/ testfile -d=10 -p=secret -I"
     - "./ffsend download $(./ffsend history -q) -p=secret -I -o=downloadfile2"
+    - "./ffsend delete $(./ffsend history -q)"
     - "cmp --silent ./testfile ./downloadfile2 || (echo ERROR: Downloaded file is different than original; exit 1)"
 
 # Cargo crate release
