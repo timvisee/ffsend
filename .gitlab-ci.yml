@@ -128,6 +128,7 @@ public-send-test:
     - build-x86_64-linux-musl
   variables:
     GIT_STRATEGY: none
+    RUST_TARGET: x86_64-unknown-linux-musl
   before_script: []
   script:
     # Generate random file, upload/download and assert equality
