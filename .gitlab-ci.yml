@@ -62,11 +62,11 @@ build-x86_64-linux-gnu:
   stage: build
   script:
     - cargo build --target=$RUST_TARGET --release --verbose
-    - mv target/$RUST_TARGET/release/ffsend ./ffsend
+    - mv target/$RUST_TARGET/release/ffsend ./ffsend-$RUST_TARGET
   artifacts:
     name: ffsend-x86_64-linux-gnu
     paths:
-      - ffsend
+      - ffsend-$RUST_TARGET
     expire_in: 1 month
 
 # Build a static version
@@ -96,11 +96,11 @@ build-x86_64-linux-musl:
 
     # Prepare the release artifact
     - find . -name ffsend -exec ls -lah {} \;
-    - mv target/$RUST_TARGET/release/ffsend ./ffsend
+    - mv target/$RUST_TARGET/release/ffsend ./ffsend-$RUST_TARGET
   artifacts:
     name: ffsend-x86_64-linux-musl
     paths:
-      - ffsend
+      - ffsend-$RUST_TARGET
     expire_in: 1 month
 
 # Run the unit tests through Cargo
@@ -143,6 +143,25 @@ crate:
     - echo $CARGO_TOKEN | cargo login
     - echo "Publishing crate to crates.io..."
     - cargo publish --verbose --allow-dirty
+
+# Publish release binaries to as GitHub release
+github-release:
+  stage: release
+  only:
+    - /^v(\d+\.)*\d+$/
+  dependencies:
+    - build-x86_64-linux-gnu
+    - build-x86_64-linux-musl
+  before_script: []
+  script:
+    # Download github-release binary
+    - wget $(curl -s https://api.github.com/repos/tfausak/github-release/releases/latest | grep 'browser_' | cut -d\" -f4 | grep 'linux') -O github-release.tar.gz
+    - tar zxvf github-release.tar.gz
+    - rm github-release.tar.gz
+
+    # Upload binaries
+    - ./github-release upload --token "$GITHUB_TOKEN" --owner 'timvisee' --repo 'ffsend' --tag "$CI_COMMIT_REF_NAME" --file ffsend-x86_64-linux-gnu --name ffsend-$CI_COMMIT_REF_NAME-linux-x64
+    - ./github-release upload --token "$GITHUB_TOKEN" --owner 'timvisee' --repo 'ffsend' --tag "$CI_COMMIT_REF_NAME" --file ffsend-x86_64-linux-musl --name ffsend-$CI_COMMIT_REF_NAME-linux-x64-static
 
 # AUR package release
 pkg-aur:
