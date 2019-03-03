@@ -171,7 +171,6 @@ github-release:
     # Download github-release binary
     - wget $(curl -s https://api.github.com/repos/tfausak/github-release/releases/latest | grep 'browser_' | cut -d\" -f4 | grep 'linux') -O github-release.gz
     - gunzip github-release.gz
-    - rm github-release.gz
 
     # Upload binaries
     - ./github-release upload --token "$GITHUB_TOKEN" --owner 'timvisee' --repo 'ffsend' --tag "$CI_COMMIT_REF_NAME" --file ffsend-x86_64-linux-gnu --name ffsend-$CI_COMMIT_REF_NAME-linux-x64
