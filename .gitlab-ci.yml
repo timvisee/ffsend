@@ -12,6 +12,7 @@ stages:
   - build
   - test
   - release
+  - package
 
 variables:
   RUST_VERSION: stable
@@ -131,15 +132,15 @@ public-send-test:
   script:
     # Generate random file, upload/download and assert equality
     - "head -c2m </dev/urandom >testfile"
-    - "./ffsend upload testfile -d=10 -p=secret -I"
-    - "./ffsend download $(./ffsend history -q) -p=secret -I -o=downloadfile"
-    - "./ffsend delete $(./ffsend history -q)"
+    - "./ffsend-$RUST_TARGET upload testfile -d=10 -p=secret -I"
+    - "./ffsend-$RUST_TARGET download $(./ffsend-$RUST_TARGET history -q) -p=secret -I -o=downloadfile"
+    - "./ffsend-$RUST_TARGET delete $(./ffsend-$RUST_TARGET history -q)"
     - "cmp --silent ./testfile ./downloadfile || (echo ERROR: Downloaded file is different than original; exit 1)"
 
     # Also test Firefox Send v3
-    - "./ffsend upload --host http://send2.dev.lcip.org/ testfile -d=10 -p=secret -I"
-    - "./ffsend download $(./ffsend history -q) -p=secret -I -o=downloadfile2"
-    - "./ffsend delete $(./ffsend history -q)"
+    - "./ffsend-$RUST_TARGET upload --host http://send2.dev.lcip.org/ testfile -d=10 -p=secret -I"
+    - "./ffsend-$RUST_TARGET download $(./ffsend-$RUST_TARGET history -q) -p=secret -I -o=downloadfile2"
+    - "./ffsend-$RUST_TARGET delete $(./ffsend-$RUST_TARGET history -q)"
     - "cmp --silent ./testfile ./downloadfile2 || (echo ERROR: Downloaded file is different than original; exit 1)"
 
 # Cargo crate release
@@ -165,21 +166,21 @@ github-release:
   script:
     # Install dependencies
     - apt-get update
-    - apt-get install -y curl wget tar
+    - apt-get install -y curl wget gzip
 
     # Download github-release binary
-    - wget $(curl -s https://api.github.com/repos/tfausak/github-release/releases/latest | grep 'browser_' | cut -d\" -f4 | grep 'linux') -O github-release.tar.gz
-    - tar zxvf github-release.tar.gz
-    - rm github-release.tar.gz
+    - wget $(curl -s https://api.github.com/repos/tfausak/github-release/releases/latest | grep 'browser_' | cut -d\" -f4 | grep 'linux') -O github-release.gz
+    - gunzip github-release.gz
+    - rm github-release.gz
 
     # Upload binaries
     - ./github-release upload --token "$GITHUB_TOKEN" --owner 'timvisee' --repo 'ffsend' --tag "$CI_COMMIT_REF_NAME" --file ffsend-x86_64-linux-gnu --name ffsend-$CI_COMMIT_REF_NAME-linux-x64
     - ./github-release upload --token "$GITHUB_TOKEN" --owner 'timvisee' --repo 'ffsend' --tag "$CI_COMMIT_REF_NAME" --file ffsend-x86_64-linux-musl --name ffsend-$CI_COMMIT_REF_NAME-linux-x64-static
 
 # AUR packages release
-pkg-aur:
+package-aur:
   image: archlinux/base
-  stage: release
+  stage: package
   only:
     - /^v(\d+\.)*\d+$/
   before_script: []
