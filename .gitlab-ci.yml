@@ -178,8 +178,8 @@ github-release:
     - chmod a+x ./github-release
 
     # Upload binaries
-    - ./github-release upload --token "$GITHUB_TOKEN" --owner 'timvisee' --repo 'ffsend' --tag "$CI_COMMIT_REF_NAME" --file ffsend-x86_64-linux-gnu --name ffsend-$CI_COMMIT_REF_NAME-linux-x64
-    - ./github-release upload --token "$GITHUB_TOKEN" --owner 'timvisee' --repo 'ffsend' --tag "$CI_COMMIT_REF_NAME" --file ffsend-x86_64-linux-musl --name ffsend-$CI_COMMIT_REF_NAME-linux-x64-static
+    - ./github-release upload --token "$GITHUB_TOKEN" --owner 'timvisee' --repo 'ffsend' --tag "$CI_COMMIT_REF_NAME" --file ./ffsend-x86_64-linux-gnu --name ffsend-$CI_COMMIT_REF_NAME-linux-x64
+    - ./github-release upload --token "$GITHUB_TOKEN" --owner 'timvisee' --repo 'ffsend' --tag "$CI_COMMIT_REF_NAME" --file ./ffsend-x86_64-linux-musl --name ffsend-$CI_COMMIT_REF_NAME-linux-x64-static
 
 # AUR packages release
 package-aur:
