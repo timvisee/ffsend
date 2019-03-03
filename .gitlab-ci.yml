@@ -167,7 +167,7 @@ github-release:
   script:
     # Install dependencies
     - apt-get update
-    - apt-get install -y curl wget gzip
+    - apt-get install -y curl wget gzip netbase
 
     # Download github-release binary
     - wget $(curl -s https://api.github.com/repos/tfausak/github-release/releases/latest | grep 'browser_' | cut -d\" -f4 | grep 'linux') -O github-release.gz
