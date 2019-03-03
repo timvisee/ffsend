@@ -9,7 +9,7 @@ use failure::Fail;
 use ffsend_api::action::params::ParamsDataBuilder;
 use ffsend_api::action::upload::{Error as UploadError, Upload as ApiUpload};
 use ffsend_api::action::version::Error as VersionError;
-use ffsend_api::config::{UPLOAD_SIZE_MAX, UPLOAD_SIZE_MAX_RECOMMENDED};
+use ffsend_api::config::{upload_size_max, UPLOAD_SIZE_MAX_RECOMMENDED};
 use ffsend_api::pipe::ProgressReporter;
 use prettytable::{format::FormatBuilder, Cell, Row, Table};
 #[cfg(feature = "archive")]
@@ -63,18 +63,22 @@ impl<'a> Upload<'a> {
 
         // TODO: ensure the file exists and is accessible
 
+        // Determine the max file size
+        // TODO: set false parameter to authentication state
+        let max_size = upload_size_max(api_version, false);
+
         // Get the file size to warn about large files
         if let Ok(size) = File::open(&path)
             .and_then(|f| f.metadata())
             .map(|m| m.len())
         {
-            if size > UPLOAD_SIZE_MAX && !matcher_main.force() {
+            if size > max_size && !matcher_main.force() {
                 // The file is too large, show an error and quit
                 quit_error_msg(
                     format!(
                         "the file size is {}, bigger than the maximum allowed of {}",
                         format_bytes(size),
-                        format_bytes(UPLOAD_SIZE_MAX),
+                        format_bytes(max_size),
                     ),
                     ErrorHintsBuilder::default()
                         .force(true)
