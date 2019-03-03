@@ -42,28 +42,28 @@ variables:
   RUST_VERSION: stable
   RUST_TARGET: x86_64-unknown-linux-gnu
 
-# # Check on stable, beta and nightly 
-# .check-base: &check-base
-#   stage: check
-#   script:
-#     - cargo check --verbose
-#     - cargo check --no-default-features --features send2 --verbose
-#     - cargo check --no-default-features --features send3 --verbose
-#     - cargo check --features no-color --verbose
-# rust-stable:
-#   <<: *check-base
-# rust-beta:
-#   <<: *check-base
-#   variables:
-#     RUST_VERSION: beta
-# rust-nightly:
-#   <<: *check-base
-#   variables:
-#     RUST_VERSION: nightly
-# rust-old:
-#   <<: *check-base
-#   variables:
-#     RUST_VERSION: "1.32.0"
+# Check on stable, beta and nightly 
+.check-base: &check-base
+  stage: check
+  script:
+    - cargo check --verbose
+    - cargo check --no-default-features --features send2 --verbose
+    - cargo check --no-default-features --features send3 --verbose
+    - cargo check --features no-color --verbose
+rust-stable:
+  <<: *check-base
+rust-beta:
+  <<: *check-base
+  variables:
+    RUST_VERSION: beta
+rust-nightly:
+  <<: *check-base
+  variables:
+    RUST_VERSION: nightly
+rust-old:
+  <<: *check-base
+  variables:
+    RUST_VERSION: "1.32.0"
 
 # Build using Rust stable
 build-x86_64-linux-gnu:
@@ -113,36 +113,36 @@ build-x86_64-linux-musl:
       - ffsend-$RUST_TARGET
     expire_in: 1 month
 
-# # Run the unit tests through Cargo
-# cargo-test:
-#   stage: test
-#   dependencies: []
-#   script:
-#     - cargo test --verbose
+# Run the unit tests through Cargo
+cargo-test:
+  stage: test
+  dependencies: []
+  script:
+    - cargo test --verbose
 
-# # Run integration test with the public Send service
-# public-send-test:
-#   stage: test
-#   allow_failure: true
-#   dependencies:
-#     - build-x86_64-linux-musl
-#   variables:
-#     GIT_STRATEGY: none
-#     RUST_TARGET: x86_64-unknown-linux-musl
-#   before_script: []
-#   script:
-#     # Generate random file, upload/download and assert equality
-#     - "head -c2m </dev/urandom >testfile"
-#     - "./ffsend-$RUST_TARGET upload testfile -d=10 -p=secret -I"
-#     - "./ffsend-$RUST_TARGET download $(./ffsend-$RUST_TARGET history -q) -p=secret -I -o=downloadfile"
-#     - "./ffsend-$RUST_TARGET delete $(./ffsend-$RUST_TARGET history -q)"
-#     - "cmp --silent ./testfile ./downloadfile || (echo ERROR: Downloaded file is different than original; exit 1)"
+# Run integration test with the public Send service
+public-send-test:
+  stage: test
+  allow_failure: true
+  dependencies:
+    - build-x86_64-linux-musl
+  variables:
+    GIT_STRATEGY: none
+    RUST_TARGET: x86_64-unknown-linux-musl
+  before_script: []
+  script:
+    # Generate random file, upload/download and assert equality
+    - "head -c2m </dev/urandom >testfile"
+    - "./ffsend-$RUST_TARGET upload testfile -d=10 -p=secret -I"
+    - "./ffsend-$RUST_TARGET download $(./ffsend-$RUST_TARGET history -q) -p=secret -I -o=downloadfile"
+    - "./ffsend-$RUST_TARGET delete $(./ffsend-$RUST_TARGET history -q)"
+    - "cmp --silent ./testfile ./downloadfile || (echo ERROR: Downloaded file is different than original; exit 1)"
 
-#     # Also test Firefox Send v3
-#     - "./ffsend-$RUST_TARGET upload --host http://send2.dev.lcip.org/ testfile -d=10 -p=secret -I"
-#     - "./ffsend-$RUST_TARGET download $(./ffsend-$RUST_TARGET history -q) -p=secret -I -o=downloadfile2"
-#     - "./ffsend-$RUST_TARGET delete $(./ffsend-$RUST_TARGET history -q)"
-#     - "cmp --silent ./testfile ./downloadfile2 || (echo ERROR: Downloaded file is different than original; exit 1)"
+    # Also test Firefox Send v3
+    - "./ffsend-$RUST_TARGET upload --host http://send2.dev.lcip.org/ testfile -d=10 -p=secret -I"
+    - "./ffsend-$RUST_TARGET download $(./ffsend-$RUST_TARGET history -q) -p=secret -I -o=downloadfile2"
+    - "./ffsend-$RUST_TARGET delete $(./ffsend-$RUST_TARGET history -q)"
+    - "cmp --silent ./testfile ./downloadfile2 || (echo ERROR: Downloaded file is different than original; exit 1)"
 
 # Cargo crate release
 crate:
@@ -158,16 +158,13 @@ crate:
 # Publish release binaries to as GitHub release
 github-release:
   stage: release
-  # only:
-  #   - /^v(\d+\.)*\d+$/
+  only:
+    - /^v(\d+\.)*\d+$/
   dependencies:
     - build-x86_64-linux-gnu
     - build-x86_64-linux-musl
   before_script: []
   script:
-    # TODO: remove after testing!
-    - export CI_COMMIT_REF_NAME=v0.2.6
-
     # Install dependencies
     - apt-get update
     - apt-get install -y curl wget gzip
