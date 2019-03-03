@@ -43,7 +43,7 @@ depends = "$auto, libssl1.1, ca-certificates, xclip"
 maintainer-scripts = "pkg/deb"
 
 [badges]
-travis-ci = { repository = "timvisee/ffsend", branch = "master" }
+gitlab = { repository = "timvisee/ffsend", branch = "master" }
 
 [[bin]]
 name = "ffsend"
