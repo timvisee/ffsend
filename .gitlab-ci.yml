@@ -32,6 +32,7 @@ before_script:
 # Variable defaults
 variables:
   RUST_VERSION: stable
+  RUST_TARGET: x86_64-unknown-linux-gnu
 
 # Check on stable, beta and nightly 
 .check-base: &check-base
@@ -51,29 +52,31 @@ rust-nightly:
   <<: *check-base
   variables:
     RUST_VERSION: nightly
-rust-oldest:
+rust-old:
   <<: *check-base
   variables:
     RUST_VERSION: "1.31"
 
 # Build using Rust stable
-build:
+build-x86_64-linux-gnu:
   stage: build
   script:
-    - cargo build --release --verbose
-    - mv target/release/ffsend ./ffsend
+    - cargo build --target=$RUST_TARGET --release --verbose
+    - mv target/$RUST_TARGET/release/ffsend ./ffsend
   artifacts:
-    name: build-dynamic
+    name: ffsend-x86_64-linux-gnu
     paths:
       - ffsend
     expire_in: 1 month
 
 # Build a static version
-build-static:
+build-x86_64-linux-musl:
   stage: build
+  variables:
+    RUST_TARGET: x86_64-unknown-linux-musl
   script:
     # Install the static target
-    - rustup target add x86_64-unknown-linux-musl
+    - rustup target add $RUST_TARGET
 
     # Build OpenSSL statically
     - apt install -y build-essential wget musl-tools
@@ -89,13 +92,13 @@ build-static:
     - export OPENSSL_STATIC=1
     - export OPENSSL_LIB_DIR=/usr/local/lib
     - export OPENSSL_INCLUDE_DIR=/usr/local/include
-    - cargo build --target=x86_64-unknown-linux-musl --release --verbose
+    - cargo build --target=$RUST_TARGET --release --verbose
 
     # Prepare the release artifact
     - find . -name ffsend -exec ls -lah {} \;
-    - mv target/x86_64-unknown-linux-musl/release/ffsend ./ffsend
+    - mv target/$RUST_TARGET/release/ffsend ./ffsend
   artifacts:
-    name: build-static
+    name: ffsend-x86_64-linux-musl
     paths:
       - ffsend
     expire_in: 1 month
@@ -112,7 +115,7 @@ public-send-test:
   stage: test
   allow_failure: true
   dependencies:
-    - build-static
+    - build-x86_64-linux-musl
   variables:
     GIT_STRATEGY: none
   before_script: []
