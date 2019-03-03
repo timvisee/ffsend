@@ -1,3 +1,10 @@
+# GitLab CI configuration for ffsend builds, tests and releases
+#
+# To add a new release:
+# - configure a new 'build-*' job with the proper target
+# - export a build artifact from the new job
+# - manually upload artifact to GitHub in the 'github-release' job
+
 image: "rust:slim"
 
 stages:
@@ -32,6 +39,7 @@ before_script:
 # Variable defaults
 variables:
   RUST_VERSION: stable
+  RUST_TARGET: x86_64-unknown-linux-gnu
 
 # Check on stable, beta and nightly 
 .check-base: &check-base
@@ -51,29 +59,32 @@ rust-nightly:
   <<: *check-base
   variables:
     RUST_VERSION: nightly
-# rust-old:
-#   <<: *check-base
-#   variables:
-#     RUST_VERSION: "1.26"
+rust-old:
+  <<: *check-base
+  variables:
+    RUST_VERSION: "1.32.0"
 
 # Build using Rust stable
-build:
+build-x86_64-linux-gnu:
   stage: build
   script:
-    - cargo build --release --verbose
-    - mv target/release/ffsend ./ffsend
+    - cargo build --target=$RUST_TARGET --release --verbose
+    - mv target/$RUST_TARGET/release/ffsend ./ffsend-$RUST_TARGET
+    - strip -g ./ffsend-$RUST_TARGET
   artifacts:
-    name: build-dynamic
+    name: ffsend-x86_64-linux-gnu
     paths:
-      - ffsend
+      - ffsend-$RUST_TARGET
     expire_in: 1 month
 
 # Build a static version
-build-static:
+build-x86_64-linux-musl:
   stage: build
+  variables:
+    RUST_TARGET: x86_64-unknown-linux-musl
   script:
     # Install the static target
-    - rustup target add x86_64-unknown-linux-musl
+    - rustup target add $RUST_TARGET
 
     # Build OpenSSL statically
     - apt install -y build-essential wget musl-tools
@@ -89,15 +100,16 @@ build-static:
     - export OPENSSL_STATIC=1
     - export OPENSSL_LIB_DIR=/usr/local/lib
     - export OPENSSL_INCLUDE_DIR=/usr/local/include
-    - cargo build --target=x86_64-unknown-linux-musl --release --verbose
+    - cargo build --target=$RUST_TARGET --release --verbose
 
-    # Prepare the release artifact
+    # Prepare the release artifact, strip it
     - find . -name ffsend -exec ls -lah {} \;
-    - mv target/x86_64-unknown-linux-musl/release/ffsend ./ffsend
+    - mv target/$RUST_TARGET/release/ffsend ./ffsend-$RUST_TARGET
+    - strip -g ./ffsend-$RUST_TARGET
   artifacts:
-    name: build-static
+    name: ffsend-x86_64-linux-musl
     paths:
-      - ffsend
+      - ffsend-$RUST_TARGET
     expire_in: 1 month
 
 # Run the unit tests through Cargo
@@ -112,7 +124,7 @@ public-send-test:
   stage: test
   allow_failure: true
   dependencies:
-    - build-static
+    - build-x86_64-linux-musl
   variables:
     GIT_STRATEGY: none
   before_script: []
@@ -121,11 +133,13 @@ public-send-test:
     - "head -c2m </dev/urandom >testfile"
     - "./ffsend upload testfile -d=10 -p=secret -I"
     - "./ffsend download $(./ffsend history -q) -p=secret -I -o=downloadfile"
+    - "./ffsend delete $(./ffsend history -q)"
     - "cmp --silent ./testfile ./downloadfile || (echo ERROR: Downloaded file is different than original; exit 1)"
 
     # Also test Firefox Send v3
     - "./ffsend upload --host http://send2.dev.lcip.org/ testfile -d=10 -p=secret -I"
     - "./ffsend download $(./ffsend history -q) -p=secret -I -o=downloadfile2"
+    - "./ffsend delete $(./ffsend history -q)"
     - "cmp --silent ./testfile ./downloadfile2 || (echo ERROR: Downloaded file is different than original; exit 1)"
 
 # Cargo crate release
@@ -138,6 +152,25 @@ crate:
     - echo $CARGO_TOKEN | cargo login
     - echo "Publishing crate to crates.io..."
     - cargo publish --verbose --allow-dirty
+
+# Publish release binaries to as GitHub release
+github-release:
+  stage: release
+  only:
+    - /^v(\d+\.)*\d+$/
+  dependencies:
+    - build-x86_64-linux-gnu
+    - build-x86_64-linux-musl
+  before_script: []
+  script:
+    # Download github-release binary
+    - wget $(curl -s https://api.github.com/repos/tfausak/github-release/releases/latest | grep 'browser_' | cut -d\" -f4 | grep 'linux') -O github-release.tar.gz
+    - tar zxvf github-release.tar.gz
+    - rm github-release.tar.gz
+
+    # Upload binaries
+    - ./github-release upload --token "$GITHUB_TOKEN" --owner 'timvisee' --repo 'ffsend' --tag "$CI_COMMIT_REF_NAME" --file ffsend-x86_64-linux-gnu --name ffsend-$CI_COMMIT_REF_NAME-linux-x64
+    - ./github-release upload --token "$GITHUB_TOKEN" --owner 'timvisee' --repo 'ffsend' --tag "$CI_COMMIT_REF_NAME" --file ffsend-x86_64-linux-musl --name ffsend-$CI_COMMIT_REF_NAME-linux-x64-static
 
 # AUR package release
 pkg-aur:
