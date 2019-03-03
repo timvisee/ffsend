@@ -163,6 +163,10 @@ github-release:
     - build-x86_64-linux-musl
   before_script: []
   script:
+    # Install dependencies
+    - apt-get update
+    - apt-get install -y curl wget tar
+
     # Download github-release binary
     - wget $(curl -s https://api.github.com/repos/tfausak/github-release/releases/latest | grep 'browser_' | cut -d\" -f4 | grep 'linux') -O github-release.tar.gz
     - tar zxvf github-release.tar.gz
@@ -182,16 +186,16 @@ pkg-aur:
   script:
     - cd ./pkg/aur
 
-      # Update version number in PKGBUILD
+    # Update version number in PKGBUILD
     - VERSION=$(echo $CI_COMMIT_REF_NAME | cut -c 2-)
     - echo "Determined binary version number 'v$VERSION', updating PKGBUILD..."
     - sed "s/^pkgver=.*\$/pkgver=$VERSION/" -i PKGBUILD
 
-      # Install dependencies
+    # Install dependencies
     - echo "Installing required build packages..."
     - pacman -Syu --noconfirm sudo base-devel binutils openssh rust cargo cmake git openssl
 
-      # Make AUR package
+    # Make AUR package
     - echo "Making AUR package..."
     - mkdir -p /.cargo
     - chmod -R 777 /.cargo
