@@ -1,3 +1,5 @@
+skip_non_tags: true
+platform: x64
 environment:
   SSL_CERT_FILE: "C:\\OpenSSL\\cacert.pem"
   RUSTUP_USE_HYPER: 1
@@ -11,7 +13,15 @@ environment:
       OPENSSL_VERSION: 1_1_0j
       OPENSSL_DIR: C:\OpenSSL
 
+artifacts:
+- path: .\ffsend*.exe
+
 install:
+  # Quit early if FFSEND_VESRION is not available
+  # These builds must be started from a webhook, initiated by a release build on
+  # GitLab CI
+  - ps: if ([string]::IsNullOrEmpty($FFSEND_VERSION)) { Exit-AppveyorBuild }
+
   # Install OpenSSL
   - mkdir C:\OpenSSL
   - ps: if (Test-Path env:OPENSSL_VERSION) { Start-FileDownload "http://slproweb.com/download/Win${env:BITS}OpenSSL-${env:OPENSSL_VERSION}.exe" }
@@ -26,22 +36,14 @@ install:
   - cargo -V
   - git submodule update --init
 
-clone_depth: 1
-
 build_script:
-  # - cargo check --verbose
-  # - cargo check --no-default-features --features send2 --verbose
-  # - cargo check --no-default-features --features send3 --verbose
-  # - cargo check --features no-color --verbose
-  # - cargo test --verbose
-
   # Build dynamic release binary
-  - cargo build --release --verbose
+  - cargo build --release --features no-color --verbose
   - copy .\target\release\ffsend.exe .\ffsend-%TARGET%.exe
 
   # Build static release binary
   - set RUSTFLAGS=-Ctarget-feature=+crt-static
-  - cargo build --release --verbose
+  - cargo build --release --features no-color --verbose
   - copy .\target\release\ffsend.exe .\ffsend-%TARGET%-static.exe
 
   # Install github-release
@@ -49,12 +51,7 @@ build_script:
   - 7z e github-release.zip
 
   # Upload release binaries to GitHub
-  # TODO: remove this tag name after debugging
-  - set APPVEYOR_REPO_TAG_NAME=v0.2.10
-  - .\github-release.exe upload --token %GITHUB_TOKEN% --owner timvisee --repo ffsend --tag %APPVEYOR_REPO_TAG_NAME% --file .\ffsend-%TARGET%.exe --name ffsend-%APPVEYOR_REPO_TAG_NAME%-windows-x64.exe
-  - .\github-release.exe upload --token %GITHUB_TOKEN% --owner timvisee --repo ffsend --tag %APPVEYOR_REPO_TAG_NAME% --file .\ffsend-%TARGET%-static.exe --name ffsend-%APPVEYOR_REPO_TAG_NAME%-windows-x64-static.exe
+  - .\github-release.exe upload --token %GITHUB_TOKEN% --owner timvisee --repo ffsend --tag v%FFSEND_VERSION% --file .\ffsend-%TARGET%.exe --name ffsend-v%FFSEND_VERSION%-windows-x64.exe
+  - .\github-release.exe upload --token %GITHUB_TOKEN% --owner timvisee --repo ffsend --tag v%FFSEND_VERSION% --file .\ffsend-%TARGET%-static.exe --name ffsend-v%FFSEND_VERSION%-windows-x64-static.exe
 
 test: false
-
-artifacts:
-- path: .\ffsend*.exe
