@@ -34,10 +34,27 @@ build_script:
   # - cargo check --no-default-features --features send3 --verbose
   # - cargo check --features no-color --verbose
   # - cargo test --verbose
+
+  # Build dynamic release binary
+  - cargo build --release --verbose
+  - copy .\target\release\ffsend.exe .\ffsend-%TARGET%.exe
+
+  # Build static release binary
   - set RUSTFLAGS=-Ctarget-feature=+crt-static
   - cargo build --release --verbose
+  - copy .\target\release\ffsend.exe .\ffsend-%TARGET%-static.exe
+
+  # Install github-release
+  - appveyor DownloadFile https://github.com/tfausak/github-release/releases/download/1.2.4/github-release-windows.zip -FileName github-release.zip
+  - 7z e github-release.zip
+
+  # Upload release binaries to GitHub
+  # TODO: remove this tag name after debugging
+  - set APPVEYOR_REPO_TAG_NAME=v0.2.10
+  - .\github-release.exe upload --token %GITHUB_TOKEN% --owner timvisee --repo ffsend --tag %APPVEYOR_REPO_TAG_NAME% --file .\ffsend-%TARGET%.exe --name ffsend-%APPVEYOR_REPO_TAG_NAME%-windows-x64
+  - .\github-release.exe upload --token %GITHUB_TOKEN% --owner timvisee --repo ffsend --tag %APPVEYOR_REPO_TAG_NAME% --file .\ffsend-%TARGET%-static.exe --name ffsend-%APPVEYOR_REPO_TAG_NAME%-windows-x64-static
 
 test: false
 
 artifacts:
-- path: target/release/ffsend.exe
+- path: .\ffsend*.exe
