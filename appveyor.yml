@@ -34,6 +34,7 @@ build_script:
   # - cargo check --no-default-features --features send3 --verbose
   # - cargo check --features no-color --verbose
   # - cargo test --verbose
+  - set OPENSSL_STATIC=1
   - cargo build --release --verbose
 
 test: false
