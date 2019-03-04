@@ -130,15 +130,15 @@ all available subcommands.
 
 ## Requirements
 - Linux, macOS or Windows
-- OpenSSL / CA certificates:
-  - Ubuntu/Debian: `apt install openssl ca-certificates`
 - A terminal :sunglasses:
+- Internet connection for uploading and downloading
 - Linux specific:
+  - OpenSSL / CA certificates:
+    - Ubuntu/Debian: `apt install openssl ca-certificates`
   - `xclip` for clipboard support (optional)
     - Ubuntu/Debian: `apt install xclip`
     - CentOS/Red Hat/openSUSE/Fedora: `yum install xclip`
     - Arch: `pacman -S xclip`
-- Internet connection for uploading and downloading
 
 ## Install
 <!-- Before installing, make sure you meet all requirements listed
@@ -151,8 +151,8 @@ It is recommended to build and install `ffsend` yourself using these fairly
 easy steps [below](#build).
 
 #### Arch AUR package
-[» `ffsend` on `aur.archlinux.org`][aur-ffsend] (binary package)  
-[» `ffsend-git` on `aur.archlinux.org`][aur-ffsend-git] (compile from source package)
+[» `ffsend`][aur-ffsend] (binary package)  
+[» `ffsend-git`][aur-ffsend-git] (compile from source package)
 
 ```bash
 yaourt -S ffsend
@@ -164,11 +164,23 @@ aurget -S ffsend
 ```
 
 #### Prebuilt binaries
-A set of prebuilt binaries for Linux and macOS can be found as asset of the
-[latest release][github-latest-release]. When downloading such release, mark
-the binary as executable using `chmod a+x ffsend`, and move it into `/usr/bin/`.
-If running the binary fails (probably due to some linked library), please feel
-free to [open an issue](https://gitlab.com/timvisee/ffsend/issues).
+A set of prebuilt binaries for Linux and Windows can be found as asset of the
+[latest release][github-latest-release].
+
+On Linux, you must mark the binary as executable. And you may want to move it
+into `/usr/bin/` to make the `ffsend` command globally available:
+```bash
+# Mark binary as executable
+chmod a+x ./ffsend
+
+# Move binary into path, to make it easily usable
+mv ./ffsend /usr/bin/ffsend
+
+ffsend
+```
+
+If running the binary fails (probably due to some missing dependency),
+feel free to [open an issue](https://gitlab.com/timvisee/ffsend/issues).
 
 ## Build
 To build and install `ffsend` yourself, you meet the following requirements
