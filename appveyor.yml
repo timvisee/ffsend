@@ -22,7 +22,6 @@ install:
   - appveyor-retry appveyor DownloadFile https://win.rustup.rs/ -FileName rustup-init.exe
   - rustup-init.exe -y --default-host x86_64-pc-windows-msvc --default-toolchain nightly
   - set PATH=%PATH%;C:\Users\appveyor\.cargo\bin
-  - rustup target add %OTHER_TARGET%
   - rustc -V
   - cargo -V
   - git submodule update --init
@@ -41,11 +40,3 @@ test: false
 
 artifacts:
 - path: target/release/ffsend.exe
-
-notifications:
-  - provider: Email
-    to:
-      - tim@visee.me
-    on_build_success: false
-    on_build_failure: true
-    on_build_status_changed: true
