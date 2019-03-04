@@ -151,12 +151,15 @@ It is recommended to build and install `ffsend` yourself using these fairly
 easy steps [below](#build).
 
 #### Arch AUR package
-[» `ffsend` on `aur.archlinux.org`][aur-ffsend]
+[» `ffsend` on `aur.archlinux.org`][aur-ffsend] (binary package)  
+[» `ffsend-git` on `aur.archlinux.org`][aur-ffsend-git] (compile from source package)
 
 ```bash
 yaourt -S ffsend
 # or
 yay ffsend
+# or
+aurget -S ffsend
 # or using any other AUR installer
 ```
 
@@ -411,3 +414,4 @@ Check out the [LICENSE](LICENSE) file for more information.
 [svg-term]: https://github.com/marionebl/svg-term-cli
 [github-latest-release]: https://github.com/timvisee/ffsend/releases/latest
 [aur-ffsend]: https://aur.archlinux.org/packages/ffsend/
+[aur-ffsend-git]: https://aur.archlinux.org/packages/ffsend-git/
