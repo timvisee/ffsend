@@ -253,7 +253,7 @@ trigger-appveyor-release:
   script:
     - apt-get install -y --no-install-recommends curl
     - export VERSION=$(echo $CI_COMMIT_REF_NAME | cut -c 2-)
-    - curl -L -H 'Content-Type: application/json' -H "Authorization: Bearer $APPVEYOR_TOKEN" -d "{\"accountName\":\"timvisee\",\"projectSlug\":\"ffsend\",\"tag\":\"$CI_COMMIT_REF_NAME\",\"environmentVariables\":{\"FFSEND_VERSION\":\"$VERSION\"}}" https://ci.appveyor.com/api/builds
+    - 'curl -L -H "Content-Type: application/json" -H "Authorization: Bearer $APPVEYOR_TOKEN" -d "{\"accountName\":\"timvisee\",\"projectSlug\":\"ffsend\",\"tag\":\"$CI_COMMIT_REF_NAME\",\"environmentVariables\":{\"FFSEND_VERSION\":\"$VERSION\"}}" https://ci.appveyor.com/api/builds'
 
 # # Snap release
 # snap:
