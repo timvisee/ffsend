@@ -1,0 +1,42 @@
+environment:
+  RUSTUP_USE_HYPER: 1
+  CARGO_HTTP_CHECK_REVOKE: false
+  GITHUB_TOKEN:
+    secure: jqZ4q5oOthKX/pBL1tRsBJsfGPIee3q+N/UBSCZNjCrlFUNfQSfibBPzzICYg1he
+
+  matrix:
+    - TARGET: x86_64-pc-windows-msvc
+      OTHER_TARGET: i686-pc-windows-msvc
+      MAKE_TARGETS: test-unit-x86_64-pc-windows-msvc
+
+install:
+  - appveyor-retry appveyor DownloadFile https://win.rustup.rs/ -FileName rustup-init.exe
+  - rustup-init.exe -y --default-host x86_64-pc-windows-msvc --default-toolchain nightly
+  - set PATH=%PATH%;C:\Users\appveyor\.cargo\bin
+  - rustup target add %OTHER_TARGET%
+  - rustc -V
+  - cargo -V
+  - git submodule update --init
+
+clone_depth: 1
+
+build_script:
+  # - cargo check --verbose
+  # - cargo check --no-default-features --features send2 --verbose
+  # - cargo check --no-default-features --features send3 --verbose
+  # - cargo check --features no-color --verbose
+  # - cargo test --verbose
+  - cargo build --release --verbose
+
+test: false
+
+artifacts:
+- path: target/release/ffsend.exe
+
+notifications:
+  - provider: Email
+    to:
+      - tim@visee.me
+    on_build_success: false
+    on_build_failure: true
+    on_build_status_changed: true
