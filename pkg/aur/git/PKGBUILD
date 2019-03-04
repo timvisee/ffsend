@@ -6,7 +6,7 @@ pkgrel=1
 pkgdesc="Easily and securely share files from the command line. A Firefox Send client."
 url="https://gitlab.com/timvisee/ffsend"
 license=('GPL3')
-provides=('ffsend=$pkgver')
+provides=('ffsend')
 conflicts=('ffsend')
 source=("ffsend-v$pkgver.tar.gz::$url/-/archive/v$pkgver/ffsend-v$pkgver.tar.gz")
 sha256sums=('SKIP')
