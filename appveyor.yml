@@ -1,0 +1,57 @@
+skip_non_tags: true
+platform: x64
+environment:
+  SSL_CERT_FILE: "C:\\OpenSSL\\cacert.pem"
+  RUSTUP_USE_HYPER: 1
+  CARGO_HTTP_CHECK_REVOKE: false
+  GITHUB_TOKEN:
+    secure: jqZ4q5oOthKX/pBL1tRsBJsfGPIee3q+N/UBSCZNjCrlFUNfQSfibBPzzICYg1he
+
+  matrix:
+    - TARGET: x86_64-pc-windows-msvc
+      BITS: 64
+      OPENSSL_VERSION: 1_1_0j
+      OPENSSL_DIR: C:\OpenSSL
+
+artifacts:
+- path: .\ffsend*.exe
+
+install:
+  # Quit early if FFSEND_VESRION is not available
+  # These builds must be started from a webhook, initiated by a release build on
+  # GitLab CI
+  - ps: if ([string]::IsNullOrEmpty($FFSEND_VERSION)) { Exit-AppveyorBuild }
+
+  # Install OpenSSL
+  - mkdir C:\OpenSSL
+  - ps: if (Test-Path env:OPENSSL_VERSION) { Start-FileDownload "http://slproweb.com/download/Win${env:BITS}OpenSSL-${env:OPENSSL_VERSION}.exe" }
+  - if defined OPENSSL_VERSION Win%BITS%OpenSSL-%OPENSSL_VERSION%.exe /SILENT /VERYSILENT /SP- /DIR="C:\OpenSSL"
+  - appveyor DownloadFile https://curl.haxx.se/ca/cacert.pem -FileName C:\OpenSSL\cacert.pem
+
+  # Install Rust
+  - appveyor-retry appveyor DownloadFile https://win.rustup.rs/ -FileName rustup-init.exe
+  - rustup-init.exe -y --default-host x86_64-pc-windows-msvc --default-toolchain nightly
+  - set PATH=%PATH%;C:\Users\appveyor\.cargo\bin
+  - rustc -V
+  - cargo -V
+  - git submodule update --init
+
+build_script:
+  # Build dynamic release binary
+  - cargo build --release --features no-color --verbose
+  - copy .\target\release\ffsend.exe .\ffsend-%TARGET%.exe
+
+  # Build static release binary
+  - set RUSTFLAGS=-Ctarget-feature=+crt-static
+  - cargo build --release --features no-color --verbose
+  - copy .\target\release\ffsend.exe .\ffsend-%TARGET%-static.exe
+
+  # Install github-release
+  - appveyor DownloadFile https://github.com/tfausak/github-release/releases/download/1.2.4/github-release-windows.zip -FileName github-release.zip
+  - 7z e github-release.zip
+
+  # Upload release binaries to GitHub
+  - .\github-release.exe upload --token %GITHUB_TOKEN% --owner timvisee --repo ffsend --tag v%FFSEND_VERSION% --file .\ffsend-%TARGET%.exe --name ffsend-v%FFSEND_VERSION%-windows-x64.exe
+  - .\github-release.exe upload --token %GITHUB_TOKEN% --owner timvisee --repo ffsend --tag v%FFSEND_VERSION% --file .\ffsend-%TARGET%-static.exe --name ffsend-v%FFSEND_VERSION%-windows-x64-static.exe
+
+test: false

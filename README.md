@@ -251,8 +251,8 @@ The following features are available, some of which are enabled by default:
 | `no-color`  |         | Compile without color support in error and help messages   |
 
 To enable features during building or installation, specify them with
-`--features <features, >` when using `cargo`.
-You may want to disable alisl default features first using
+`--features <features...>` when using `cargo`.
+You may want to disable default features first using
 `--no-default-features`.
 Here are some examples:
 
