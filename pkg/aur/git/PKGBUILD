@@ -8,24 +8,18 @@ url="https://gitlab.com/timvisee/ffsend"
 license=('GPL3')
 provides=('ffsend=$pkgver')
 conflicts=('ffsend')
-source=("$pkgname-v$pkgver.tar.gz::$url/-/archive/v$pkgver/ffsend-v$pkgver.tar.gz")
+source=("ffsend-v$pkgver.tar.gz::$url/-/archive/v$pkgver/ffsend-v$pkgver.tar.gz")
 sha256sums=('SKIP')
 arch=('x86_64' 'i686')
 depends=('ca-certificates')
 makedepends=('openssl>=1.0' 'rust' 'cargo' 'cmake')
 optdepends=('xclip: clipboard support')
 
-pkgver() {
-    cd "$pkgname-v$pkgver"
-    echo "$(grep '^version =' Cargo.toml|head -n1|cut -d\" -f2)"
-    #.$(git rev-list --count HEAD).g$(git rev-parse --short HEAD)
-}
-
 build() {
-    cd "$pkgname-v$pkgver"
+    cd "ffsend-v$pkgver"
     env CARGO_INCREMENTAL=0 cargo build --release
 }
 
 package() {
-    install -Dm755 "$srcdir/$pkgname-v$pkgver/target/release/ffsend" "$pkgdir/usr/bin/ffsend"
+    install -Dm755 "$srcdir/ffsend-v$pkgver/target/release/ffsend" "$pkgdir/usr/bin/ffsend"
 }
