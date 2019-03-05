@@ -58,7 +58,7 @@ build_script:
   - 7z e github-release.zip
 
   # Upload release binaries to GitHub
-  - .\github-release.exe upload --token %GITHUB_TOKEN% --owner timvisee --repo ffsend --tag v%FFSEND_VERSION% --file .\ffsend-%TARGET%.exe --name ffsend-v%FFSEND_VERSION%-windows-x64.exe
-  - .\github-release.exe upload --token %GITHUB_TOKEN% --owner timvisee --repo ffsend --tag v%FFSEND_VERSION% --file .\ffsend-%TARGET%-static.exe --name ffsend-v%FFSEND_VERSION%-windows-x64-static.exe
+  - .\github-release.exe upload --token %GITHUB_TOKEN% --owner timvisee --repo ffsend --tag %APPVEYOR_REPO_TAG_NAME% --file .\ffsend-%TARGET%.exe --name ffsend-%APPVEYOR_REPO_TAG_NAME%-windows-x64.exe
+  - .\github-release.exe upload --token %GITHUB_TOKEN% --owner timvisee --repo ffsend --tag %APPVEYOR_REPO_TAG_NAME% --file .\ffsend-%TARGET%-static.exe --name ffsend-%APPVEYOR_REPO_TAG_NAME%-windows-x64-static.exe
 
 test: false
