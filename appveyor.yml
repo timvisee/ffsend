@@ -1,4 +1,10 @@
+# Only build version tags
 skip_non_tags: true
+branches:
+  only:
+    - /v\d*\.\d*\.\d*/
+
+# Build for the x86_64 Windows target
 platform: x64
 environment:
   SSL_CERT_FILE: "C:\\OpenSSL\\cacert.pem"
@@ -13,14 +19,15 @@ environment:
       OPENSSL_VERSION: 1_1_0j
       OPENSSL_DIR: C:\OpenSSL
 
+# Extract release binary artifacts
 artifacts:
 - path: .\ffsend*.exe
 
 install:
-  # Quit early if FFSEND_VESRION is not available
-  # These builds must be started from a webhook, initiated by a release build on
-  # GitLab CI
-  - ps: if ([string]::IsNullOrEmpty($FFSEND_VERSION)) { Exit-AppveyorBuild }
+  # # Quit early if FFSEND_VESRION is not available
+  # # These builds must be started from a webhook, initiated by a release build on
+  # # GitLab CI
+  # - ps: if ([string]::IsNullOrEmpty($FFSEND_VERSION)) { Exit-AppveyorBuild }
 
   # Install OpenSSL
   - mkdir C:\OpenSSL
