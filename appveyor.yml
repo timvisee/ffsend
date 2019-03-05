@@ -23,12 +23,8 @@ environment:
 artifacts:
 - path: .\ffsend*.exe
 
+# Install dependencies: Rust and OpenSSL
 install:
-  # # Quit early if FFSEND_VESRION is not available
-  # # These builds must be started from a webhook, initiated by a release build on
-  # # GitLab CI
-  # - ps: if ([string]::IsNullOrEmpty($FFSEND_VERSION)) { Exit-AppveyorBuild }
-
   # Install OpenSSL
   - mkdir C:\OpenSSL
   - ps: if (Test-Path env:OPENSSL_VERSION) { Start-FileDownload "http://slproweb.com/download/Win${env:BITS}OpenSSL-${env:OPENSSL_VERSION}.exe" }
@@ -37,12 +33,13 @@ install:
 
   # Install Rust
   - appveyor-retry appveyor DownloadFile https://win.rustup.rs/ -FileName rustup-init.exe
-  - rustup-init.exe -y --default-host x86_64-pc-windows-msvc --default-toolchain nightly
+  - rustup-init.exe -y --default-host x86_64-pc-windows-msvc --default-toolchain stable
   - set PATH=%PATH%;C:\Users\appveyor\.cargo\bin
   - rustc -V
   - cargo -V
   - git submodule update --init
 
+# Build dynamic and static Windows binaries, release on GitHub
 build_script:
   # Build dynamic release binary
   - cargo build --release --features no-color --verbose
@@ -57,8 +54,10 @@ build_script:
   - appveyor DownloadFile https://github.com/tfausak/github-release/releases/download/1.2.4/github-release-windows.zip -FileName github-release.zip
   - 7z e github-release.zip
 
-  # Upload release binaries to GitHub
+  # Create the release, upload the binaries
+  - .\github-release.exe release --token %GITHUB_TOKEN% --owner timvisee --repo ffsend --tag %APPVEYOR_REPO_TAG_NAME% --title "ffsend %APPVEYOR_REPO_TAG_NAME%"
   - .\github-release.exe upload --token %GITHUB_TOKEN% --owner timvisee --repo ffsend --tag %APPVEYOR_REPO_TAG_NAME% --file .\ffsend-%TARGET%.exe --name ffsend-%APPVEYOR_REPO_TAG_NAME%-windows-x64.exe
   - .\github-release.exe upload --token %GITHUB_TOKEN% --owner timvisee --repo ffsend --tag %APPVEYOR_REPO_TAG_NAME% --file .\ffsend-%TARGET%-static.exe --name ffsend-%APPVEYOR_REPO_TAG_NAME%-windows-x64-static.exe
 
+# We don't test anything here
 test: false
