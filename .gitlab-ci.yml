@@ -155,6 +155,35 @@ crate:
     - echo "Publishing crate to crates.io..."
     - cargo publish --verbose --allow-dirty
 
+# Snap release
+snap:
+  image: snapcore/snapcraft:edge
+  stage: release
+  only:
+    - /^v(\d+\.)*\d+$/
+  before_script: []
+  script:
+    # Prepare the environment
+    - apt-get update -y
+    - cd pkg/snap
+
+    # Update version number in snapcraft.yml
+    - VERSION=$(echo $CI_COMMIT_REF_NAME | cut -c 2-)
+    - echo "Determined binary version number 'v$VERSION', updating snapcraft.yml..."
+    - sed "s/^version:.*\$/version: $VERSION/" -i snapcraft.yml
+    - sed "s/^pkgver=.*\$/pkgver=$VERSION/" -i snapcraft.yml
+
+    # Build the package
+    - echo "Building snap package..."
+    - snapcraft
+
+    # TODO: test snap package
+
+    # Publish snap package
+    - echo "Publishing snap package..."
+    - echo "$SNAP_MAIL\n&SNAP_PASSWORD" | snapcraft login
+    - snapcraft push --release=stable ffsend_*_amd64.snap
+
 # Publish release binaries to as GitHub release
 github-release:
   stage: release
@@ -254,24 +283,5 @@ package-aur:
 #     - apt-get install -y --no-install-recommends curl
 #     - export VERSION=$(echo $CI_COMMIT_REF_NAME | cut -c 2-)
 #     - 'curl -L -H "Content-Type: application/json" -H "Authorization: Bearer $APPVEYOR_TOKEN" -d "{\"accountName\":\"timvisee\",\"projectSlug\":\"ffsend\",\"tag\":\"$CI_COMMIT_REF_NAME\",\"environmentVariables\":{\"FFSEND_VERSION\":\"$VERSION\"}}" https://ci.appveyor.com/api/builds'
-
-# # Snap release
-# snap:
-#   image: snapcore/snapcraft:edge
-#   stage: release
-#   # only:
-#   #   - /^v(\d+\.)*\d+$/
-#   before_script: []
-#   script:
-#     - echo "Building snap package..."
-#     - cd pkg/snap
-#     - snapcraft
-#     # TODO: See: https://docs.snapcraft.io/rust-applications/7826
-#     # TODO: - login to registry
-#     # TODO: - test built snap
-#     # TODO: - push snap to snapcraft.io
-#     # - echo "Publishing snap package..."
-#     # - echo "$SNAP_USER\n&SNAP_PASS" | snapcraft login
-#     # - snapcraft push --release=edge ffsend_amd64.snap
 
 # TODO: add job to test ffsend{-git} AUR packages

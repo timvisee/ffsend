@@ -152,6 +152,12 @@ available right now.
 It is recommended to build and install `ffsend` yourself using these fairly
 easy steps [below](#build).
 
+#### Snap package
+[» `ffsend`][snapcraft-ffsend]
+```bash
+snap install ffsend
+```
+
 #### Arch AUR package
 [» `ffsend`][aur-ffsend] (binary package)  
 [» `ffsend-git`][aur-ffsend-git] (compile from source package)
@@ -433,3 +439,4 @@ Check out the [LICENSE](LICENSE) file for more information.
 [github-latest-release]: https://github.com/timvisee/ffsend/releases/latest
 [aur-ffsend]: https://aur.archlinux.org/packages/ffsend/
 [aur-ffsend-git]: https://aur.archlinux.org/packages/ffsend-git/
+[snapcraft-ffsend]: https://snapcraft.io/ffsend
