@@ -18,6 +18,8 @@ jobs:
       os: osx
       env: RUST_TARGET=x86_64-apple-darwin
       cache: cargo
+      install:
+        - brew install curl
       script:
         # TODO: remove after debugging
         - export TRAVIS_TAG=v0.2.18
