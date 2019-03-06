@@ -40,7 +40,7 @@ impl<'a> CmdArgOption<'a> for ArgPassword {
         // Get the password argument value, or prompt
         let password = match Self::value_raw(matches) {
             Some(password) => password.into(),
-            None => prompt_password(&matcher_main),
+            None => prompt_password(&matcher_main, false).unwrap(),
         };
 
         // Check for empty passwords

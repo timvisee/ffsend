@@ -76,7 +76,12 @@ impl<'a> Download<'a> {
         }
 
         // Ensure a password is set when required
-        ensure_password(&mut password, exists.requires_password(), &matcher_main);
+        ensure_password(
+            &mut password,
+            exists.requires_password(),
+            &matcher_main,
+            false,
+        );
 
         // Fetch the file metadata
         let metadata = ApiMetadata::new(&file, password.clone(), false).invoke(&client)?;

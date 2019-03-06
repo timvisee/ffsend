@@ -376,9 +376,9 @@ pub fn check_empty_password(password: &str, matcher_main: &MainMatcher) {
 /// Prompt the user to enter a password.
 ///
 /// If `empty` is `false`, emtpy passwords aren't allowed unless forced.
-pub fn prompt_password(main_matcher: &MainMatcher) -> String {
+pub fn prompt_password(main_matcher: &MainMatcher, optional: bool) -> Option<String> {
     // Quit with an error if we may not interact
-    if main_matcher.no_interact() {
+    if !optional && main_matcher.no_interact() {
         quit_error_msg(
             "missing password, must be specified in no-interact mode",
             ErrorHintsBuilder::default()
@@ -390,35 +390,89 @@ pub fn prompt_password(main_matcher: &MainMatcher) -> String {
     }
 
     // Prompt for the password
-    match prompt_password_stderr("Password: ") {
-        Ok(password) => password,
-        Err(err) => quit_error(
-            err.context("failed to read password from password prompt"),
-            ErrorHints::default(),
-        ),
+    let prompt = if optional {
+        "Password (optional): "
+    } else {
+        "Password: "
+    };
+    match prompt_password_stderr(prompt) {
+        // If optional and nothing is entered, regard it as not defined
+        Ok(password) => {
+            if password.is_empty() && optional {
+                None
+            } else {
+                Some(password)
+            }
+        }
+
+        // On input error, propegate the error or don't use a password if optional
+        Err(err) => {
+            if !optional {
+                quit_error(
+                    err.context("failed to read password from password prompt"),
+                    ErrorHints::default(),
+                )
+            } else {
+                return None;
+            }
+        }
     }
 }
 
 /// Get a password if required.
 /// This method will ensure a password is set (or not) in the given `password`
 /// parameter, as defined by `needs`.
+/// If a password is needed, it may optionally be entered if `option` is set to true.
 ///
 /// This method will prompt the user for a password, if one is required but
 /// wasn't set. An ignore message will be shown if it was not required while it
 /// was set.
-pub fn ensure_password(password: &mut Option<String>, needs: bool, main_matcher: &MainMatcher) {
-    // Return if we're fine
+///
+/// Returns true if a password is now set, false if not.
+pub fn ensure_password(
+    password: &mut Option<String>,
+    needs: bool,
+    main_matcher: &MainMatcher,
+    optional: bool,
+) -> bool {
+    // Return if we're fine, ignore if set but we don't need it
     if password.is_some() == needs {
-        return;
+        return needs;
+    }
+    if !needs {
+        // Notify the user a set password is ignored
+        if password.is_some() {
+            println!("Ignoring password, it is not required");
+            *password = None;
+        }
+        return false;
     }
 
-    // Prompt for the password, or clear it if not required
-    if needs {
-        println!("This file is protected with a password.");
-        *password = Some(prompt_password(main_matcher));
-    } else {
-        println!("Ignoring password, it is not required");
-        *password = None;
+    // Check whehter we allow interaction
+    let interact = !main_matcher.no_interact();
+
+    loop {
+        // Prompt for an owner token if not set yet
+        if password.is_none() {
+            // Do not ask for a token if optional when non-interactive or forced
+            if optional && (!interact || main_matcher.force()) {
+                return false;
+            }
+
+            // Ask for the password
+            *password = prompt_password(main_matcher, optional);
+        }
+
+        // The token must not be empty, unless it's optional
+        let empty = password.is_none();
+        if empty && !optional {
+            eprintln!(
+                "No password given, which is required. Use {} to cancel.",
+                highlight("[CTRL+C]"),
+            );
+        } else {
+            return !empty;
+        }
     }
 }
 

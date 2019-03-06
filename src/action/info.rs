@@ -59,7 +59,12 @@ impl<'a> Info<'a> {
 
         // Get the password, ensure the password is set when required
         let mut password = matcher_info.password();
-        ensure_password(&mut password, exists.requires_password(), &matcher_main);
+        let has_password = ensure_password(
+            &mut password,
+            exists.requires_password(),
+            &matcher_main,
+            true,
+        );
 
         // Fetch both file info and metadata
         let info = if has_owner {
@@ -67,12 +72,16 @@ impl<'a> Info<'a> {
         } else {
             None
         };
-        let metadata = ApiMetadata::new(&file, password, false)
-            .invoke(&client)
-            .map_err(|err| {
-                print_error(err.context("failed to fetch file metadata, showing limited info"))
-            })
-            .ok();
+        let metadata = if has_password {
+            ApiMetadata::new(&file, password, false)
+                .invoke(&client)
+                .map_err(|err| {
+                    print_error(err.context("failed to fetch file metadata, showing limited info"))
+                })
+                .ok()
+        } else {
+            None
+        };
 
         // Update history file TTL if info is known
         if let Some(info) = &info {
@@ -92,7 +101,7 @@ impl<'a> Info<'a> {
         // Add the ID
         table.add_row(Row::new(vec![Cell::new("ID:"), Cell::new(file.id())]));
 
-        // Metadata related details
+        // Show file metadata if available
         if let Some(metadata) = &metadata {
             // The file name
             table.add_row(Row::new(vec![
@@ -118,8 +127,9 @@ impl<'a> Info<'a> {
             ]));
         }
 
-        // The download count
+        // Show file info if available
         if let Some(info) = &info {
+            // The download count
             table.add_row(Row::new(vec![
                 Cell::new("Downloads:"),
                 Cell::new(&format!(
