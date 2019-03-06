@@ -1,3 +1,8 @@
+# AppVeyor CI configuration for building Windows binaries for ffsend.
+# These Windows binaries are published on GitHub as release files.
+#
+# The main CI runs on GitLab CI at: https://gitlab.com/timvisee/ffsend/pipelines
+
 # Only build version tags
 skip_non_tags: true
 branches:

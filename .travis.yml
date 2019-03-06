@@ -1,0 +1,39 @@
+# Travis CI configuration for building macOS binaries for ffsend.
+# These macOS binaries are published on GitHub as release files.
+#
+# The main CI runs on GitLab CI at: https://gitlab.com/timvisee/ffsend/pipelines
+
+language: rust
+
+stages:
+  - release
+  # TODO: use this configuration instead to only build version tags
+  # - name: release
+  #   if: tag =~ ^v(\d+\.)*\d+$
+
+jobs:
+  include:
+    - stage: release
+      rust: stable
+      os: osx
+      env: RUST_TARGET=x86_64-apple-darwin
+      cache: cargo
+      install:
+        - brew install curl
+      script:
+        # TODO: remove after debugging
+        - export TRAVIS_TAG=v0.2.18
+
+        # Create release binary for macOS
+        - echo "Creating release binary for $RUST_TARGET..."
+        - cargo build --target=$RUST_TARGET --release --verbose --all
+        - cp target/$RUST_TARGET/release/ffsend ./ffsend
+
+        # Download github-release binary
+        - wget $(curl -s https://api.github.com/repos/tfausak/github-release/releases/latest | grep 'browser_' | cut -d\" -f4 | grep 'osx') -O github-release.gz
+        - gunzip github-release.gz
+        - chmod a+x ./github-release
+
+        # Create the release, upload binary
+        - ./github-release release --token "$GITHUB_TOKEN" --owner timvisee --repo ffsend --tag "$TRAVIS_TAG"  --title "ffsend $TRAVIS_TAG"
+        - ./github-release upload --token "$GITHUB_TOKEN" --owner timvisee --repo ffsend --tag "$TRAVIS_TAG" --file ./ffsend --name ffsend-$TRAVIS_TAG-macos
