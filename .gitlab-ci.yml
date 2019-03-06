@@ -170,14 +170,12 @@ snap:
     # Update version number in snapcraft.yml
     - VERSION=$(echo $CI_COMMIT_REF_NAME | cut -c 2-)
     - echo "Determined binary version number 'v$VERSION', updating snapcraft.yml..."
-    - sed "s/^version:.*\$/version: $VERSION/" -i snapcraft.yml
-    - sed "s/^pkgver=.*\$/pkgver=$VERSION/" -i snapcraft.yml
+    - 'sed "s/^version:.*\$/version: $VERSION/" -i snapcraft.yml'
+    - 'sed "s/^pkgver=.*\$/pkgver=$VERSION/" -i snapcraft.yml'
 
     # Build the package
     - echo "Building snap package..."
     - snapcraft
-
-    # TODO: test snap package
 
     # Publish snap package
     - echo "Publishing snap package..."
