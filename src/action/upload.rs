@@ -19,7 +19,7 @@ use super::select_api_version;
 #[cfg(feature = "archive")]
 use crate::archive::archiver::Archiver;
 use crate::client::create_transfer_client;
-use crate::cmd::matcher::{CopyMode, MainMatcher, Matcher, UploadMatcher};
+use crate::cmd::matcher::{MainMatcher, Matcher, UploadMatcher};
 #[cfg(feature = "history")]
 use crate::history_tool;
 use crate::progress::ProgressBar;
