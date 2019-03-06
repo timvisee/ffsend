@@ -51,7 +51,7 @@ This is a nuspec. It mostly adheres to https://docs.nuget.org/create/Nuspec-Refe
 
     <!-- Specifying dependencies and version ranges? https://docs.nuget.org/create/versioning#specifying-version-ranges-in-.nuspec-files -->
     <dependencies>
-      <dependency id="openssl.light" version="1.1.0.80000000" />
+      <dependency id="openssl.light" version="" />
     </dependencies>
   </metadata>
   <files>

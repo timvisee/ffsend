@@ -64,5 +64,15 @@ build_script:
   - .\github-release.exe upload --token %GITHUB_TOKEN% --owner timvisee --repo ffsend --tag %APPVEYOR_REPO_TAG_NAME% --file .\ffsend-%TARGET%.exe --name ffsend-%APPVEYOR_REPO_TAG_NAME%-windows-x64.exe
   - .\github-release.exe upload --token %GITHUB_TOKEN% --owner timvisee --repo ffsend --tag %APPVEYOR_REPO_TAG_NAME% --file .\ffsend-%TARGET%-static.exe --name ffsend-%APPVEYOR_REPO_TAG_NAME%-windows-x64-static.exe
 
+  # TODO: configure these chocolatey commands
+  # Create Chocolatey package
+  # - copy .\ffsend-%TARGET%.exe .\pkg\choco\ffsend\tools\ffsend.exe
+  # - cd .\pkg\choco\ffsend
+  # TODO: define version number in file
+  # - choco pack
+  # - cd ..
+  # - choco install ffsend -dv -s .
+  # TODO: publish package
+
 # We don't test anything here
 test: false
