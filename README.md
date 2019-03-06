@@ -129,7 +129,7 @@ Use the `--help` flag, `help` subcommand, or see the [help](#help) section for
 all available subcommands.
 
 ## Requirements
-- Linux, macOS or Windows
+- Linux, Windows or macOS
 - A terminal :sunglasses:
 - Internet connection for uploading and downloading
 - Linux specific:
@@ -141,6 +141,8 @@ all available subcommands.
     - Arch: `pacman -S xclip`
 - Windows specific:
   - OpenSSL v1.1.0j: [» Installer](https://slproweb.com/download/Win64OpenSSL_Light-1_1_0j.exe)
+- macOS specific:
+  - OpenSSL: `brew install openssl`
 
 ## Install
 <!-- Before installing, make sure you meet all requirements listed
@@ -206,11 +208,11 @@ before proceeding:
     - Gentoo: `emerge -a dev-util/pkgconfig dev-util/cmake dev-libs/openssl`
 		- Fedora: `dnf install gcc gcc-c++ make cmake openssl-devel`
 		- Or see instructions [here](https://github.com/sfackler/rust-openssl#linux)
+	- Windows:
+		- See instructions here [here](https://github.com/sfackler/rust-openssl#windows-msvc)
 	- macOS:
 		- Using `brew`: `brew install cmake pkg-config openssl`
 		- Or see instructions [here](https://github.com/sfackler/rust-openssl#osx)
-	- Windows:
-		- See instructions here [here](https://github.com/sfackler/rust-openssl#windows-msvc)
 
 ### Compile and install
 Then, walk through one of the following steps to compile and install `ffsend`:
