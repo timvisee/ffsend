@@ -93,10 +93,21 @@ impl<'a: 'b, 'b> UploadMatcher<'a> {
         self.matches.is_present("open") || env_var_present("FFSEND_OPEN")
     }
 
-    /// Check whether to copy the file URL in the user's clipboard.
+    /// Check whether to copy the file URL in the user's clipboard, get the copy mode.
     #[cfg(feature = "clipboard")]
-    pub fn copy(&self) -> bool {
-        self.matches.is_present("copy") || env_var_present("FFSEND_COPY")
+    pub fn copy(&self) -> Option<CopyMode> {
+        // Get the options
+        let copy = self.matches.is_present("copy") || env_var_present("FFSEND_COPY");
+        let copy_cmd = self.matches.is_present("copy-cmd") || env_var_present("FFSEND_COPY_CMD");
+
+        // Return the corresponding copy mode
+        if copy_cmd {
+            Some(CopyMode::DownloadCmd)
+        } else if copy {
+            Some(CopyMode::Url)
+        } else {
+            None
+        }
     }
 }
 
@@ -106,4 +117,13 @@ impl<'a> Matcher<'a> for UploadMatcher<'a> {
             .subcommand_matches("upload")
             .map(|matches| UploadMatcher { matches })
     }
+}
+
+/// The copy mode.
+pub enum CopyMode {
+    /// Copy the public share link.
+    Url,
+
+    /// Copy an ffsend download command.
+    DownloadCmd,
 }

@@ -22,7 +22,7 @@ pub use self::info::InfoMatcher;
 pub use self::main::MainMatcher;
 pub use self::params::ParamsMatcher;
 pub use self::password::PasswordMatcher;
-pub use self::upload::UploadMatcher;
+pub use self::upload::{CopyMode, UploadMatcher};
 pub use self::version::VersionMatcher;
 
 use clap::ArgMatches;

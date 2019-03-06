@@ -413,7 +413,7 @@ pub fn prompt_password(main_matcher: &MainMatcher, optional: bool) -> Option<Str
                     ErrorHints::default(),
                 )
             } else {
-                return None;
+                None
             }
         }
     }

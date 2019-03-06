@@ -55,12 +55,22 @@ impl CmdUpload {
         // Optional clipboard support
         #[cfg(feature = "clipboard")]
         {
-            cmd = cmd.arg(
-                Arg::with_name("copy")
-                    .long("copy")
-                    .short("c")
-                    .help("Copy the share link to your clipboard"),
-            );
+            cmd = cmd
+                .arg(
+                    Arg::with_name("copy")
+                        .long("copy")
+                        .short("c")
+                        .help("Copy the share link to your clipboard")
+                        .conflicts_with("copy-cmd"),
+                )
+                .arg(
+                    Arg::with_name("copy-cmd")
+                        .long("copy-cmd")
+                        .alias("copy-command")
+                        .short("C")
+                        .help("Copy the ffsend download command to your clipboard")
+                        .conflicts_with("copy"),
+                );
         }
 
         cmd

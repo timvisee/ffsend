@@ -302,18 +302,19 @@ These environment variables may be used to toggle a flag, simply by making them
 available. The actual value of these variables is ignored, and variables may be
 empty.
 
-| Variable             | CLI flag        | Description                       |
-| :------------------- | :-------------: | :-------------------------------- |
-| `FFSEND_FORCE`       | `--force`       | Force operations                  |
-| `FFSEND_NO_INTERACT` | `--no-interact` | No interaction for prompts        |
-| `FFSEND_YES`         | `--yes`         | Assume yes for prompts            |
-| `FFSEND_INCOGNITO`   | `--incognito`   | Incognito mode, don't use history |
-| `FFSEND_OPEN`        | `--open`        | Open share link of uploaded file  |
-| `FFSEND_ARCHIVE`     | `--archive`     | Archive files uploaded            |
-| `FFSEND_EXTRACT`     | `--extract`     | Extract files downloaded          |
-| `FFSEND_COPY`        | `--copy`        | Copy share link to clipboard      |
-| `FFSEND_QUIET`       | `--quiet`       | Log quiet information             |
-| `FFSEND_VERBOSE`     | `--verbose`     | Log verbose information           |
+| Variable             | CLI flag        | Description                        |
+| :------------------- | :-------------: | :--------------------------------- |
+| `FFSEND_FORCE`       | `--force`       | Force operations                   |
+| `FFSEND_NO_INTERACT` | `--no-interact` | No interaction for prompts         |
+| `FFSEND_YES`         | `--yes`         | Assume yes for prompts             |
+| `FFSEND_INCOGNITO`   | `--incognito`   | Incognito mode, don't use history  |
+| `FFSEND_OPEN`        | `--open`        | Open share link of uploaded file   |
+| `FFSEND_ARCHIVE`     | `--archive`     | Archive files uploaded             |
+| `FFSEND_EXTRACT`     | `--extract`     | Extract files downloaded           |
+| `FFSEND_COPY`        | `--copy`        | Copy share link to clipboard       |
+| `FFSEND_COPY_CMD`    | `--copy-cmd`    | Copy download command to clipboard |
+| `FFSEND_QUIET`       | `--quiet`       | Log quiet information              |
+| `FFSEND_VERBOSE`     | `--verbose`     | Log verbose information            |
 
 At this time, no configuration or _dotfile_ file support is available.
 This will be something added in a later release.
