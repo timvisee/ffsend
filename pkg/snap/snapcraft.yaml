@@ -14,8 +14,8 @@ description: |
   (up to 20) download or 24 hours is enforced to ensure your stuff does not
   remain online forever. This provides a secure platform to share your files.
 
-grade: devel
-confinement: devmode
+grade: stable
+confinement: classic
 
 apps:
   ffsend:
