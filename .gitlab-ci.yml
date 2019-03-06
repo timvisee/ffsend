@@ -167,11 +167,11 @@ snap:
     - apt-get update -y
     - cd pkg/snap
 
-    # Update version number in snapcraft.yml
+    # Update version number in snapcraft.yaml
     - VERSION=$(echo $CI_COMMIT_REF_NAME | cut -c 2-)
-    - echo "Determined binary version number 'v$VERSION', updating snapcraft.yml..."
-    - 'sed "s/^version:.*\$/version: $VERSION/" -i snapcraft.yml'
-    - 'sed "s/^pkgver=.*\$/pkgver=$VERSION/" -i snapcraft.yml'
+    - echo "Determined binary version number 'v$VERSION', updating snapcraft.yaml..."
+    - 'sed "s/^version:.*\$/version: $VERSION/" -i snapcraft.yaml'
+    - 'sed "s/^pkgver=.*\$/pkgver=$VERSION/" -i snapcraft.yaml'
 
     # Build the package
     - echo "Building snap package..."
