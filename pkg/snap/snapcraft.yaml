@@ -15,7 +15,7 @@ description: |
   remain online forever. This provides a secure platform to share your files.
 
 grade: stable
-confinement: classic
+confinement: strict
 
 apps:
   ffsend:
