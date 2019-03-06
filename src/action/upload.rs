@@ -26,8 +26,8 @@ use crate::progress::ProgressBar;
 #[cfg(feature = "clipboard")]
 use crate::util::set_clipboard;
 use crate::util::{
-    bin_name, format_bytes, open_url, print_error, print_error_msg, prompt_yes, quit,
-    quit_error_msg, ErrorHintsBuilder,
+    format_bytes, open_url, print_error, print_error_msg, prompt_yes, quit, quit_error_msg,
+    ErrorHintsBuilder,
 };
 
 /// A file upload action.
@@ -265,18 +265,11 @@ impl<'a> Upload<'a> {
             };
         }
 
-        // Copy the URL in the user's clipboard
+        // Copy the URL or command to the user's clipboard
         #[cfg(feature = "clipboard")]
         {
             if let Some(copy_mode) = matcher_upload.copy() {
-                // Build the string to copy
-                let copy = match copy_mode {
-                    CopyMode::Url => url.as_str().to_owned(),
-                    CopyMode::DownloadCmd => format!("{} download {}", bin_name(), url.as_str()),
-                };
-
-                // Copy to clipboard
-                if let Err(err) = set_clipboard(copy) {
+                if let Err(err) = set_clipboard(copy_mode.build(url.as_str())) {
                     print_error(
                         err.context("failed to copy the share link to the clipboard, ignoring"),
                     );

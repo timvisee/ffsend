@@ -6,7 +6,7 @@ use super::Matcher;
 use crate::cmd::arg::{
     ArgDownloadLimit, ArgGenPassphrase, ArgHost, ArgPassword, CmdArgFlag, CmdArgOption,
 };
-use crate::util::{env_var_present, quit_error_msg, ErrorHintsBuilder};
+use crate::util::{bin_name, env_var_present, quit_error_msg, ErrorHintsBuilder};
 
 /// The upload command matcher.
 pub struct UploadMatcher<'a> {
@@ -120,10 +120,21 @@ impl<'a> Matcher<'a> for UploadMatcher<'a> {
 }
 
 /// The copy mode.
+#[derive(Debug, Copy, Clone)]
 pub enum CopyMode {
     /// Copy the public share link.
     Url,
 
     /// Copy an ffsend download command.
     DownloadCmd,
+}
+
+impl CopyMode {
+    /// Build the string to copy, based on the given `url` and currend mode.
+    pub fn build(&self, url: &str) -> String {
+        match self {
+            CopyMode::Url => url.into(),
+            CopyMode::DownloadCmd => format!("{} download {}", bin_name(), url),
+        }
+    }
 }
