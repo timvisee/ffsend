@@ -50,17 +50,17 @@ variables:
     - cargo check --no-default-features --features send2 --verbose
     - cargo check --no-default-features --features send3 --verbose
     - cargo check --features no-color --verbose
-rust-stable:
+check-stable:
   <<: *check-base
-rust-beta:
+check-beta:
   <<: *check-base
   variables:
     RUST_VERSION: beta
-rust-nightly:
+check-nightly:
   <<: *check-base
   variables:
     RUST_VERSION: nightly
-rust-old:
+check-old:
   <<: *check-base
   variables:
     RUST_VERSION: "1.32.0"
@@ -114,14 +114,14 @@ build-x86_64-linux-musl:
     expire_in: 1 month
 
 # Run the unit tests through Cargo
-cargo-test:
+test-cargo:
   stage: test
   dependencies: []
   script:
     - cargo test --verbose
 
 # Run integration test with the public Send service
-public-send-test:
+test-public:
   stage: test
   allow_failure: true
   dependencies:
@@ -145,8 +145,9 @@ public-send-test:
     - "cmp --silent ./testfile ./downloadfile2 || (echo ERROR: Downloaded file is different than original; exit 1)"
 
 # Cargo crate release
-crate:
+release-crate:
   stage: release
+  dependencies: []
   only:
     - /^v(\d+\.)*\d+$/
   script:
@@ -156,9 +157,10 @@ crate:
     - cargo publish --verbose --allow-dirty
 
 # Snap release
-snap:
+release-snap:
   image: snapcore/snapcraft:edge
   stage: release
+  dependencies: []
   only:
     - /^v(\d+\.)*\d+$/
   before_script: []
@@ -179,11 +181,17 @@ snap:
 
     # Publish snap package
     - echo "Publishing snap package..."
-    - echo "$SNAP_MAIL\n&SNAP_PASSWORD" | snapcraft login
+    - echo "$SNAPCRAFT_LOGIN" | base64 -d > snapcraft.login
+    - snapcraft login --with snapcraft.login
     - snapcraft push --release=stable ffsend_*_amd64.snap
+  artifacts:
+    name: ffsend-snap-x86_64
+    paths:
+      - pkg/snap/ffsend_*_amd64.snap
+    expire_in: 1 month
 
 # Publish release binaries to as GitHub release
-github-release:
+release-github:
   stage: release
   only:
     - /^v(\d+\.)*\d+$/
@@ -210,6 +218,7 @@ github-release:
 package-aur:
   image: archlinux/base
   stage: package
+  dependencies: []
   only:
     - /^v(\d+\.)*\d+$/
   before_script: []
@@ -271,15 +280,5 @@ package-aur:
     - git commit -m "Release v$VERSION"
     - git push
     - cd ..
-
-# # Trigger a release build on AppVeyor, for a Windows binary
-# trigger-appveyor-release:
-#   stage: package
-#   only:
-#     - "/^v([0-9]+\\.)*[0-9]+.*$/"
-#   script:
-#     - apt-get install -y --no-install-recommends curl
-#     - export VERSION=$(echo $CI_COMMIT_REF_NAME | cut -c 2-)
-#     - 'curl -L -H "Content-Type: application/json" -H "Authorization: Bearer $APPVEYOR_TOKEN" -d "{\"accountName\":\"timvisee\",\"projectSlug\":\"ffsend\",\"tag\":\"$CI_COMMIT_REF_NAME\",\"environmentVariables\":{\"FFSEND_VERSION\":\"$VERSION\"}}" https://ci.appveyor.com/api/builds'
 
 # TODO: add job to test ffsend{-git} AUR packages
