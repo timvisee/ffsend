@@ -6,14 +6,8 @@
 language: rust
 
 stages:
-  - release
-  # TODO: use this configuration instead to only build version tags
-  # - name: release
-  #   if: tag =~ ^v(\d+\.)*\d+$
-addons:
-  homebrew:
-    packages:
-    - curl
+  - name: release
+    if: tag =~ ^v(\d+\.)*\d+$
 
 jobs:
   include:
@@ -23,9 +17,6 @@ jobs:
       env: RUST_TARGET=x86_64-apple-darwin
       cache: cargo
       script:
-        # TODO: remove after debugging
-        - export TRAVIS_TAG=v0.2.18
-
         # Create release binary for macOS
         - echo "Creating release binary for $RUST_TARGET..."
         - cargo build --target=$RUST_TARGET --release --verbose --all
