@@ -5,9 +5,17 @@
 
 language: rust
 
+# Only build release jobs
 stages:
   - name: release
     if: tag =~ ^v(\d+\.)*\d+$
+
+# Explicitly install and update OpenSSL dependencies
+addons:
+  homebrew:
+    packages:
+    - openssl
+    update: true
 
 jobs:
   include:
