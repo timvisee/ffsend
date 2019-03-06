@@ -32,7 +32,7 @@ jobs:
         - cp target/$RUST_TARGET/release/ffsend ./ffsend
 
         # Download github-release binary
-        - wget $(curl -s https://api.github.com/repos/tfausak/github-release/releases/latest | grep 'browser_' | cut -d\" -f4 | grep 'osx') -O github-release.gz
+        - wget https://github.com/tfausak/github-release/releases/download/1.2.4/github-release-osx.gz -O github-release.gz
         - gunzip github-release.gz
         - chmod a+x ./github-release
 
