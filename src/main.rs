@@ -1,22 +1,14 @@
-extern crate chbs;
-extern crate chrono;
 #[macro_use]
 extern crate clap;
 #[macro_use]
 extern crate derive_builder;
 #[macro_use]
 extern crate failure;
-extern crate ffsend_api;
 #[macro_use]
 extern crate lazy_static;
-extern crate openssl_probe;
-extern crate prettytable;
-extern crate rpassword;
-extern crate serde;
 #[cfg(feature = "history")]
 #[macro_use]
 extern crate serde_derive;
-extern crate tempfile;
 
 mod action;
 #[cfg(feature = "archive")]
