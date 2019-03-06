@@ -46,21 +46,21 @@ The public [Send][send] service that is used as default host is provided by
 This application is not affiliated with [Mozilla][mozilla], [Firefox][firefox]
 or [Firefox Send][send] in any way.
 
-_Note: this tool is currently in the alpha phase_
+_Note: this tool is currently in alpha_
 
 ## Features
 - Fully featured and friendly command line tool
 - Upload and download files and directories securely
 - Always encrypted on the client
 - Additional password protection, generation and configurable download limits
-- Supports old and new Firefox Send versions
-- Built-in file and directory archiving and extraction
+- Supports old and new Firefox Send server versions
+- File and directory archiving and extraction
 - History tracking your files for easy management
-- Ability to use your own Send host
+- Ability to use custom Send hosts
 - Inspect or delete shared files
 - Accurate error reporting
-- Low memory footprint, due to encryption and download/upload streaming
-- Intended to be used in scripts without interaction
+- Streaming encryption and uploading/downloading, very low memory footprint
+- Intended for use in scripts without interaction
 
 For a list of upcoming features and ideas, take a look at the
 [ROADMAP](ROADMAP.md) file.
@@ -133,12 +133,14 @@ all available subcommands.
 - A terminal :sunglasses:
 - Internet connection for uploading and downloading
 - Linux specific:
-  - OpenSSL / CA certificates:
+  - OpenSSL & CA certificates:
     - Ubuntu/Debian: `apt install openssl ca-certificates`
-  - `xclip` for clipboard support (optional)
+  - Optional: `xclip` for clipboard support
     - Ubuntu/Debian: `apt install xclip`
     - CentOS/Red Hat/openSUSE/Fedora: `yum install xclip`
     - Arch: `pacman -S xclip`
+- Windows specific:
+  - OpenSSL v1.1.0j: [» Installer](https://slproweb.com/download/Win64OpenSSL_Light-1_1_0j.exe)
 
 ## Install
 <!-- Before installing, make sure you meet all requirements listed
@@ -255,8 +257,8 @@ The following features are available, some of which are enabled by default:
 
 | Feature     | Enabled | Description                                                |
 | :---------: | :-----: | :--------------------------------------------------------- |
-| `send2`     | Default | Compile with support for Firefox Send v2 servers           |
-| `send3`     | Default | Compile with support for Firefox Send v3 servers           |
+| `send2`     | Default | Support for Firefox Send v2 servers                        |
+| `send3`     | Default | Support for Firefox Send v3 servers                        |
 | `clipboard` | Default | Support for copying links to the clipboard                 |
 | `history`   | Default | Support for tracking files in history                      |
 | `archive`   | Default | Support for archiving and extracting uploads and downloads |
@@ -279,6 +281,9 @@ cargo install --no-default-features
 # Only history and clipboard support
 cargo install --no-default--features --features history,clipboard
 ```
+
+For Windows systems it is recommended to provide the `no-color` flag, as color
+support in Windows terminals is flaky.
 
 ## Configuration and environment
 The following environment variables may be used to configure the following

@@ -69,6 +69,7 @@ impl<'a: 'b, 'b> Handler<'a> {
                     .long("no-interact")
                     .short("I")
                     .alias("no-interactive")
+                    .alias("non-interactive")
                     .global(true)
                     .help("Not interactive, do not prompt"),
             )
