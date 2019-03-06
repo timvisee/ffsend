@@ -40,7 +40,7 @@ impl<'a> Delete<'a> {
         history_tool::derive_file_properties(&matcher_main, &mut file);
 
         // Ensure the owner token is set
-        ensure_owner_token(file.owner_token_mut(), &matcher_main);
+        ensure_owner_token(file.owner_token_mut(), &matcher_main, false);
 
         // Send the file deletion request
         let result = ApiDelete::new(&file, None).invoke(&client);

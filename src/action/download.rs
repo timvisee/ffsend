@@ -16,6 +16,7 @@ use ffsend_api::pipe::ProgressReporter;
 #[cfg(feature = "archive")]
 use tempfile::{Builder as TempBuilder, NamedTempFile};
 
+use super::select_api_version;
 #[cfg(feature = "archive")]
 use crate::archive::archive::Archive;
 use crate::client::create_transfer_client;
@@ -26,7 +27,6 @@ use crate::progress::ProgressBar;
 use crate::util::{
     ensure_enough_space, ensure_password, prompt_yes, quit, quit_error, quit_error_msg, ErrorHints,
 };
-use super::select_api_version;
 
 /// A file download action.
 pub struct Download<'a> {

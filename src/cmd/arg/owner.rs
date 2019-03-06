@@ -45,6 +45,7 @@ impl<'a> CmdArgOption<'a> for ArgOwner {
         let matcher_main = MainMatcher::with(matches).unwrap();
 
         // Prompt for the owner token
-        Some(prompt_owner_token(&matcher_main))
+        // TODO: should this be optional?
+        Some(prompt_owner_token(&matcher_main, false))
     }
 }

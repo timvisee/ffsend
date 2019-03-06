@@ -15,6 +15,7 @@ use prettytable::{format::FormatBuilder, Cell, Row, Table};
 #[cfg(feature = "archive")]
 use tempfile::{Builder as TempBuilder, NamedTempFile};
 
+use super::select_api_version;
 #[cfg(feature = "archive")]
 use crate::archive::archiver::Archiver;
 use crate::client::create_transfer_client;
@@ -28,7 +29,6 @@ use crate::util::{
     format_bytes, open_url, print_error, print_error_msg, prompt_yes, quit, quit_error_msg,
     ErrorHintsBuilder,
 };
-use super::select_api_version;
 
 /// A file upload action.
 pub struct Upload<'a> {
@@ -224,7 +224,8 @@ impl<'a> Upload<'a> {
             file_name,
             password.clone(),
             params,
-        ).invoke(&transfer_client, reporter)?;
+        )
+        .invoke(&transfer_client, reporter)?;
         let url = file.download_url(true);
 
         // Report the result

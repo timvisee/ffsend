@@ -10,7 +10,7 @@ pub mod password;
 pub mod upload;
 pub mod version;
 
-use ffsend_api::action::version::{Version as ApiVersion, Error as VersionError};
+use ffsend_api::action::version::{Error as VersionError, Version as ApiVersion};
 use ffsend_api::api::DesiredVersion;
 use ffsend_api::url::Url;
 
@@ -23,7 +23,11 @@ use crate::util::print_warning;
 /// If the current desired version is set to the `DesiredVersion::Lookup` variant, this method
 /// will look up the server API version. It it's `DesiredVersion::Use` it will return and
 /// attempt to use the specified version.
-fn select_api_version(client: &Client, host: Url, desired: &mut DesiredVersion) -> Result<(), VersionError> {
+fn select_api_version(
+    client: &Client,
+    host: Url,
+    desired: &mut DesiredVersion,
+) -> Result<(), VersionError> {
     // Break if already specified
     if let DesiredVersion::Use(_) = desired {
         return Ok(());
@@ -46,7 +50,7 @@ fn select_api_version(client: &Client, host: Url, desired: &mut DesiredVersion) 
         }
 
         // Propegate other errors
-        Err(e) => return Err(e)
+        Err(e) => return Err(e),
     }
 
     Ok(())

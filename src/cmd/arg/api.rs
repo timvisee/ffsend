@@ -3,7 +3,7 @@ use ffsend_api::api::{DesiredVersion, Version};
 
 use super::{CmdArg, CmdArgOption};
 use crate::config::API_VERSION_DESIRED_DEFAULT;
-use crate::util::{ErrorHints, quit_error_msg};
+use crate::util::{quit_error_msg, ErrorHints};
 
 /// The api argument.
 pub struct ArgApi {}
@@ -22,10 +22,12 @@ impl CmdArg for ArgApi {
             .hide_env_values(true)
             .global(true)
             .help("Server API version to use, '-' to lookup")
-            .long_help("Server API version to use, one of:\n\
-                2, 3: Firefox Send API versions\n\
-                auto, -: probe server to determine\
-            ")
+            .long_help(
+                "Server API version to use, one of:\n\
+                 2, 3: Firefox Send API versions\n\
+                 auto, -: probe server to determine\
+                 ",
+            )
     }
 }
 

@@ -536,8 +536,15 @@ fn derive_bool(input: &str) -> Option<bool> {
 }
 
 /// Prompt the user to enter an owner token.
-pub fn prompt_owner_token(main_matcher: &MainMatcher) -> String {
-    prompt("Owner token", main_matcher)
+pub fn prompt_owner_token(main_matcher: &MainMatcher, optional: bool) -> String {
+    prompt(
+        if optional {
+            "Owner token (optional)"
+        } else {
+            "Owner token"
+        },
+        main_matcher,
+    )
 }
 
 /// Get the owner token.
@@ -545,20 +552,40 @@ pub fn prompt_owner_token(main_matcher: &MainMatcher) -> String {
 /// parameter.
 ///
 /// This method will prompt the user for the token, if it wasn't set.
-pub fn ensure_owner_token(token: &mut Option<String>, main_matcher: &MainMatcher) {
+///
+/// Returns if an owner token was set.
+/// If `optional` is false, this always returns true.
+///
+/// If in non-interactive or force mode, the user will not be prompted for a token if `optional` is
+/// set to true.
+pub fn ensure_owner_token(
+    token: &mut Option<String>,
+    main_matcher: &MainMatcher,
+    optional: bool,
+) -> bool {
     // Check whehter we allow interaction
     let interact = !main_matcher.no_interact();
 
     // Notify that an owner token is required
     if interact && token.is_none() {
-        println!("The file owner token is required for authentication.");
+        if optional {
+            println!("The file owner token is recommended for authentication.");
+        } else {
+            println!("The file owner token is required for authentication.");
+        }
     }
 
     loop {
-        // Prompt for an owner token
+        // Prompt for an owner token if not set yet
         if token.is_none() {
+            // Do not ask for a token if optional when non-interactive or forced
+            if optional && (!interact || main_matcher.force()) {
+                return false;
+            }
+
+            // Ask for the token, or quit with an error if non-interactive
             if interact {
-                *token = Some(prompt_owner_token(main_matcher));
+                *token = Some(prompt_owner_token(main_matcher, optional));
             } else {
                 quit_error_msg(
                     "missing owner token, must be specified in no-interact mode",
@@ -571,15 +598,18 @@ pub fn ensure_owner_token(token: &mut Option<String>, main_matcher: &MainMatcher
             }
         }
 
-        // The token must not be empty
-        if token.as_ref().unwrap().is_empty() {
+        // The token must not be empty, unless it's optional
+        let empty = token.as_ref().unwrap().is_empty();
+        if empty {
+            *token = None;
+        }
+        if empty && !optional {
             eprintln!(
                 "Empty owner token given, which is invalid. Use {} to cancel.",
                 highlight("[CTRL+C]"),
             );
-            *token = None;
         } else {
-            break;
+            return !empty;
         }
     }
 }

@@ -44,8 +44,8 @@ impl<'a> Info<'a> {
         #[cfg(feature = "history")]
         history_tool::derive_file_properties(&matcher_main, &mut file);
 
-        // Ensure the owner token is set
-        ensure_owner_token(file.owner_token_mut(), &matcher_main);
+        // Ask the user to set the owner token for more detailed information
+        let has_owner = ensure_owner_token(file.owner_token_mut(), &matcher_main, true);
 
         // Check whether the file exists
         let exists = ApiExists::new(&file).invoke(&client)?;
@@ -57,14 +57,16 @@ impl<'a> Info<'a> {
             return Err(Error::Expired);
         }
 
-        // Get the password
+        // Get the password, ensure the password is set when required
         let mut password = matcher_info.password();
-
-        // Ensure a password is set when required
         ensure_password(&mut password, exists.requires_password(), &matcher_main);
 
         // Fetch both file info and metadata
-        let info = ApiInfo::new(&file, None).invoke(&client)?;
+        let info = if has_owner {
+            Some(ApiInfo::new(&file, None).invoke(&client)?)
+        } else {
+            None
+        };
         let metadata = ApiMetadata::new(&file, password, false)
             .invoke(&client)
             .map_err(|err| {
@@ -72,12 +74,12 @@ impl<'a> Info<'a> {
             })
             .ok();
 
-        // Get the TTL duration
-        let ttl_millis = info.ttl_millis() as i64;
-        let ttl = Duration::milliseconds(ttl_millis);
-
-        // Update file properties
-        file.set_expire_duration(ttl);
+        // Update history file TTL if info is known
+        if let Some(info) = &info {
+            let ttl_millis = info.ttl_millis() as i64;
+            let ttl = Duration::milliseconds(ttl_millis);
+            file.set_expire_duration(ttl);
+        }
 
         // Add the file to the history
         #[cfg(feature = "history")]
@@ -91,7 +93,7 @@ impl<'a> Info<'a> {
         table.add_row(Row::new(vec![Cell::new("ID:"), Cell::new(file.id())]));
 
         // Metadata related details
-        if let Some(metadata) = metadata {
+        if let Some(metadata) = &metadata {
             // The file name
             table.add_row(Row::new(vec![
                 Cell::new("Name:"),
@@ -117,24 +119,28 @@ impl<'a> Info<'a> {
         }
 
         // The download count
-        table.add_row(Row::new(vec![
-            Cell::new("Downloads:"),
-            Cell::new(&format!(
-                "{} of {}",
-                info.download_count(),
-                info.download_limit()
-            )),
-        ]));
+        if let Some(info) = &info {
+            table.add_row(Row::new(vec![
+                Cell::new("Downloads:"),
+                Cell::new(&format!(
+                    "{} of {}",
+                    info.download_count(),
+                    info.download_limit()
+                )),
+            ]));
 
-        // The time to live
-        table.add_row(Row::new(vec![
-            Cell::new("Expiry:"),
-            Cell::new(&if ttl_millis >= 60 * 1000 {
-                format!("{} ({}s)", format_duration(&ttl), ttl.num_seconds())
-            } else {
-                format_duration(&ttl)
-            }),
-        ]));
+            // The time to live
+            let ttl_millis = info.ttl_millis() as i64;
+            let ttl = Duration::milliseconds(ttl_millis);
+            table.add_row(Row::new(vec![
+                Cell::new("Expiry:"),
+                Cell::new(&if ttl_millis >= 60 * 1000 {
+                    format!("{} ({}s)", format_duration(&ttl), ttl.num_seconds())
+                } else {
+                    format_duration(&ttl)
+                }),
+            ]));
+        }
 
         // Print the info table
         table.printstd();

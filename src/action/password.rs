@@ -40,7 +40,7 @@ impl<'a> Password<'a> {
         history_tool::derive_file_properties(&matcher_main, &mut file);
 
         // Ensure the owner token is set
-        ensure_owner_token(file.owner_token_mut(), &matcher_main);
+        ensure_owner_token(file.owner_token_mut(), &matcher_main, false);
 
         // Get the password to use and whether it was generated
         let (password, password_generated) = matcher_password.password();
