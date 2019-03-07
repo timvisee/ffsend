@@ -72,11 +72,13 @@ build_script:
   # Collect binary, set package version and build chocolatey package
   - copy .\ffsend-%TARGET%-static.exe .\pkg\choco\ffsend\tools\ffsend.exe
   - cd .\pkg\choco\ffsend\
-  - sh: 'echo $(echo $APPVEYOR_REPO_TAG_NAME | cut -c 2-)'
-  - sh: 'sed "s/0\\.0\\.0/$(echo $APPVEYOR_REPO_TAG_NAME | cut -c 2-)/" -i ffsend.nuspec'
+  - sh: >-
+      echo $(echo $APPVEYOR_REPO_TAG_NAME | cut -c 2-)
+      sed "s/0\\.0\\.0/$(echo $APPVEYOR_REPO_TAG_NAME | cut -c 2-)/" -i ffsend.nuspec
   - choco pack
-  - choco push --api-key %CHOCOLATEY_TOKEN%
-  - copy ffsend.*.nupkg
+  # - choco push --api-key %CHOCOLATEY_TOKEN%
+  - dir
+  - copy ffsend.*.nupkg ..\..\..\
   - cd ..\..\..\
 
   # # Create the release, upload the binaries
