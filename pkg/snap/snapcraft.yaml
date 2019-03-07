@@ -1,5 +1,6 @@
 name: ffsend
 version: git
+license: GNU-3.0-only
 summary: Easily and securely share files from the command line.
 description: |
   Easily and securely share files and directories from the command line through
@@ -14,13 +15,16 @@ description: |
   (up to 20) download or 24 hours is enforced to ensure your stuff does not
   remain online forever. This provides a secure platform to share your files.
 
+architectures:
+  - amd64
+
 grade: stable
 confinement: strict
 
 apps:
   ffsend:
     command: ffsend
-    plugs: [home, removable-media, network]
+    plugs: [home, network, removable-media, x11]
 
 parts:
   ffsend:
