@@ -1,6 +1,5 @@
 name: ffsend
 version: git
-license: GNU-3.0-only
 summary: Easily and securely share files from the command line.
 description: |
   Easily and securely share files and directories from the command line through
