@@ -52,9 +52,10 @@ build_script:
   # TODO: remove after debugging
   - set APPVEYOR_REPO_TAG_NAME=v0.2.23
 
-  # Build dynamic release binary
-  - cargo build --release --features no-color --verbose
-  - copy .\target\release\ffsend.exe .\ffsend-%TARGET%.exe
+  # TODO: re-enable after debugging
+  # # Build dynamic release binary
+  # - cargo build --release --features no-color --verbose
+  # - copy .\target\release\ffsend.exe .\ffsend-%TARGET%.exe
 
   # Build static release binary
   - set RUSTFLAGS=-Ctarget-feature=+crt-static
