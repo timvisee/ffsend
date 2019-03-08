@@ -4,11 +4,10 @@
 # The main CI runs on GitLab CI at: https://gitlab.com/timvisee/ffsend/pipelines
 
 # Only build version tags
-# TODO: re-enable after debugging
-# skip_non_tags: true
-# branches:
-#   only:
-#     - /v\d*\.\d*\.\d*/
+skip_non_tags: true
+branches:
+  only:
+    - /v\d*\.\d*\.\d*/
 
 # Build for the x86_64 Windows target
 platform: x64
@@ -39,7 +38,6 @@ install:
   - ps: if (Test-Path env:OPENSSL_VERSION) { Start-FileDownload "http://slproweb.com/download/Win${env:BITS}OpenSSL-${env:OPENSSL_VERSION}.exe" }
   - if defined OPENSSL_VERSION Win%BITS%OpenSSL-%OPENSSL_VERSION%.exe /SILENT /VERYSILENT /SP- /DIR="C:\OpenSSL"
   - appveyor DownloadFile https://curl.haxx.se/ca/cacert.pem -FileName C:\OpenSSL\cacert.pem
-
   - choco install openssl.light --version 1.1.0.80000000 -y -f
 
   # Install Rust
@@ -52,13 +50,9 @@ install:
 
 # Build dynamic and static Windows binaries, release on GitHub
 build_script:
-  # TODO: remove after debugging
-  - set APPVEYOR_REPO_TAG_NAME=v0.2.23
-
-  # TODO: re-enable after debugging
-  # # Build dynamic release binary
-  # - cargo build --release --features no-color --verbose
-  # - copy .\target\release\ffsend.exe .\ffsend-%TARGET%.exe
+  # Build dynamic release binary
+  - cargo build --release --features no-color --verbose
+  - copy .\target\release\ffsend.exe .\ffsend-%TARGET%.exe
 
   # Build static release binary
   - set RUSTFLAGS=-Ctarget-feature=+crt-static
@@ -75,16 +69,15 @@ build_script:
   - ps: echo $env:APPVEYOR_REPO_TAG_NAME
   - ps: ((Get-Content -path .\ffsend.nuspec -Raw) -replace "0.0.0",$env:APPVEYOR_REPO_TAG_NAME.Substring(1)) | Set-Content -Path .\ffsend.nuspec
   - choco pack
-  # - choco push --api-key %CHOCOLATEY_TOKEN%
-  - dir
+  - choco push --api-key %CHOCOLATEY_TOKEN%
   - copy ffsend.*.nupkg ..\..\..\
   - cd ..\..\..\
 
-  # # Create the release, upload the binaries
-  # TODO: re-enable after debugging
-  # - .\github-release.exe release --token %GITHUB_TOKEN% --owner timvisee --repo ffsend --tag %APPVEYOR_REPO_TAG_NAME% --title "ffsend %APPVEYOR_REPO_TAG_NAME%"
-  # - .\github-release.exe upload --token %GITHUB_TOKEN% --owner timvisee --repo ffsend --tag %APPVEYOR_REPO_TAG_NAME% --file .\ffsend-%TARGET%.exe --name ffsend-%APPVEYOR_REPO_TAG_NAME%-windows-x64.exe
-  # - .\github-release.exe upload --token %GITHUB_TOKEN% --owner timvisee --repo ffsend --tag %APPVEYOR_REPO_TAG_NAME% --file .\ffsend-%TARGET%-static.exe --name ffsend-%APPVEYOR_REPO_TAG_NAME%-windows-x64-static.exe
+  # Create the release, upload the binaries
+  - .\github-release.exe release --token %GITHUB_TOKEN% --owner timvisee --repo ffsend --tag %APPVEYOR_REPO_TAG_NAME% --title "ffsend %APPVEYOR_REPO_TAG_NAME%"
+  - .\github-release.exe upload --token %GITHUB_TOKEN% --owner timvisee --repo ffsend --tag %APPVEYOR_REPO_TAG_NAME% --file .\ffsend-%TARGET%.exe --name ffsend-%APPVEYOR_REPO_TAG_NAME%-windows-x64.exe
+  - .\github-release.exe upload --token %GITHUB_TOKEN% --owner timvisee --repo ffsend --tag %APPVEYOR_REPO_TAG_NAME% --file .\ffsend-%TARGET%-static.exe --name ffsend-%APPVEYOR_REPO_TAG_NAME%-windows-x64-static.exe
+  - .\github-release.exe upload --token %GITHUB_TOKEN% --owner timvisee --repo ffsend --tag %APPVEYOR_REPO_TAG_NAME% --file .\ffsend.*.nupkg --name ffsend-%APPVEYOR_REPO_TAG_NAME%.nupkg
 
 # We don't test anything here
 test: false
