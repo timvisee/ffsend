@@ -17,6 +17,8 @@ environment:
   CARGO_HTTP_CHECK_REVOKE: false
   GITHUB_TOKEN:
     secure: jqZ4q5oOthKX/pBL1tRsBJsfGPIee3q+N/UBSCZNjCrlFUNfQSfibBPzzICYg1he
+  CHOCOLATEY_TOKEN:
+    secure: k5Q57xoXa6qSFScSpRaww2puW0yjYoH19uIq3qS1emOG+lNs9TYCnWYhUzQ2gzfc
 
   matrix:
     - TARGET: x86_64-pc-windows-msvc
@@ -27,6 +29,7 @@ environment:
 # Extract release binary artifacts
 artifacts:
 - path: .\ffsend*.exe
+- path: .\ffsend.*.nupkg
 
 # Install dependencies: Rust and OpenSSL
 install:
@@ -35,6 +38,7 @@ install:
   - ps: if (Test-Path env:OPENSSL_VERSION) { Start-FileDownload "http://slproweb.com/download/Win${env:BITS}OpenSSL-${env:OPENSSL_VERSION}.exe" }
   - if defined OPENSSL_VERSION Win%BITS%OpenSSL-%OPENSSL_VERSION%.exe /SILENT /VERYSILENT /SP- /DIR="C:\OpenSSL"
   - appveyor DownloadFile https://curl.haxx.se/ca/cacert.pem -FileName C:\OpenSSL\cacert.pem
+  - choco install openssl.light --version 1.1.0.80000000 -y -f
 
   # Install Rust
   - appveyor-retry appveyor DownloadFile https://win.rustup.rs/ -FileName rustup-init.exe
@@ -59,10 +63,21 @@ build_script:
   - appveyor DownloadFile https://github.com/tfausak/github-release/releases/download/1.2.4/github-release-windows.zip -FileName github-release.zip
   - 7z e github-release.zip
 
+  # Collect binary, set package version and build chocolatey package
+  - copy .\ffsend-%TARGET%-static.exe .\pkg\choco\ffsend\tools\ffsend.exe
+  - cd .\pkg\choco\ffsend\
+  - ps: echo $env:APPVEYOR_REPO_TAG_NAME
+  - ps: ((Get-Content -path .\ffsend.nuspec -Raw) -replace "0.0.0",$env:APPVEYOR_REPO_TAG_NAME.Substring(1)) | Set-Content -Path .\ffsend.nuspec
+  - choco pack
+  - choco push --api-key %CHOCOLATEY_TOKEN%
+  - copy ffsend.*.nupkg ..\..\..\
+  - cd ..\..\..\
+
   # Create the release, upload the binaries
   - .\github-release.exe release --token %GITHUB_TOKEN% --owner timvisee --repo ffsend --tag %APPVEYOR_REPO_TAG_NAME% --title "ffsend %APPVEYOR_REPO_TAG_NAME%"
   - .\github-release.exe upload --token %GITHUB_TOKEN% --owner timvisee --repo ffsend --tag %APPVEYOR_REPO_TAG_NAME% --file .\ffsend-%TARGET%.exe --name ffsend-%APPVEYOR_REPO_TAG_NAME%-windows-x64.exe
   - .\github-release.exe upload --token %GITHUB_TOKEN% --owner timvisee --repo ffsend --tag %APPVEYOR_REPO_TAG_NAME% --file .\ffsend-%TARGET%-static.exe --name ffsend-%APPVEYOR_REPO_TAG_NAME%-windows-x64-static.exe
+  - .\github-release.exe upload --token %GITHUB_TOKEN% --owner timvisee --repo ffsend --tag %APPVEYOR_REPO_TAG_NAME% --file .\ffsend.*.nupkg --name ffsend-%APPVEYOR_REPO_TAG_NAME%.nupkg
 
 # We don't test anything here
 test: false
