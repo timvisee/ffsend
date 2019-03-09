@@ -69,7 +69,6 @@ build_script:
   - ps: echo $env:APPVEYOR_REPO_TAG_NAME
   - ps: ((Get-Content -path .\ffsend.nuspec -Raw) -replace "0.0.0",$env:APPVEYOR_REPO_TAG_NAME.Substring(1)) | Set-Content -Path .\ffsend.nuspec
   - choco pack
-  - choco push --api-key %CHOCOLATEY_TOKEN%
   - copy ffsend.*.nupkg ..\..\..\
   - cd ..\..\..\
 
@@ -78,6 +77,11 @@ build_script:
   - .\github-release.exe upload --token %GITHUB_TOKEN% --owner timvisee --repo ffsend --tag %APPVEYOR_REPO_TAG_NAME% --file .\ffsend-%TARGET%.exe --name ffsend-%APPVEYOR_REPO_TAG_NAME%-windows-x64.exe
   - .\github-release.exe upload --token %GITHUB_TOKEN% --owner timvisee --repo ffsend --tag %APPVEYOR_REPO_TAG_NAME% --file .\ffsend-%TARGET%-static.exe --name ffsend-%APPVEYOR_REPO_TAG_NAME%-windows-x64-static.exe
   - .\github-release.exe upload --token %GITHUB_TOKEN% --owner timvisee --repo ffsend --tag %APPVEYOR_REPO_TAG_NAME% --file .\ffsend.*.nupkg --name ffsend-%APPVEYOR_REPO_TAG_NAME%.nupkg
+
+  # Publish the chocolatey package
+  - cd .\pkg\choco\ffsend\
+  - choco push --api-key %CHOCOLATEY_TOKEN%
+  - cd ..\..\..\
 
 # We don't test anything here
 test: false
