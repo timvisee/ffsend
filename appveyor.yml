@@ -79,9 +79,10 @@ build_script:
   - ps: .\github-release.exe upload --token $env:GITHUB_TOKEN --owner timvisee --repo ffsend --tag $env:APPVEYOR_REPO_TAG_NAME --file (Get-Item .\ffsend.*.nupkg).FullName --name ffsend-$env:APPVEYOR_REPO_TAG_NAME.nupkg
 
   # Publish the chocolatey package
-  - cd .\pkg\choco\ffsend\
-  - choco push --api-key %CHOCOLATEY_TOKEN%
-  - cd ..\..\..\
+  # TODO: re-enable when chocolatey is properly accepting packages again
+  # - cd .\pkg\choco\ffsend\
+  # - choco push --api-key %CHOCOLATEY_TOKEN%
+  # - cd ..\..\..\
 
 # We don't test anything here
 test: false
