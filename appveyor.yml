@@ -73,10 +73,10 @@ build_script:
   - cd ..\..\..\
 
   # Create the release, upload the binaries
-  - .\github-release.exe release --token %GITHUB_TOKEN% --owner timvisee --repo ffsend --tag %APPVEYOR_REPO_TAG_NAME% --title "ffsend %APPVEYOR_REPO_TAG_NAME%"
-  - .\github-release.exe upload --token %GITHUB_TOKEN% --owner timvisee --repo ffsend --tag %APPVEYOR_REPO_TAG_NAME% --file .\ffsend-%TARGET%.exe --name ffsend-%APPVEYOR_REPO_TAG_NAME%-windows-x64.exe
-  - .\github-release.exe upload --token %GITHUB_TOKEN% --owner timvisee --repo ffsend --tag %APPVEYOR_REPO_TAG_NAME% --file .\ffsend-%TARGET%-static.exe --name ffsend-%APPVEYOR_REPO_TAG_NAME%-windows-x64-static.exe
-  - .\github-release.exe upload --token %GITHUB_TOKEN% --owner timvisee --repo ffsend --tag %APPVEYOR_REPO_TAG_NAME% --file .\ffsend.*.nupkg --name ffsend-%APPVEYOR_REPO_TAG_NAME%.nupkg
+  - ps: .\github-release.exe release --token $env:GITHUB_TOKEN --owner timvisee --repo ffsend --tag $env:APPVEYOR_REPO_TAG_NAME --title "ffsend $env:APPVEYOR_REPO_TAG_NAME"
+  - ps: .\github-release.exe upload --token $env:GITHUB_TOKEN --owner timvisee --repo ffsend --tag $env:APPVEYOR_REPO_TAG_NAME --file .\ffsend-$env:TARGET.exe --name ffsend-$env:APPVEYOR_REPO_TAG_NAME-windows-x64.exe
+  - ps: .\github-release.exe upload --token $env:GITHUB_TOKEN --owner timvisee --repo ffsend --tag $env:APPVEYOR_REPO_TAG_NAME --file .\ffsend-$env:TARGET-static.exe --name ffsend-$env:APPVEYOR_REPO_TAG_NAME-windows-x64-static.exe
+  - ps: .\github-release.exe upload --token $env:GITHUB_TOKEN --owner timvisee --repo ffsend --tag $env:APPVEYOR_REPO_TAG_NAME --file (Get-Item .\ffsend.*.nupkg).FullName --name ffsend-$env:APPVEYOR_REPO_TAG_NAME.nupkg
 
   # Publish the chocolatey package
   - cd .\pkg\choco\ffsend\
