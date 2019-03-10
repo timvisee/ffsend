@@ -133,10 +133,10 @@ test-public:
   script:
     # Generate random file, upload/download and assert equality
     - "head -c2m </dev/urandom >testfile"
-    - "./ffsend-$RUST_TARGET upload testfile -d=10 -p=secret -I"
-    - "./ffsend-$RUST_TARGET download $(./ffsend-$RUST_TARGET history -q) -p=secret -I -o=downloadfile"
-    - "./ffsend-$RUST_TARGET delete $(./ffsend-$RUST_TARGET history -q)"
-    - "cmp --silent ./testfile ./downloadfile || (echo ERROR: Downloaded file is different than original; exit 1)"
+    # - "./ffsend-$RUST_TARGET upload testfile -d=10 -p=secret -I"
+    # - "./ffsend-$RUST_TARGET download $(./ffsend-$RUST_TARGET history -q) -p=secret -I -o=downloadfile"
+    # - "./ffsend-$RUST_TARGET delete $(./ffsend-$RUST_TARGET history -q)"
+    # - "cmp --silent ./testfile ./downloadfile || (echo ERROR: Downloaded file is different than original; exit 1)"
 
     # Also test Firefox Send v3
     - "./ffsend-$RUST_TARGET upload --host http://send2.dev.lcip.org/ testfile -d=10 -p=secret -I"
