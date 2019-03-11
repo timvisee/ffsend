@@ -131,7 +131,7 @@ test-public:
     RUST_TARGET: x86_64-unknown-linux-musl
   before_script:
     - apt-get update
-    - apt-get install -y openssl
+    - apt-get install -y ca-certificates
   script:
     # Generate random file, upload/download and assert equality
     - "head -c8m </dev/urandom >test.txt"
