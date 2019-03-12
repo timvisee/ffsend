@@ -61,6 +61,7 @@ _Note: this tool is currently in alpha_
 - Accurate error reporting
 - Streaming encryption and uploading/downloading, very low memory footprint
 - Intended for use in scripts without interaction
+- Upcomming: Firefox Account integration (higher download counts, longer expiry times)
 
 For a list of upcoming features and ideas, take a look at the
 [ROADMAP](ROADMAP.md) file.
