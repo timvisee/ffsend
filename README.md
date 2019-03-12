@@ -152,6 +152,8 @@ all available subcommands.
 Because `ffsend` is still in alpha, only limited installation options are
 available right now.
 
+Make sure you meet and install the [requirements](#requirements).
+
 See the operating system specific instructions below:
 * [Linux](#linux)
 * [macOS](#macos)
@@ -163,8 +165,8 @@ Using the [snap](#linux-snap-package) package is recommended if supported.
 Alternatively you may install it manually using the
 [prebuilt binaries](#linux-prebuilt-binaries).
 
-Only 64-bit (`x86_64`) packages and binaries are provided. For other
-architectures and configurations you may [compile from source](#build).
+Only 64-bit (`x86_64`) packages and binaries are provided.
+For other architectures and configurations you may [compile from source](#build).
 
 More packages options will be coming soon.
 
@@ -250,8 +252,8 @@ Currently only [prebuilt binaries](#windows-prebuilt-binaries) are available for
 If you're using the [Windows Subsystem for Linux](wsl), it's highly recommended
 to install the [prebuilt Linux binary](#prebuilt-binaries-for-linux) instead.
 
-Only 64-bit (`x86_64`) binaries are provided. For other architectures and
-configurations you may [compile from source](#build).
+Only 64-bit (`x86_64`) binaries are provided.
+For other architectures and configurations you may [compile from source](#build).
 
 A `chocolatey` and `scoop` package along with an `.msi` installer will be coming soon.
 
