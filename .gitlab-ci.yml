@@ -124,6 +124,7 @@ test-cargo:
 test-public:
   image: alpine:latest
   stage: test
+  allow_failure: true
   dependencies:
     - build-x86_64-linux-musl
   variables:
