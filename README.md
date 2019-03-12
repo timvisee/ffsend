@@ -33,7 +33,7 @@ Find out more about security [here](#security).
 - [Features](#features)
 - [Usage](#usage)
 - [Requirements](#requirements)
-- [Install](#install)
+- [Install](#install) ([Linux](#linux), [macOS](#macos), [Windows](#windows), [_Other OS/arch_](#other-os-or-architecture))
 - [Build](#build)
 - [Configuration and environment](#configuration-and-environment)
 - [Security](#security)
@@ -64,7 +64,7 @@ _Note: this tool is currently in alpha_
 - Upcomming: Firefox Account integration (higher download counts, longer expiry times)
 
 For a list of upcoming features and ideas, take a look at the
-[ROADMAP](ROADMAP.md) file.
+current [open issues](https://gitlab.com/timvisee/ffsend/issues) over on GitLab.
 
 ## Usage
 Easily upload and download:
@@ -141,7 +141,7 @@ all available subcommands.
     - CentOS/Red Hat/openSUSE/Fedora: `yum install xclip`
     - Arch: `pacman -S xclip`
 - Windows specific:
-  - OpenSSL v1.1.0j: [» Installer](https://slproweb.com/download/Win64OpenSSL_Light-1_1_0j.exe)
+  - OpenSSL v1.1.0j: [» Installer][openssl-windows-installer]
 - macOS specific:
   - OpenSSL: `brew install openssl`
 
@@ -150,18 +150,32 @@ all available subcommands.
 [here](#requirements) -->
 
 Because `ffsend` is still in alpha, only limited installation options are
-available right now.  
+available right now.
 
-It is recommended to build and install `ffsend` yourself using these fairly
-easy steps [below](#build).
+See the operating system specific instructions below:
+* [Linux](#linux)
+* [macOS](#macos)
+* [Windows](#windows)
+* [_Other OS or architecture_](#other-os-or-architecture)
 
-#### Snap package
+### Linux
+Using the [snap](#linux-snap-package) package is recommended if supported.  
+Alternatively you may install it manually using the
+[prebuilt binaries](#linux-prebuilt-binaries).
+
+Only 64-bit (`x86_64`) packages and binaries are provided. For other
+architectures and configurations you may [compile from source](#build).
+
+More packages options will be coming soon.
+
+#### Linux: snap package
 [» `ffsend`][snapcraft-ffsend]
 ```bash
 snap install ffsend
+ffsend --help
 ```
 
-#### Arch AUR package
+#### Linux: Arch AUR packages
 [» `ffsend`][aur-ffsend] (binary package)  
 [» `ffsend-git`][aur-ffsend-git] (compile from source package)
 
@@ -172,26 +186,97 @@ yay ffsend
 # or
 aurget -S ffsend
 # or using any other AUR installer
+
+ffsend --help
 ```
 
-#### Prebuilt binaries
-A set of prebuilt binaries for Linux and Windows can be found as asset of the
-[latest release][github-latest-release].
+#### Linux: Prebuilt binaries
+Check out the [latest release][github-latest-release] assets for Linux binaries.  
+Use the `ffsend-v*-linux-x64-static` binary, to minimize the chance for issues.
 
-On Linux, you must mark the binary as executable. And you may want to move it
-into `/usr/bin/` to make the `ffsend` command globally available:
+Make sure you meet and install the [requirements](#requirements) before you
+continue.
+
+You must make the binary executable, and may want to move it into `/usr/bin` to
+make it easily executable:
+
 ```bash
+# Rename binary to ffsend
+mv ./ffsend-* ./ffsend
+
 # Mark binary as executable
 chmod a+x ./ffsend
 
 # Move binary into path, to make it easily usable
-mv ./ffsend /usr/bin/ffsend
+sudo mv ./ffsend /usr/bin/
+
+ffsend --help
+```
+
+### macOS
+Currently only a [prebuilt binary](#macos-prebuilt-binaries) is available for macOS.
+
+A `homebrew` package will be coming soon.
+
+#### macOS: Prebuilt binaries
+Check out the [latest release][github-latest-release] assets for a macOS binary.
+
+You must install `openssl` through [`homebrew`][homebrew] which `ffsend` depends
+on.
+
+Then, mark the downloaded binary as as executable.
+You then may want to move it into `/usr/bin/` to make the `ffsend` command
+globally available:
+
+```bash
+# Install openssl dependency
+homebrew install openssl
+
+# Rename file to ffsend
+mv ./ffsend-* ./ffsend
+
+# Mark binary as executable
+chmod a+x ./ffsend
+
+# Move binary into path, to make it easily usable
+sudo mv ./ffsend /usr/bin/
 
 ffsend
 ```
 
-If running the binary fails (probably due to some missing dependency),
-feel free to [open an issue](https://gitlab.com/timvisee/ffsend/issues).
+### Windows
+Currently only [prebuilt binaries](#windows-prebuilt-binaries) are available for Windows.
+
+If you're using the [Windows Subsystem for Linux](wsl), it's highly recommended
+to install the [prebuilt Linux binary](#prebuilt-binaries-for-linux) instead.
+
+Only 64-bit (`x86_64`) binaries are provided. For other architectures and
+configurations you may [compile from source](#build).
+
+A `chocolatey` and `scoop` package along with an `.msi` installer will be coming soon.
+
+#### Windows: Prebuilt binaries
+Check out the [latest release][github-latest-release] assets for Windows binaries.
+Use the `ffsend-v*-windows-x64-static` binary, to minimize the chance for issues.
+
+You must install OpenSSL 1.1.0j which `ffsend` depends on. The installer for
+this can be found here: [» Installer][openssl-windows-installer]
+
+You can use `ffsend` from the command line in the same directory:
+```cmd
+.\ffsend.exe --help
+```
+
+To make it globally invokable as `ffsend`, you must make the binary available in
+your systems `PATH`. The easiest solution is to move it into `System32`:
+```cmd
+move .\ffsend.exe C:\Windows\System32\ffsend.exe
+```
+
+### Other OS or architecture
+There are currently no other binaries or packages available.
+
+You can [build the project from source](#build) instead.
 
 ## Build
 To build and install `ffsend` yourself, you meet the following requirements
@@ -433,6 +518,7 @@ Check out the [LICENSE](LICENSE) file for more information.
 [libressl]: https://libressl.org/
 [mozilla]: https://mozilla.org/
 [openssl]: https://www.openssl.org/
+[openssl-windows-installer]: https://slproweb.com/download/Win64OpenSSL_Light-1_1_0j.exe
 [rust]: https://rust-lang.org/
 [rustup]: https://rustup.rs/
 [send]: https://send.firefox.com/
@@ -443,3 +529,5 @@ Check out the [LICENSE](LICENSE) file for more information.
 [aur-ffsend]: https://aur.archlinux.org/packages/ffsend/
 [aur-ffsend-git]: https://aur.archlinux.org/packages/ffsend-git/
 [snapcraft-ffsend]: https://snapcraft.io/ffsend
+[homebrew]: https://brew.sh/
+[wsl]: https://docs.microsoft.com/en-us/windows/wsl/install-win10
