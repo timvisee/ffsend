@@ -124,7 +124,6 @@ test-cargo:
 test-public:
   image: alpine:latest
   stage: test
-  allow_failure: true
   dependencies:
     - build-x86_64-linux-musl
   variables:
@@ -138,9 +137,8 @@ test-public:
     - head -c1m </dev/urandom >test.txt
 
     # Generate random file, upload/download and assert equality
-    - ./ffsend upload test.txt -d2 -I
+    - ./ffsend upload test.txt -I
     - ./ffsend download $(./ffsend history -q) -I -o=download.txt
-    - ./ffsend delete $(./ffsend history -q) -I
     - "cmp --silent ./test.txt ./download.txt || (echo ERROR: Downloaded file is different than original; exit 1)"
     - rm ./download.txt
 
