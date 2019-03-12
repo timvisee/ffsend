@@ -122,31 +122,26 @@ test-cargo:
 
 # Run integration test with the public Send service
 test-public:
+  image: alpine:latest
   stage: test
-  allow_failure: true
   dependencies:
     - build-x86_64-linux-musl
   variables:
     GIT_STRATEGY: none
     RUST_TARGET: x86_64-unknown-linux-musl
-  before_script:
-    - apt-get update
-    - apt-get install -y ca-certificates
+  before_script: []
   script:
-    # Generate random file, upload/download and assert equality
-    - "head -c8m </dev/urandom >test.txt"
-    - "./ffsend-$RUST_TARGET upload test.txt -d2 -I"
-    - "./ffsend-$RUST_TARGET download $(./ffsend-$RUST_TARGET history -q) -I -o=download.txt"
-    - "./ffsend-$RUST_TARGET delete $(./ffsend-$RUST_TARGET history -q) -I"
-    - "cmp --silent ./test.txt ./download.txt || (echo ERROR: Downloaded file is different than original; exit 1)"
-    - "rm ./download.txt"
+    # Prepare ffsend binary, create random file
+    - mv ./ffsend-$RUST_TARGET ./ffsend
+    - chmod a+x ./ffsend
+    - head -c1m </dev/urandom >test.txt
 
-    # Also test Firefox Send v3
-    - "./ffsend-$RUST_TARGET upload --host http://send2.dev.lcip.org/ test.txt -d2 -I"
-    - "./ffsend-$RUST_TARGET download $(./ffsend-$RUST_TARGET history -q) -I -o=download.txt"
-    - "./ffsend-$RUST_TARGET delete $(./ffsend-$RUST_TARGET history -q) -I"
-    - "cmp --silent ./test.txt ./download.txt || (echo ERROR: Downloaded file is different than original; exit 1)"
-    - "rm ./download.txt"
+    # Generate random file, upload/download and assert equality
+    - ./ffsend upload test.txt -d2 -I
+    - ./ffsend download $(./ffsend history -q) -I -o=download.txt
+    - ./ffsend delete $(./ffsend history -q) -I
+    - cmp --silent ./test.txt ./download.txt || (echo ERROR: Downloaded file is different than original; exit 1)
+    - rm ./download.txt
 
 # Cargo crate release
 release-crate:
