@@ -11,7 +11,7 @@ pub const CLIENT_TRANSFER_TIMEOUT: u64 = 24 * 60 * 60;
 pub const API_VERSION_DESIRED_DEFAULT: DesiredVersion = DesiredVersion::Assume(API_VERSION_ASSUME);
 
 /// The default server API version to assume when it could not be determined.
-#[cfg(feature = "send2")]
-pub const API_VERSION_ASSUME: Version = Version::V2;
-#[cfg(not(feature = "send2"))]
+#[cfg(feature = "send3")]
 pub const API_VERSION_ASSUME: Version = Version::V3;
+#[cfg(not(feature = "send3"))]
+pub const API_VERSION_ASSUME: Version = Version::V2;
