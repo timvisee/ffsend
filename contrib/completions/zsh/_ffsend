@@ -1,0 +1,233 @@
+#compdef ffsend
+
+local -a root_args
+root_args=(
+  '(- *)'{-h,--help}'[Prints help information]'
+  '(- *)'{-V,--version}'[Prints version information]'
+)
+
+local -a common_args
+common_args=(
+  '(-f --force)'{-f,--force}'[Force the action, ignore warnings]'
+  '(-i --incognito)'{-i,--incognito}"[Don't update local history for actions]"
+  '(-I --no-interact)'{-I,--no-interact}'[Not interactive, do not prompt]'
+  '(-q --quiet)'{-q,--quiet}'[Produce output suitable for logging and automation]'
+  '(-v --verbose)'{-v,--verbose}'[Enable verbose information and logging]'
+  '(-y --yes)'{-y,--yes}'[Assume yes for prompts]'
+)
+
+local -a common_options
+common_options=(
+  '(-A --api)'{-A,--api}"[Server API version to use, '-' to lookup]:api:(2 3 auto -)"
+  '(-H --history)'{-H,--history}'[Use the specified history file]:history file:_files'
+  '(-t --timeout)'{-t,--timeout}'[Request timeout (0 to disable)]:timeout:'
+  '(-T --transfer-timeout)'{-T,--transfer-timeout}'[Transfer timeout (0 to disable)]:timeout:'
+)
+
+_ffsend_commands() {
+  local -a commands
+  commands=(
+    'upload:Upload files'
+    'download:Download files'
+    'debug:View debug information'
+    'delete:Delete a shared file'
+    'exists:Check whether a remote file exists'
+    'help:Prints this message or the help of the given subcommand(s)'
+    'history:View file history'
+    'info:Fetch info about a shared file'
+    'parameters:Change parameters of a shared file'
+    'password:Change the password of a shared file'
+    'version:Determine the Send server version'
+  )
+  _describe 'command' commands
+}
+
+_arguments -w -s -S \
+  ${root_args[@]} \
+  ${common_args[@]} \
+  ${common_options[@]} \
+  '1: :_ffsend_commands' \
+  '*:: :->subcommands'
+
+case ${words[1]} in
+  upload)
+    local -a upload_args
+    upload_args=(
+      '(-a --archive)'{-a,--archive}'[Archive the upload in a single file]'
+      '(-c --copy)'{-c,--copy}'[Copy the share link to your clipboard]'
+      '(-C --copy-cmd)'{-C,--copy-cmd}'[Copy the ffsend download command to your clipboard]'
+      '(-P --gen-passphrase)'{-P,--gen-passphrase}'[Protect the file with a generated passphrase]'
+      '(- *)--help[Prints help information]'
+      '(-o --open)'{-o,--open}'[Open the share link in your browser]'
+    )
+    local -a upload_options
+    upload_options=(
+      '(-d --download-limit)'{-d,--download-limit}'[The file download limit]:count:'
+      '(-h --host)'{-h,--host}'[The remote host to upload to]:host:'
+      '(-n --name)'{-n,--name}'[Rename the file being uploaded]:name:'
+      '(-p --password)'{-p,--password}'[Protect the file with a password]:password:'
+    )
+    _arguments -w -s -S \
+      ${upload_args[@]} \
+      ${common_args[@]} \
+      ${upload_options[@]} \
+      ${common_options[@]} \
+      ':file:_files'
+    ;;
+  download)
+    local -a download_args
+    download_args=(
+      '(-e --extract)'{-e,--extract}'[Extract an archived file]'
+      '(- *)'{-h,--help}'[Prints help information]'
+    )
+    local -a download_options
+    download_options=(
+      '(-o --output)'{-o,--output}'[The output file or directory]:output file or directory:_files'
+      '(-p --password)'{-p,--password}'[Unlock a password protected file]:password:'
+    )
+    _arguments -w -s -S \
+      ${download_args[@]} \
+      ${common_args[@]} \
+      ${download_options[@]} \
+      ${common_options[@]} \
+      ':url:()'
+    ;;
+  debug)
+    local -a debug_args
+    debug_args=(
+      '(- *)--help[Prints help information]'
+    )
+    local -a debug_options
+    debug_options=(
+      '(-h --host)'{-h,--host}'[The remote host to upload to]:host:'
+    )
+    _arguments -w -s -S \
+      ${debug_args[@]} \
+      ${common_args[@]} \
+      ${debug_options[@]} \
+      ${common_options[@]}
+    ;;
+  delete)
+    local -a delete_args
+    delete_args=(
+      '(- *)'{-h,--help}'[Prints help information]'
+    )
+    local -a delete_options
+    delete_options=(
+      '(-o --owner)'{-o,--owner}'[Specify the file owner token]:token:'
+    )
+    _arguments -w -s -S \
+      ${delete_args[@]} \
+      ${common_args[@]} \
+      ${delete_options[@]} \
+      ${common_options[@]} \
+      '1:url:()'
+    ;;
+  exists)
+    local -a exists_args
+    exists_args=(
+      '(- *)'{-h,--help}'[Prints help information]'
+    )
+    _arguments -w -s -S \
+      ${exists_args[@]} \
+      ${common_args[@]} \
+      ${common_options[@]} \
+      '1:url:()'
+    ;;
+  help)
+    local -a help_topics
+    help_topics=(
+      'upload'
+      'download'
+      'debug'
+      'delete'
+      'exists'
+      'help'
+      'history'
+      'info'
+      'parameters'
+      'password'
+      'version'
+    )
+    _values 'help topics' ${help_topics[@]}
+    ;;
+  history)
+    local -a history_args
+    history_args=(
+      '(- *)'{-h,--help}'[Prints help information]'
+    )
+    _arguments -w -s -S \
+      ${history_args[@]} \
+      ${common_args[@]} \
+      ${common_options[@]}
+    ;;
+  info)
+    local -a info_args
+    info_args=(
+      '(- *)'{-h,--help}'[Prints help information]'
+    )
+    local -a info_options
+    info_options=(
+      '(-o --owner)'{-o,--owner}'[Specify the file owner token]:token:'
+      '(-p --password)'{-p,--password}'[Unlock a password protected file]:password:'
+    )
+    _arguments -w -s -S \
+      ${info_args[@]} \
+      ${common_args[@]} \
+      ${info_options[@]} \
+      ${common_options[@]} \
+      '1:url:()'
+    ;;
+  parameters)
+    local -a parameters_args
+    parameters_args=(
+      '(- *)'{-h,--help}'[Prints help information]'
+    )
+    local -a parameters_options
+    parameters_options=(
+      '(-d --download-limit)'{-d,--download-limit}'[The file download limit]:count:'
+      '(-o --owner)'{-o,--owner}'[Specify the file owner token]:token:'
+    )
+    _arguments -w -s -S \
+      ${parameters_args[@]} \
+      ${common_args[@]} \
+      ${parameters_options[@]} \
+      ${common_options[@]} \
+      '1:url:()'
+    ;;
+  password)
+    local -a password_args
+    password_args=(
+      '(-P --gen-passphrase)'{-P,--gen-passphrase}'[Protect the file with a generated passphrase]'
+      '(- *)'{-h,--help}'[Prints help information]'
+    )
+    local -a password_options
+    password_options=(
+      '(-o --owner)'{-o,--owner}'[Specify the file owner token]:token:'
+      '(-p --password)'{-p,--password}'[Unlock a password protected file]:password:'
+    )
+    _arguments -w -s -S \
+      ${password_args[@]} \
+      ${common_args[@]} \
+      ${password_options[@]} \
+      ${common_options[@]} \
+      '1:url:()'
+    ;;
+  version)
+    local -a version_args
+    version_args=(
+      '(- *)--help[Prints help information]'
+    )
+    local -a version_options
+    version_options=(
+      '(-h --host)'{-h,--host}'[The remote host to upload to]:host:'
+    )
+    _arguments -w -s -S \
+      ${version_args[@]} \
+      ${common_args[@]} \
+      ${version_options[@]} \
+      ${common_options[@]}
+    ;;
+esac
+
+# vim: ft=zsh sw=2 ts=2 et
