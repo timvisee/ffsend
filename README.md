@@ -171,6 +171,10 @@ For other architectures and configurations you may [compile from source](#build)
 More packages options will be coming soon.
 
 #### Linux: snap package
+_Note: The `ffsend` `snap` package is isolated, and can only access files in
+your home directory. Use a different installation option instead if you don't
+want this._
+
 [» `ffsend`][snapcraft-ffsend]
 ```bash
 snap install ffsend
