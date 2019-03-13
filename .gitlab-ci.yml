@@ -279,4 +279,42 @@ package-aur:
     - git push
     - cd ..
 
+# Alpine APK package release
+package-alpine:
+  image: alpine:latest
+  stage: package
+  only:
+    - /^v(\d+\.)*\d+$/
+  dependencies:
+    - build-x86_64-linux-musl
+  variables:
+    RUST_TARGET: x86_64-unknown-linux-musl
+  before_script: []
+  script:
+    # Rename ffsend binary, move into Alpine package directory
+    - mv ./ffsend-$RUST_TARGET ./ffsend
+    - cd ./pkg/alpine
+
+    # Install SDK, prepare user, create build directories, configure abuild
+    - apk add alpine-sdk
+    - adduser -D ffsend
+    - addgroup ffsend abuild
+    - echo "ffsend    ALL=(ALL) ALL" >> /etc/sudoers
+    - mkdir -p /var/cache/distfiles
+    - chmod a+w /var/cache/distfiles
+    - echo 'PACKAGER="timvisee <tim@visee.me>"' >> /etc/abuild.conf
+    - echo 'MAINTAINER="$PACKAGER"' >> /etc/abuild.conf
+
+    # Switch to new user, configure git, clone aports repository
+    - su - ffsend
+    - git config --global user.name timvisee
+    - git config --global user.email tim@visee.me
+    - git clone git://git.alpinelinux.org/aports
+
+    # TODO: configure with APKBUILD guide: https://wiki.alpinelinux.org/wiki/Creating_an_Alpine_package
+
+    # TODO: configure version number
+    # TODO: build package
+    # TODO: publish package
+
 # TODO: add job to test ffsend{-git} AUR packages
