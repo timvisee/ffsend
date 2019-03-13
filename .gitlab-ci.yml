@@ -220,8 +220,12 @@ release-docker:
     - /^v(\d+\.)*\d+$/
   dependencies:
     - build-x86_64-linux-musl
+  services:
+    - docker:dind
   variables:
     RUST_TARGET: x86_64-unknown-linux-musl
+    DOCKER_HOST: tcp://docker:2375
+    # DOCKER_DRIVER: overlay2
   before_script: []
   script:
     # Place binary in Docker directory, change to it
