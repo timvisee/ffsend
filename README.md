@@ -488,7 +488,7 @@ documentation [here][send-encryption].
 ```
 $ ffsend help
 
-ffsend 0.2.29
+ffsend 0.2.30
 Tim Visee <timvisee.com>
 Easily and securely share files from the command line.
 A fully featured Firefox Send client.
