@@ -33,7 +33,7 @@ Find out more about security [here](#security).
 - [Features](#features)
 - [Usage](#usage)
 - [Requirements](#requirements)
-- [Install](#install) ([Linux](#linux), [macOS](#macos), [Windows](#windows), [_Other OS/arch_](#other-os-or-architecture))
+- [Install](#install) ([GNU/Linux](#linux), [macOS](#macos), [Windows](#windows), [_Other OS/arch_](#other-os-or-architecture))
 - [Build](#build)
 - [Configuration and environment](#configuration-and-environment)
 - [Security](#security)
@@ -130,10 +130,10 @@ Use the `--help` flag, `help` subcommand, or see the [help](#help) section for
 all available subcommands.
 
 ## Requirements
-- Linux, Windows or macOS
+- GNU/Linux, Windows or macOS
 - A terminal :sunglasses:
 - Internet connection for uploading and downloading
-- Linux specific:
+- GNU/Linux specific:
   - OpenSSL & CA certificates:
     - Ubuntu/Debian: `apt install openssl ca-certificates`
   - Optional: `xclip` for clipboard support
@@ -155,12 +155,12 @@ available right now.
 Make sure you meet and install the [requirements](#requirements).
 
 See the operating system specific instructions below:
-* [Linux](#linux)
+* [GNU/Linux](#linux)
 * [macOS](#macos)
 * [Windows](#windows)
 * [_Other OS or architecture_](#other-os-or-architecture)
 
-### Linux
+### GNU/Linux (all distributions)
 Using the [snap](#linux-snap-package) package is recommended if supported.  
 Alternatively you may install it manually using the
 [prebuilt binaries](#linux-prebuilt-binaries).
@@ -170,18 +170,14 @@ For other architectures and configurations you may [compile from source](#build)
 
 More packages options will be coming soon.
 
-#### Linux: snap package
-_Note: The `ffsend` `snap` package is isolated, and can only access files in
-your home directory. Use a different installation option instead if you don't
-want this._
-
+#### GNU/Linux: snap package
 [» `ffsend`][snapcraft-ffsend]
 ```bash
 snap install ffsend
 ffsend --help
 ```
 
-#### Linux: Arch AUR packages
+#### GNU/Linux: Arch AUR packages
 [» `ffsend`][aur-ffsend] (binary package)  
 [» `ffsend-git`][aur-ffsend-git] (compile from source package)
 
@@ -196,8 +192,8 @@ aurget -S ffsend
 ffsend --help
 ```
 
-#### Linux: Prebuilt binaries
-Check out the [latest release][github-latest-release] assets for Linux binaries.  
+#### GNU/Linux: Prebuilt binaries
+Check out the [latest release][github-latest-release] assets for GNU/Linux binaries.  
 Use the `ffsend-v*-linux-x64-static` binary, to minimize the chance for issues.
 
 Make sure you meet and install the [requirements](#requirements) before you
@@ -254,12 +250,12 @@ ffsend
 Currently only [prebuilt binaries](#windows-prebuilt-binaries) are available for Windows.
 
 If you're using the [Windows Subsystem for Linux](wsl), it's highly recommended
-to install the [prebuilt Linux binary](#prebuilt-binaries-for-linux) instead.
+to install the [prebuilt GNU/Linux binary](#prebuilt-binaries-for-linux) instead.
 
 Only 64-bit (`x86_64`) binaries are provided.
 For other architectures and configurations you may [compile from source](#build).
 
-A `chocolatey` and `scoop` package along with an `.msi` installer will be coming soon.
+A `chocolatey` and a `scoop` package along with an `.msi` installer will be coming soon.
 
 #### Windows: Prebuilt binaries
 Check out the [latest release][github-latest-release] assets for Windows binaries.
@@ -293,8 +289,8 @@ before proceeding:
 - [`git`][git]
 - [`rust`][rust] `v1.32` or higher (install using [`rustup`][rustup])
 - [OpenSSL][openssl] or [LibreSSL][libressl] libraries and headers must be available
-	- Linux:
-		- Ubuntu/Debian: `apt install build-essential cmake pkg-config libssl-dev`
+	- GNU/Linux:
+		- Debian, Ubuntu and derivatives: `apt install build-essential cmake pkg-config libssl-dev`
 		- CentOS/Red Hat/openSUSE: `yum install gcc gcc-c++ make cmake openssl-devel`
 		- Arch: `pacman -S openssl base-devel`
     - Gentoo: `emerge -a dev-util/pkgconfig dev-util/cmake dev-libs/openssl`
@@ -336,7 +332,7 @@ Then, walk through one of the following steps to compile and install `ffsend`:
 	cargo run --release -- --help 
 	```
 
-- Or clone the repository and invoke the binary directly (Linux/macOS):
+- Or clone the repository and invoke the binary directly (GNU/Linux, macOS):
 
 	```bash
 	# Clone the project
@@ -436,7 +432,7 @@ somehow got decrypted without proper authorization._
 `ffsend` uses client side encryption, to ensure your files are securely
 encrypted before they are uploaded to the remote host. This makes it impossible
 for third parties to decrypt your file without having the secret (encryption
-key). The file and it's metadata are encrypted using `128-bit AES-GCM`, and a
+key). The file and its metadata are encrypted using `128-bit AES-GCM`, and a
 `HMAC SHA-256` signing key is used for request authentication.
 This is consistent with the encryption documentation provided by the
 [Send][send] service, `ffsend` is a tool for.
