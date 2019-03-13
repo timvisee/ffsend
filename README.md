@@ -232,7 +232,7 @@ globally available:
 
 ```bash
 # Install openssl dependency
-homebrew install openssl
+brew install openssl@1.1
 
 # Rename file to ffsend
 mv ./ffsend-* ./ffsend
