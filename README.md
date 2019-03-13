@@ -61,7 +61,7 @@ _Note: this tool is currently in alpha_
 - Accurate error reporting
 - Streaming encryption and uploading/downloading, very low memory footprint
 - Intended for use in scripts without interaction
-- Upcomming: Firefox Account integration (higher download counts, longer expiry times)
+- Upcoming: Firefox Account integration (higher download counts, longer expiry times)
 
 For a list of upcoming features and ideas, take a look at the
 current [open issues](https://gitlab.com/timvisee/ffsend/issues) over on GitLab.
