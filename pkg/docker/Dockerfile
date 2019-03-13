@@ -3,5 +3,5 @@ LABEL maintainer="Tim Visée <tim@visee.me>"
 
 COPY ./ffsend /
 
-WORKDIR /
+WORKDIR /data/
 ENTRYPOINT ["/ffsend"]
