@@ -253,7 +253,7 @@ ffsend
 ### Windows
 Currently only [prebuilt binaries](#windows-prebuilt-binaries) are available for Windows.
 
-If you're using the [Windows Subsystem for Linux](wsl), it's highly recommended
+If you're using the [Windows Subsystem for Linux][wsl], it's highly recommended
 to install the [prebuilt Linux binary](#prebuilt-binaries-for-linux) instead.
 
 Only 64-bit (`x86_64`) binaries are provided.
