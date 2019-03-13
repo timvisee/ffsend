@@ -230,7 +230,7 @@ Check out the [latest release][github-latest-release] assets for a macOS binary.
 You must install `openssl` through [`homebrew`][homebrew] which `ffsend` depends
 on.
 
-Then, mark the downloaded binary as as executable.
+Then, mark the downloaded binary as an executable.
 You then may want to move it into `/usr/bin/` to make the `ffsend` command
 globally available:
 
