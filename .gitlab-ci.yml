@@ -212,6 +212,36 @@ release-github:
     - ./github-release upload --token "$GITHUB_TOKEN" --owner timvisee --repo ffsend --tag "$CI_COMMIT_REF_NAME" --file ./ffsend-x86_64-unknown-linux-gnu --name ffsend-$CI_COMMIT_REF_NAME-linux-x64
     - ./github-release upload --token "$GITHUB_TOKEN" --owner timvisee --repo ffsend --tag "$CI_COMMIT_REF_NAME" --file ./ffsend-x86_64-unknown-linux-musl --name ffsend-$CI_COMMIT_REF_NAME-linux-x64-static
 
+# Publish a Docker image
+release-docker:
+  image: docker:git
+  stage: release
+  only:
+    - /^v(\d+\.)*\d+$/
+  dependencies:
+    - build-x86_64-linux-musl
+  variables:
+    RUST_TARGET: x86_64-unknown-linux-musl
+  before_script: []
+  script:
+    # Place binary in Docker directory, change to it
+    - mv ./ffsend-$RUST_TARGET ./pkg/docker/ffsend
+    - cd ./pkg/docker
+
+    # Build the Docker image, run it once to test
+    - docker build -t timvisee/ffsend:latest ./
+    - docker run --rm -it timvisee/ffsend:latest
+
+    # Retag version
+    - VERSION=$(echo $CI_COMMIT_REF_NAME | cut -c 2-)
+    - echo "Determined Docker image version number 'v$VERSION', retagging image..."
+    - docker tag timvisee/ffsend:latest timvisee/ffsend:$VERSION
+
+    # Authenticate and push the Docker images
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USER" --password-stdin
+    - docker push timvisee/ffsend:$VERSION
+    - docker push timvisee/ffsend:latest
+
 # AUR packages release
 package-aur:
   image: archlinux/base

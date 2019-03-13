@@ -280,9 +280,31 @@ move .\ffsend.exe C:\Windows\System32\ffsend.exe
 ```
 
 ### Other OS or architecture
+If your system runs Docker, you can use the [docker image](#docker-image).
 There are currently no other binaries or packages available.
 
 You can [build the project from source](#build) instead.
+
+#### Docker image
+A Docker image is available for using `ffsend` running in a container.
+Mount a directory to `/data`, so it's accessible for `ffsend` in the container,
+and use the command as you normally would.
+
+[» `timvisee/ffsend`][docker-hub-ffsend]
+
+```bash
+# Run container with no parameters
+docker run --rm -it -v $PWD:/data timvisee/ffsend
+
+# Upload a file
+docker run --rm -it -v $PWD:/data timvisee/ffsend upload my-file.txt
+
+# Download a file
+docker run --rm -it -v $PWD:/data timvisee/ffsend download https://send.firefox.com/#sample-share-url
+
+# View help
+docker run --rm -it -v $PWD:/data timvisee/ffsend help
+```
 
 ## Build
 To build and install `ffsend` yourself, you meet the following requirements
@@ -537,3 +559,4 @@ Check out the [LICENSE](LICENSE) file for more information.
 [snapcraft-ffsend]: https://snapcraft.io/ffsend
 [homebrew]: https://brew.sh/
 [wsl]: https://docs.microsoft.com/en-us/windows/wsl/install-win10
+[docker-hub-ffsend]: https://hub.docker.com/r/timvisee/ffsend
