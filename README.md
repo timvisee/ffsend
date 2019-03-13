@@ -33,7 +33,7 @@ Find out more about security [here](#security).
 - [Features](#features)
 - [Usage](#usage)
 - [Requirements](#requirements)
-- [Install](#install) ([Linux](#linux), [macOS](#macos), [Windows](#windows), [_Other OS/arch_](#other-os-or-architecture))
+- [Install](#install) ([Linux](#linux-all-distributions), [macOS](#macos), [Windows](#windows), [_Other OS/arch_](#other-os-or-architecture))
 - [Build](#build)
 - [Configuration and environment](#configuration-and-environment)
 - [Security](#security)
@@ -135,9 +135,9 @@ all available subcommands.
 - Internet connection for uploading and downloading
 - Linux specific:
   - OpenSSL & CA certificates:
-    - Ubuntu/Debian: `apt install openssl ca-certificates`
+    - Ubuntu, Debian and derivatives: `apt install openssl ca-certificates`
   - Optional: `xclip` for clipboard support
-    - Ubuntu/Debian: `apt install xclip`
+    - Ubuntu, Debian and derivatives: `apt install xclip`
     - CentOS/Red Hat/openSUSE/Fedora: `yum install xclip`
     - Arch: `pacman -S xclip`
 - Windows specific:
@@ -155,12 +155,12 @@ available right now.
 Make sure you meet and install the [requirements](#requirements).
 
 See the operating system specific instructions below:
-* [Linux](#linux)
+* [Linux](#linux-all-distributions)
 * [macOS](#macos)
 * [Windows](#windows)
 * [_Other OS or architecture_](#other-os-or-architecture)
 
-### Linux
+### Linux (all distributions)
 Using the [snap](#linux-snap-package) package is recommended if supported.  
 Alternatively you may install it manually using the
 [prebuilt binaries](#linux-prebuilt-binaries).
@@ -259,7 +259,7 @@ to install the [prebuilt Linux binary](#prebuilt-binaries-for-linux) instead.
 Only 64-bit (`x86_64`) binaries are provided.
 For other architectures and configurations you may [compile from source](#build).
 
-A `chocolatey` and `scoop` package along with an `.msi` installer will be coming soon.
+A `chocolatey` and a `scoop` package along with an `.msi` installer will be coming soon.
 
 #### Windows: Prebuilt binaries
 Check out the [latest release][github-latest-release] assets for Windows binaries.
@@ -294,7 +294,7 @@ before proceeding:
 - [`rust`][rust] `v1.32` or higher (install using [`rustup`][rustup])
 - [OpenSSL][openssl] or [LibreSSL][libressl] libraries and headers must be available
 	- Linux:
-		- Ubuntu/Debian: `apt install build-essential cmake pkg-config libssl-dev`
+		- Ubuntu, Debian and derivatives: `apt install build-essential cmake pkg-config libssl-dev`
 		- CentOS/Red Hat/openSUSE: `yum install gcc gcc-c++ make cmake openssl-devel`
 		- Arch: `pacman -S openssl base-devel`
     - Gentoo: `emerge -a dev-util/pkgconfig dev-util/cmake dev-libs/openssl`
@@ -436,7 +436,7 @@ somehow got decrypted without proper authorization._
 `ffsend` uses client side encryption, to ensure your files are securely
 encrypted before they are uploaded to the remote host. This makes it impossible
 for third parties to decrypt your file without having the secret (encryption
-key). The file and it's metadata are encrypted using `128-bit AES-GCM`, and a
+key). The file and its metadata are encrypted using `128-bit AES-GCM`, and a
 `HMAC SHA-256` signing key is used for request authentication.
 This is consistent with the encryption documentation provided by the
 [Send][send] service, `ffsend` is a tool for.
