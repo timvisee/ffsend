@@ -143,7 +143,7 @@ all available subcommands.
 - Windows specific:
   - OpenSSL v1.1.0j: [» Installer][openssl-windows-installer]
 - macOS specific:
-  - OpenSSL: `brew install openssl`
+  - OpenSSL: `brew install openssl@1.1`
 
 ## Install
 <!-- Before installing, make sure you meet all requirements listed
@@ -232,7 +232,7 @@ globally available:
 
 ```bash
 # Install openssl dependency
-homebrew install openssl
+brew install openssl@1.1
 
 # Rename file to ffsend
 mv ./ffsend-* ./ffsend
