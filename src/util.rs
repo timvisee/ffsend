@@ -29,7 +29,11 @@ use chrono::Duration;
 use failure::{err_msg, Fail};
 #[cfg(all(feature = "clipboard", not(target_os = "linux")))]
 use failure::{Compat, Error};
-use ffsend_api::url::Url;
+use ffsend_api::{
+    api::request::{ensure_success, ResponseError},
+    reqwest::{self, Client},
+    url::Url,
+};
 use rpassword::prompt_password_stderr;
 
 use crate::cmd::matcher::MainMatcher;
@@ -856,4 +860,39 @@ pub fn api_version_list() -> Vec<&'static str> {
     versions.push("v3");
 
     versions
+}
+
+/// Follow redirects on the given URL, and return the final full URL.
+///
+/// This is used to obtain share URLs from shortened links.
+///
+// TODO: extract this into module
+pub fn follow_url(client: &Client, url: &Url) -> Result<Url, FollowError> {
+    // Send the request, follow the URL, ensure success
+    let response = client
+        .get(url.as_str())
+        .send()
+        .map_err(FollowError::Request)?;
+    ensure_success(&response)?;
+
+    // Obtain the final URL
+    Ok(response.url().clone())
+}
+
+/// URL following error.
+#[derive(Debug, Fail)]
+pub enum FollowError {
+    /// Failed to send the shortening request.
+    #[fail(display = "failed to send URL follow request")]
+    Request(#[cause] reqwest::Error),
+
+    /// The server responded with a bad response.
+    #[fail(display = "failed to shorten URL, got bad response")]
+    Response(#[cause] ResponseError),
+}
+
+impl From<ResponseError> for FollowError {
+    fn from(err: ResponseError) -> Self {
+        FollowError::Response(err)
+    }
 }

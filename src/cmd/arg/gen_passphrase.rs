@@ -1,8 +1,4 @@
-use chbs::{
-    config::BasicConfig,
-    prelude::*,
-    word::WordList,
-};
+use chbs::{config::BasicConfig, prelude::*, word::WordList};
 use clap::Arg;
 
 use super::{CmdArg, CmdArgFlag};

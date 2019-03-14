@@ -20,11 +20,13 @@ use tempfile::{Builder as TempBuilder, NamedTempFile};
 use super::select_api_version;
 #[cfg(feature = "archive")]
 use crate::archive::archiver::Archiver;
-use crate::client::create_transfer_client;
+use crate::client::{create_client, create_transfer_client};
 use crate::cmd::matcher::{MainMatcher, Matcher, UploadMatcher};
 #[cfg(feature = "history")]
 use crate::history_tool;
 use crate::progress::ProgressBar;
+#[cfg(feature = "urlshorten")]
+use crate::urlshorten;
 #[cfg(feature = "clipboard")]
 use crate::util::set_clipboard;
 use crate::util::{
@@ -56,7 +58,7 @@ impl<'a> Upload<'a> {
         let host = matcher_upload.host();
 
         // Create a reqwest client capable for uploading files
-        let client = create_transfer_client(&matcher_main);
+        let client = create_client(&matcher_main);
 
         // Determine the API version to use
         let mut desired_version = matcher_main.api();
@@ -228,23 +230,58 @@ impl<'a> Upload<'a> {
             params,
         )
         .invoke(&transfer_client, reporter)?;
-        let url = file.download_url(true);
+        #[allow(unused_mut)]
+        let mut url = file.download_url(true);
+
+        // Shorten the share URL if requested, prompt the user to confirm
+        #[cfg(feature = "urlshorten")]
+        {
+            if matcher_upload.shorten() {
+                if prompt_yes("URL shortening is a security risk. This shares the secret URL with a 3rd party.\nDo you want to shorten the share URL?", Some(false), &matcher_main) {
+                    match urlshorten::shorten_url(&client, &url) {
+                        Ok(short) => url = short,
+                        Err(err) => print_error(
+                            err.context("failed to shorten share URL, ignoring")
+                                .compat(),
+                        ),
+                    }
+                }
+            }
+        }
 
         // Report the result
         if !matcher_main.quiet() {
-            // Show a table
+            // Create a table
             let mut table = Table::new();
             table.set_format(FormatBuilder::new().padding(0, 2).build());
+
+            // Show the original URL when shortening, verbose and different
+            #[cfg(feature = "urlshorten")]
+            {
+                let full_url = file.download_url(true);
+                if matcher_main.verbose() && matcher_upload.shorten() && url != full_url {
+                    table.add_row(Row::new(vec![
+                        Cell::new("Full share link:"),
+                        Cell::new(full_url.as_str()),
+                    ]));
+                }
+            }
+
+            // Show the share URL
             table.add_row(Row::new(vec![
                 Cell::new("Share link:"),
                 Cell::new(url.as_str()),
             ]));
+
+            // Show a generate passphrase
             if password_generated {
                 table.add_row(Row::new(vec![
                     Cell::new("Passphrase:"),
                     Cell::new(&password.unwrap_or("?".into())),
                 ]));
             }
+
+            // Show the owner token
             if matcher_main.verbose() {
                 table.add_row(Row::new(vec![
                     Cell::new("Owner token:"),
@@ -284,10 +321,7 @@ impl<'a> Upload<'a> {
         {
             if matcher_upload.qrcode() {
                 if let Err(err) = print_qr(url.as_str()) {
-                    print_error(
-                        err.context("failed to print QR code, ignoring")
-                            .compat(),
-                    );
+                    print_error(err.context("failed to print QR code, ignoring").compat());
                 }
             }
         }

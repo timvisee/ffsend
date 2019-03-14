@@ -110,6 +110,12 @@ impl<'a: 'b, 'b> UploadMatcher<'a> {
         }
     }
 
+    /// Check whether to shorten a share URL
+    #[cfg(feature = "urlshorten")]
+    pub fn shorten(&self) -> bool {
+        self.matches.is_present("shorten")
+    }
+
     /// Check whether to print a QR code for the share URL.
     #[cfg(feature = "qrcode")]
     pub fn qrcode(&self) -> bool {

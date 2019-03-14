@@ -394,6 +394,8 @@ The following features are available, some of which are enabled by default:
 | `clipboard` | Default | Support for copying links to the clipboard                 |
 | `history`   | Default | Support for tracking files in history                      |
 | `archive`   | Default | Support for archiving and extracting uploads and downloads |
+| `qrcode`    | Default | Support for rendering a QR code for a share URL            |
+| `urlshorten`| Default | Support for shortening share URLs                          |
 | `no-color`  |         | Compile without color support in error and help messages   |
 
 To enable features during building or installation, specify them with
