@@ -251,7 +251,9 @@ ffsend
 ```
 
 ### Windows
-Currently only [prebuilt binaries](#windows-prebuilt-binaries) are available for Windows.
+Using the [`scoop` package](#windows-scoop-package) is recommended.  
+Alternatively you may install it manually using the
+[prebuilt binaries](#windows-prebuilt-binaries).
 
 If you're using the [Windows Subsystem for Linux][wsl], it's highly recommended
 to install the [prebuilt Linux binary](#prebuilt-binaries-for-linux) instead.
@@ -259,7 +261,18 @@ to install the [prebuilt Linux binary](#prebuilt-binaries-for-linux) instead.
 Only 64-bit (`x86_64`) binaries are provided.
 For other architectures and configurations you may [compile from source](#build).
 
-A `chocolatey` and a `scoop` package along with an `.msi` installer will be coming soon.
+A `chocolatey` and an official `scoop` package along with an `.msi` installer will be coming soon.
+
+#### Windows: scoop package
+An unofficial [`scoop`][scoop] package has been created by some amazing contributors.  
+_Note: it currently isn't automatically upgraded with new releases._
+
+Make sure you've [`scoop`][scoop] installed, and run:
+
+```bash
+scoop install ffsend
+ffsend --help
+```
 
 #### Windows: Prebuilt binaries
 Check out the [latest release][github-latest-release] assets for Windows binaries.
@@ -560,3 +573,4 @@ Check out the [LICENSE](LICENSE) file for more information.
 [homebrew]: https://brew.sh/
 [wsl]: https://docs.microsoft.com/en-us/windows/wsl/install-win10
 [docker-hub-ffsend]: https://hub.docker.com/r/timvisee/ffsend
+[scoop]: https://scoop.sh/
