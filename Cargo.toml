@@ -50,7 +50,7 @@ name = "ffsend"
 path = "src/main.rs"
 
 [features]
-default = ["archive", "clipboard", "history", "send2", "send3"]
+default = ["archive", "clipboard", "history", "send2", "send3", "qrcode"]
 
 # Compile with file archiving support
 archive = ["tar"]
@@ -67,6 +67,9 @@ send2 = ["ffsend-api/send2"]
 # Support for Firefox Send v3
 send3 = ["ffsend-api/send3"]
 
+# Support for generating QR codes for share URLs
+qrcode = ["qr2term"]
+
 [dependencies]
 chbs = "0.0.8"
 chrono = "0.4"
@@ -82,6 +85,7 @@ open = "1"
 openssl-probe = "0.1"
 pbr = "1"
 prettytable-rs = "0.8"
+qr2term = { version = "0.1", optional = true }
 rpassword = "2.1"
 serde = "1.0"
 serde_derive = "1.0"

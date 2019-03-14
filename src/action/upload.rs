@@ -12,6 +12,8 @@ use ffsend_api::action::version::Error as VersionError;
 use ffsend_api::config::{upload_size_max, UPLOAD_SIZE_MAX_RECOMMENDED};
 use ffsend_api::pipe::ProgressReporter;
 use prettytable::{format::FormatBuilder, Cell, Row, Table};
+#[cfg(feature = "history")]
+use qr2term::print_qr;
 #[cfg(feature = "archive")]
 use tempfile::{Builder as TempBuilder, NamedTempFile};
 
@@ -272,6 +274,19 @@ impl<'a> Upload<'a> {
                 if let Err(err) = set_clipboard(copy_mode.build(url.as_str())) {
                     print_error(
                         err.context("failed to copy the share link to the clipboard, ignoring"),
+                    );
+                }
+            }
+        }
+
+        // Print a QR code for the share URL
+        #[cfg(feature = "qrcode")]
+        {
+            if matcher_upload.qrcode() {
+                if let Err(err) = print_qr(url.as_str()) {
+                    print_error(
+                        err.context("failed to print QR code, ignoring")
+                            .compat(),
                     );
                 }
             }
