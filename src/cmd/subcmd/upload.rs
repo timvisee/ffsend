@@ -73,6 +73,18 @@ impl CmdUpload {
                 );
         }
 
+        // Optional qrcode support
+        #[cfg(feature = "qrcode")]
+        {
+            cmd = cmd.arg(
+                Arg::with_name("qrcode")
+                    .long("qrcode")
+                    .alias("qr")
+                    .short("Q")
+                    .help("Print a QR code for the share URL"),
+            )
+        }
+
         cmd
     }
 }

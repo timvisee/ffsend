@@ -109,6 +109,12 @@ impl<'a: 'b, 'b> UploadMatcher<'a> {
             None
         }
     }
+
+    /// Check whether to print a QR code for the share URL.
+    #[cfg(feature = "qrcode")]
+    pub fn qrcode(&self) -> bool {
+        self.matches.is_present("qrcode")
+    }
 }
 
 impl<'a> Matcher<'a> for UploadMatcher<'a> {
