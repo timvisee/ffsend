@@ -321,10 +321,7 @@ impl<'a> Upload<'a> {
         {
             if matcher_upload.qrcode() {
                 if let Err(err) = print_qr(url.as_str()) {
-                    print_error(
-                        err.context("failed to print QR code, ignoring")
-                            .compat(),
-                    );
+                    print_error(err.context("failed to print QR code, ignoring").compat());
                 }
             }
         }

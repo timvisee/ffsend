@@ -19,13 +19,14 @@ use tempfile::{Builder as TempBuilder, NamedTempFile};
 use super::select_api_version;
 #[cfg(feature = "archive")]
 use crate::archive::archive::Archive;
-use crate::client::create_transfer_client;
+use crate::client::{create_client, create_transfer_client};
 use crate::cmd::matcher::{download::DownloadMatcher, main::MainMatcher, Matcher};
 #[cfg(feature = "history")]
 use crate::history_tool;
 use crate::progress::ProgressBar;
 use crate::util::{
-    ensure_enough_space, ensure_password, prompt_yes, quit, quit_error, quit_error_msg, ErrorHints,
+    ensure_enough_space, ensure_password, follow_url, print_error, prompt_yes, quit, quit_error,
+    quit_error_msg, ErrorHints,
 };
 
 /// A file download action.
@@ -46,12 +47,21 @@ impl<'a> Download<'a> {
         let matcher_main = MainMatcher::with(self.cmd_matches).unwrap();
         let matcher_download = DownloadMatcher::with(self.cmd_matches).unwrap();
 
-        // Get the share URL, derive the host
-        let url = matcher_download.url();
-        let host = matcher_download.guess_host();
+        // Create a regular client
+        let client = create_client(&matcher_main);
 
-        // Create a reqwest client capable for downloading files
-        let client = create_transfer_client(&matcher_main);
+        // Get the share URL, attempt to follow it
+        let url = matcher_download.url();
+        let url = match follow_url(&client, &url) {
+            Ok(url) => url,
+            Err(err) => {
+                print_error(err.context("failed to follow share URL, ignoring").compat());
+                url
+            }
+        };
+
+        // Guess the host
+        let host = matcher_download.guess_host(Some(url.clone()));
 
         // Determine the API version to use
         let mut desired_version = matcher_main.api();
@@ -154,6 +164,9 @@ impl<'a> Download<'a> {
         let progress_bar = Arc::new(Mutex::new(ProgressBar::new_download()));
         let progress_reader: Arc<Mutex<ProgressReporter>> = progress_bar;
 
+        // Create a transfer client
+        let transfer_client = create_transfer_client(&matcher_main);
+
         // Execute an download action
         let progress = if !matcher_main.quiet() {
             Some(progress_reader)
@@ -161,7 +174,7 @@ impl<'a> Download<'a> {
             None
         };
         ApiDownload::new(api_version, &file, target, password, false, Some(metadata))
-            .invoke(&client, progress)?;
+            .invoke(&transfer_client, progress)?;
 
         // Extract the downloaded file if working with an archive
         #[cfg(feature = "archive")]

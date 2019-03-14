@@ -2,11 +2,11 @@
 
 use ffsend_api::{
     api::request::{ensure_success, ResponseError},
-    url::{self, Url},
     reqwest::{self, Client},
+    url::{self, Url},
 };
 use urlshortener::{
-    providers::{Provider, self},
+    providers::{self, Provider},
     request::{Method, Request},
 };
 
@@ -21,9 +21,7 @@ pub fn shorten(client: &Client, url: &str) -> Result<String> {
 
 /// Shorten the given URL.
 pub fn shorten_url(client: &Client, url: &Url) -> Result<Url> {
-    Url::parse(
-        &shorten(client, url.as_str())?,
-    ).map_err(|err| err.into())
+    Url::parse(&shorten(client, url.as_str())?).map_err(|err| err.into())
 }
 
 /// Do the request as given, return the response.
@@ -59,8 +57,7 @@ fn request(client: &Client, req: Request) -> Result<String> {
     }
 
     // Send the request, ensure success
-    let mut response = builder.send()
-        .map_err(Error::Request)?;
+    let mut response = builder.send().map_err(Error::Request)?;
     ensure_success(&response)?;
 
     // Respond with the body text
@@ -84,7 +81,7 @@ pub enum Error {
 
     /// An error occurred while parsing the shortened URL.
     #[fail(display = "failed to shorten URL, could not parse URL")]
-    Url(#[cause] url::ParseError)
+    Url(#[cause] url::ParseError),
 }
 
 impl From<url::ParseError> for Error {

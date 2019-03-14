@@ -26,8 +26,8 @@ impl<'a: 'b, 'b> DownloadMatcher<'a> {
     /// Guess the file share host, based on the file share URL.
     ///
     /// See `Self::url`.
-    pub fn guess_host(&'a self) -> Url {
-        let mut url = self.url();
+    pub fn guess_host(&'a self, url: Option<Url>) -> Url {
+        let mut url = url.unwrap_or(self.url());
         url.set_path("");
         url.set_query(None);
         url.set_fragment(None);
