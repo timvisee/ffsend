@@ -234,7 +234,7 @@ release-docker:
 
     # Build the Docker image, run it once to test
     - docker build -t timvisee/ffsend:latest ./
-    - docker run --rm -it timvisee/ffsend:latest
+    - docker run --rm timvisee/ffsend:latest
 
     # Retag version
     - VERSION=$(echo $CI_COMMIT_REF_NAME | cut -c 2-)
