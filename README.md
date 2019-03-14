@@ -261,12 +261,9 @@ to install the [prebuilt Linux binary](#prebuilt-binaries-for-linux) instead.
 Only 64-bit (`x86_64`) binaries are provided.
 For other architectures and configurations you may [compile from source](#build).
 
-A `chocolatey` and an official `scoop` package along with an `.msi` installer will be coming soon.
+A `chocolatey` package along with an `.msi` installer will be coming soon.
 
 #### Windows: scoop package
-An unofficial [`scoop`][scoop] package has been created by some amazing contributors.  
-_Note: it currently isn't automatically upgraded with new releases._
-
 Make sure you've [`scoop`][scoop] installed, and run:
 
 ```bash
