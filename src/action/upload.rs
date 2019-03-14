@@ -233,16 +233,18 @@ impl<'a> Upload<'a> {
         #[allow(unused_mut)]
         let mut url = file.download_url(true);
 
-        // Shorten the share URL if requested
+        // Shorten the share URL if requested, prompt the user to confirm
         #[cfg(feature = "urlshorten")]
         {
             if matcher_upload.shorten() {
-                match urlshorten::shorten_url(&client, &url) {
-                    Ok(short) => url = short,
-                    Err(err) => print_error(
-                        err.context("failed to shorten share URL, ignoring")
-                            .compat(),
-                    ),
+                if prompt_yes("URL shortening is a security risk. This shares the secret URL with a 3rd party.\nDo you want to shorten the share URL?", Some(false), &matcher_main) {
+                    match urlshorten::shorten_url(&client, &url) {
+                        Ok(short) => url = short,
+                        Err(err) => print_error(
+                            err.context("failed to shorten share URL, ignoring")
+                                .compat(),
+                        ),
+                    }
                 }
             }
         }
@@ -253,13 +255,14 @@ impl<'a> Upload<'a> {
             let mut table = Table::new();
             table.set_format(FormatBuilder::new().padding(0, 2).build());
 
-            // Show the original URL when shortening and verbose
+            // Show the original URL when shortening, verbose and different
             #[cfg(feature = "urlshorten")]
             {
-                if matcher_main.verbose() && matcher_upload.shorten() {
+                let full_url = file.download_url(true);
+                if matcher_main.verbose() && matcher_upload.shorten() && url != full_url {
                     table.add_row(Row::new(vec![
                         Cell::new("Full share link:"),
-                        Cell::new(file.download_url(true).as_str()),
+                        Cell::new(full_url.as_str()),
                     ]));
                 }
             }
