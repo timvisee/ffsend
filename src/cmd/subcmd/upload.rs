@@ -73,6 +73,19 @@ impl CmdUpload {
                 );
         }
 
+        // Optional url shortening support
+        #[cfg(feature = "urlshorten")]
+        {
+            cmd = cmd.arg(
+                Arg::with_name("shorten")
+                    .long("shorten")
+                    .alias("short")
+                    .alias("url-shorten")
+                    .short("S")
+                    .help("Shorten share URLs with a public service"),
+            )
+        }
+
         // Optional qrcode support
         #[cfg(feature = "qrcode")]
         {

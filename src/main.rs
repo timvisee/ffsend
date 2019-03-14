@@ -23,6 +23,8 @@ mod history;
 mod history_tool;
 mod host;
 mod progress;
+#[cfg(feature = "urlshorten")]
+mod urlshorten;
 mod util;
 
 use crate::action::debug::Debug;

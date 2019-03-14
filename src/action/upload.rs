@@ -20,11 +20,13 @@ use tempfile::{Builder as TempBuilder, NamedTempFile};
 use super::select_api_version;
 #[cfg(feature = "archive")]
 use crate::archive::archiver::Archiver;
-use crate::client::create_transfer_client;
+use crate::client::{create_client, create_transfer_client};
 use crate::cmd::matcher::{MainMatcher, Matcher, UploadMatcher};
 #[cfg(feature = "history")]
 use crate::history_tool;
 use crate::progress::ProgressBar;
+#[cfg(feature = "urlshorten")]
+use crate::urlshorten;
 #[cfg(feature = "clipboard")]
 use crate::util::set_clipboard;
 use crate::util::{
@@ -56,7 +58,7 @@ impl<'a> Upload<'a> {
         let host = matcher_upload.host();
 
         // Create a reqwest client capable for uploading files
-        let client = create_transfer_client(&matcher_main);
+        let client = create_client(&matcher_main);
 
         // Determine the API version to use
         let mut desired_version = matcher_main.api();
@@ -228,23 +230,55 @@ impl<'a> Upload<'a> {
             params,
         )
         .invoke(&transfer_client, reporter)?;
-        let url = file.download_url(true);
+        #[allow(unused_mut)]
+        let mut url = file.download_url(true);
+
+        // Shorten the share URL if requested
+        #[cfg(feature = "urlshorten")]
+        {
+            if matcher_upload.shorten() {
+                match urlshorten::shorten_url(&client, &url) {
+                    Ok(short) => url = short,
+                    Err(err) => print_error(
+                        err.context("failed to shorten share URL, ignoring")
+                            .compat(),
+                    ),
+                }
+            }
+        }
 
         // Report the result
         if !matcher_main.quiet() {
-            // Show a table
+            // Create a table
             let mut table = Table::new();
             table.set_format(FormatBuilder::new().padding(0, 2).build());
+
+            // Show the original URL when shortening and verbose
+            #[cfg(feature = "urlshorten")]
+            {
+                if matcher_main.verbose() && matcher_upload.shorten() {
+                    table.add_row(Row::new(vec![
+                        Cell::new("Full share link:"),
+                        Cell::new(file.download_url(true).as_str()),
+                    ]));
+                }
+            }
+
+            // Show the share URL
             table.add_row(Row::new(vec![
                 Cell::new("Share link:"),
                 Cell::new(url.as_str()),
             ]));
+
+            // Show a generate passphrase
             if password_generated {
                 table.add_row(Row::new(vec![
                     Cell::new("Passphrase:"),
                     Cell::new(&password.unwrap_or("?".into())),
                 ]));
             }
+
+            // Show the owner token
             if matcher_main.verbose() {
                 table.add_row(Row::new(vec![
                     Cell::new("Owner token:"),

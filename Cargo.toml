@@ -50,7 +50,7 @@ name = "ffsend"
 path = "src/main.rs"
 
 [features]
-default = ["archive", "clipboard", "history", "send2", "send3", "qrcode"]
+default = ["archive", "clipboard", "history", "send2", "send3", "qrcode", "urlshorten"]
 
 # Compile with file archiving support
 archive = ["tar"]
@@ -69,6 +69,9 @@ send3 = ["ffsend-api/send3"]
 
 # Support for generating QR codes for share URLs
 qrcode = ["qr2term"]
+
+# Support for shortening share URLs
+urlshorten = ["urlshortener"]
 
 [dependencies]
 chbs = "0.0.8"
@@ -93,6 +96,7 @@ tar = { version = "0.4", optional = true }
 tempfile = "3"
 toml = "0.4"
 version-compare = "0.0.6"
+urlshortener = { version = "0.9", default-features = false, optional = true }
 
 [target.'cfg(not(target_os = "linux"))'.dependencies]
 clipboard = { version = "0.5", optional = true }
