@@ -12,7 +12,7 @@ use ffsend_api::action::version::Error as VersionError;
 use ffsend_api::config::{upload_size_max, UPLOAD_SIZE_MAX_RECOMMENDED};
 use ffsend_api::pipe::ProgressReporter;
 use prettytable::{format::FormatBuilder, Cell, Row, Table};
-#[cfg(feature = "history")]
+#[cfg(feature = "qrcode")]
 use qr2term::print_qr;
 #[cfg(feature = "archive")]
 use tempfile::{Builder as TempBuilder, NamedTempFile};
