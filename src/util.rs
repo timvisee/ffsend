@@ -837,7 +837,11 @@ pub fn features_list() -> Vec<&'static str> {
     features.push("clipboard");
     #[cfg(feature = "history")]
     features.push("history");
-    #[cfg(feature = "no-color")]
+    #[cfg(feature = "qrcode")]
+    features.push("qrcode");
+    #[cfg(feature = "urlshorten")]
+    features.push("urlshorten");
+    #[cfg(feature = "no-qcolor")]
     features.push("no-color");
     #[cfg(feature = "send2")]
     features.push("send2");
