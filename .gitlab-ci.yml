@@ -49,6 +49,8 @@ variables:
     - cargo check --verbose
     - cargo check --no-default-features --features send2 --verbose
     - cargo check --no-default-features --features send3 --verbose
+    - cargo check --no-default-features --features send2,send3,qrcode --verbose
+    - cargo check --no-default-features --features send2,send3,urlshorten --verbose
     - cargo check --features no-color --verbose
 check-stable:
   <<: *check-base
