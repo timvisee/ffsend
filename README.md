@@ -53,8 +53,9 @@ _Note: this tool is currently in alpha_
 - Upload and download files and directories securely
 - Always encrypted on the client
 - Additional password protection, generation and configurable download limits
-- Supports old and new Firefox Send server versions
 - File and directory archiving and extraction
+- Built-in share URL shortener and QR code generator
+- Supports old and new Firefox Send server versions
 - History tracking your files for easy management
 - Ability to use custom Send hosts
 - Inspect or delete shared files
@@ -264,7 +265,7 @@ For other architectures and configurations you may [compile from source](#build)
 A `chocolatey` package along with an `.msi` installer will be coming soon.
 
 #### Windows: scoop package
-Make sure you've [`scoop`][scoop] installed, and run:
+Make sure you've [`scoop`][scoop-install] installed, and run:
 
 ```bash
 scoop install ffsend
@@ -572,4 +573,4 @@ Check out the [LICENSE](LICENSE) file for more information.
 [homebrew]: https://brew.sh/
 [wsl]: https://docs.microsoft.com/en-us/windows/wsl/install-win10
 [docker-hub-ffsend]: https://hub.docker.com/r/timvisee/ffsend
-[scoop]: https://scoop.sh/
+[scoop-install]: https://scoop.sh/#installs-in-seconds
