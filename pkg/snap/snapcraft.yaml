@@ -13,6 +13,7 @@ description: |
   An optional password may be specified, and a default file lifetime of 1
   (up to 20) download or 24 hours is enforced to ensure your stuff does not
   remain online forever. This provides a secure platform to share your files.
+license: GPL-3.0
 
 architectures:
   - amd64
