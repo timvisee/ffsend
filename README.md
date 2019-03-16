@@ -215,7 +215,7 @@ mv ./ffsend-* ./ffsend
 chmod a+x ./ffsend
 
 # Move binary into path, to make it easily usable
-sudo mv ./ffsend /usr/bin/
+sudo mv ./ffsend /usr/local/bin/
 
 ffsend --help
 ```
@@ -232,7 +232,7 @@ You must install `openssl` through [`homebrew`][homebrew] which `ffsend` depends
 on.
 
 Then, mark the downloaded binary as an executable.
-You then may want to move it into `/usr/bin/` to make the `ffsend` command
+You then may want to move it into `/usr/local/bin/` to make the `ffsend` command
 globally available:
 
 ```bash
@@ -246,7 +246,7 @@ mv ./ffsend-* ./ffsend
 chmod a+x ./ffsend
 
 # Move binary into path, to make it easily usable
-sudo mv ./ffsend /usr/bin/
+sudo mv ./ffsend /usr/local/bin/
 
 ffsend
 ```
