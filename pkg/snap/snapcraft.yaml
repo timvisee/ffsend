@@ -23,7 +23,7 @@ confinement: strict
 apps:
   ffsend:
     command: ffsend
-    plugs: [home, network, removable-media, x11]
+    plugs: [desktop, home, network, removable-media, x11]
 
 parts:
   ffsend:
