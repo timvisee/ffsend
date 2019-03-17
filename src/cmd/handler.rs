@@ -1,5 +1,8 @@
 extern crate directories;
 
+#[cfg(feature = "infer-command")]
+use std::ffi::OsString;
+
 use clap::{App, AppSettings, Arg, ArgMatches};
 
 use super::arg::{ArgApi, CmdArg};
@@ -15,9 +18,13 @@ use super::subcmd::{
     CmdDebug, CmdDelete, CmdDownload, CmdExists, CmdInfo, CmdParams, CmdPassword, CmdUpload,
     CmdVersion,
 };
+#[cfg(feature = "infer-command")]
+use crate::config::INFER_COMMANDS;
 use crate::config::{CLIENT_TIMEOUT, CLIENT_TRANSFER_TIMEOUT};
 #[cfg(feature = "history")]
 use crate::util::app_history_file_path_string;
+#[cfg(feature = "infer-command")]
+use crate::util::bin_name;
 
 #[cfg(feature = "history")]
 lazy_static! {
@@ -188,9 +195,40 @@ impl<'a: 'b, 'b> Handler<'a> {
 
     /// Parse CLI arguments.
     pub fn parse() -> Handler<'a> {
+        // Obtain the program arguments
+        #[allow(unused_mut)]
+        let mut args: Vec<_> = ::std::env::args_os().collect();
+
+        // Infer subcommand based on binary name
+        #[cfg(feature = "infer-command")]
+        Self::infer_subcommand(&mut args);
+
         // Build the application CLI definition, get the matches
         Handler {
-            matches: Handler::build().get_matches(),
+            matches: Handler::build().get_matches_from(args),
+        }
+    }
+
+    /// Infer subcommand when the binary has a predefined name,
+    /// modifying the given program arguments.
+    ///
+    /// If no subcommand could be inferred, the `args` list leaves unchanged.
+    /// See `crate::config::INFER_COMMANDS` for a list of commands.
+    ///
+    /// When the `ffsend` binary is called with such a name, the corresponding subcommand is
+    /// automatically inserted as argument. This also works when calling binaries through symbolic
+    /// or hard links.
+    #[cfg(feature = "infer-command")]
+    fn infer_subcommand(args: &mut Vec<OsString>) {
+        // Get the name of the called binary
+        let name = bin_name();
+
+        // Infer subcommands
+        for (bin, subcmd) in INFER_COMMANDS.iter() {
+            if &name == bin {
+                args.insert(1, subcmd.into());
+                break;
+            }
         }
     }
 

@@ -849,6 +849,8 @@ pub fn features_list() -> Vec<&'static str> {
     features.push("qrcode");
     #[cfg(feature = "urlshorten")]
     features.push("urlshorten");
+    #[cfg(feature = "infer-command")]
+    features.push("infer-command");
     #[cfg(feature = "no-qcolor")]
     features.push("no-color");
     #[cfg(feature = "send2")]

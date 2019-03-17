@@ -1,3 +1,6 @@
+#[cfg(feature = "infer-command")]
+use std::collections::HashMap;
+
 use ffsend_api::api::{DesiredVersion, Version};
 
 /// The timeout for the Send client for generic requests, `0` to disable.
@@ -15,3 +18,19 @@ pub const API_VERSION_DESIRED_DEFAULT: DesiredVersion = DesiredVersion::Assume(A
 pub const API_VERSION_ASSUME: Version = Version::V3;
 #[cfg(not(feature = "send3"))]
 pub const API_VERSION_ASSUME: Version = Version::V2;
+
+#[cfg(feature = "infer-command")]
+lazy_static! {
+    /// Hashmap holding binary names to infer subcommands for.
+    ///
+    /// When the `ffsend` binary is called with such a name, the corresponding subcommand is
+    /// automatically inserted as argument. This also works when calling binaries through symbolic
+    /// or hard links.
+    pub static ref INFER_COMMANDS: HashMap<&'static str, &'static str> = {
+        let mut m = HashMap::new();
+        m.insert("ffput", "upload");
+        m.insert("ffget", "download");
+        m.insert("ffdel", "delete");
+        m
+    };
+}

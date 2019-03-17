@@ -388,16 +388,17 @@ Different use flags are available for `ffsend` to toggle whether to include
 various features.
 The following features are available, some of which are enabled by default:
 
-| Feature     | Enabled | Description                                                |
-| :---------: | :-----: | :--------------------------------------------------------- |
-| `send2`     | Default | Support for Firefox Send v2 servers                        |
-| `send3`     | Default | Support for Firefox Send v3 servers                        |
-| `clipboard` | Default | Support for copying links to the clipboard                 |
-| `history`   | Default | Support for tracking files in history                      |
-| `archive`   | Default | Support for archiving and extracting uploads and downloads |
-| `qrcode`    | Default | Support for rendering a QR code for a share URL            |
-| `urlshorten`| Default | Support for shortening share URLs                          |
-| `no-color`  |         | Compile without color support in error and help messages   |
+| Feature        | Enabled | Description                                                |
+| :------------: | :-----: | :--------------------------------------------------------- |
+| `send2`        | Default | Support for Firefox Send v2 servers                        |
+| `send3`        | Default | Support for Firefox Send v3 servers                        |
+| `clipboard`    | Default | Support for copying links to the clipboard                 |
+| `history`      | Default | Support for tracking files in history                      |
+| `archive`      | Default | Support for archiving and extracting uploads and downloads |
+| `qrcode`       | Default | Support for rendering a QR code for a share URL            |
+| `urlshorten`   | Default | Support for shortening share URLs                          |
+| `infer-command`| Default | Support for inferring subcommand based on binary name      |
+| `no-color`     |         | Compile without color support in error and help messages   |
 
 To enable features during building or installation, specify them with
 `--features <features...>` when using `cargo`.
@@ -453,6 +454,37 @@ empty.
 
 At this time, no configuration or _dotfile_ file support is available.
 This will be something added in a later release.
+
+### Binary for each subcommand: `ffput`, `ffget`
+`ffsend` supports having a separate binary for a single subcommand, such as
+having `ffput` and `ffget` just for uploading and downloading through `ffsend`.
+This allows simple commands like:
+```bash
+ffput my-file.txt
+ffget https://send.firefox.com/#sample-share-url
+```
+
+This works for a predefined list of binary names:
+* `ffput` -> `ffsend upload ...`
+* `ffget` -> `ffsend download ...`
+* `ffdel` -> `ffsend delete ...`
+* _This list is defined in [`src/config.rs`](./src/config.rs) as `INFER_COMMANDS`_
+
+Symbolic or hard links may be created having these names for this functionality
+(similar to [`busybox`](https://en.wikipedia.org/wiki/BusyBox#Single_binary)),
+so you don't have to clone the `ffsend` binary for each subcommand.  
+On Linux and macOS you can use the following commands for setting up these
+symbolic links in the current directory:
+```bash
+ln -s $(which ffsend) ./ffput
+ln -s $(which ffsend) ./ffget
+```
+
+Support for this feature is only available when `ffsend` is compiled with the
+[`infer-command`](#compile-features--use-flags) feature flag.
+This is usually enabled by default.
+To verify support is available with an existing installation, make sure the
+feature is listed when invoking `ffsend debug`.
 
 ## Security
 In short; the `ffsend` tool and the [Send][send] service can be considered

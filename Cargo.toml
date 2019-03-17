@@ -50,16 +50,13 @@ name = "ffsend"
 path = "src/main.rs"
 
 [features]
-default = ["archive", "clipboard", "history", "send2", "send3", "qrcode", "urlshorten"]
+default = ["archive", "clipboard", "history", "infer-command", "qrcode", "send2", "send3", "urlshorten"]
 
 # Compile with file archiving support
 archive = ["tar"]
 
 # Compile with file history support
 history = []
-
-# Compile without colored output support
-no-color = ["colored/no-color"]
 
 # Support for Firefox Send v2
 send2 = ["ffsend-api/send2"]
@@ -72,6 +69,12 @@ qrcode = ["qr2term"]
 
 # Support for shortening share URLs
 urlshorten = ["urlshortener"]
+
+# Support for inferring subcommand when linking binary
+infer-command = []
+
+# Compile without colored output support
+no-color = ["colored/no-color"]
 
 [dependencies]
 chbs = "0.0.8"
