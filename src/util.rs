@@ -6,14 +6,13 @@ extern crate fs2;
 extern crate open;
 
 use std::borrow::Borrow;
-use std::env::{current_exe, var_os};
+use std::env::{self, current_exe, var_os};
 use std::ffi::OsStr;
 use std::fmt::{Debug, Display};
 #[cfg(feature = "clipboard")]
 use std::io::ErrorKind as IoErrorKind;
 use std::io::{stderr, stdin, Error as IoError, Write};
 use std::path::Path;
-#[cfg(feature = "history")]
 use std::path::PathBuf;
 use std::process::{exit, ExitStatus};
 #[cfg(all(feature = "clipboard", target_os = "linux"))]
@@ -745,9 +744,18 @@ pub fn format_bool(b: bool) -> &'static str {
 }
 
 /// Get the name of the executable that was invoked.
+///
+/// When a symbolic or hard link is used, the name of the link is returned.
+///
+/// This attempts to obtain the binary name in the following order:
+/// - name in first item of program arguments via `std::env::args`
+/// - current executable name via `std::env::current_exe`
+/// - crate name
 pub fn bin_name() -> String {
-    current_exe()
-        .ok()
+    env::args_os()
+        .next()
+        .map(|path| PathBuf::from(path))
+        .or_else(|| current_exe().ok())
         .and_then(|p| p.file_name().map(|n| n.to_owned()))
         .and_then(|n| n.into_string().ok())
         .unwrap_or_else(|| crate_name!().into())
