@@ -456,25 +456,27 @@ At this time, no configuration or _dotfile_ file support is available.
 This will be something added in a later release.
 
 ### Binary for each subcommand: `ffput`, `ffget`
-`ffsend` supports having a separate binary for a single subcommand, such as
-having `ffput` and `ffget` just for uploading and downloading through `ffsend`.
-This allows simple commands like:
+`ffsend` supports having a separate binaries for a single subcommands, such as
+having `ffput` and `ffget` just for to upload and download using `ffsend`.
+This allows simple and direct commands like:
 ```bash
 ffput my-file.txt
 ffget https://send.firefox.com/#sample-share-url
 ```
 
 This works for a predefined list of binary names:
-* `ffput` -> `ffsend upload ...`
-* `ffget` -> `ffsend download ...`
-* `ffdel` -> `ffsend delete ...`
+* `ffput` → `ffsend upload ...`
+* `ffget` → `ffsend download ...`
+* `ffdel` → `ffsend delete ...`
 * _This list is defined in [`src/config.rs`](./src/config.rs) as `INFER_COMMANDS`_
 
-Symbolic or hard links may be created having these names for this functionality
-(similar to [`busybox`](https://en.wikipedia.org/wiki/BusyBox#Single_binary)),
-so you don't have to clone the `ffsend` binary for each subcommand.  
-On Linux and macOS you can use the following commands for setting up these
-symbolic links in the current directory:
+You can use the following methods to set up these single-command binaries:
+* Create a properly named symbolic link (recommended)
+* Create a properly named hard link
+* Clone the `ffsend` binary, and rename it
+
+On Linux and macOS you can use the following command to set up symbolic links in
+the current directory:
 ```bash
 ln -s $(which ffsend) ./ffput
 ln -s $(which ffsend) ./ffget
