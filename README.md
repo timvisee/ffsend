@@ -456,7 +456,7 @@ At this time, no configuration or _dotfile_ file support is available.
 This will be something added in a later release.
 
 ### Binary for each subcommand: `ffput`, `ffget`
-`ffsend` supports having a separate binaries for a single subcommands, such as
+`ffsend` supports having a separate binaries for single subcommands, such as
 having `ffput` and `ffget` just for to upload and download using `ffsend`.
 This allows simple and direct commands like:
 ```bash
@@ -487,6 +487,9 @@ Support for this feature is only available when `ffsend` is compiled with the
 This is usually enabled by default.
 To verify support is available with an existing installation, make sure the
 feature is listed when invoking `ffsend debug`.
+
+Note that the `snap` package does currently not support this due to how this
+package format works.
 
 ## Security
 In short; the `ffsend` tool and the [Send][send] service can be considered
