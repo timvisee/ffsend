@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+# Stop on error
+set -e
+
+echo "Generating all completions using cargo debug binary..."
+cargo run -q -- generate completions all --output $PWD
+echo "Done."

@@ -27,7 +27,7 @@ impl<'a> Completions<'a> {
         // Obtian shells to generate completions for, build application definition
         let shells = matcher_completions.shells();
         let dir = matcher_completions.output();
-        let verbose = matcher_main.verbose();
+        let quiet = matcher_main.quiet();
         let mut app = crate::cmd::handler::Handler::build();
 
         // If the directory does not exist yet, attempt to create it
@@ -37,14 +37,14 @@ impl<'a> Completions<'a> {
 
         // Generate completions
         for shell in shells {
-            if verbose {
+            if !quiet {
                 print!(
                     "Generating completions for {}...",
                     format!("{}", shell).to_lowercase()
                 );
             }
             app.gen_completions(crate_name!(), shell, &dir);
-            if verbose {
+            if !quiet {
                 println!(" done.");
             }
         }

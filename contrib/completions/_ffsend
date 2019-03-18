@@ -1,233 +1,1807 @@
 #compdef ffsend
 
-local -a root_args
-root_args=(
-  '(- *)'{-h,--help}'[Prints help information]'
-  '(- *)'{-V,--version}'[Prints version information]'
-)
+autoload -U is-at-least
 
-local -a common_args
-common_args=(
-  '(-f --force)'{-f,--force}'[Force the action, ignore warnings]'
-  '(-i --incognito)'{-i,--incognito}"[Don't update local history for actions]"
-  '(-I --no-interact)'{-I,--no-interact}'[Not interactive, do not prompt]'
-  '(-q --quiet)'{-q,--quiet}'[Produce output suitable for logging and automation]'
-  '(-v --verbose)'{-v,--verbose}'[Enable verbose information and logging]'
-  '(-y --yes)'{-y,--yes}'[Assume yes for prompts]'
-)
+_ffsend() {
+    typeset -A opt_args
+    typeset -a _arguments_options
+    local ret=1
 
-local -a common_options
-common_options=(
-  '(-A --api)'{-A,--api}"[Server API version to use, '-' to lookup]:api:(2 3 auto -)"
-  '(-H --history)'{-H,--history}'[Use the specified history file]:history file:_files'
-  '(-t --timeout)'{-t,--timeout}'[Request timeout (0 to disable)]:timeout:'
-  '(-T --transfer-timeout)'{-T,--transfer-timeout}'[Transfer timeout (0 to disable)]:timeout:'
-)
+    if is-at-least 5.2; then
+        _arguments_options=(-s -S -C)
+    else
+        _arguments_options=(-s -C)
+    fi
 
-_ffsend_commands() {
-  local -a commands
-  commands=(
-    'upload:Upload files'
-    'download:Download files'
-    'debug:View debug information'
-    'delete:Delete a shared file'
-    'exists:Check whether a remote file exists'
-    'help:Prints this message or the help of the given subcommand(s)'
-    'history:View file history'
-    'info:Fetch info about a shared file'
-    'parameters:Change parameters of a shared file'
-    'password:Change the password of a shared file'
-    'version:Determine the Send server version'
-  )
-  _describe 'command' commands
-}
-
-_arguments -w -s -S \
-  ${root_args[@]} \
-  ${common_args[@]} \
-  ${common_options[@]} \
-  '1: :_ffsend_commands' \
-  '*:: :->subcommands'
-
-case ${words[1]} in
-  upload)
-    local -a upload_args
-    upload_args=(
-      '(-a --archive)'{-a,--archive}'[Archive the upload in a single file]'
-      '(-c --copy)'{-c,--copy}'[Copy the share link to your clipboard]'
-      '(-C --copy-cmd)'{-C,--copy-cmd}'[Copy the ffsend download command to your clipboard]'
-      '(-P --gen-passphrase)'{-P,--gen-passphrase}'[Protect the file with a generated passphrase]'
-      '(- *)--help[Prints help information]'
-      '(-o --open)'{-o,--open}'[Open the share link in your browser]'
-    )
-    local -a upload_options
-    upload_options=(
-      '(-d --download-limit)'{-d,--download-limit}'[The file download limit]:count:'
-      '(-h --host)'{-h,--host}'[The remote host to upload to]:host:'
-      '(-n --name)'{-n,--name}'[Rename the file being uploaded]:name:'
-      '(-p --password)'{-p,--password}'[Protect the file with a password]:password:'
-    )
-    _arguments -w -s -S \
-      ${upload_args[@]} \
-      ${common_args[@]} \
-      ${upload_options[@]} \
-      ${common_options[@]} \
-      ':file:_files'
-    ;;
-  download)
-    local -a download_args
-    download_args=(
-      '(-e --extract)'{-e,--extract}'[Extract an archived file]'
-      '(- *)'{-h,--help}'[Prints help information]'
-    )
-    local -a download_options
-    download_options=(
-      '(-o --output)'{-o,--output}'[The output file or directory]:output file or directory:_files'
-      '(-p --password)'{-p,--password}'[Unlock a password protected file]:password:'
-    )
-    _arguments -w -s -S \
-      ${download_args[@]} \
-      ${common_args[@]} \
-      ${download_options[@]} \
-      ${common_options[@]} \
-      ':url:()'
-    ;;
-  debug)
-    local -a debug_args
-    debug_args=(
-      '(- *)--help[Prints help information]'
-    )
-    local -a debug_options
-    debug_options=(
-      '(-h --host)'{-h,--host}'[The remote host to upload to]:host:'
-    )
-    _arguments -w -s -S \
-      ${debug_args[@]} \
-      ${common_args[@]} \
-      ${debug_options[@]} \
-      ${common_options[@]}
-    ;;
-  delete)
-    local -a delete_args
-    delete_args=(
-      '(- *)'{-h,--help}'[Prints help information]'
-    )
-    local -a delete_options
-    delete_options=(
-      '(-o --owner)'{-o,--owner}'[Specify the file owner token]:token:'
-    )
-    _arguments -w -s -S \
-      ${delete_args[@]} \
-      ${common_args[@]} \
-      ${delete_options[@]} \
-      ${common_options[@]} \
-      '1:url:()'
-    ;;
-  exists)
-    local -a exists_args
-    exists_args=(
-      '(- *)'{-h,--help}'[Prints help information]'
-    )
-    _arguments -w -s -S \
-      ${exists_args[@]} \
-      ${common_args[@]} \
-      ${common_options[@]} \
-      '1:url:()'
-    ;;
-  help)
-    local -a help_topics
-    help_topics=(
-      'upload'
-      'download'
-      'debug'
-      'delete'
-      'exists'
-      'help'
-      'history'
-      'info'
-      'parameters'
-      'password'
-      'version'
-    )
-    _values 'help topics' ${help_topics[@]}
-    ;;
-  history)
-    local -a history_args
-    history_args=(
-      '(- *)'{-h,--help}'[Prints help information]'
-    )
-    _arguments -w -s -S \
-      ${history_args[@]} \
-      ${common_args[@]} \
-      ${common_options[@]}
-    ;;
-  info)
-    local -a info_args
-    info_args=(
-      '(- *)'{-h,--help}'[Prints help information]'
-    )
-    local -a info_options
-    info_options=(
-      '(-o --owner)'{-o,--owner}'[Specify the file owner token]:token:'
-      '(-p --password)'{-p,--password}'[Unlock a password protected file]:password:'
-    )
-    _arguments -w -s -S \
-      ${info_args[@]} \
-      ${common_args[@]} \
-      ${info_options[@]} \
-      ${common_options[@]} \
-      '1:url:()'
-    ;;
-  parameters)
-    local -a parameters_args
-    parameters_args=(
-      '(- *)'{-h,--help}'[Prints help information]'
-    )
-    local -a parameters_options
-    parameters_options=(
-      '(-d --download-limit)'{-d,--download-limit}'[The file download limit]:count:'
-      '(-o --owner)'{-o,--owner}'[Specify the file owner token]:token:'
-    )
-    _arguments -w -s -S \
-      ${parameters_args[@]} \
-      ${common_args[@]} \
-      ${parameters_options[@]} \
-      ${common_options[@]} \
-      '1:url:()'
-    ;;
-  password)
-    local -a password_args
-    password_args=(
-      '(-P --gen-passphrase)'{-P,--gen-passphrase}'[Protect the file with a generated passphrase]'
-      '(- *)'{-h,--help}'[Prints help information]'
-    )
-    local -a password_options
-    password_options=(
-      '(-o --owner)'{-o,--owner}'[Specify the file owner token]:token:'
-      '(-p --password)'{-p,--password}'[Unlock a password protected file]:password:'
-    )
-    _arguments -w -s -S \
-      ${password_args[@]} \
-      ${common_args[@]} \
-      ${password_options[@]} \
-      ${common_options[@]} \
-      '1:url:()'
-    ;;
-  version)
-    local -a version_args
-    version_args=(
-      '(- *)--help[Prints help information]'
-    )
-    local -a version_options
-    version_options=(
-      '(-h --host)'{-h,--host}'[The remote host to upload to]:host:'
-    )
-    _arguments -w -s -S \
-      ${version_args[@]} \
-      ${common_args[@]} \
-      ${version_options[@]} \
-      ${common_options[@]}
+    local context curcontext="$curcontext" state line
+    _arguments "${_arguments_options[@]}" \
+'-t+[Request timeout (0 to disable)]' \
+'--timeout=[Request timeout (0 to disable)]' \
+'-T+[Transfer timeout (0 to disable)]' \
+'--transfer-timeout=[Transfer timeout (0 to disable)]' \
+'-A+[Server API version to use, '\''-'\'' to lookup]' \
+'--api=[Server API version to use, '\''-'\'' to lookup]' \
+'-H+[Use the specified history file]' \
+'--history=[Use the specified history file]' \
+'-f[Force the action, ignore warnings]' \
+'--force[Force the action, ignore warnings]' \
+'-I[Not interactive, do not prompt]' \
+'--no-interact[Not interactive, do not prompt]' \
+'-y[Assume yes for prompts]' \
+'--yes[Assume yes for prompts]' \
+'-q[Produce output suitable for logging and automation]' \
+'--quiet[Produce output suitable for logging and automation]' \
+'*-v[Enable verbose information and logging]' \
+'*--verbose[Enable verbose information and logging]' \
+'-i[Don'\''t update local history for actions]' \
+'--incognito[Don'\''t update local history for actions]' \
+'-h[Prints help information]' \
+'--help[Prints help information]' \
+'-V[Prints version information]' \
+'--version[Prints version information]' \
+":: :_ffsend_commands" \
+"*::: :->ffsend" \
+&& ret=0
+    case $state in
+    (ffsend)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:ffsend-command-$line[1]:"
+        case $line[1] in
+            (dbg)
+_arguments "${_arguments_options[@]}" \
+'-h+[The remote host to upload to]' \
+'--host=[The remote host to upload to]' \
+'-t+[Request timeout (0 to disable)]' \
+'--timeout=[Request timeout (0 to disable)]' \
+'-T+[Transfer timeout (0 to disable)]' \
+'--transfer-timeout=[Transfer timeout (0 to disable)]' \
+'-A+[Server API version to use, '\''-'\'' to lookup]' \
+'--api=[Server API version to use, '\''-'\'' to lookup]' \
+'-H+[Use the specified history file]' \
+'--history=[Use the specified history file]' \
+'--help[Prints help information]' \
+'-V[Prints version information]' \
+'--version[Prints version information]' \
+'-f[Force the action, ignore warnings]' \
+'--force[Force the action, ignore warnings]' \
+'-I[Not interactive, do not prompt]' \
+'--no-interact[Not interactive, do not prompt]' \
+'-y[Assume yes for prompts]' \
+'--yes[Assume yes for prompts]' \
+'-q[Produce output suitable for logging and automation]' \
+'--quiet[Produce output suitable for logging and automation]' \
+'*-v[Enable verbose information and logging]' \
+'*--verbose[Enable verbose information and logging]' \
+'-i[Don'\''t update local history for actions]' \
+'--incognito[Don'\''t update local history for actions]' \
+&& ret=0
+;;
+(debug)
+_arguments "${_arguments_options[@]}" \
+'-h+[The remote host to upload to]' \
+'--host=[The remote host to upload to]' \
+'-t+[Request timeout (0 to disable)]' \
+'--timeout=[Request timeout (0 to disable)]' \
+'-T+[Transfer timeout (0 to disable)]' \
+'--transfer-timeout=[Transfer timeout (0 to disable)]' \
+'-A+[Server API version to use, '\''-'\'' to lookup]' \
+'--api=[Server API version to use, '\''-'\'' to lookup]' \
+'-H+[Use the specified history file]' \
+'--history=[Use the specified history file]' \
+'--help[Prints help information]' \
+'-V[Prints version information]' \
+'--version[Prints version information]' \
+'-f[Force the action, ignore warnings]' \
+'--force[Force the action, ignore warnings]' \
+'-I[Not interactive, do not prompt]' \
+'--no-interact[Not interactive, do not prompt]' \
+'-y[Assume yes for prompts]' \
+'--yes[Assume yes for prompts]' \
+'-q[Produce output suitable for logging and automation]' \
+'--quiet[Produce output suitable for logging and automation]' \
+'*-v[Enable verbose information and logging]' \
+'*--verbose[Enable verbose information and logging]' \
+'-i[Don'\''t update local history for actions]' \
+'--incognito[Don'\''t update local history for actions]' \
+&& ret=0
+;;
+(del)
+_arguments "${_arguments_options[@]}" \
+'-o+[Specify the file owner token]' \
+'--owner=[Specify the file owner token]' \
+'-t+[Request timeout (0 to disable)]' \
+'--timeout=[Request timeout (0 to disable)]' \
+'-T+[Transfer timeout (0 to disable)]' \
+'--transfer-timeout=[Transfer timeout (0 to disable)]' \
+'-A+[Server API version to use, '\''-'\'' to lookup]' \
+'--api=[Server API version to use, '\''-'\'' to lookup]' \
+'-H+[Use the specified history file]' \
+'--history=[Use the specified history file]' \
+'-h[Prints help information]' \
+'--help[Prints help information]' \
+'-V[Prints version information]' \
+'--version[Prints version information]' \
+'-f[Force the action, ignore warnings]' \
+'--force[Force the action, ignore warnings]' \
+'-I[Not interactive, do not prompt]' \
+'--no-interact[Not interactive, do not prompt]' \
+'-y[Assume yes for prompts]' \
+'--yes[Assume yes for prompts]' \
+'-q[Produce output suitable for logging and automation]' \
+'--quiet[Produce output suitable for logging and automation]' \
+'*-v[Enable verbose information and logging]' \
+'*--verbose[Enable verbose information and logging]' \
+'-i[Don'\''t update local history for actions]' \
+'--incognito[Don'\''t update local history for actions]' \
+':URL -- The share URL:_files' \
+&& ret=0
+;;
+(delete)
+_arguments "${_arguments_options[@]}" \
+'-o+[Specify the file owner token]' \
+'--owner=[Specify the file owner token]' \
+'-t+[Request timeout (0 to disable)]' \
+'--timeout=[Request timeout (0 to disable)]' \
+'-T+[Transfer timeout (0 to disable)]' \
+'--transfer-timeout=[Transfer timeout (0 to disable)]' \
+'-A+[Server API version to use, '\''-'\'' to lookup]' \
+'--api=[Server API version to use, '\''-'\'' to lookup]' \
+'-H+[Use the specified history file]' \
+'--history=[Use the specified history file]' \
+'-h[Prints help information]' \
+'--help[Prints help information]' \
+'-V[Prints version information]' \
+'--version[Prints version information]' \
+'-f[Force the action, ignore warnings]' \
+'--force[Force the action, ignore warnings]' \
+'-I[Not interactive, do not prompt]' \
+'--no-interact[Not interactive, do not prompt]' \
+'-y[Assume yes for prompts]' \
+'--yes[Assume yes for prompts]' \
+'-q[Produce output suitable for logging and automation]' \
+'--quiet[Produce output suitable for logging and automation]' \
+'*-v[Enable verbose information and logging]' \
+'*--verbose[Enable verbose information and logging]' \
+'-i[Don'\''t update local history for actions]' \
+'--incognito[Don'\''t update local history for actions]' \
+':URL -- The share URL:_files' \
+&& ret=0
+;;
+(d)
+_arguments "${_arguments_options[@]}" \
+'-p+[Unlock a password protected file]' \
+'--password=[Unlock a password protected file]' \
+'-o+[Output file or directory]' \
+'--output=[Output file or directory]' \
+'-t+[Request timeout (0 to disable)]' \
+'--timeout=[Request timeout (0 to disable)]' \
+'-T+[Transfer timeout (0 to disable)]' \
+'--transfer-timeout=[Transfer timeout (0 to disable)]' \
+'-A+[Server API version to use, '\''-'\'' to lookup]' \
+'--api=[Server API version to use, '\''-'\'' to lookup]' \
+'-H+[Use the specified history file]' \
+'--history=[Use the specified history file]' \
+'-e[Extract an archived file]' \
+'--extract[Extract an archived file]' \
+'-h[Prints help information]' \
+'--help[Prints help information]' \
+'-V[Prints version information]' \
+'--version[Prints version information]' \
+'-f[Force the action, ignore warnings]' \
+'--force[Force the action, ignore warnings]' \
+'-I[Not interactive, do not prompt]' \
+'--no-interact[Not interactive, do not prompt]' \
+'-y[Assume yes for prompts]' \
+'--yes[Assume yes for prompts]' \
+'-q[Produce output suitable for logging and automation]' \
+'--quiet[Produce output suitable for logging and automation]' \
+'*-v[Enable verbose information and logging]' \
+'*--verbose[Enable verbose information and logging]' \
+'-i[Don'\''t update local history for actions]' \
+'--incognito[Don'\''t update local history for actions]' \
+':URL -- The share URL:_files' \
+&& ret=0
+;;
+(down)
+_arguments "${_arguments_options[@]}" \
+'-p+[Unlock a password protected file]' \
+'--password=[Unlock a password protected file]' \
+'-o+[Output file or directory]' \
+'--output=[Output file or directory]' \
+'-t+[Request timeout (0 to disable)]' \
+'--timeout=[Request timeout (0 to disable)]' \
+'-T+[Transfer timeout (0 to disable)]' \
+'--transfer-timeout=[Transfer timeout (0 to disable)]' \
+'-A+[Server API version to use, '\''-'\'' to lookup]' \
+'--api=[Server API version to use, '\''-'\'' to lookup]' \
+'-H+[Use the specified history file]' \
+'--history=[Use the specified history file]' \
+'-e[Extract an archived file]' \
+'--extract[Extract an archived file]' \
+'-h[Prints help information]' \
+'--help[Prints help information]' \
+'-V[Prints version information]' \
+'--version[Prints version information]' \
+'-f[Force the action, ignore warnings]' \
+'--force[Force the action, ignore warnings]' \
+'-I[Not interactive, do not prompt]' \
+'--no-interact[Not interactive, do not prompt]' \
+'-y[Assume yes for prompts]' \
+'--yes[Assume yes for prompts]' \
+'-q[Produce output suitable for logging and automation]' \
+'--quiet[Produce output suitable for logging and automation]' \
+'*-v[Enable verbose information and logging]' \
+'*--verbose[Enable verbose information and logging]' \
+'-i[Don'\''t update local history for actions]' \
+'--incognito[Don'\''t update local history for actions]' \
+':URL -- The share URL:_files' \
+&& ret=0
+;;
+(download)
+_arguments "${_arguments_options[@]}" \
+'-p+[Unlock a password protected file]' \
+'--password=[Unlock a password protected file]' \
+'-o+[Output file or directory]' \
+'--output=[Output file or directory]' \
+'-t+[Request timeout (0 to disable)]' \
+'--timeout=[Request timeout (0 to disable)]' \
+'-T+[Transfer timeout (0 to disable)]' \
+'--transfer-timeout=[Transfer timeout (0 to disable)]' \
+'-A+[Server API version to use, '\''-'\'' to lookup]' \
+'--api=[Server API version to use, '\''-'\'' to lookup]' \
+'-H+[Use the specified history file]' \
+'--history=[Use the specified history file]' \
+'-e[Extract an archived file]' \
+'--extract[Extract an archived file]' \
+'-h[Prints help information]' \
+'--help[Prints help information]' \
+'-V[Prints version information]' \
+'--version[Prints version information]' \
+'-f[Force the action, ignore warnings]' \
+'--force[Force the action, ignore warnings]' \
+'-I[Not interactive, do not prompt]' \
+'--no-interact[Not interactive, do not prompt]' \
+'-y[Assume yes for prompts]' \
+'--yes[Assume yes for prompts]' \
+'-q[Produce output suitable for logging and automation]' \
+'--quiet[Produce output suitable for logging and automation]' \
+'*-v[Enable verbose information and logging]' \
+'*--verbose[Enable verbose information and logging]' \
+'-i[Don'\''t update local history for actions]' \
+'--incognito[Don'\''t update local history for actions]' \
+':URL -- The share URL:_files' \
+&& ret=0
+;;
+(e)
+_arguments "${_arguments_options[@]}" \
+'-t+[Request timeout (0 to disable)]' \
+'--timeout=[Request timeout (0 to disable)]' \
+'-T+[Transfer timeout (0 to disable)]' \
+'--transfer-timeout=[Transfer timeout (0 to disable)]' \
+'-A+[Server API version to use, '\''-'\'' to lookup]' \
+'--api=[Server API version to use, '\''-'\'' to lookup]' \
+'-H+[Use the specified history file]' \
+'--history=[Use the specified history file]' \
+'-h[Prints help information]' \
+'--help[Prints help information]' \
+'-V[Prints version information]' \
+'--version[Prints version information]' \
+'-f[Force the action, ignore warnings]' \
+'--force[Force the action, ignore warnings]' \
+'-I[Not interactive, do not prompt]' \
+'--no-interact[Not interactive, do not prompt]' \
+'-y[Assume yes for prompts]' \
+'--yes[Assume yes for prompts]' \
+'-q[Produce output suitable for logging and automation]' \
+'--quiet[Produce output suitable for logging and automation]' \
+'*-v[Enable verbose information and logging]' \
+'*--verbose[Enable verbose information and logging]' \
+'-i[Don'\''t update local history for actions]' \
+'--incognito[Don'\''t update local history for actions]' \
+':URL -- The share URL:_files' \
+&& ret=0
+;;
+(exist)
+_arguments "${_arguments_options[@]}" \
+'-t+[Request timeout (0 to disable)]' \
+'--timeout=[Request timeout (0 to disable)]' \
+'-T+[Transfer timeout (0 to disable)]' \
+'--transfer-timeout=[Transfer timeout (0 to disable)]' \
+'-A+[Server API version to use, '\''-'\'' to lookup]' \
+'--api=[Server API version to use, '\''-'\'' to lookup]' \
+'-H+[Use the specified history file]' \
+'--history=[Use the specified history file]' \
+'-h[Prints help information]' \
+'--help[Prints help information]' \
+'-V[Prints version information]' \
+'--version[Prints version information]' \
+'-f[Force the action, ignore warnings]' \
+'--force[Force the action, ignore warnings]' \
+'-I[Not interactive, do not prompt]' \
+'--no-interact[Not interactive, do not prompt]' \
+'-y[Assume yes for prompts]' \
+'--yes[Assume yes for prompts]' \
+'-q[Produce output suitable for logging and automation]' \
+'--quiet[Produce output suitable for logging and automation]' \
+'*-v[Enable verbose information and logging]' \
+'*--verbose[Enable verbose information and logging]' \
+'-i[Don'\''t update local history for actions]' \
+'--incognito[Don'\''t update local history for actions]' \
+':URL -- The share URL:_files' \
+&& ret=0
+;;
+(exists)
+_arguments "${_arguments_options[@]}" \
+'-t+[Request timeout (0 to disable)]' \
+'--timeout=[Request timeout (0 to disable)]' \
+'-T+[Transfer timeout (0 to disable)]' \
+'--transfer-timeout=[Transfer timeout (0 to disable)]' \
+'-A+[Server API version to use, '\''-'\'' to lookup]' \
+'--api=[Server API version to use, '\''-'\'' to lookup]' \
+'-H+[Use the specified history file]' \
+'--history=[Use the specified history file]' \
+'-h[Prints help information]' \
+'--help[Prints help information]' \
+'-V[Prints version information]' \
+'--version[Prints version information]' \
+'-f[Force the action, ignore warnings]' \
+'--force[Force the action, ignore warnings]' \
+'-I[Not interactive, do not prompt]' \
+'--no-interact[Not interactive, do not prompt]' \
+'-y[Assume yes for prompts]' \
+'--yes[Assume yes for prompts]' \
+'-q[Produce output suitable for logging and automation]' \
+'--quiet[Produce output suitable for logging and automation]' \
+'*-v[Enable verbose information and logging]' \
+'*--verbose[Enable verbose information and logging]' \
+'-i[Don'\''t update local history for actions]' \
+'--incognito[Don'\''t update local history for actions]' \
+':URL -- The share URL:_files' \
+&& ret=0
+;;
+(gen)
+_arguments "${_arguments_options[@]}" \
+'-t+[Request timeout (0 to disable)]' \
+'--timeout=[Request timeout (0 to disable)]' \
+'-T+[Transfer timeout (0 to disable)]' \
+'--transfer-timeout=[Transfer timeout (0 to disable)]' \
+'-A+[Server API version to use, '\''-'\'' to lookup]' \
+'--api=[Server API version to use, '\''-'\'' to lookup]' \
+'-H+[Use the specified history file]' \
+'--history=[Use the specified history file]' \
+'-h[Prints help information]' \
+'--help[Prints help information]' \
+'-V[Prints version information]' \
+'--version[Prints version information]' \
+'-f[Force the action, ignore warnings]' \
+'--force[Force the action, ignore warnings]' \
+'-I[Not interactive, do not prompt]' \
+'--no-interact[Not interactive, do not prompt]' \
+'-y[Assume yes for prompts]' \
+'--yes[Assume yes for prompts]' \
+'-q[Produce output suitable for logging and automation]' \
+'--quiet[Produce output suitable for logging and automation]' \
+'*-v[Enable verbose information and logging]' \
+'*--verbose[Enable verbose information and logging]' \
+'-i[Don'\''t update local history for actions]' \
+'--incognito[Don'\''t update local history for actions]' \
+":: :_ffsend__generate_commands" \
+"*::: :->generate" \
+&& ret=0
+case $state in
+    (generate)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:ffsend-generate-command-$line[1]:"
+        case $line[1] in
+            (completion)
+_arguments "${_arguments_options[@]}" \
+'-o+[Shell completion files output directory]' \
+'--output=[Shell completion files output directory]' \
+'-t+[Request timeout (0 to disable)]' \
+'--timeout=[Request timeout (0 to disable)]' \
+'-T+[Transfer timeout (0 to disable)]' \
+'--transfer-timeout=[Transfer timeout (0 to disable)]' \
+'-A+[Server API version to use, '\''-'\'' to lookup]' \
+'--api=[Server API version to use, '\''-'\'' to lookup]' \
+'-H+[Use the specified history file]' \
+'--history=[Use the specified history file]' \
+'-h[Prints help information]' \
+'--help[Prints help information]' \
+'-V[Prints version information]' \
+'--version[Prints version information]' \
+'-f[Force the action, ignore warnings]' \
+'--force[Force the action, ignore warnings]' \
+'-I[Not interactive, do not prompt]' \
+'--no-interact[Not interactive, do not prompt]' \
+'-y[Assume yes for prompts]' \
+'--yes[Assume yes for prompts]' \
+'-q[Produce output suitable for logging and automation]' \
+'--quiet[Produce output suitable for logging and automation]' \
+'*-v[Enable verbose information and logging]' \
+'*--verbose[Enable verbose information and logging]' \
+'-i[Don'\''t update local history for actions]' \
+'--incognito[Don'\''t update local history for actions]' \
+':SHELL -- Shell type to generate completions for:(all zsh bash fish powershell elvish)' \
+&& ret=0
+;;
+(complete)
+_arguments "${_arguments_options[@]}" \
+'-o+[Shell completion files output directory]' \
+'--output=[Shell completion files output directory]' \
+'-t+[Request timeout (0 to disable)]' \
+'--timeout=[Request timeout (0 to disable)]' \
+'-T+[Transfer timeout (0 to disable)]' \
+'--transfer-timeout=[Transfer timeout (0 to disable)]' \
+'-A+[Server API version to use, '\''-'\'' to lookup]' \
+'--api=[Server API version to use, '\''-'\'' to lookup]' \
+'-H+[Use the specified history file]' \
+'--history=[Use the specified history file]' \
+'-h[Prints help information]' \
+'--help[Prints help information]' \
+'-V[Prints version information]' \
+'--version[Prints version information]' \
+'-f[Force the action, ignore warnings]' \
+'--force[Force the action, ignore warnings]' \
+'-I[Not interactive, do not prompt]' \
+'--no-interact[Not interactive, do not prompt]' \
+'-y[Assume yes for prompts]' \
+'--yes[Assume yes for prompts]' \
+'-q[Produce output suitable for logging and automation]' \
+'--quiet[Produce output suitable for logging and automation]' \
+'*-v[Enable verbose information and logging]' \
+'*--verbose[Enable verbose information and logging]' \
+'-i[Don'\''t update local history for actions]' \
+'--incognito[Don'\''t update local history for actions]' \
+':SHELL -- Shell type to generate completions for:(all zsh bash fish powershell elvish)' \
+&& ret=0
+;;
+(completions)
+_arguments "${_arguments_options[@]}" \
+'-o+[Shell completion files output directory]' \
+'--output=[Shell completion files output directory]' \
+'-t+[Request timeout (0 to disable)]' \
+'--timeout=[Request timeout (0 to disable)]' \
+'-T+[Transfer timeout (0 to disable)]' \
+'--transfer-timeout=[Transfer timeout (0 to disable)]' \
+'-A+[Server API version to use, '\''-'\'' to lookup]' \
+'--api=[Server API version to use, '\''-'\'' to lookup]' \
+'-H+[Use the specified history file]' \
+'--history=[Use the specified history file]' \
+'-h[Prints help information]' \
+'--help[Prints help information]' \
+'-V[Prints version information]' \
+'--version[Prints version information]' \
+'-f[Force the action, ignore warnings]' \
+'--force[Force the action, ignore warnings]' \
+'-I[Not interactive, do not prompt]' \
+'--no-interact[Not interactive, do not prompt]' \
+'-y[Assume yes for prompts]' \
+'--yes[Assume yes for prompts]' \
+'-q[Produce output suitable for logging and automation]' \
+'--quiet[Produce output suitable for logging and automation]' \
+'*-v[Enable verbose information and logging]' \
+'*--verbose[Enable verbose information and logging]' \
+'-i[Don'\''t update local history for actions]' \
+'--incognito[Don'\''t update local history for actions]' \
+':SHELL -- Shell type to generate completions for:(all zsh bash fish powershell elvish)' \
+&& ret=0
+;;
+(help)
+_arguments "${_arguments_options[@]}" \
+'-t+[Request timeout (0 to disable)]' \
+'--timeout=[Request timeout (0 to disable)]' \
+'-T+[Transfer timeout (0 to disable)]' \
+'--transfer-timeout=[Transfer timeout (0 to disable)]' \
+'-A+[Server API version to use, '\''-'\'' to lookup]' \
+'--api=[Server API version to use, '\''-'\'' to lookup]' \
+'-H+[Use the specified history file]' \
+'--history=[Use the specified history file]' \
+'-h[Prints help information]' \
+'--help[Prints help information]' \
+'-V[Prints version information]' \
+'--version[Prints version information]' \
+'-f[Force the action, ignore warnings]' \
+'--force[Force the action, ignore warnings]' \
+'-I[Not interactive, do not prompt]' \
+'--no-interact[Not interactive, do not prompt]' \
+'-y[Assume yes for prompts]' \
+'--yes[Assume yes for prompts]' \
+'-q[Produce output suitable for logging and automation]' \
+'--quiet[Produce output suitable for logging and automation]' \
+'*-v[Enable verbose information and logging]' \
+'*--verbose[Enable verbose information and logging]' \
+'-i[Don'\''t update local history for actions]' \
+'--incognito[Don'\''t update local history for actions]' \
+&& ret=0
+;;
+        esac
     ;;
 esac
+;;
+(generate)
+_arguments "${_arguments_options[@]}" \
+'-t+[Request timeout (0 to disable)]' \
+'--timeout=[Request timeout (0 to disable)]' \
+'-T+[Transfer timeout (0 to disable)]' \
+'--transfer-timeout=[Transfer timeout (0 to disable)]' \
+'-A+[Server API version to use, '\''-'\'' to lookup]' \
+'--api=[Server API version to use, '\''-'\'' to lookup]' \
+'-H+[Use the specified history file]' \
+'--history=[Use the specified history file]' \
+'-h[Prints help information]' \
+'--help[Prints help information]' \
+'-V[Prints version information]' \
+'--version[Prints version information]' \
+'-f[Force the action, ignore warnings]' \
+'--force[Force the action, ignore warnings]' \
+'-I[Not interactive, do not prompt]' \
+'--no-interact[Not interactive, do not prompt]' \
+'-y[Assume yes for prompts]' \
+'--yes[Assume yes for prompts]' \
+'-q[Produce output suitable for logging and automation]' \
+'--quiet[Produce output suitable for logging and automation]' \
+'*-v[Enable verbose information and logging]' \
+'*--verbose[Enable verbose information and logging]' \
+'-i[Don'\''t update local history for actions]' \
+'--incognito[Don'\''t update local history for actions]' \
+":: :_ffsend__generate_commands" \
+"*::: :->generate" \
+&& ret=0
+case $state in
+    (generate)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:ffsend-generate-command-$line[1]:"
+        case $line[1] in
+            (completion)
+_arguments "${_arguments_options[@]}" \
+'-o+[Shell completion files output directory]' \
+'--output=[Shell completion files output directory]' \
+'-t+[Request timeout (0 to disable)]' \
+'--timeout=[Request timeout (0 to disable)]' \
+'-T+[Transfer timeout (0 to disable)]' \
+'--transfer-timeout=[Transfer timeout (0 to disable)]' \
+'-A+[Server API version to use, '\''-'\'' to lookup]' \
+'--api=[Server API version to use, '\''-'\'' to lookup]' \
+'-H+[Use the specified history file]' \
+'--history=[Use the specified history file]' \
+'-h[Prints help information]' \
+'--help[Prints help information]' \
+'-V[Prints version information]' \
+'--version[Prints version information]' \
+'-f[Force the action, ignore warnings]' \
+'--force[Force the action, ignore warnings]' \
+'-I[Not interactive, do not prompt]' \
+'--no-interact[Not interactive, do not prompt]' \
+'-y[Assume yes for prompts]' \
+'--yes[Assume yes for prompts]' \
+'-q[Produce output suitable for logging and automation]' \
+'--quiet[Produce output suitable for logging and automation]' \
+'*-v[Enable verbose information and logging]' \
+'*--verbose[Enable verbose information and logging]' \
+'-i[Don'\''t update local history for actions]' \
+'--incognito[Don'\''t update local history for actions]' \
+':SHELL -- Shell type to generate completions for:(all zsh bash fish powershell elvish)' \
+&& ret=0
+;;
+(complete)
+_arguments "${_arguments_options[@]}" \
+'-o+[Shell completion files output directory]' \
+'--output=[Shell completion files output directory]' \
+'-t+[Request timeout (0 to disable)]' \
+'--timeout=[Request timeout (0 to disable)]' \
+'-T+[Transfer timeout (0 to disable)]' \
+'--transfer-timeout=[Transfer timeout (0 to disable)]' \
+'-A+[Server API version to use, '\''-'\'' to lookup]' \
+'--api=[Server API version to use, '\''-'\'' to lookup]' \
+'-H+[Use the specified history file]' \
+'--history=[Use the specified history file]' \
+'-h[Prints help information]' \
+'--help[Prints help information]' \
+'-V[Prints version information]' \
+'--version[Prints version information]' \
+'-f[Force the action, ignore warnings]' \
+'--force[Force the action, ignore warnings]' \
+'-I[Not interactive, do not prompt]' \
+'--no-interact[Not interactive, do not prompt]' \
+'-y[Assume yes for prompts]' \
+'--yes[Assume yes for prompts]' \
+'-q[Produce output suitable for logging and automation]' \
+'--quiet[Produce output suitable for logging and automation]' \
+'*-v[Enable verbose information and logging]' \
+'*--verbose[Enable verbose information and logging]' \
+'-i[Don'\''t update local history for actions]' \
+'--incognito[Don'\''t update local history for actions]' \
+':SHELL -- Shell type to generate completions for:(all zsh bash fish powershell elvish)' \
+&& ret=0
+;;
+(completions)
+_arguments "${_arguments_options[@]}" \
+'-o+[Shell completion files output directory]' \
+'--output=[Shell completion files output directory]' \
+'-t+[Request timeout (0 to disable)]' \
+'--timeout=[Request timeout (0 to disable)]' \
+'-T+[Transfer timeout (0 to disable)]' \
+'--transfer-timeout=[Transfer timeout (0 to disable)]' \
+'-A+[Server API version to use, '\''-'\'' to lookup]' \
+'--api=[Server API version to use, '\''-'\'' to lookup]' \
+'-H+[Use the specified history file]' \
+'--history=[Use the specified history file]' \
+'-h[Prints help information]' \
+'--help[Prints help information]' \
+'-V[Prints version information]' \
+'--version[Prints version information]' \
+'-f[Force the action, ignore warnings]' \
+'--force[Force the action, ignore warnings]' \
+'-I[Not interactive, do not prompt]' \
+'--no-interact[Not interactive, do not prompt]' \
+'-y[Assume yes for prompts]' \
+'--yes[Assume yes for prompts]' \
+'-q[Produce output suitable for logging and automation]' \
+'--quiet[Produce output suitable for logging and automation]' \
+'*-v[Enable verbose information and logging]' \
+'*--verbose[Enable verbose information and logging]' \
+'-i[Don'\''t update local history for actions]' \
+'--incognito[Don'\''t update local history for actions]' \
+':SHELL -- Shell type to generate completions for:(all zsh bash fish powershell elvish)' \
+&& ret=0
+;;
+(help)
+_arguments "${_arguments_options[@]}" \
+'-t+[Request timeout (0 to disable)]' \
+'--timeout=[Request timeout (0 to disable)]' \
+'-T+[Transfer timeout (0 to disable)]' \
+'--transfer-timeout=[Transfer timeout (0 to disable)]' \
+'-A+[Server API version to use, '\''-'\'' to lookup]' \
+'--api=[Server API version to use, '\''-'\'' to lookup]' \
+'-H+[Use the specified history file]' \
+'--history=[Use the specified history file]' \
+'-h[Prints help information]' \
+'--help[Prints help information]' \
+'-V[Prints version information]' \
+'--version[Prints version information]' \
+'-f[Force the action, ignore warnings]' \
+'--force[Force the action, ignore warnings]' \
+'-I[Not interactive, do not prompt]' \
+'--no-interact[Not interactive, do not prompt]' \
+'-y[Assume yes for prompts]' \
+'--yes[Assume yes for prompts]' \
+'-q[Produce output suitable for logging and automation]' \
+'--quiet[Produce output suitable for logging and automation]' \
+'*-v[Enable verbose information and logging]' \
+'*--verbose[Enable verbose information and logging]' \
+'-i[Don'\''t update local history for actions]' \
+'--incognito[Don'\''t update local history for actions]' \
+&& ret=0
+;;
+        esac
+    ;;
+esac
+;;
+(i)
+_arguments "${_arguments_options[@]}" \
+'-o+[Specify the file owner token]' \
+'--owner=[Specify the file owner token]' \
+'-p+[Unlock a password protected file]' \
+'--password=[Unlock a password protected file]' \
+'-t+[Request timeout (0 to disable)]' \
+'--timeout=[Request timeout (0 to disable)]' \
+'-T+[Transfer timeout (0 to disable)]' \
+'--transfer-timeout=[Transfer timeout (0 to disable)]' \
+'-A+[Server API version to use, '\''-'\'' to lookup]' \
+'--api=[Server API version to use, '\''-'\'' to lookup]' \
+'-H+[Use the specified history file]' \
+'--history=[Use the specified history file]' \
+'-h[Prints help information]' \
+'--help[Prints help information]' \
+'-V[Prints version information]' \
+'--version[Prints version information]' \
+'-f[Force the action, ignore warnings]' \
+'--force[Force the action, ignore warnings]' \
+'-I[Not interactive, do not prompt]' \
+'--no-interact[Not interactive, do not prompt]' \
+'-y[Assume yes for prompts]' \
+'--yes[Assume yes for prompts]' \
+'-q[Produce output suitable for logging and automation]' \
+'--quiet[Produce output suitable for logging and automation]' \
+'*-v[Enable verbose information and logging]' \
+'*--verbose[Enable verbose information and logging]' \
+'-i[Don'\''t update local history for actions]' \
+'--incognito[Don'\''t update local history for actions]' \
+':URL -- The share URL:_files' \
+&& ret=0
+;;
+(information)
+_arguments "${_arguments_options[@]}" \
+'-o+[Specify the file owner token]' \
+'--owner=[Specify the file owner token]' \
+'-p+[Unlock a password protected file]' \
+'--password=[Unlock a password protected file]' \
+'-t+[Request timeout (0 to disable)]' \
+'--timeout=[Request timeout (0 to disable)]' \
+'-T+[Transfer timeout (0 to disable)]' \
+'--transfer-timeout=[Transfer timeout (0 to disable)]' \
+'-A+[Server API version to use, '\''-'\'' to lookup]' \
+'--api=[Server API version to use, '\''-'\'' to lookup]' \
+'-H+[Use the specified history file]' \
+'--history=[Use the specified history file]' \
+'-h[Prints help information]' \
+'--help[Prints help information]' \
+'-V[Prints version information]' \
+'--version[Prints version information]' \
+'-f[Force the action, ignore warnings]' \
+'--force[Force the action, ignore warnings]' \
+'-I[Not interactive, do not prompt]' \
+'--no-interact[Not interactive, do not prompt]' \
+'-y[Assume yes for prompts]' \
+'--yes[Assume yes for prompts]' \
+'-q[Produce output suitable for logging and automation]' \
+'--quiet[Produce output suitable for logging and automation]' \
+'*-v[Enable verbose information and logging]' \
+'*--verbose[Enable verbose information and logging]' \
+'-i[Don'\''t update local history for actions]' \
+'--incognito[Don'\''t update local history for actions]' \
+':URL -- The share URL:_files' \
+&& ret=0
+;;
+(info)
+_arguments "${_arguments_options[@]}" \
+'-o+[Specify the file owner token]' \
+'--owner=[Specify the file owner token]' \
+'-p+[Unlock a password protected file]' \
+'--password=[Unlock a password protected file]' \
+'-t+[Request timeout (0 to disable)]' \
+'--timeout=[Request timeout (0 to disable)]' \
+'-T+[Transfer timeout (0 to disable)]' \
+'--transfer-timeout=[Transfer timeout (0 to disable)]' \
+'-A+[Server API version to use, '\''-'\'' to lookup]' \
+'--api=[Server API version to use, '\''-'\'' to lookup]' \
+'-H+[Use the specified history file]' \
+'--history=[Use the specified history file]' \
+'-h[Prints help information]' \
+'--help[Prints help information]' \
+'-V[Prints version information]' \
+'--version[Prints version information]' \
+'-f[Force the action, ignore warnings]' \
+'--force[Force the action, ignore warnings]' \
+'-I[Not interactive, do not prompt]' \
+'--no-interact[Not interactive, do not prompt]' \
+'-y[Assume yes for prompts]' \
+'--yes[Assume yes for prompts]' \
+'-q[Produce output suitable for logging and automation]' \
+'--quiet[Produce output suitable for logging and automation]' \
+'*-v[Enable verbose information and logging]' \
+'*--verbose[Enable verbose information and logging]' \
+'-i[Don'\''t update local history for actions]' \
+'--incognito[Don'\''t update local history for actions]' \
+':URL -- The share URL:_files' \
+&& ret=0
+;;
+(params)
+_arguments "${_arguments_options[@]}" \
+'-o+[Specify the file owner token]' \
+'--owner=[Specify the file owner token]' \
+'-d+[The file download limit]' \
+'--download-limit=[The file download limit]' \
+'-t+[Request timeout (0 to disable)]' \
+'--timeout=[Request timeout (0 to disable)]' \
+'-T+[Transfer timeout (0 to disable)]' \
+'--transfer-timeout=[Transfer timeout (0 to disable)]' \
+'-A+[Server API version to use, '\''-'\'' to lookup]' \
+'--api=[Server API version to use, '\''-'\'' to lookup]' \
+'-H+[Use the specified history file]' \
+'--history=[Use the specified history file]' \
+'-h[Prints help information]' \
+'--help[Prints help information]' \
+'-V[Prints version information]' \
+'--version[Prints version information]' \
+'-f[Force the action, ignore warnings]' \
+'--force[Force the action, ignore warnings]' \
+'-I[Not interactive, do not prompt]' \
+'--no-interact[Not interactive, do not prompt]' \
+'-y[Assume yes for prompts]' \
+'--yes[Assume yes for prompts]' \
+'-q[Produce output suitable for logging and automation]' \
+'--quiet[Produce output suitable for logging and automation]' \
+'*-v[Enable verbose information and logging]' \
+'*--verbose[Enable verbose information and logging]' \
+'-i[Don'\''t update local history for actions]' \
+'--incognito[Don'\''t update local history for actions]' \
+':URL -- The share URL:_files' \
+&& ret=0
+;;
+(param)
+_arguments "${_arguments_options[@]}" \
+'-o+[Specify the file owner token]' \
+'--owner=[Specify the file owner token]' \
+'-d+[The file download limit]' \
+'--download-limit=[The file download limit]' \
+'-t+[Request timeout (0 to disable)]' \
+'--timeout=[Request timeout (0 to disable)]' \
+'-T+[Transfer timeout (0 to disable)]' \
+'--transfer-timeout=[Transfer timeout (0 to disable)]' \
+'-A+[Server API version to use, '\''-'\'' to lookup]' \
+'--api=[Server API version to use, '\''-'\'' to lookup]' \
+'-H+[Use the specified history file]' \
+'--history=[Use the specified history file]' \
+'-h[Prints help information]' \
+'--help[Prints help information]' \
+'-V[Prints version information]' \
+'--version[Prints version information]' \
+'-f[Force the action, ignore warnings]' \
+'--force[Force the action, ignore warnings]' \
+'-I[Not interactive, do not prompt]' \
+'--no-interact[Not interactive, do not prompt]' \
+'-y[Assume yes for prompts]' \
+'--yes[Assume yes for prompts]' \
+'-q[Produce output suitable for logging and automation]' \
+'--quiet[Produce output suitable for logging and automation]' \
+'*-v[Enable verbose information and logging]' \
+'*--verbose[Enable verbose information and logging]' \
+'-i[Don'\''t update local history for actions]' \
+'--incognito[Don'\''t update local history for actions]' \
+':URL -- The share URL:_files' \
+&& ret=0
+;;
+(parameter)
+_arguments "${_arguments_options[@]}" \
+'-o+[Specify the file owner token]' \
+'--owner=[Specify the file owner token]' \
+'-d+[The file download limit]' \
+'--download-limit=[The file download limit]' \
+'-t+[Request timeout (0 to disable)]' \
+'--timeout=[Request timeout (0 to disable)]' \
+'-T+[Transfer timeout (0 to disable)]' \
+'--transfer-timeout=[Transfer timeout (0 to disable)]' \
+'-A+[Server API version to use, '\''-'\'' to lookup]' \
+'--api=[Server API version to use, '\''-'\'' to lookup]' \
+'-H+[Use the specified history file]' \
+'--history=[Use the specified history file]' \
+'-h[Prints help information]' \
+'--help[Prints help information]' \
+'-V[Prints version information]' \
+'--version[Prints version information]' \
+'-f[Force the action, ignore warnings]' \
+'--force[Force the action, ignore warnings]' \
+'-I[Not interactive, do not prompt]' \
+'--no-interact[Not interactive, do not prompt]' \
+'-y[Assume yes for prompts]' \
+'--yes[Assume yes for prompts]' \
+'-q[Produce output suitable for logging and automation]' \
+'--quiet[Produce output suitable for logging and automation]' \
+'*-v[Enable verbose information and logging]' \
+'*--verbose[Enable verbose information and logging]' \
+'-i[Don'\''t update local history for actions]' \
+'--incognito[Don'\''t update local history for actions]' \
+':URL -- The share URL:_files' \
+&& ret=0
+;;
+(parameters)
+_arguments "${_arguments_options[@]}" \
+'-o+[Specify the file owner token]' \
+'--owner=[Specify the file owner token]' \
+'-d+[The file download limit]' \
+'--download-limit=[The file download limit]' \
+'-t+[Request timeout (0 to disable)]' \
+'--timeout=[Request timeout (0 to disable)]' \
+'-T+[Transfer timeout (0 to disable)]' \
+'--transfer-timeout=[Transfer timeout (0 to disable)]' \
+'-A+[Server API version to use, '\''-'\'' to lookup]' \
+'--api=[Server API version to use, '\''-'\'' to lookup]' \
+'-H+[Use the specified history file]' \
+'--history=[Use the specified history file]' \
+'-h[Prints help information]' \
+'--help[Prints help information]' \
+'-V[Prints version information]' \
+'--version[Prints version information]' \
+'-f[Force the action, ignore warnings]' \
+'--force[Force the action, ignore warnings]' \
+'-I[Not interactive, do not prompt]' \
+'--no-interact[Not interactive, do not prompt]' \
+'-y[Assume yes for prompts]' \
+'--yes[Assume yes for prompts]' \
+'-q[Produce output suitable for logging and automation]' \
+'--quiet[Produce output suitable for logging and automation]' \
+'*-v[Enable verbose information and logging]' \
+'*--verbose[Enable verbose information and logging]' \
+'-i[Don'\''t update local history for actions]' \
+'--incognito[Don'\''t update local history for actions]' \
+':URL -- The share URL:_files' \
+&& ret=0
+;;
+(pass)
+_arguments "${_arguments_options[@]}" \
+'-p+[Specify a password, do not prompt]' \
+'--password=[Specify a password, do not prompt]' \
+'-o+[Specify the file owner token]' \
+'--owner=[Specify the file owner token]' \
+'-t+[Request timeout (0 to disable)]' \
+'--timeout=[Request timeout (0 to disable)]' \
+'-T+[Transfer timeout (0 to disable)]' \
+'--transfer-timeout=[Transfer timeout (0 to disable)]' \
+'-A+[Server API version to use, '\''-'\'' to lookup]' \
+'--api=[Server API version to use, '\''-'\'' to lookup]' \
+'-H+[Use the specified history file]' \
+'--history=[Use the specified history file]' \
+'-P[Protect the file with a generated passphrase]' \
+'--gen-passphrase[Protect the file with a generated passphrase]' \
+'-h[Prints help information]' \
+'--help[Prints help information]' \
+'-V[Prints version information]' \
+'--version[Prints version information]' \
+'-f[Force the action, ignore warnings]' \
+'--force[Force the action, ignore warnings]' \
+'-I[Not interactive, do not prompt]' \
+'--no-interact[Not interactive, do not prompt]' \
+'-y[Assume yes for prompts]' \
+'--yes[Assume yes for prompts]' \
+'-q[Produce output suitable for logging and automation]' \
+'--quiet[Produce output suitable for logging and automation]' \
+'*-v[Enable verbose information and logging]' \
+'*--verbose[Enable verbose information and logging]' \
+'-i[Don'\''t update local history for actions]' \
+'--incognito[Don'\''t update local history for actions]' \
+':URL -- The share URL:_files' \
+&& ret=0
+;;
+(p)
+_arguments "${_arguments_options[@]}" \
+'-p+[Specify a password, do not prompt]' \
+'--password=[Specify a password, do not prompt]' \
+'-o+[Specify the file owner token]' \
+'--owner=[Specify the file owner token]' \
+'-t+[Request timeout (0 to disable)]' \
+'--timeout=[Request timeout (0 to disable)]' \
+'-T+[Transfer timeout (0 to disable)]' \
+'--transfer-timeout=[Transfer timeout (0 to disable)]' \
+'-A+[Server API version to use, '\''-'\'' to lookup]' \
+'--api=[Server API version to use, '\''-'\'' to lookup]' \
+'-H+[Use the specified history file]' \
+'--history=[Use the specified history file]' \
+'-P[Protect the file with a generated passphrase]' \
+'--gen-passphrase[Protect the file with a generated passphrase]' \
+'-h[Prints help information]' \
+'--help[Prints help information]' \
+'-V[Prints version information]' \
+'--version[Prints version information]' \
+'-f[Force the action, ignore warnings]' \
+'--force[Force the action, ignore warnings]' \
+'-I[Not interactive, do not prompt]' \
+'--no-interact[Not interactive, do not prompt]' \
+'-y[Assume yes for prompts]' \
+'--yes[Assume yes for prompts]' \
+'-q[Produce output suitable for logging and automation]' \
+'--quiet[Produce output suitable for logging and automation]' \
+'*-v[Enable verbose information and logging]' \
+'*--verbose[Enable verbose information and logging]' \
+'-i[Don'\''t update local history for actions]' \
+'--incognito[Don'\''t update local history for actions]' \
+':URL -- The share URL:_files' \
+&& ret=0
+;;
+(password)
+_arguments "${_arguments_options[@]}" \
+'-p+[Specify a password, do not prompt]' \
+'--password=[Specify a password, do not prompt]' \
+'-o+[Specify the file owner token]' \
+'--owner=[Specify the file owner token]' \
+'-t+[Request timeout (0 to disable)]' \
+'--timeout=[Request timeout (0 to disable)]' \
+'-T+[Transfer timeout (0 to disable)]' \
+'--transfer-timeout=[Transfer timeout (0 to disable)]' \
+'-A+[Server API version to use, '\''-'\'' to lookup]' \
+'--api=[Server API version to use, '\''-'\'' to lookup]' \
+'-H+[Use the specified history file]' \
+'--history=[Use the specified history file]' \
+'-P[Protect the file with a generated passphrase]' \
+'--gen-passphrase[Protect the file with a generated passphrase]' \
+'-h[Prints help information]' \
+'--help[Prints help information]' \
+'-V[Prints version information]' \
+'--version[Prints version information]' \
+'-f[Force the action, ignore warnings]' \
+'--force[Force the action, ignore warnings]' \
+'-I[Not interactive, do not prompt]' \
+'--no-interact[Not interactive, do not prompt]' \
+'-y[Assume yes for prompts]' \
+'--yes[Assume yes for prompts]' \
+'-q[Produce output suitable for logging and automation]' \
+'--quiet[Produce output suitable for logging and automation]' \
+'*-v[Enable verbose information and logging]' \
+'*--verbose[Enable verbose information and logging]' \
+'-i[Don'\''t update local history for actions]' \
+'--incognito[Don'\''t update local history for actions]' \
+':URL -- The share URL:_files' \
+&& ret=0
+;;
+(u)
+_arguments "${_arguments_options[@]}" \
+'-p+[Protect the file with a password]' \
+'--password=[Protect the file with a password]' \
+'-d+[The file download limit]' \
+'--download-limit=[The file download limit]' \
+'-h+[The remote host to upload to]' \
+'--host=[The remote host to upload to]' \
+'-n+[Rename the file being uploaded]' \
+'--name=[Rename the file being uploaded]' \
+'-t+[Request timeout (0 to disable)]' \
+'--timeout=[Request timeout (0 to disable)]' \
+'-T+[Transfer timeout (0 to disable)]' \
+'--transfer-timeout=[Transfer timeout (0 to disable)]' \
+'-A+[Server API version to use, '\''-'\'' to lookup]' \
+'--api=[Server API version to use, '\''-'\'' to lookup]' \
+'-H+[Use the specified history file]' \
+'--history=[Use the specified history file]' \
+'-P[Protect the file with a generated passphrase]' \
+'--gen-passphrase[Protect the file with a generated passphrase]' \
+'-o[Open the share link in your browser]' \
+'--open[Open the share link in your browser]' \
+'-a[Archive the upload in a single file]' \
+'--archive[Archive the upload in a single file]' \
+'(-C --copy-cmd)-c[Copy the share link to your clipboard]' \
+'(-C --copy-cmd)--copy[Copy the share link to your clipboard]' \
+'(-c --copy)-C[Copy the ffsend download command to your clipboard]' \
+'(-c --copy)--copy-cmd[Copy the ffsend download command to your clipboard]' \
+'-S[Shorten share URLs with a public service]' \
+'--shorten[Shorten share URLs with a public service]' \
+'-Q[Print a QR code for the share URL]' \
+'--qrcode[Print a QR code for the share URL]' \
+'--help[Prints help information]' \
+'-V[Prints version information]' \
+'--version[Prints version information]' \
+'-f[Force the action, ignore warnings]' \
+'--force[Force the action, ignore warnings]' \
+'-I[Not interactive, do not prompt]' \
+'--no-interact[Not interactive, do not prompt]' \
+'-y[Assume yes for prompts]' \
+'--yes[Assume yes for prompts]' \
+'-q[Produce output suitable for logging and automation]' \
+'--quiet[Produce output suitable for logging and automation]' \
+'*-v[Enable verbose information and logging]' \
+'*--verbose[Enable verbose information and logging]' \
+'-i[Don'\''t update local history for actions]' \
+'--incognito[Don'\''t update local history for actions]' \
+':FILE -- The file to upload:_files' \
+&& ret=0
+;;
+(up)
+_arguments "${_arguments_options[@]}" \
+'-p+[Protect the file with a password]' \
+'--password=[Protect the file with a password]' \
+'-d+[The file download limit]' \
+'--download-limit=[The file download limit]' \
+'-h+[The remote host to upload to]' \
+'--host=[The remote host to upload to]' \
+'-n+[Rename the file being uploaded]' \
+'--name=[Rename the file being uploaded]' \
+'-t+[Request timeout (0 to disable)]' \
+'--timeout=[Request timeout (0 to disable)]' \
+'-T+[Transfer timeout (0 to disable)]' \
+'--transfer-timeout=[Transfer timeout (0 to disable)]' \
+'-A+[Server API version to use, '\''-'\'' to lookup]' \
+'--api=[Server API version to use, '\''-'\'' to lookup]' \
+'-H+[Use the specified history file]' \
+'--history=[Use the specified history file]' \
+'-P[Protect the file with a generated passphrase]' \
+'--gen-passphrase[Protect the file with a generated passphrase]' \
+'-o[Open the share link in your browser]' \
+'--open[Open the share link in your browser]' \
+'-a[Archive the upload in a single file]' \
+'--archive[Archive the upload in a single file]' \
+'(-C --copy-cmd)-c[Copy the share link to your clipboard]' \
+'(-C --copy-cmd)--copy[Copy the share link to your clipboard]' \
+'(-c --copy)-C[Copy the ffsend download command to your clipboard]' \
+'(-c --copy)--copy-cmd[Copy the ffsend download command to your clipboard]' \
+'-S[Shorten share URLs with a public service]' \
+'--shorten[Shorten share URLs with a public service]' \
+'-Q[Print a QR code for the share URL]' \
+'--qrcode[Print a QR code for the share URL]' \
+'--help[Prints help information]' \
+'-V[Prints version information]' \
+'--version[Prints version information]' \
+'-f[Force the action, ignore warnings]' \
+'--force[Force the action, ignore warnings]' \
+'-I[Not interactive, do not prompt]' \
+'--no-interact[Not interactive, do not prompt]' \
+'-y[Assume yes for prompts]' \
+'--yes[Assume yes for prompts]' \
+'-q[Produce output suitable for logging and automation]' \
+'--quiet[Produce output suitable for logging and automation]' \
+'*-v[Enable verbose information and logging]' \
+'*--verbose[Enable verbose information and logging]' \
+'-i[Don'\''t update local history for actions]' \
+'--incognito[Don'\''t update local history for actions]' \
+':FILE -- The file to upload:_files' \
+&& ret=0
+;;
+(upload)
+_arguments "${_arguments_options[@]}" \
+'-p+[Protect the file with a password]' \
+'--password=[Protect the file with a password]' \
+'-d+[The file download limit]' \
+'--download-limit=[The file download limit]' \
+'-h+[The remote host to upload to]' \
+'--host=[The remote host to upload to]' \
+'-n+[Rename the file being uploaded]' \
+'--name=[Rename the file being uploaded]' \
+'-t+[Request timeout (0 to disable)]' \
+'--timeout=[Request timeout (0 to disable)]' \
+'-T+[Transfer timeout (0 to disable)]' \
+'--transfer-timeout=[Transfer timeout (0 to disable)]' \
+'-A+[Server API version to use, '\''-'\'' to lookup]' \
+'--api=[Server API version to use, '\''-'\'' to lookup]' \
+'-H+[Use the specified history file]' \
+'--history=[Use the specified history file]' \
+'-P[Protect the file with a generated passphrase]' \
+'--gen-passphrase[Protect the file with a generated passphrase]' \
+'-o[Open the share link in your browser]' \
+'--open[Open the share link in your browser]' \
+'-a[Archive the upload in a single file]' \
+'--archive[Archive the upload in a single file]' \
+'(-C --copy-cmd)-c[Copy the share link to your clipboard]' \
+'(-C --copy-cmd)--copy[Copy the share link to your clipboard]' \
+'(-c --copy)-C[Copy the ffsend download command to your clipboard]' \
+'(-c --copy)--copy-cmd[Copy the ffsend download command to your clipboard]' \
+'-S[Shorten share URLs with a public service]' \
+'--shorten[Shorten share URLs with a public service]' \
+'-Q[Print a QR code for the share URL]' \
+'--qrcode[Print a QR code for the share URL]' \
+'--help[Prints help information]' \
+'-V[Prints version information]' \
+'--version[Prints version information]' \
+'-f[Force the action, ignore warnings]' \
+'--force[Force the action, ignore warnings]' \
+'-I[Not interactive, do not prompt]' \
+'--no-interact[Not interactive, do not prompt]' \
+'-y[Assume yes for prompts]' \
+'--yes[Assume yes for prompts]' \
+'-q[Produce output suitable for logging and automation]' \
+'--quiet[Produce output suitable for logging and automation]' \
+'*-v[Enable verbose information and logging]' \
+'*--verbose[Enable verbose information and logging]' \
+'-i[Don'\''t update local history for actions]' \
+'--incognito[Don'\''t update local history for actions]' \
+':FILE -- The file to upload:_files' \
+&& ret=0
+;;
+(ver)
+_arguments "${_arguments_options[@]}" \
+'-h+[The remote host to upload to]' \
+'--host=[The remote host to upload to]' \
+'-t+[Request timeout (0 to disable)]' \
+'--timeout=[Request timeout (0 to disable)]' \
+'-T+[Transfer timeout (0 to disable)]' \
+'--transfer-timeout=[Transfer timeout (0 to disable)]' \
+'-A+[Server API version to use, '\''-'\'' to lookup]' \
+'--api=[Server API version to use, '\''-'\'' to lookup]' \
+'-H+[Use the specified history file]' \
+'--history=[Use the specified history file]' \
+'--help[Prints help information]' \
+'-V[Prints version information]' \
+'--version[Prints version information]' \
+'-f[Force the action, ignore warnings]' \
+'--force[Force the action, ignore warnings]' \
+'-I[Not interactive, do not prompt]' \
+'--no-interact[Not interactive, do not prompt]' \
+'-y[Assume yes for prompts]' \
+'--yes[Assume yes for prompts]' \
+'-q[Produce output suitable for logging and automation]' \
+'--quiet[Produce output suitable for logging and automation]' \
+'*-v[Enable verbose information and logging]' \
+'*--verbose[Enable verbose information and logging]' \
+'-i[Don'\''t update local history for actions]' \
+'--incognito[Don'\''t update local history for actions]' \
+&& ret=0
+;;
+(v)
+_arguments "${_arguments_options[@]}" \
+'-h+[The remote host to upload to]' \
+'--host=[The remote host to upload to]' \
+'-t+[Request timeout (0 to disable)]' \
+'--timeout=[Request timeout (0 to disable)]' \
+'-T+[Transfer timeout (0 to disable)]' \
+'--transfer-timeout=[Transfer timeout (0 to disable)]' \
+'-A+[Server API version to use, '\''-'\'' to lookup]' \
+'--api=[Server API version to use, '\''-'\'' to lookup]' \
+'-H+[Use the specified history file]' \
+'--history=[Use the specified history file]' \
+'--help[Prints help information]' \
+'-V[Prints version information]' \
+'--version[Prints version information]' \
+'-f[Force the action, ignore warnings]' \
+'--force[Force the action, ignore warnings]' \
+'-I[Not interactive, do not prompt]' \
+'--no-interact[Not interactive, do not prompt]' \
+'-y[Assume yes for prompts]' \
+'--yes[Assume yes for prompts]' \
+'-q[Produce output suitable for logging and automation]' \
+'--quiet[Produce output suitable for logging and automation]' \
+'*-v[Enable verbose information and logging]' \
+'*--verbose[Enable verbose information and logging]' \
+'-i[Don'\''t update local history for actions]' \
+'--incognito[Don'\''t update local history for actions]' \
+&& ret=0
+;;
+(version)
+_arguments "${_arguments_options[@]}" \
+'-h+[The remote host to upload to]' \
+'--host=[The remote host to upload to]' \
+'-t+[Request timeout (0 to disable)]' \
+'--timeout=[Request timeout (0 to disable)]' \
+'-T+[Transfer timeout (0 to disable)]' \
+'--transfer-timeout=[Transfer timeout (0 to disable)]' \
+'-A+[Server API version to use, '\''-'\'' to lookup]' \
+'--api=[Server API version to use, '\''-'\'' to lookup]' \
+'-H+[Use the specified history file]' \
+'--history=[Use the specified history file]' \
+'--help[Prints help information]' \
+'-V[Prints version information]' \
+'--version[Prints version information]' \
+'-f[Force the action, ignore warnings]' \
+'--force[Force the action, ignore warnings]' \
+'-I[Not interactive, do not prompt]' \
+'--no-interact[Not interactive, do not prompt]' \
+'-y[Assume yes for prompts]' \
+'--yes[Assume yes for prompts]' \
+'-q[Produce output suitable for logging and automation]' \
+'--quiet[Produce output suitable for logging and automation]' \
+'*-v[Enable verbose information and logging]' \
+'*--verbose[Enable verbose information and logging]' \
+'-i[Don'\''t update local history for actions]' \
+'--incognito[Don'\''t update local history for actions]' \
+&& ret=0
+;;
+(h)
+_arguments "${_arguments_options[@]}" \
+'-t+[Request timeout (0 to disable)]' \
+'--timeout=[Request timeout (0 to disable)]' \
+'-T+[Transfer timeout (0 to disable)]' \
+'--transfer-timeout=[Transfer timeout (0 to disable)]' \
+'-A+[Server API version to use, '\''-'\'' to lookup]' \
+'--api=[Server API version to use, '\''-'\'' to lookup]' \
+'-H+[Use the specified history file]' \
+'--history=[Use the specified history file]' \
+'-h[Prints help information]' \
+'--help[Prints help information]' \
+'-V[Prints version information]' \
+'--version[Prints version information]' \
+'-f[Force the action, ignore warnings]' \
+'--force[Force the action, ignore warnings]' \
+'-I[Not interactive, do not prompt]' \
+'--no-interact[Not interactive, do not prompt]' \
+'-y[Assume yes for prompts]' \
+'--yes[Assume yes for prompts]' \
+'-q[Produce output suitable for logging and automation]' \
+'--quiet[Produce output suitable for logging and automation]' \
+'*-v[Enable verbose information and logging]' \
+'*--verbose[Enable verbose information and logging]' \
+'-i[Don'\''t update local history for actions]' \
+'--incognito[Don'\''t update local history for actions]' \
+&& ret=0
+;;
+(ls)
+_arguments "${_arguments_options[@]}" \
+'-t+[Request timeout (0 to disable)]' \
+'--timeout=[Request timeout (0 to disable)]' \
+'-T+[Transfer timeout (0 to disable)]' \
+'--transfer-timeout=[Transfer timeout (0 to disable)]' \
+'-A+[Server API version to use, '\''-'\'' to lookup]' \
+'--api=[Server API version to use, '\''-'\'' to lookup]' \
+'-H+[Use the specified history file]' \
+'--history=[Use the specified history file]' \
+'-h[Prints help information]' \
+'--help[Prints help information]' \
+'-V[Prints version information]' \
+'--version[Prints version information]' \
+'-f[Force the action, ignore warnings]' \
+'--force[Force the action, ignore warnings]' \
+'-I[Not interactive, do not prompt]' \
+'--no-interact[Not interactive, do not prompt]' \
+'-y[Assume yes for prompts]' \
+'--yes[Assume yes for prompts]' \
+'-q[Produce output suitable for logging and automation]' \
+'--quiet[Produce output suitable for logging and automation]' \
+'*-v[Enable verbose information and logging]' \
+'*--verbose[Enable verbose information and logging]' \
+'-i[Don'\''t update local history for actions]' \
+'--incognito[Don'\''t update local history for actions]' \
+&& ret=0
+;;
+(history)
+_arguments "${_arguments_options[@]}" \
+'-t+[Request timeout (0 to disable)]' \
+'--timeout=[Request timeout (0 to disable)]' \
+'-T+[Transfer timeout (0 to disable)]' \
+'--transfer-timeout=[Transfer timeout (0 to disable)]' \
+'-A+[Server API version to use, '\''-'\'' to lookup]' \
+'--api=[Server API version to use, '\''-'\'' to lookup]' \
+'-H+[Use the specified history file]' \
+'--history=[Use the specified history file]' \
+'-h[Prints help information]' \
+'--help[Prints help information]' \
+'-V[Prints version information]' \
+'--version[Prints version information]' \
+'-f[Force the action, ignore warnings]' \
+'--force[Force the action, ignore warnings]' \
+'-I[Not interactive, do not prompt]' \
+'--no-interact[Not interactive, do not prompt]' \
+'-y[Assume yes for prompts]' \
+'--yes[Assume yes for prompts]' \
+'-q[Produce output suitable for logging and automation]' \
+'--quiet[Produce output suitable for logging and automation]' \
+'*-v[Enable verbose information and logging]' \
+'*--verbose[Enable verbose information and logging]' \
+'-i[Don'\''t update local history for actions]' \
+'--incognito[Don'\''t update local history for actions]' \
+&& ret=0
+;;
+(help)
+_arguments "${_arguments_options[@]}" \
+'-t+[Request timeout (0 to disable)]' \
+'--timeout=[Request timeout (0 to disable)]' \
+'-T+[Transfer timeout (0 to disable)]' \
+'--transfer-timeout=[Transfer timeout (0 to disable)]' \
+'-A+[Server API version to use, '\''-'\'' to lookup]' \
+'--api=[Server API version to use, '\''-'\'' to lookup]' \
+'-H+[Use the specified history file]' \
+'--history=[Use the specified history file]' \
+'-h[Prints help information]' \
+'--help[Prints help information]' \
+'-V[Prints version information]' \
+'--version[Prints version information]' \
+'-f[Force the action, ignore warnings]' \
+'--force[Force the action, ignore warnings]' \
+'-I[Not interactive, do not prompt]' \
+'--no-interact[Not interactive, do not prompt]' \
+'-y[Assume yes for prompts]' \
+'--yes[Assume yes for prompts]' \
+'-q[Produce output suitable for logging and automation]' \
+'--quiet[Produce output suitable for logging and automation]' \
+'*-v[Enable verbose information and logging]' \
+'*--verbose[Enable verbose information and logging]' \
+'-i[Don'\''t update local history for actions]' \
+'--incognito[Don'\''t update local history for actions]' \
+&& ret=0
+;;
+        esac
+    ;;
+esac
+}
 
-# vim: ft=zsh sw=2 ts=2 et
+(( $+functions[_ffsend_commands] )) ||
+_ffsend_commands() {
+    local commands; commands=(
+        "debug:View debug information" \
+"dbg:View debug information" \
+"delete:Delete a shared file" \
+"del:Delete a shared file" \
+"download:Download files" \
+"d:Download files" \
+"down:Download files" \
+"exists:Check whether a remote file exists" \
+"e:Check whether a remote file exists" \
+"generate:Generate assets" \
+"gen:Generate assets" \
+"info:Fetch info about a shared file" \
+"i:Fetch info about a shared file" \
+"parameters:Change parameters of a shared file" \
+"params:Change parameters of a shared file" \
+"password:Change the password of a shared file" \
+"pass:Change the password of a shared file" \
+"p:Change the password of a shared file" \
+"upload:Upload files" \
+"u:Upload files" \
+"up:Upload files" \
+"version:Determine the Send server version" \
+"v:Determine the Send server version" \
+"history:View file history" \
+"h:View file history" \
+"help:Prints this message or the help of the given subcommand(s)" \
+    )
+    _describe -t commands 'ffsend commands' commands "$@"
+}
+(( $+functions[_ffsend__complete_commands] )) ||
+_ffsend__complete_commands() {
+    local commands; commands=(
+        
+    )
+    _describe -t commands 'ffsend complete commands' commands "$@"
+}
+(( $+functions[_ffsend__generate__complete_commands] )) ||
+_ffsend__generate__complete_commands() {
+    local commands; commands=(
+        
+    )
+    _describe -t commands 'ffsend generate complete commands' commands "$@"
+}
+(( $+functions[_ffsend__completion_commands] )) ||
+_ffsend__completion_commands() {
+    local commands; commands=(
+        
+    )
+    _describe -t commands 'ffsend completion commands' commands "$@"
+}
+(( $+functions[_ffsend__generate__completion_commands] )) ||
+_ffsend__generate__completion_commands() {
+    local commands; commands=(
+        
+    )
+    _describe -t commands 'ffsend generate completion commands' commands "$@"
+}
+(( $+functions[_ffsend__generate__completions_commands] )) ||
+_ffsend__generate__completions_commands() {
+    local commands; commands=(
+        
+    )
+    _describe -t commands 'ffsend generate completions commands' commands "$@"
+}
+(( $+functions[_d_commands] )) ||
+_d_commands() {
+    local commands; commands=(
+        
+    )
+    _describe -t commands 'd commands' commands "$@"
+}
+(( $+functions[_ffsend__d_commands] )) ||
+_ffsend__d_commands() {
+    local commands; commands=(
+        
+    )
+    _describe -t commands 'ffsend d commands' commands "$@"
+}
+(( $+functions[_dbg_commands] )) ||
+_dbg_commands() {
+    local commands; commands=(
+        
+    )
+    _describe -t commands 'dbg commands' commands "$@"
+}
+(( $+functions[_ffsend__dbg_commands] )) ||
+_ffsend__dbg_commands() {
+    local commands; commands=(
+        
+    )
+    _describe -t commands 'ffsend dbg commands' commands "$@"
+}
+(( $+functions[_ffsend__debug_commands] )) ||
+_ffsend__debug_commands() {
+    local commands; commands=(
+        
+    )
+    _describe -t commands 'ffsend debug commands' commands "$@"
+}
+(( $+functions[_del_commands] )) ||
+_del_commands() {
+    local commands; commands=(
+        
+    )
+    _describe -t commands 'del commands' commands "$@"
+}
+(( $+functions[_ffsend__del_commands] )) ||
+_ffsend__del_commands() {
+    local commands; commands=(
+        
+    )
+    _describe -t commands 'ffsend del commands' commands "$@"
+}
+(( $+functions[_ffsend__delete_commands] )) ||
+_ffsend__delete_commands() {
+    local commands; commands=(
+        
+    )
+    _describe -t commands 'ffsend delete commands' commands "$@"
+}
+(( $+functions[_down_commands] )) ||
+_down_commands() {
+    local commands; commands=(
+        
+    )
+    _describe -t commands 'down commands' commands "$@"
+}
+(( $+functions[_ffsend__down_commands] )) ||
+_ffsend__down_commands() {
+    local commands; commands=(
+        
+    )
+    _describe -t commands 'ffsend down commands' commands "$@"
+}
+(( $+functions[_ffsend__download_commands] )) ||
+_ffsend__download_commands() {
+    local commands; commands=(
+        
+    )
+    _describe -t commands 'ffsend download commands' commands "$@"
+}
+(( $+functions[_e_commands] )) ||
+_e_commands() {
+    local commands; commands=(
+        
+    )
+    _describe -t commands 'e commands' commands "$@"
+}
+(( $+functions[_ffsend__e_commands] )) ||
+_ffsend__e_commands() {
+    local commands; commands=(
+        
+    )
+    _describe -t commands 'ffsend e commands' commands "$@"
+}
+(( $+functions[_exist_commands] )) ||
+_exist_commands() {
+    local commands; commands=(
+        
+    )
+    _describe -t commands 'exist commands' commands "$@"
+}
+(( $+functions[_ffsend__exist_commands] )) ||
+_ffsend__exist_commands() {
+    local commands; commands=(
+        
+    )
+    _describe -t commands 'ffsend exist commands' commands "$@"
+}
+(( $+functions[_ffsend__exists_commands] )) ||
+_ffsend__exists_commands() {
+    local commands; commands=(
+        
+    )
+    _describe -t commands 'ffsend exists commands' commands "$@"
+}
+(( $+functions[_gen_commands] )) ||
+_gen_commands() {
+    local commands; commands=(
+        "completions:Shell completions" \
+"help:Prints this message or the help of the given subcommand(s)" \
+    )
+    _describe -t commands 'gen commands' commands "$@"
+}
+(( $+functions[_ffsend__generate_commands] )) ||
+_ffsend__generate_commands() {
+    local commands; commands=(
+        "completions:Shell completions" \
+"help:Prints this message or the help of the given subcommand(s)" \
+    )
+    _describe -t commands 'ffsend generate commands' commands "$@"
+}
+(( $+functions[_ffsend__h_commands] )) ||
+_ffsend__h_commands() {
+    local commands; commands=(
+        
+    )
+    _describe -t commands 'ffsend h commands' commands "$@"
+}
+(( $+functions[_h_commands] )) ||
+_h_commands() {
+    local commands; commands=(
+        
+    )
+    _describe -t commands 'h commands' commands "$@"
+}
+(( $+functions[_ffsend__generate__help_commands] )) ||
+_ffsend__generate__help_commands() {
+    local commands; commands=(
+        
+    )
+    _describe -t commands 'ffsend generate help commands' commands "$@"
+}
+(( $+functions[_ffsend__help_commands] )) ||
+_ffsend__help_commands() {
+    local commands; commands=(
+        
+    )
+    _describe -t commands 'ffsend help commands' commands "$@"
+}
+(( $+functions[_ffsend__history_commands] )) ||
+_ffsend__history_commands() {
+    local commands; commands=(
+        
+    )
+    _describe -t commands 'ffsend history commands' commands "$@"
+}
+(( $+functions[_ffsend__i_commands] )) ||
+_ffsend__i_commands() {
+    local commands; commands=(
+        
+    )
+    _describe -t commands 'ffsend i commands' commands "$@"
+}
+(( $+functions[_i_commands] )) ||
+_i_commands() {
+    local commands; commands=(
+        
+    )
+    _describe -t commands 'i commands' commands "$@"
+}
+(( $+functions[_ffsend__info_commands] )) ||
+_ffsend__info_commands() {
+    local commands; commands=(
+        
+    )
+    _describe -t commands 'ffsend info commands' commands "$@"
+}
+(( $+functions[_ffsend__information_commands] )) ||
+_ffsend__information_commands() {
+    local commands; commands=(
+        
+    )
+    _describe -t commands 'ffsend information commands' commands "$@"
+}
+(( $+functions[_information_commands] )) ||
+_information_commands() {
+    local commands; commands=(
+        
+    )
+    _describe -t commands 'information commands' commands "$@"
+}
+(( $+functions[_ffsend__ls_commands] )) ||
+_ffsend__ls_commands() {
+    local commands; commands=(
+        
+    )
+    _describe -t commands 'ffsend ls commands' commands "$@"
+}
+(( $+functions[_ls_commands] )) ||
+_ls_commands() {
+    local commands; commands=(
+        
+    )
+    _describe -t commands 'ls commands' commands "$@"
+}
+(( $+functions[_ffsend__p_commands] )) ||
+_ffsend__p_commands() {
+    local commands; commands=(
+        
+    )
+    _describe -t commands 'ffsend p commands' commands "$@"
+}
+(( $+functions[_p_commands] )) ||
+_p_commands() {
+    local commands; commands=(
+        
+    )
+    _describe -t commands 'p commands' commands "$@"
+}
+(( $+functions[_ffsend__param_commands] )) ||
+_ffsend__param_commands() {
+    local commands; commands=(
+        
+    )
+    _describe -t commands 'ffsend param commands' commands "$@"
+}
+(( $+functions[_param_commands] )) ||
+_param_commands() {
+    local commands; commands=(
+        
+    )
+    _describe -t commands 'param commands' commands "$@"
+}
+(( $+functions[_ffsend__parameter_commands] )) ||
+_ffsend__parameter_commands() {
+    local commands; commands=(
+        
+    )
+    _describe -t commands 'ffsend parameter commands' commands "$@"
+}
+(( $+functions[_parameter_commands] )) ||
+_parameter_commands() {
+    local commands; commands=(
+        
+    )
+    _describe -t commands 'parameter commands' commands "$@"
+}
+(( $+functions[_ffsend__parameters_commands] )) ||
+_ffsend__parameters_commands() {
+    local commands; commands=(
+        
+    )
+    _describe -t commands 'ffsend parameters commands' commands "$@"
+}
+(( $+functions[_ffsend__params_commands] )) ||
+_ffsend__params_commands() {
+    local commands; commands=(
+        
+    )
+    _describe -t commands 'ffsend params commands' commands "$@"
+}
+(( $+functions[_params_commands] )) ||
+_params_commands() {
+    local commands; commands=(
+        
+    )
+    _describe -t commands 'params commands' commands "$@"
+}
+(( $+functions[_ffsend__pass_commands] )) ||
+_ffsend__pass_commands() {
+    local commands; commands=(
+        
+    )
+    _describe -t commands 'ffsend pass commands' commands "$@"
+}
+(( $+functions[_pass_commands] )) ||
+_pass_commands() {
+    local commands; commands=(
+        
+    )
+    _describe -t commands 'pass commands' commands "$@"
+}
+(( $+functions[_ffsend__password_commands] )) ||
+_ffsend__password_commands() {
+    local commands; commands=(
+        
+    )
+    _describe -t commands 'ffsend password commands' commands "$@"
+}
+(( $+functions[_ffsend__u_commands] )) ||
+_ffsend__u_commands() {
+    local commands; commands=(
+        
+    )
+    _describe -t commands 'ffsend u commands' commands "$@"
+}
+(( $+functions[_u_commands] )) ||
+_u_commands() {
+    local commands; commands=(
+        
+    )
+    _describe -t commands 'u commands' commands "$@"
+}
+(( $+functions[_ffsend__up_commands] )) ||
+_ffsend__up_commands() {
+    local commands; commands=(
+        
+    )
+    _describe -t commands 'ffsend up commands' commands "$@"
+}
+(( $+functions[_up_commands] )) ||
+_up_commands() {
+    local commands; commands=(
+        
+    )
+    _describe -t commands 'up commands' commands "$@"
+}
+(( $+functions[_ffsend__upload_commands] )) ||
+_ffsend__upload_commands() {
+    local commands; commands=(
+        
+    )
+    _describe -t commands 'ffsend upload commands' commands "$@"
+}
+(( $+functions[_ffsend__v_commands] )) ||
+_ffsend__v_commands() {
+    local commands; commands=(
+        
+    )
+    _describe -t commands 'ffsend v commands' commands "$@"
+}
+(( $+functions[_v_commands] )) ||
+_v_commands() {
+    local commands; commands=(
+        
+    )
+    _describe -t commands 'v commands' commands "$@"
+}
+(( $+functions[_ffsend__ver_commands] )) ||
+_ffsend__ver_commands() {
+    local commands; commands=(
+        
+    )
+    _describe -t commands 'ffsend ver commands' commands "$@"
+}
+(( $+functions[_ver_commands] )) ||
+_ver_commands() {
+    local commands; commands=(
+        
+    )
+    _describe -t commands 'ver commands' commands "$@"
+}
+(( $+functions[_ffsend__version_commands] )) ||
+_ffsend__version_commands() {
+    local commands; commands=(
+        
+    )
+    _describe -t commands 'ffsend version commands' commands "$@"
+}
+
+_ffsend "$@"
