@@ -2,6 +2,7 @@ pub mod debug;
 pub mod delete;
 pub mod download;
 pub mod exists;
+pub mod generate;
 #[cfg(feature = "history")]
 pub mod history;
 pub mod info;
@@ -15,6 +16,7 @@ pub use self::debug::CmdDebug;
 pub use self::delete::CmdDelete;
 pub use self::download::CmdDownload;
 pub use self::exists::CmdExists;
+pub use self::generate::CmdGenerate;
 #[cfg(feature = "history")]
 pub use self::history::CmdHistory;
 pub use self::info::CmdInfo;

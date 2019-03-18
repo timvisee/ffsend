@@ -6,6 +6,7 @@ use ffsend_api::action::version::Error as VersionError;
 use ffsend_api::file::remote_file::FileParseError;
 
 use crate::action::download::Error as CliDownloadError;
+use crate::action::generate::completions::Error as CliGenerateCompletionsError;
 #[cfg(feature = "history")]
 use crate::action::history::Error as CliHistoryError;
 use crate::action::info::Error as CliInfoError;
@@ -56,6 +57,10 @@ pub enum ActionError {
     #[fail(display = "failed to check whether the file exists")]
     Exists(#[cause] ExistsError),
 
+    /// An error occurred while generating completions.
+    #[fail(display = "failed to generate shell completions")]
+    GenerateCompletions(#[cause] CliGenerateCompletionsError),
+
     /// An error occurred while processing the file history.
     #[cfg(feature = "history")]
     #[fail(display = "failed to process the history")]
@@ -96,6 +101,12 @@ impl From<DeleteError> for ActionError {
 impl From<ExistsError> for ActionError {
     fn from(err: ExistsError) -> ActionError {
         ActionError::Exists(err)
+    }
+}
+
+impl From<CliGenerateCompletionsError> for ActionError {
+    fn from(err: CliGenerateCompletionsError) -> ActionError {
+        ActionError::GenerateCompletions(err)
     }
 }
 

@@ -31,6 +31,7 @@ use crate::action::debug::Debug;
 use crate::action::delete::Delete;
 use crate::action::download::Download;
 use crate::action::exists::Exists;
+use crate::action::generate::Generate;
 #[cfg(feature = "history")]
 use crate::action::history::History;
 use crate::action::info::Info;
@@ -88,6 +89,13 @@ fn invoke_action(handler: &Handler) -> Result<(), Error> {
     // Match the exists command
     if handler.exists().is_some() {
         return Exists::new(handler.matches())
+            .invoke()
+            .map_err(|err| err.into());
+    }
+
+    // Match the generate command
+    if handler.generate().is_some() {
+        return Generate::new(handler.matches())
             .invoke()
             .map_err(|err| err.into());
     }

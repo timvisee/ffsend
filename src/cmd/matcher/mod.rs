@@ -2,6 +2,7 @@ pub mod debug;
 pub mod delete;
 pub mod download;
 pub mod exists;
+pub mod generate;
 #[cfg(feature = "history")]
 pub mod history;
 pub mod info;
@@ -16,6 +17,7 @@ pub use self::debug::DebugMatcher;
 pub use self::delete::DeleteMatcher;
 pub use self::download::DownloadMatcher;
 pub use self::exists::ExistsMatcher;
+pub use self::generate::GenerateMatcher;
 #[cfg(feature = "history")]
 pub use self::history::HistoryMatcher;
 pub use self::info::InfoMatcher;

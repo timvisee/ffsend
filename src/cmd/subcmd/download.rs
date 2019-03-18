@@ -23,7 +23,7 @@ impl CmdDownload {
                     .alias("out")
                     .alias("file")
                     .value_name("PATH")
-                    .help("The output file or directory"),
+                    .help("Output file or directory"),
             );
 
         // Optional archive support

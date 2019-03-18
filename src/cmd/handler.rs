@@ -9,14 +9,14 @@ use super::arg::{ArgApi, CmdArg};
 #[cfg(feature = "history")]
 use super::matcher::HistoryMatcher;
 use super::matcher::{
-    DebugMatcher, DeleteMatcher, DownloadMatcher, ExistsMatcher, InfoMatcher, Matcher,
-    ParamsMatcher, PasswordMatcher, UploadMatcher, VersionMatcher,
+    DebugMatcher, DeleteMatcher, DownloadMatcher, ExistsMatcher, GenerateMatcher, InfoMatcher,
+    Matcher, ParamsMatcher, PasswordMatcher, UploadMatcher, VersionMatcher,
 };
 #[cfg(feature = "history")]
 use super::subcmd::CmdHistory;
 use super::subcmd::{
-    CmdDebug, CmdDelete, CmdDownload, CmdExists, CmdInfo, CmdParams, CmdPassword, CmdUpload,
-    CmdVersion,
+    CmdDebug, CmdDelete, CmdDownload, CmdExists, CmdGenerate, CmdInfo, CmdParams, CmdPassword,
+    CmdUpload, CmdVersion,
 };
 #[cfg(feature = "infer-command")]
 use crate::config::INFER_COMMANDS;
@@ -153,6 +153,7 @@ impl<'a: 'b, 'b> Handler<'a> {
             .subcommand(CmdDelete::build())
             .subcommand(CmdDownload::build().display_order(2))
             .subcommand(CmdExists::build())
+            .subcommand(CmdGenerate::build())
             .subcommand(CmdInfo::build())
             .subcommand(CmdParams::build())
             .subcommand(CmdPassword::build())
@@ -255,6 +256,11 @@ impl<'a: 'b, 'b> Handler<'a> {
     /// Get the exists sub command, if matched.
     pub fn exists(&'a self) -> Option<ExistsMatcher> {
         ExistsMatcher::with(&self.matches)
+    }
+
+    /// Get the generate sub command, if matched.
+    pub fn generate(&'a self) -> Option<GenerateMatcher> {
+        GenerateMatcher::with(&self.matches)
     }
 
     /// Get the history sub command, if matched.

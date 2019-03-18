@@ -2,6 +2,7 @@ pub mod debug;
 pub mod delete;
 pub mod download;
 pub mod exists;
+pub mod generate;
 #[cfg(feature = "history")]
 pub mod history;
 pub mod info;
