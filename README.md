@@ -304,17 +304,15 @@ and use the command as you normally would.
 [» `timvisee/ffsend`][docker-hub-ffsend]
 
 ```bash
-# Run container with no parameters
+# Example usage
 docker run --rm -it -v $PWD:/data timvisee/ffsend
-
-# Upload a file
 docker run --rm -it -v $PWD:/data timvisee/ffsend upload my-file.txt
-
-# Download a file
 docker run --rm -it -v $PWD:/data timvisee/ffsend download https://send.firefox.com/#sample-share-url
-
-# View help
 docker run --rm -it -v $PWD:/data timvisee/ffsend help
+
+# Maybe create an alias
+alias ffsend='docker run --rm -it -v "$(pwd):/data" timvisee/ffsend'
+ffsend
 ```
 
 ## Build
