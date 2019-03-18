@@ -104,9 +104,23 @@ impl History {
             return Ok(());
         }
 
-        // Ensure the file parnet directories are available
+        // Ensure the file parent directories are available
         if let Some(parent) = path.parent() {
             fs::create_dir_all(parent)?;
+        }
+
+        // Set file permissions on unix based systems
+        #[cfg(unix)] {
+            use std::fs::Permissions;
+            use std::os::unix::fs::PermissionsExt;
+
+            if !path.exists() {
+                let file = fs::File::create(path).map_err(SaveError::Write)?;
+
+                // Set Read/Write permissions for the user
+                file.set_permissions(Permissions::from_mode(0o600))
+                    .map_err(SaveError::SetPermissions)?;
+            }
         }
 
         // Build the data and write to a file
@@ -304,6 +318,10 @@ pub enum SaveError {
     /// Failed to write to the history file.
     #[fail(display = "failed to write to the history file")]
     Write(#[cause] IoError),
+
+    /// Failed to set file permissions to the history file.
+    #[fail(display = "failed to set permissions to the history file")]
+    SetPermissions(#[cause] IoError),
 
     /// Failed to delete the history file, which was tried because there
     /// are no history items to save.
