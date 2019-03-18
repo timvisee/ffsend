@@ -173,8 +173,8 @@ More packages options will be coming soon.
 
 #### Linux: snap package
 _Note: The `ffsend` `snap` package is isolated, and can only access files in
-your home directory that aren't hidden. Choose a different installation option
-if you don't want this limitation._
+your home directory. Choose a different installation option if you don't want
+this limitation._
 
 [» `ffsend`][snapcraft-ffsend]
 ```bash
@@ -304,11 +304,17 @@ and use the command as you normally would.
 [» `timvisee/ffsend`][docker-hub-ffsend]
 
 ```bash
-# Example usage
-docker run --rm -it -v $PWD:/data timvisee/ffsend
-docker run --rm -it -v $PWD:/data timvisee/ffsend upload my-file.txt
-docker run --rm -it -v $PWD:/data timvisee/ffsend download https://send.firefox.com/#sample-share-url
-docker run --rm -it -v $PWD:/data timvisee/ffsend help
+# Invoke without arguments
+docker run --rm -it -v $(pwd):/data timvisee/ffsend
+
+# Upload my-file.txt
+docker run --rm -it -v $(pwd):/data timvisee/ffsend upload my-file.txt
+
+# Download from specified link
+docker run --rm -it -v $(pwd):/data timvisee/ffsend download https://send.firefox.com/#sample-share-url
+
+# Show help
+docker run --rm -it -v $(pwd):/data timvisee/ffsend help
 ```
 
 On Linux or macOS you might define a alias in your shell configuration, to make
@@ -317,8 +323,8 @@ it invokable as `ffsend`:
 alias ffsend='docker run --rm -it -v "$(pwd):/data" timvisee/ffsend'
 ```
 
-_Note: This implementation is limited to what paths you make available through the
-specified mount._
+_Note: This implementation is limited to accessing the paths you make available
+through the specified mount._
 
 ## Build
 To build and install `ffsend` yourself, you meet the following requirements
@@ -541,7 +547,7 @@ documentation [here][send-encryption].
 ```
 $ ffsend help
 
-ffsend 0.2.36
+ffsend 0.2.37
 Tim Visee <3a4fb3964f@sinenomine.email>
 Easily and securely share files from the command line.
 A fully featured Firefox Send client.
