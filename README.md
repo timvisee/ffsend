@@ -173,8 +173,8 @@ More packages options will be coming soon.
 
 #### Linux: snap package
 _Note: The `ffsend` `snap` package is isolated, and can only access files in
-your home directory. Use a different installation option instead if you don't
-want this._
+your home directory that aren't hidden. Choose a different installation option
+if you don't want this limitation._
 
 [» `ffsend`][snapcraft-ffsend]
 ```bash
@@ -309,11 +309,16 @@ docker run --rm -it -v $PWD:/data timvisee/ffsend
 docker run --rm -it -v $PWD:/data timvisee/ffsend upload my-file.txt
 docker run --rm -it -v $PWD:/data timvisee/ffsend download https://send.firefox.com/#sample-share-url
 docker run --rm -it -v $PWD:/data timvisee/ffsend help
-
-# Maybe create an alias
-alias ffsend='docker run --rm -it -v "$(pwd):/data" timvisee/ffsend'
-ffsend
 ```
+
+On Linux or macOS you might define a alias in your shell configuration, to make
+it invokable as `ffsend`:
+```bash
+alias ffsend='docker run --rm -it -v "$(pwd):/data" timvisee/ffsend'
+```
+
+_Note: This implementation is limited to what paths you make available through the
+specified mount._
 
 ## Build
 To build and install `ffsend` yourself, you meet the following requirements
@@ -358,7 +363,7 @@ Then, walk through one of the following steps to compile and install `ffsend`:
 	cd ffsend
 
 	# Compile and install
-	cargo install -f
+	cargo install --path . -f
 
 	# Start using ffsend
 	ffsend --help
