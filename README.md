@@ -568,6 +568,7 @@ FLAGS:
 
 OPTIONS:
     -A, --api <VERSION>                 Server API version to use, '-' to lookup [env: FFSEND_API]
+        --basic-auth <USER:PASSWORD>    HTTP basic authentication credentials [env: FFSEND_BASIC_AUTH]
     -H, --history <FILE>                Use the specified history file [env: FFSEND_HISTORY]
     -t, --timeout <SECONDS>             Request timeout (0 to disable) [env: FFSEND_TIMEOUT]
     -T, --transfer-timeout <SECONDS>    Transfer timeout (0 to disable) [env: FFSEND_TRANSFER_TIMEOUT]

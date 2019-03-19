@@ -84,8 +84,7 @@ colored = "1.7"
 derive_builder = "0.7"
 directories = "1.0"
 failure = "0.1"
-# ffsend-api = { version = "0.2.3", default-features = false }
-ffsend-api = { path = "../ffsend-api", version = "*", default-features = false }
+ffsend-api = { version = "0.3.0", default-features = false }
 fs2 = "0.4"
 lazy_static = "1.0"
 open = "1"
