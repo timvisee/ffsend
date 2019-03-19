@@ -2,7 +2,8 @@
 
 use ffsend_api::{
     api::request::{ensure_success, ResponseError},
-    reqwest::{self, Client},
+    client::Client,
+    reqwest,
     url::{self, Url},
 };
 use urlshortener::{

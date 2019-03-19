@@ -1,7 +1,7 @@
 use clap::ArgMatches;
 use ffsend_api::action::version::{Error as VersionError, Version as ApiVersion};
 
-use crate::client::create_client;
+use crate::client::create_config;
 use crate::cmd::matcher::main::MainMatcher;
 use crate::cmd::matcher::{version::VersionMatcher, Matcher};
 use crate::error::ActionError;
@@ -28,7 +28,8 @@ impl<'a> Version<'a> {
         let host = matcher_version.host();
 
         // Create a reqwest client
-        let client = create_client(&matcher_main);
+        let client_config = create_config(&matcher_main);
+        let client = client_config.client(false);
 
         // Make sure the file version
         let response = ApiVersion::new(host).invoke(&client);

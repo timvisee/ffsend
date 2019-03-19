@@ -110,7 +110,8 @@ impl History {
         }
 
         // Set file permissions on unix based systems
-        #[cfg(unix)] {
+        #[cfg(unix)]
+        {
             use std::fs::Permissions;
             use std::os::unix::fs::PermissionsExt;
 

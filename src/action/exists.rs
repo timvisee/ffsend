@@ -2,7 +2,7 @@ use clap::ArgMatches;
 use ffsend_api::action::exists::{Error as ExistsError, Exists as ApiExists};
 use ffsend_api::file::remote_file::{FileParseError, RemoteFile};
 
-use crate::client::create_client;
+use crate::client::create_config;
 use crate::cmd::matcher::main::MainMatcher;
 use crate::cmd::matcher::{exists::ExistsMatcher, Matcher};
 use crate::error::ActionError;
@@ -31,7 +31,8 @@ impl<'a> Exists<'a> {
         let url = matcher_exists.url();
 
         // Create a reqwest client
-        let client = create_client(&matcher_main);
+        let client_config = create_config(&matcher_main);
+        let client = client_config.client(false);
 
         // Parse the remote file based on the share URL
         let file = RemoteFile::parse_url(url, None)?;

@@ -30,7 +30,8 @@ use failure::{err_msg, Fail};
 use failure::{Compat, Error};
 use ffsend_api::{
     api::request::{ensure_success, ResponseError},
-    reqwest::{self, Client},
+    client::Client,
+    reqwest,
     url::Url,
 };
 use rpassword::prompt_password_stderr;

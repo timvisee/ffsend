@@ -13,9 +13,9 @@ pub mod version;
 
 use ffsend_api::action::version::{Error as VersionError, Version as ApiVersion};
 use ffsend_api::api::DesiredVersion;
+use ffsend_api::client::Client;
 use ffsend_api::url::Url;
 
-use crate::client::Client;
 use crate::config::API_VERSION_ASSUME;
 use crate::util::print_warning;
 

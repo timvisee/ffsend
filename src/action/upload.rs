@@ -20,7 +20,7 @@ use tempfile::{Builder as TempBuilder, NamedTempFile};
 use super::select_api_version;
 #[cfg(feature = "archive")]
 use crate::archive::archiver::Archiver;
-use crate::client::{create_client, create_transfer_client};
+use crate::client::create_config;
 use crate::cmd::matcher::{MainMatcher, Matcher, UploadMatcher};
 #[cfg(feature = "history")]
 use crate::history_tool;
@@ -58,7 +58,8 @@ impl<'a> Upload<'a> {
         let host = matcher_upload.host();
 
         // Create a reqwest client capable for uploading files
-        let client = create_client(&matcher_main);
+        let client_config = create_config(&matcher_main);
+        let client = client_config.clone().client(false);
 
         // Determine the API version to use
         let mut desired_version = matcher_main.api();
@@ -109,7 +110,7 @@ impl<'a> Upload<'a> {
         }
 
         // Create a reqwest client capable for uploading files
-        let transfer_client = create_transfer_client(&matcher_main);
+        let transfer_client = client_config.client(true);
 
         // Create a progress bar reporter
         let progress_bar = Arc::new(Mutex::new(ProgressBar::new_upload()));
