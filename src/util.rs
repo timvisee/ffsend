@@ -9,7 +9,7 @@ use std::borrow::Borrow;
 use std::env::{self, current_exe, var_os};
 use std::ffi::OsStr;
 use std::fmt::{Debug, Display};
-#[cfg(feature = "clipboard")]
+#[cfg(all(target_os = "linux", feature = "clipboard"))]
 use std::io::ErrorKind as IoErrorKind;
 use std::io::{stderr, stdin, Error as IoError, Write};
 use std::path::Path;
