@@ -5,7 +5,7 @@ use std::ffi::OsString;
 
 use clap::{App, AppSettings, Arg, ArgMatches};
 
-use super::arg::{ArgApi, CmdArg};
+use super::arg::{ArgApi, ArgBasicAuth, CmdArg};
 #[cfg(feature = "history")]
 use super::matcher::HistoryMatcher;
 use super::matcher::{
@@ -149,6 +149,7 @@ impl<'a: 'b, 'b> Handler<'a> {
                     .help("Enable verbose information and logging"),
             )
             .arg(ArgApi::build())
+            .arg(ArgBasicAuth::build())
             .subcommand(CmdDebug::build())
             .subcommand(CmdDelete::build())
             .subcommand(CmdDownload::build().display_order(2))

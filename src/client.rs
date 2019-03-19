@@ -14,6 +14,7 @@ pub fn create_config(matcher_main: &MainMatcher) -> ClientConfig {
     ClientConfigBuilder::default()
         .timeout(to_duration(matcher_main.timeout()))
         .transfer_timeout(to_duration(matcher_main.transfer_timeout()))
+        .basic_auth(matcher_main.basic_auth())
         .build()
         .expect("failed to create network client configuration")
 }

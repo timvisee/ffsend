@@ -435,13 +435,14 @@ The following environment variables may be used to configure the following
 defaults. The CLI flag is shown along with it, to better describe the relation
 to command line arguments:
 
-| Variable                  | CLI flag                       | Description                       |
-| :------------------------ | :----------------------------: | :-------------------------------- |
-| `FFSEND_HISTORY`          | `--history <FILE>`             | History file path                 |
-| `FFSEND_HOST`             | `--host <URL>`                 | Upload host                       |
-| `FFSEND_TIMEOUT`          | `--timeout <SECONDS>`          | Request timeout (0 to disable)    |
-| `FFSEND_TRANSFER_TIMEOUT` | `--transfer-timeout <SECONDS>` | Transfer timeout (0 to disable)   |
-| `FFSEND_API`              | `--api <VERSION>`              | Server API version, `-` to lookup |
+| Variable                  | CLI flag                       | Description                                   |
+| :------------------------ | :----------------------------: | :-------------------------------------------- |
+| `FFSEND_HISTORY`          | `--history <FILE>`             | History file path                             |
+| `FFSEND_HOST`             | `--host <URL>`                 | Upload host                                   |
+| `FFSEND_TIMEOUT`          | `--timeout <SECONDS>`          | Request timeout (0 to disable)                |
+| `FFSEND_TRANSFER_TIMEOUT` | `--transfer-timeout <SECONDS>` | Transfer timeout (0 to disable)               |
+| `FFSEND_API`              | `--api <VERSION>`              | Server API version, `-` to lookup             |
+| `FFSEND_BASIC_AUTH`       | `--basic-auth <USER:PASSWORD>` | Basic HTTP authentication credentials to use. |
 
 These environment variables may be used to toggle a flag, simply by making them
 available. The actual value of these variables is ignored, and variables may be

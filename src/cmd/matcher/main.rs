@@ -5,7 +5,7 @@ use clap::ArgMatches;
 use ffsend_api::api::DesiredVersion;
 
 use super::Matcher;
-use crate::cmd::arg::{ArgApi, CmdArgOption};
+use crate::cmd::arg::{ArgApi, ArgBasicAuth, CmdArgOption};
 use crate::util::env_var_present;
 #[cfg(feature = "history")]
 use crate::util::{quit_error_msg, ErrorHintsBuilder};
@@ -34,6 +34,11 @@ impl<'a: 'b, 'b> MainMatcher<'a> {
     /// Get the desired API version to use.
     pub fn api(&'a self) -> DesiredVersion {
         ArgApi::value(self.matches)
+    }
+
+    /// Get basic HTTP authentication credentials to use.
+    pub fn basic_auth(&'a self) -> Option<(String, Option<String>)> {
+        ArgBasicAuth::value(self.matches)
     }
 
     /// Get the history file to use.
