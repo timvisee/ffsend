@@ -30,6 +30,12 @@ impl<'a> Debug<'a> {
         let mut table = Table::new();
         table.set_format(FormatBuilder::new().padding(0, 2).build());
 
+        // The crate version
+        table.add_row(Row::new(vec![
+            Cell::new("Version:"),
+            Cell::new(crate_version!()),
+        ]));
+
         // The default host
         table.add_row(Row::new(vec![
             Cell::new("Host:"),
