@@ -61,7 +61,7 @@ _Note: this tool is currently in alpha_
 - Inspect or delete shared files
 - Accurate error reporting
 - Streaming encryption and uploading/downloading, very low memory footprint
-- Intended for use in scripts without interaction
+- Intended for use in [scripts](#scriptability) without interaction
 - Upcoming: Firefox Account integration (higher download counts, longer expiry times)
 
 For a list of upcoming features and ideas, take a look at the
@@ -506,6 +506,74 @@ feature is listed when invoking `ffsend debug`.
 
 Note that the `snap` package does currently not support this due to how this
 package format works.
+
+### Scriptability
+`ffsend` is optimized for use in automated scripts. It provides some specialized
+arguments to control `ffsend` without user interaction.
+
+- `--no-interact` (`-I`): do not allow user interaction. For prompts not having
+    a default value, the application will quit with an error, unless `--yes`
+    or `--force` is provided.
+    This should **always** be given when using automated scripting.
+  - Example: when uploading a directory, providing this flag will stop the
+    archive question prompt form popping up, and will archive the directory as
+    default option.
+- `--yes` (`-y`): assume the yes option for yes/no prompt by default.
+  - Example: when downloading a file that already exists, providing this flag
+    will assume yes when asking to overwrite a file.
+- `--force` (`-f`): force to continue with the action, skips any warnings that
+    would otherwise quit the application.
+  - Example: when uploading a file that is too big, providing this flag will
+    ignore the file size warning and forcefully continues.
+- `--quiet` (`-q`): be quiet, print as little information as possible.
+  - Example: when uploading a file, providing this flag will only output the
+    final share URL.
+
+Generally speaking, you could use the following rules when automating:
+- Always use `--no-interact` (`-I`).
+- When invoking an action you want to complete no matter what,
+  use any combination of `--yes` (`-y`) and `--force` (`-f`).
+- When passing share URLs along, use the `--quiet` (`-q`) flag, when uploading
+  for example.
+
+These flags can also automatically be set by defining environment variables as
+specified here:
+[» Configuration and environment](#configuration-and-environment)
+
+Here are some example commands in `bash`:
+```bash
+# Stop on error
+set -e
+
+# Upload a file
+# -I: no interaction
+# -y: assume yes
+# -q: quiet output, just return the share link
+URL=$(ffsend -Iy upload -q my-file.txt)
+
+# Render file information
+# -I: no interaction
+# -f: force, just show the info
+ffsend -If info $URL
+
+# Set a password for the uploaded file
+ffsend -I password $URL --password="secret"
+
+# Use the following flags automatically from now on
+# -I: no interaction
+# -f: force
+# -y: yes
+export FFSEND_NO_INTERACT=1 FFSEND_FORCE=1 FFSEND_YES=1
+
+# Download the uploaded file, overwriting the local variant due to variables
+ffsend -If download $URL --password="secret"
+```
+
+For more information on these arguments, use `ffsend help` and check out:
+[» Configuration and environment](#configuration-and-environment)
+
+For other questions regarding automation, or feature requests, be sure to
+[open](https://github.com/timvisee/ffsend/issues/) an issue.
 
 ## Security
 In short; the `ffsend` tool and the [Send][send] service can be considered
