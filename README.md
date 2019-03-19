@@ -514,33 +514,33 @@ arguments to control `ffsend` without user interaction.
 - `--no-interact` (`-I`): do not allow user interaction. For prompts not having
     a default value, the application will quit with an error, unless `--yes`
     or `--force` is provided.
-    This should **always** be given when using automated scripting.
-  - Example: when uploading a directory, providing this flag will stop the
+    This should **always** be given when using automated scripting.  
+    Example: when uploading a directory, providing this flag will stop the
     archive question prompt form popping up, and will archive the directory as
     default option.
-- `--yes` (`-y`): assume the yes option for yes/no prompt by default.
-  - Example: when downloading a file that already exists, providing this flag
+- `--yes` (`-y`): assume the yes option for yes/no prompt by default.  
+    Example: when downloading a file that already exists, providing this flag
     will assume yes when asking to overwrite a file.
 - `--force` (`-f`): force to continue with the action, skips any warnings that
-    would otherwise quit the application.
-  - Example: when uploading a file that is too big, providing this flag will
+    would otherwise quit the application.  
+    Example: when uploading a file that is too big, providing this flag will
     ignore the file size warning and forcefully continues.
-- `--quiet` (`-q`): be quiet, print as little information as possible.
-  - Example: when uploading a file, providing this flag will only output the
+- `--quiet` (`-q`): be quiet, print as little information as possible.  
+    Example: when uploading a file, providing this flag will only output the
     final share URL.
 
-Generally speaking, you could use the following rules when automating:
-- Always use `--no-interact` (`-I`).
-- When invoking an action you want to complete no matter what,
-  use any combination of `--yes` (`-y`) and `--force` (`-f`).
-- When passing share URLs along, use the `--quiet` (`-q`) flag, when uploading
-  for example.
+Generally speaking, use the following rules when automating:
+- Always provide `--no-interact` (`-I`).
+- Provide any combination of `--yes` (`-y`) and `--force` (`-f`) for actions you
+  want to complete no matter what.
+- When passing share URLs along, provide the `--quiet` (`-q`) flag, when
+  uploading for example.
 
 These flags can also automatically be set by defining environment variables as
-specified here:
+specified here:  
 [» Configuration and environment](#configuration-and-environment)
 
-Here are some example commands in `bash`:
+Here are some examples commands in `bash`:
 ```bash
 # Stop on error
 set -e
@@ -566,13 +566,13 @@ ffsend -I password $URL --password="secret"
 export FFSEND_NO_INTERACT=1 FFSEND_FORCE=1 FFSEND_YES=1
 
 # Download the uploaded file, overwriting the local variant due to variables
-ffsend -If download $URL --password="secret"
+ffsend download $URL --password="secret"
 ```
 
-For more information on these arguments, use `ffsend help` and check out:
+For more information on these arguments, invoke `ffsend help` and check out:
 [» Configuration and environment](#configuration-and-environment)
 
-For other questions regarding automation, or feature requests, be sure to
+For other questions regarding automation or feature requests, be sure to
 [open](https://github.com/timvisee/ffsend/issues/) an issue.
 
 ## Security
