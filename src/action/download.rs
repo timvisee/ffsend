@@ -19,7 +19,7 @@ use tempfile::{Builder as TempBuilder, NamedTempFile};
 use super::select_api_version;
 #[cfg(feature = "archive")]
 use crate::archive::archive::Archive;
-use crate::client::{create_client, create_transfer_client};
+use crate::client::create_config;
 use crate::cmd::matcher::{download::DownloadMatcher, main::MainMatcher, Matcher};
 #[cfg(feature = "history")]
 use crate::history_tool;
@@ -48,7 +48,8 @@ impl<'a> Download<'a> {
         let matcher_download = DownloadMatcher::with(self.cmd_matches).unwrap();
 
         // Create a regular client
-        let client = create_client(&matcher_main);
+        let client_config = create_config(&matcher_main);
+        let client = client_config.clone().client(false);
 
         // Get the share URL, attempt to follow it
         let url = matcher_download.url();
@@ -165,7 +166,7 @@ impl<'a> Download<'a> {
         let progress_reader: Arc<Mutex<ProgressReporter>> = progress_bar;
 
         // Create a transfer client
-        let transfer_client = create_transfer_client(&matcher_main);
+        let transfer_client = client_config.client(true);
 
         // Execute an download action
         let progress = if !matcher_main.quiet() {

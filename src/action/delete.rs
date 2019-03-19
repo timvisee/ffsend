@@ -2,7 +2,7 @@ use clap::ArgMatches;
 use ffsend_api::action::delete::{Delete as ApiDelete, Error as DeleteError};
 use ffsend_api::file::remote_file::{FileParseError, RemoteFile};
 
-use crate::client::create_client;
+use crate::client::create_config;
 use crate::cmd::matcher::{delete::DeleteMatcher, main::MainMatcher, Matcher};
 use crate::error::ActionError;
 #[cfg(feature = "history")]
@@ -30,9 +30,9 @@ impl<'a> Delete<'a> {
         // Get the share link
         let url = matcher_delete.url();
 
-        // Create a reqwest client
-        // TODO: create transfer client when draining downloads
-        let client = create_client(&matcher_main);
+        // Create client
+        let client_config = create_config(&matcher_main);
+        let client = client_config.client(false);
 
         // Parse the remote file based on the share link, derive the owner token from history
         let mut file = RemoteFile::parse_url(url, matcher_delete.owner())?;
