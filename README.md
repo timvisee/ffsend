@@ -200,6 +200,8 @@ ffsend --help
 #### Linux: Prebuilt binaries
 Check out the [latest release][github-latest-release] assets for Linux binaries.  
 Use the `ffsend-v*-linux-x64-static` binary, to minimize the chance for issues.
+If it isn't available yet, you may use an artifact from a
+[previous version][github-releases] instead, until it is available.
 
 Make sure you meet and install the [requirements](#requirements) before you
 continue.
@@ -227,6 +229,8 @@ A `homebrew` package will be coming soon.
 
 #### macOS: Prebuilt binaries
 Check out the [latest release][github-latest-release] assets for a macOS binary.
+If it isn't available yet, you may use an artifact from a
+[previous version][github-releases] instead, until it is available.
 
 You must install `openssl` through [`homebrew`][homebrew] which `ffsend` depends
 on.
@@ -275,6 +279,8 @@ ffsend --help
 #### Windows: Prebuilt binaries
 Check out the [latest release][github-latest-release] assets for Windows binaries.
 Use the `ffsend-v*-windows-x64-static` binary, to minimize the chance for issues.
+If it isn't available yet, you may use an artifact from a
+[previous version][github-releases] instead, until it is available.
 
 You must install OpenSSL 1.1.0j which `ffsend` depends on. The installer for
 this can be found here: [» Installer][openssl-windows-installer]
@@ -616,6 +622,7 @@ Check out the [LICENSE](LICENSE) file for more information.
 [send-encryption]: https://github.com/mozilla/send/blob/master/docs/encryption.md
 [asciinema]: https://asciinema.org/
 [svg-term]: https://github.com/marionebl/svg-term-cli
+[github-releases]: https://github.com/timvisee/ffsend/releases
 [github-latest-release]: https://github.com/timvisee/ffsend/releases/latest
 [aur-ffsend]: https://aur.archlinux.org/packages/ffsend/
 [aur-ffsend-git]: https://aur.archlinux.org/packages/ffsend-git/
