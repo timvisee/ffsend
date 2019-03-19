@@ -13,6 +13,9 @@ impl CmdArg for ArgBasicAuth {
     fn build<'b, 'c>() -> Arg<'b, 'c> {
         Arg::with_name("basic-auth")
             .long("basic-auth")
+            .alias("basic-authentication")
+            .alias("http-basic-authentication")
+            .alias("http-basic-auth")
             .value_name("USER:PASSWORD")
             .env("FFSEND_BASIC_AUTH")
             .hide_env_values(true)
