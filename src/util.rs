@@ -297,7 +297,7 @@ pub fn set_clipboard(content: String) -> Result<(), ClipboardError> {
     #[cfg(target_os = "linux")]
     {
         // Open an xclip process
-        let mut process = match Command::new("xclip")
+        let mut process = match Command::new(option_env!("XCLIP_PATH").unwrap_or("xclip"))
             .arg("-sel")
             .arg("clip")
             .stdin(Stdio::piped())
