@@ -92,7 +92,7 @@ openssl-probe = "0.1"
 pbr = "1"
 prettytable-rs = "0.8"
 qr2term = { version = "0.1", optional = true }
-rpassword = "2.1"
+rpassword = "3.0"
 serde = "1.0"
 serde_derive = "1.0"
 tar = { version = "0.4", optional = true }
