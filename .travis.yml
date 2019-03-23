@@ -38,3 +38,8 @@ jobs:
         # Create the release, upload binary
         - ./github-release release --token "$GITHUB_TOKEN" --owner timvisee --repo ffsend --tag "$TRAVIS_TAG"  --title "ffsend $TRAVIS_TAG"
         - ./github-release upload --token "$GITHUB_TOKEN" --owner timvisee --repo ffsend --tag "$TRAVIS_TAG" --file ./ffsend --name ffsend-$TRAVIS_TAG-macos
+
+        # Update homebrew package
+        - git config --global user.name "timvisee"
+        - git config --global user.email "$GIT_EMAIL"
+        - brew bump-formula-pr --url="https://github.com/timvisee/ffsend/archive/$TRAVIS_TAG.tar.gz" --message="Automated release pull request using continuous integration." --no-browse -v ffsend
