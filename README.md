@@ -223,9 +223,17 @@ ffsend --help
 ```
 
 ### macOS
-Currently only a [prebuilt binary](#macos-prebuilt-binaries) is available for macOS.
+Using the [`homebrew` package](#macos-homebrew-package) is recommended.
+Alternatively you may install it manually using the
+[prebuilt binaries](#macos-prebuilt-binaries).
 
-A `homebrew` package will be coming soon.
+#### macOS: homebrew package
+Make sure you've [`homebrew`][homebrew] installed, and run:
+
+```bash
+homebrew install ffsend
+ffsend --help
+```
 
 #### macOS: Prebuilt binaries
 Check out the [latest release][github-latest-release] assets for a macOS binary.
@@ -541,6 +549,7 @@ specified here:
 [» Configuration and environment](#configuration-and-environment)
 
 Here are some examples commands in `bash`:
+
 ```bash
 # Stop on error
 set -e
