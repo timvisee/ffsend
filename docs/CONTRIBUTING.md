@@ -1,12 +1,14 @@
 # Contributing
 
-Repository:
+**Repository:**
 - [GitLab repository][gitlab]
 - _Mirror: [GitHub repository][github]_
-Issues (bug reporting, feature requests, enhancements, etc.):
+
+**Issues:** (bug reporting, feature requests, enhancements, etc.)
 - [GitLab issue board][gitlab-issues]
 - _Alternatively: [GitHub issue board][github-issues]_
-Pull/merge requests (fixes, implemented features, etc.):
+
+**Pull/merge requests:** (fixes, implemented features, etc.)
 - [GitLab merge requests][gitlab-mr]
 - _Alternatively: [GitHub pull requests][github-pr]_
 
@@ -30,8 +32,8 @@ with the project.
 
 ## Pull Request Process
 
-1. Ensure you've discussed your improvements when working on a bigger change in
-   an issue
+1. Ensure you've discussed your improvements in an issue when working on a
+   bigger change
 2. Ensure your branch is up-to-date with the latest [`master`][branch-master]
 3. Ensure the project builds with your changes: `cargo build`
 4. Ensure the project tests succeed with your changes: `cargo test`
@@ -42,7 +44,7 @@ with the project.
 7. Fix any issues continuous integration might report.
 
 Additional notes:
-- do not change version numbers, this is done by @timvisee
+- Do not change version numbers, this is done by @timvisee
 
 ## Code of Conduct
 
@@ -101,7 +103,7 @@ further defined and clarified by project maintainers.
 ### Enforcement
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported by contacting the project team at [INSERT EMAIL ADDRESS]. All
+reported by contacting the project owner at 3a4fb3964f@sinenomine.email. All
 complaints will be reviewed and investigated and will result in a response that
 is deemed necessary and appropriate to the circumstances. The project team is
 obligated to maintain confidentiality with regard to the reporter of an incident.
