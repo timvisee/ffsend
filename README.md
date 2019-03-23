@@ -197,6 +197,18 @@ aurget -S ffsend
 ffsend --help
 ```
 
+#### Linux: Nix package
+_Note: The Nix package is currently not automatically updated, therefore it
+might be slightly outdated. Open an issue if you believe an important new
+feature is missing._
+
+```bash
+nix-channel --update
+nix-env --install ffsend
+
+ffsend --help
+```
+
 #### Linux: Prebuilt binaries
 Check out the [latest release][github-latest-release] assets for Linux binaries.  
 Use the `ffsend-v*-linux-x64-static` binary, to minimize the chance for issues.
