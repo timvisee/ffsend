@@ -223,7 +223,7 @@ ffsend --help
 ```
 
 ### macOS
-Using the [`homebrew` package](#macos-homebrew-package) is recommended.
+Using the [`homebrew` package](#macos-homebrew-package) is recommended.  
 Alternatively you may install it manually using the
 [prebuilt binaries](#macos-prebuilt-binaries).
 
@@ -231,7 +231,7 @@ Alternatively you may install it manually using the
 Make sure you've [`homebrew`][homebrew] installed, and run:
 
 ```bash
-homebrew install ffsend
+brew install ffsend
 ffsend --help
 ```
 
