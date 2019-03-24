@@ -42,4 +42,6 @@ jobs:
         # Update homebrew package
         - git config --global user.name "timvisee"
         - git config --global user.email "$GIT_EMAIL"
+        - git config --global credential.helper store
+        - echo "https://timvisee:$HOMEBREW_GITHUB_API_TOKEN@github.com" >> ~/.git-credentials
         - brew bump-formula-pr --url="https://github.com/timvisee/ffsend/archive/$TRAVIS_TAG.tar.gz" --message="Automated release pull request using continuous integration." --no-browse -v ffsend
