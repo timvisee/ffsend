@@ -25,7 +25,6 @@ apps:
   ffsend:
     command: ffsend
     plugs: [desktop, home, network, removable-media, x11]
-    completer: ./contrib/completions/ffsend.bash
 
 parts:
   ffsend:
