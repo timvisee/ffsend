@@ -207,6 +207,17 @@ nix-env --install ffsend
 ffsend --help
 ```
 
+#### Linux: Fedora package
+_Note: The Fedora package is maintained by contributors, therefore it might be
+outdated. Choose a different installation method if an important update is
+missing._
+
+```bash
+yum install ffsend
+
+ffsend --help
+```
+
 #### Linux: Prebuilt binaries
 Check out the [latest release][github-latest-release] assets for Linux binaries.  
 Use the `ffsend-v*-linux-x64-static` binary, to minimize the chance for issues.
