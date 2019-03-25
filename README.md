@@ -490,6 +490,13 @@ empty.
 | `FFSEND_QUIET`       | `--quiet`       | Log quiet information              |
 | `FFSEND_VERBOSE`     | `--verbose`     | Log verbose information            |
 
+Some environment variables may be set at compile time to tweak some defaults.
+
+| Variable     | Description                            |
+| :----------- | :------------------------------------- |
+| `XCLIP_PATH` | Set fixed `xclip` binary path on Linux |
+| `XSEL_PATH`  | Set fixed `xsel` binary path on Linux  |
+
 At this time, no configuration or _dotfile_ file support is available.
 This will be something added in a later release.
 

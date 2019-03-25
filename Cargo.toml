@@ -50,7 +50,17 @@ name = "ffsend"
 path = "src/main.rs"
 
 [features]
-default = ["archive", "clipboard", "history", "infer-command", "qrcode", "send2", "send3", "urlshorten"]
+default = [
+    "archive",
+    "clipboard",
+    "history",
+    "infer-command",
+    "qrcode",
+    "quale",
+    "send2",
+    "send3",
+    "urlshorten"
+]
 
 # Compile with file archiving support
 archive = ["tar"]
@@ -92,14 +102,15 @@ openssl-probe = "0.1"
 pbr = "1"
 prettytable-rs = "0.8"
 qr2term = { version = "0.1", optional = true }
+quale = { version = "1.0", optional = true }
 rpassword = "3.0"
 serde = "1.0"
 serde_derive = "1.0"
 tar = { version = "0.4", optional = true }
 tempfile = "3"
 toml = "0.5"
-version-compare = "0.0.6"
 urlshortener = { version = "0.10", default-features = false, optional = true }
+version-compare = "0.0.6"
 
 [target.'cfg(not(target_os = "linux"))'.dependencies]
 clipboard = { version = "0.5", optional = true }

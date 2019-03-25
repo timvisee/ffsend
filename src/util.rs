@@ -4,12 +4,16 @@ extern crate colored;
 extern crate directories;
 extern crate fs2;
 extern crate open;
+#[cfg(all(feature = "clipboard", target_os = "linux"))]
+extern crate quale;
 
 use std::borrow::Borrow;
 use std::env::{self, current_exe, var_os};
 use std::ffi::OsStr;
+#[cfg(all(feature = "clipboard", target_os = "linux"))]
+use std::fmt;
 use std::fmt::{Debug, Display};
-#[cfg(all(target_os = "linux", feature = "clipboard"))]
+#[cfg(all(feature = "clipboard", target_os = "linux"))]
 use std::io::ErrorKind as IoErrorKind;
 use std::io::{stderr, stdin, Error as IoError, Write};
 use std::path::Path;
@@ -284,11 +288,81 @@ pub fn open_path(path: &str) -> Result<ExitStatus, IoError> {
     open::that(path)
 }
 
-/// Set the clipboard of the user to the given `content` string.
+/// Clipboard management enum.
+///
+/// Defines which method of setting the clipboard is used.
+/// Invoke `ClipboardType::select()` to select the best variant to use determined at runtime.
+///
+/// Usually, the `Native` variant is used. However, on Linux system a different variant will be
+/// selected which will call a system binary to set the clipboard. This must be done because the
+/// native clipboard interface only has a lifetime of the application. This means that the
+/// clipboard is instantly cleared as soon as this application quits, which is always immediately.
+/// This limitation is due to security reasons as defined by X11. The alternative binaries we set
+/// the clipboard with spawn a daemon in the background to keep the clipboad alive until it's
+/// flushed.
 #[cfg(feature = "clipboard")]
-pub fn set_clipboard(content: String) -> Result<(), ClipboardError> {
+#[derive(Clone, Eq, PartialEq)]
+pub enum ClipboardType {
+    /// Native operating system clipboard.
     #[cfg(not(target_os = "linux"))]
-    {
+    Native,
+
+    /// Manage clipboard through `xclip` on Linux.
+    ///
+    /// May contain a binary path if specified at compile time through the `XCLIP_PATH` variable.
+    #[cfg(target_os = "linux")]
+    Xclip(Option<String>),
+
+    /// Manage clipboard through `xsel` on Linux.
+    ///
+    /// May contain a binary path if specified at compile time through the `XSEL_PATH` variable.
+    #[cfg(target_os = "linux")]
+    Xsel(Option<String>),
+}
+
+#[cfg(feature = "clipboard")]
+impl ClipboardType {
+    /// Select the clipboard type to use, depending on the runtime system.
+    pub fn select() -> Self {
+        #[cfg(not(target_os = "linux"))]
+        {
+            ClipboardType::Native
+        }
+
+        #[cfg(target_os = "linux")]
+        {
+            if let Some(path) = option_env!("XCLIP_PATH") {
+                ClipboardType::Xclip(Some(path.to_owned()))
+            } else if let Some(path) = option_env!("XSEL_PATH") {
+                ClipboardType::Xsel(Some(path.to_owned()))
+            } else if quale::which("xclip").is_some() {
+                ClipboardType::Xclip(None)
+            } else if quale::which("xsel").is_some() {
+                ClipboardType::Xsel(None)
+            } else {
+                // TODO: should we error here instead, as no clipboard binary was found?
+                ClipboardType::Xclip(None)
+            }
+        }
+    }
+
+    /// Set clipboar contents through the selected clipboard type.
+    pub fn set(&self, content: String) -> Result<(), ClipboardError> {
+        match self {
+            #[cfg(not(target_os = "linux"))]
+            ClipboardType::Native => Self::native_set(content),
+            #[cfg(target_os = "linux")]
+            ClipboardType::Xclip(path) => Self::xclip_set(path.clone(), content),
+            #[cfg(target_os = "linux")]
+            ClipboardType::Xsel(path) => Self::xsel_set(path.clone(), content),
+        }
+    }
+
+    /// Set the clipboard through a native interface.
+    ///
+    /// This is used on non-Linux systems.
+    #[cfg(not(target_os = "linux"))]
+    fn native_set(content: String) -> Result<(), ClipboardError> {
         ClipboardProvider::new()
             .and_then(|mut context: ClipboardContext| context.set_contents(content))
             .map_err(|err| format_err!("{}", err).compat())
@@ -296,14 +370,27 @@ pub fn set_clipboard(content: String) -> Result<(), ClipboardError> {
     }
 
     #[cfg(target_os = "linux")]
-    {
-        // Open an xclip process
-        let mut process = match Command::new(option_env!("XCLIP_PATH").unwrap_or("xclip"))
-            .arg("-sel")
-            .arg("clip")
-            .stdin(Stdio::piped())
-            .spawn()
-        {
+    fn xclip_set(path: Option<String>, content: String) -> Result<(), ClipboardError> {
+        Self::sys_cmd_set(
+            Command::new(path.unwrap_or_else(|| "xclip".into()))
+                .arg("-sel")
+                .arg("clip"),
+            content,
+        )
+    }
+
+    #[cfg(target_os = "linux")]
+    fn xsel_set(path: Option<String>, content: String) -> Result<(), ClipboardError> {
+        Self::sys_cmd_set(
+            Command::new(path.unwrap_or_else(|| "xsel".into())).arg("--clipboard"),
+            content,
+        )
+    }
+
+    #[cfg(target_os = "linux")]
+    fn sys_cmd_set(command: &mut Command, content: String) -> Result<(), ClipboardError> {
+        // Spawn the command process for setting the clipboard
+        let mut process = match command.stdin(Stdio::piped()).spawn() {
             Ok(process) => process,
             Err(err) => {
                 return Err(match err.kind() {
@@ -329,6 +416,32 @@ pub fn set_clipboard(content: String) -> Result<(), ClipboardError> {
 
         Ok(())
     }
+}
+
+#[cfg(feature = "clipboard")]
+impl fmt::Display for ClipboardType {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            #[cfg(not(target_os = "linux"))]
+            ClipboardType::Native => write!(f, "native"),
+            #[cfg(target_os = "linux")]
+            ClipboardType::Xclip(path) => match path {
+                None => write!(f, "xclip"),
+                Some(path) => write!(f, "xclip ({})", path),
+            },
+            #[cfg(target_os = "linux")]
+            ClipboardType::Xsel(path) => match path {
+                None => write!(f, "xsel"),
+                Some(path) => write!(f, "xsel ({})", path),
+            },
+        }
+    }
+}
+
+/// Set the clipboard of the user to the given `content` string.
+#[cfg(feature = "clipboard")]
+pub fn set_clipboard(content: String) -> Result<(), ClipboardError> {
+    ClipboardType::select().set(content)
 }
 
 #[cfg(feature = "clipboard")]
