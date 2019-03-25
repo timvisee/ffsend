@@ -96,6 +96,17 @@ impl<'a> Debug<'a> {
             Cell::new(&api_version_list().join(", ")),
         ]));
 
+        // Clipboard information
+        #[cfg(all(feature = "clipboard", target_os = "linux"))]
+        table.add_row(Row::new(vec![
+            Cell::new("Clipboard:"),
+            Cell::new(
+                &option_env!("XCLIP_PATH")
+                    .map(|path| format!("xclip ({})", path))
+                    .unwrap_or_else(|| "xclip".into()),
+            ),
+        ]));
+
         // Show whether quiet is used
         table.add_row(Row::new(vec![
             Cell::new("Quiet:"),
