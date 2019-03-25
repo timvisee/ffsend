@@ -10,7 +10,7 @@ extern crate quale;
 use std::borrow::Borrow;
 use std::env::{self, current_exe, var_os};
 use std::ffi::OsStr;
-#[cfg(all(feature = "clipboard", target_os = "linux"))]
+#[cfg(feature = "clipboard")]
 use std::fmt;
 use std::fmt::{Debug, Display};
 #[cfg(all(feature = "clipboard", target_os = "linux"))]
