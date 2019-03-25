@@ -73,7 +73,8 @@ build_script:
   - cd ..\..\..\
 
   # Create the release, upload the binaries
-  - ps: '$ErrorActionPreference = "SilentlyContinue"; .\github-release.exe release --token $env:GITHUB_TOKEN --owner timvisee --repo ffsend --tag $env:APPVEYOR_REPO_TAG_NAME --title "ffsend $env:APPVEYOR_REPO_TAG_NAME"; exit 0'
+  # TODO: fix errors caused by the command below
+  # - ps: '$ErrorActionPreference = "SilentlyContinue"; .\github-release.exe release --token $env:GITHUB_TOKEN --owner timvisee --repo ffsend --tag $env:APPVEYOR_REPO_TAG_NAME --title "ffsend $env:APPVEYOR_REPO_TAG_NAME"; exit 0'
   - ps: .\github-release.exe upload --token $env:GITHUB_TOKEN --owner timvisee --repo ffsend --tag $env:APPVEYOR_REPO_TAG_NAME --file .\ffsend-$env:TARGET.exe --name ffsend-$env:APPVEYOR_REPO_TAG_NAME-windows-x64.exe
   - ps: .\github-release.exe upload --token $env:GITHUB_TOKEN --owner timvisee --repo ffsend --tag $env:APPVEYOR_REPO_TAG_NAME --file .\ffsend-$env:TARGET-static.exe --name ffsend-$env:APPVEYOR_REPO_TAG_NAME-windows-x64-static.exe
   - ps: .\github-release.exe upload --token $env:GITHUB_TOKEN --owner timvisee --repo ffsend --tag $env:APPVEYOR_REPO_TAG_NAME --file (Get-Item .\ffsend.*.nupkg).FullName --name ffsend-$env:APPVEYOR_REPO_TAG_NAME.nupkg
