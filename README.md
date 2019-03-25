@@ -208,9 +208,8 @@ ffsend --help
 ```
 
 #### Linux: Fedora package
-_Note: The Fedora package is maintained by contributors, therefore it might be
-outdated. Choose a different installation method if an important update is
-missing._
+_Note: The Fedora package is maintained by contributors, it might be outdated.
+Choose a different installation method if an important update is missing._
 
 ```bash
 yum install ffsend
