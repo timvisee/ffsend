@@ -22,6 +22,7 @@ exclude = [
     "res/*",
 ]
 edition = "2018"
+build = "build.rs"
 
 [package.metadata.deb]
 section = "utility"
