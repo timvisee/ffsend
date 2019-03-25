@@ -755,7 +755,8 @@ pub fn format_bool(b: bool) -> &'static str {
 pub fn bin_name() -> String {
     env::args_os()
         .next()
-        .map(|path| PathBuf::from(path))
+        .filter(|path| !path.is_empty())
+        .map(PathBuf::from)
         .or_else(|| current_exe().ok())
         .and_then(|p| p.file_name().map(|n| n.to_owned()))
         .and_then(|n| n.into_string().ok())

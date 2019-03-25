@@ -111,6 +111,7 @@ Expiry:     18h2m (64928s)
 ```
 
 Other commands include:
+
 ```bash
 # View your file history
 $ ffsend history
@@ -147,9 +148,6 @@ all available subcommands.
   - OpenSSL: `brew install openssl@1.1`
 
 ## Install
-<!-- Before installing, make sure you meet all requirements listed
-[here](#requirements) -->
-
 Because `ffsend` is still in alpha, only limited installation options are
 available right now.
 
@@ -199,8 +197,8 @@ ffsend --help
 
 #### Linux: Nix package
 _Note: The Nix package is currently not automatically updated, therefore it
-might be slightly outdated. Open an issue if you believe an important new
-feature is missing._
+might be slightly outdated. Open an issue if you believe an important update
+is missing._
 
 ```bash
 nix-channel --update
@@ -341,10 +339,14 @@ docker run --rm -it -v $(pwd):/data timvisee/ffsend download https://send.firefo
 
 # Show help
 docker run --rm -it -v $(pwd):/data timvisee/ffsend help
+
+# To update the used image
+docker pull timvisee/ffsend
 ```
 
 On Linux or macOS you might define a alias in your shell configuration, to make
 it invokable as `ffsend`:
+
 ```bash
 alias ffsend='docker run --rm -it -v "$(pwd):/data" timvisee/ffsend'
 ```
