@@ -288,6 +288,12 @@ pub fn open_path(path: &str) -> Result<ExitStatus, IoError> {
     open::that(path)
 }
 
+/// Set the clipboard of the user to the given `content` string.
+#[cfg(feature = "clipboard")]
+pub fn set_clipboard(content: String) -> Result<(), ClipboardError> {
+    ClipboardType::select().set(content)
+}
+
 /// Clipboard management enum.
 ///
 /// Defines which method of setting the clipboard is used.
@@ -366,12 +372,13 @@ impl ClipboardType {
         ClipboardProvider::new()
             .and_then(|mut context: ClipboardContext| context.set_contents(content))
             .map_err(|err| format_err!("{}", err).compat())
-            .map_err(ClipboardError::Generic)
+            .map_err(ClipboardError::Native)
     }
 
     #[cfg(target_os = "linux")]
     fn xclip_set(path: Option<String>, content: String) -> Result<(), ClipboardError> {
         Self::sys_cmd_set(
+            "xclip",
             Command::new(path.unwrap_or_else(|| "xclip".into()))
                 .arg("-sel")
                 .arg("clip"),
@@ -382,20 +389,25 @@ impl ClipboardType {
     #[cfg(target_os = "linux")]
     fn xsel_set(path: Option<String>, content: String) -> Result<(), ClipboardError> {
         Self::sys_cmd_set(
+            "xsel",
             Command::new(path.unwrap_or_else(|| "xsel".into())).arg("--clipboard"),
             content,
         )
     }
 
     #[cfg(target_os = "linux")]
-    fn sys_cmd_set(command: &mut Command, content: String) -> Result<(), ClipboardError> {
+    fn sys_cmd_set(
+        bin: &'static str,
+        command: &mut Command,
+        content: String,
+    ) -> Result<(), ClipboardError> {
         // Spawn the command process for setting the clipboard
         let mut process = match command.stdin(Stdio::piped()).spawn() {
             Ok(process) => process,
             Err(err) => {
                 return Err(match err.kind() {
-                    IoErrorKind::NotFound => ClipboardError::NoXclip,
-                    _ => ClipboardError::Xclip(err),
+                    IoErrorKind::NotFound => ClipboardError::NoBinary,
+                    _ => ClipboardError::BinaryIo(bin, err),
                 });
             }
         };
@@ -406,12 +418,17 @@ impl ClipboardType {
             .as_mut()
             .unwrap()
             .write_all(content.as_bytes())
-            .map_err(ClipboardError::Xclip)?;
+            .map_err(|err| ClipboardError::BinaryIo(bin, err))?;
 
         // Wait for xclip to exit
-        let status = process.wait().map_err(ClipboardError::Xclip)?;
+        let status = process
+            .wait()
+            .map_err(|err| ClipboardError::BinaryIo(bin, err))?;
         if !status.success() {
-            return Err(ClipboardError::XclipStatus(status.code().unwrap_or(0)));
+            return Err(ClipboardError::BinaryStatus(
+                bin,
+                status.code().unwrap_or(0),
+            ));
         }
 
         Ok(())
@@ -438,39 +455,35 @@ impl fmt::Display for ClipboardType {
     }
 }
 
-/// Set the clipboard of the user to the given `content` string.
-#[cfg(feature = "clipboard")]
-pub fn set_clipboard(content: String) -> Result<(), ClipboardError> {
-    ClipboardType::select().set(content)
-}
-
 #[cfg(feature = "clipboard")]
 #[derive(Debug, Fail)]
 pub enum ClipboardError {
-    /// A generic error occurred while setting the clipboard contents
+    /// A generic error occurred while setting the clipboard contents.
+    ///
+    /// This is for non-Linux systems, using a native clipboard interface.
     #[cfg(not(target_os = "linux"))]
     #[fail(display = "failed to access clipboard")]
-    Generic(#[cause] Compat<Error>),
+    Native(#[cause] Compat<Error>),
 
-    /// Xclip is not installed on the system, which is required for clipboard support.
+    /// The `xclip` or `xsel` binary could not be found on the system, required for clipboard support.
     #[cfg(target_os = "linux")]
-    #[fail(display = "failed to access clipboard, xclip is not installed")]
-    NoXclip,
+    #[fail(display = "failed to access clipboard, xclip or xsel is not installed")]
+    NoBinary,
 
-    /// An error occurred while using xclip to set the clipboard contents.
-    /// This problem probably occurred when stargin the xclip process, or while piping the
-    /// clipboard contents to the process.
+    /// An error occurred while using `xclip` or `xsel` to set the clipboard contents.
+    /// This problem probably occurred when starting, or while piping the clipboard contents to
+    /// the process.
     #[cfg(target_os = "linux")]
-    #[fail(display = "failed to access clipboard using xclip")]
-    Xclip(#[cause] IoError),
+    #[fail(display = "failed to access clipboard using {}", _0)]
+    BinaryIo(&'static str, #[cause] IoError),
 
-    /// Xclip unexpectetly exited with a non-successful status code.
+    /// `xclip` or `xsel` unexpectetly exited with a non-successful status code.
     #[cfg(target_os = "linux")]
     #[fail(
-        display = "failed to use clipboard, xclip exited with status code {}",
-        _0
+        display = "failed to use clipboard, {} exited with status code {}",
+        _0, _1
     )]
-    XclipStatus(i32),
+    BinaryStatus(&'static str, i32),
 }
 
 /// Check for an emtpy password in the given `password`.
