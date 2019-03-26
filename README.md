@@ -20,7 +20,7 @@ Files are shared using the [Send][send] service and may be up
 to 2GB. Others are able to download these files with this tool, or through
 their web browser.
 
-[![ffsend usage demo][usage-demo-svg]][usage-demo-asciinema]
+[![ffsend usage demo][usage-demo-svg]][usage-demo-asciinema]  
 _No demo visible here? View it on [asciinema][usage-demo-asciinema]._
 
 All files are always encrypted on the client, and secrets are never shared with
@@ -42,7 +42,7 @@ Find out more about security [here](#security).
 - [License](#license)
 
 The public [Send][send] service that is used as default host is provided by
-[Mozilla][mozilla].
+[Mozilla][mozilla].  
 This application is not affiliated with [Mozilla][mozilla], [Firefox][firefox]
 or [Firefox Send][send] in any way.
 
@@ -160,7 +160,7 @@ See the operating system specific instructions below:
 * [_Other OS or architecture_](#other-os-or-architecture)
 
 ### Linux (all distributions)
-Using the [snap](#linux-snap-package) package is recommended if supported.
+Using the [snap](#linux-snap-package) package is recommended if supported.  
 Alternatively you may install it manually using the
 [prebuilt binaries](#linux-prebuilt-binaries).
 
@@ -181,7 +181,7 @@ ffsend --help
 ```
 
 #### Linux: Arch AUR packages
-[» `ffsend-bin`][aur-ffsend-bin] (binary package)
+[» `ffsend-bin`][aur-ffsend-bin] (binary package)  
 [» `ffsend-git`][aur-ffsend-git] (compile from source package)
 
 ```bash
@@ -216,7 +216,7 @@ ffsend --help
 ```
 
 #### Linux: Prebuilt binaries
-Check out the [latest release][github-latest-release] assets for Linux binaries.
+Check out the [latest release][github-latest-release] assets for Linux binaries.  
 Use the `ffsend-v*-linux-x64-static` binary, to minimize the chance for issues.
 If it isn't available yet, you may use an artifact from a
 [previous version][github-releases] instead, until it is available.
@@ -241,7 +241,7 @@ ffsend --help
 ```
 
 ### macOS
-Using the [`homebrew` package](#macos-homebrew-package) is recommended.
+Using the [`homebrew` package](#macos-homebrew-package) is recommended.  
 Alternatively you may install it manually using the
 [prebuilt binaries](#macos-prebuilt-binaries).
 
@@ -282,7 +282,7 @@ ffsend
 ```
 
 ### Windows
-Using the [`scoop` package](#windows-scoop-package) is recommended.
+Using the [`scoop` package](#windows-scoop-package) is recommended.  
 Alternatively you may install it manually using the
 [prebuilt binaries](#windows-prebuilt-binaries).
 
@@ -551,18 +551,18 @@ arguments to control `ffsend` without user interaction.
 - `--no-interact` (`-I`): do not allow user interaction. For prompts not having
     a default value, the application will quit with an error, unless `--yes`
     or `--force` is provided.
-    This should **always** be given when using automated scripting.
+    This should **always** be given when using automated scripting.  
     Example: when uploading a directory, providing this flag will stop the
     archive question prompt form popping up, and will archive the directory as
     default option.
-- `--yes` (`-y`): assume the yes option for yes/no prompt by default.
+- `--yes` (`-y`): assume the yes option for yes/no prompt by default.  
     Example: when downloading a file that already exists, providing this flag
     will assume yes when asking to overwrite a file.
 - `--force` (`-f`): force to continue with the action, skips any warnings that
-    would otherwise quit the application.
+    would otherwise quit the application.  
     Example: when uploading a file that is too big, providing this flag will
     ignore the file size warning and forcefully continues.
-- `--quiet` (`-q`): be quiet, print as little information as possible.
+- `--quiet` (`-q`): be quiet, print as little information as possible.  
     Example: when uploading a file, providing this flag will only output the
     final share URL.
 
@@ -574,7 +574,7 @@ Generally speaking, use the following rules when automating:
   uploading for example.
 
 These flags can also automatically be set by defining environment variables as
-specified here:
+specified here:  
 [» Configuration and environment](#configuration-and-environment)
 
 Here are some examples commands in `bash`:
