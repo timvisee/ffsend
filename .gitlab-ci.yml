@@ -263,31 +263,65 @@ package-aur:
   script:
     - cd ./pkg/aur
 
-    # Update version number in PKGBUILD
+    # Determine the version number we're releasing for
     - VERSION=$(echo $CI_COMMIT_REF_NAME | cut -c 2-)
-    - echo "Determined binary version number 'v$VERSION', updating PKGBUILDs..."
-    - sed "s/^pkgver=.*\$/pkgver=$VERSION/" -i bin/PKGBUILD
-    - sed "s/^pkgver=.*\$/pkgver=$VERSION/" -i git/PKGBUILD
+    - echo "Determined binary version number 'v$VERSION'"
+
+    # Determine remote URLs and SHA checksums
+    - echo "Determining SHA checksums for remote files..."
+    - URL_BIN=https://github.com/timvisee/ffsend/releases/download/v$VERSION/ffsend-v$VERSION-linux-x64-static
+    - URL_SOURCE=https://gitlab.com/timvisee/ffsend/-/archive/v$VERSION/ffsend-v$VERSION.tar.gz
+    - 'echo "Selected binary URL: $URL_BIN"'
+    - 'echo "Selected source URL: $URL_SOURCE"'
+    - echo "Determining sha256sum for remote binary..."
+    - 'SHA_BIN=$(curl -sSL "$URL_BIN" | sha256sum | cut -d" " -f1)'
+    - 'echo "Got sha256sum: $SHA_BIN"'
+    - echo "Determining sha256sum for remote source..."
+    - 'SHA_SOURCE=$(curl -sSL "$URL_SOURCE" | sha256sum | cut -d" " -f1)'
+    - 'echo "Got sha256sum: $SHA_SOURCE"'
+
+    # Update PKGBUILD parameters: version, source URL and SHA sum
+    - echo "Updating PKGBUILDS with release information..."
+    - sed "s/^pkgver=.*\$/pkgver=$VERSION/" -i ffsend/PKGBUILD
+    - sed "s/^pkgver=.*\$/pkgver=$VERSION/" -i ffsend-bin/PKGBUILD
+    - sed "s/^pkgver=.*\$/pkgver=$VERSION.$CI_COMMIT_SHORT_SHA/" -i ffsend-git/PKGBUILD
+    - sed "s/^source=(\"\(.*\)::.*\").*\$/source=('\1::$(echo $URL_SOURCE | sed 's/\//\\\//g')')/" -i ffsend/PKGBUILD
+    - sed "s/^source=(\"\(.*\)::.*\").*\$/source=('\1::$(echo $URL_BIN | sed 's/\//\\\//g')')/" -i ffsend-bin/PKGBUILD
+    - sed "s/^sha256sums=.*\$/sha256sums=('$SHA_SOURCE')/" -i ffsend/PKGBUILD
+    - sed "s/^sha256sums=.*\$/sha256sums=('$SHA_BIN')/" -i ffsend-bin/PKGBUILD
+
+    # Get SHA hash for local and remote file w/o version, update if it has changed
+    - 'PKGBUILD_STRIP_LOCAL=$(cat ffsend-git/PKGBUILD | sed /^pkgver=.\*/d | sha256sum | cut -d" " -f1)'
+    - 'PKGBUILD_STRIP_REMOTE=$(curl -sSL "https://aur.archlinux.org/cgit/aur.git/plain/PKGBUILD?h=ffsend-git" | sed /^pkgver=.\*/d | sha256sum | cut -d" " -f1)'
 
     # Install dependencies
     - echo "Installing required build packages..."
     - pacman -Syu --noconfirm sudo base-devel binutils openssh rust cargo cmake git openssl
 
     # Make AUR package
-    - echo "Making AUR package..."
     - mkdir -p /.cargo
     - chmod -R 777 /.cargo
-    - cd bin/
+    - cd ffsend-bin/
     - echo "Making binary package..."
     - sudo -u nobody makepkg -c
     - sudo -u nobody makepkg --printsrcinfo > .SRCINFO
-    - cd ../git
-    - echo "Making git source package..."
+    - cd ../ffsend
+    - echo "Making main source package..."
     - sudo -u nobody makepkg -c
     - sudo -u nobody makepkg --printsrcinfo > .SRCINFO
+    # Make git package if different than the remote
+    - |
+      if [ ! "$PKGBUILD_STRIP_LOCAL" == "$PKGBUILD_STRIP_REMOTE" ]; then
+        cd ../ffsend-git
+        echo "Making git source package..."
+        sudo -u nobody makepkg -c
+        sudo -u nobody makepkg --printsrcinfo > .SRCINFO
+      else
+        echo "Not making git source package, it has not changed"
+      fi
     - cd ..
 
-      # Set up SSH for publishing
+    # Set up SSH for publishing
     - mkdir -p /root/.ssh
     - cp ./aur.pub /root/.ssh/id_rsa.pub
     - echo "$AUR_SSH_PRIVATE" > /root/.ssh/id_rsa
@@ -301,22 +335,37 @@ package-aur:
     - git config --global user.name "timvisee"
     - git config --global user.email "tim@visee.me"
 
-      # Publish binary package: clone AUR repo, commit update and push
-    - git clone ssh://aur@aur.archlinux.org/ffsend.git aur-ffsend-bin
-    - cd aur-ffsend-bin
-    - cp ../bin/{PKGBUILD,.SRCINFO} ./
+    # Publish main package: clone AUR repo, commit update and push
+    - git clone ssh://aur@aur.archlinux.org/ffsend.git aur-ffsend
+    - cd aur-ffsend
+    - cp ../ffsend/{PKGBUILD,.SRCINFO} ./
     - git add PKGBUILD .SRCINFO
     - git commit -m "Release v$VERSION"
     - git push
     - cd ..
 
-      # Publish git package: clone AUR repo, commit update and push
-    - git clone ssh://aur@aur.archlinux.org/ffsend-git.git aur-ffsend-git
-    - cd aur-ffsend-git
-    - cp ../git/{PKGBUILD,.SRCINFO} ./
+    # Publish binary package: clone AUR repo, commit update and push
+    - git clone ssh://aur@aur.archlinux.org/ffsend-bin.git aur-ffsend-bin
+    - cd aur-ffsend-bin
+    - cp ../ffsend-bin/{PKGBUILD,.SRCINFO} ./
     - git add PKGBUILD .SRCINFO
     - git commit -m "Release v$VERSION"
     - git push
     - cd ..
+
+    # Publish git package: clone AUR repo, commit update and push
+    # Only publish it if it is different than the remote
+    - |
+      if [ ! "$PKGBUILD_STRIP_LOCAL" == "$PKGBUILD_STRIP_REMOTE" ]; then
+        git clone ssh://aur@aur.archlinux.org/ffsend.git aur-ffsend-git
+        cd aur-ffsend-git
+        cp ../ffsend-git/{PKGBUILD,.SRCINFO} ./
+        git add PKGBUILD .SRCINFO
+        git commit -m "Update PKGBUILD for release v$VERSION"
+        git push
+        cd ..
+      else
+        echo "Not pushing git package, it has not changed"
+      fi
 
 # TODO: add job to test ffsend{-git} AUR packages
