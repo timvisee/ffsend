@@ -1,4 +1,8 @@
 # Maintainer: Tim Visee <tim@visee.me>
+#
+# This PKGBUILD is managed externally, and is automatically updated here:
+# - https://gitlab.com/timvisee/ffsend/blob/master/pkg/aur/ffsend/PKGBUILD
+# - Mirror: https://github.com/timvisee/ffsend/blob/master/pkg/aur/ffsend/PKGBUILD
 
 pkgname=ffsend
 pkgver=0.0.0 # automatically set in CI, see: /.gitlab-ci.yml
