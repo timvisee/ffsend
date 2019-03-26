@@ -185,9 +185,9 @@ ffsend --help
 [» `ffsend-git`][aur-ffsend-git] (compile from source package)
 
 ```bash
-yay ffsend
+yay -S ffsend-bin
 # or
-aurget -S ffsend
+aurget -S ffsend-bin
 # or using any other AUR installer
 
 ffsend --help
