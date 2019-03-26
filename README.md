@@ -255,6 +255,18 @@ brew install ffsend
 ffsend --help
 ```
 
+#### macOS: Nix package
+_Note: The Nix package is currently not automatically updated, therefore it
+might be slightly outdated. Open an issue if you believe an important update
+is missing._
+
+```bash
+nix-channel --update
+nix-env --install ffsend
+
+ffsend --help
+```
+
 #### macOS: Prebuilt binaries
 Check out the [latest release][github-latest-release] assets for a macOS binary.
 If it isn't available yet, you may use an artifact from a
