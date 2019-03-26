@@ -181,15 +181,13 @@ ffsend --help
 ```
 
 #### Linux: Arch AUR packages
-[» `ffsend`][aur-ffsend] (binary package)  
+[» `ffsend-bin`][aur-ffsend-bin] (binary package)  
 [» `ffsend-git`][aur-ffsend-git] (compile from source package)
 
 ```bash
-yaourt -S ffsend
+yay -S ffsend-bin
 # or
-yay ffsend
-# or
-aurget -S ffsend
+aurget -S ffsend-bin
 # or using any other AUR installer
 
 ffsend --help
@@ -425,7 +423,7 @@ Then, walk through one of the following steps to compile and install `ffsend`:
 	ffsend --help
 
 	# or run it directly from cargo
-	cargo run --release -- --help 
+	cargo run --release -- --help
 	```
 
 - Or clone the repository and invoke the binary directly (Linux/macOS):
@@ -440,7 +438,7 @@ Then, walk through one of the following steps to compile and install `ffsend`:
 
 	# Start using ffsend
 	./target/release/ffsend --help
-	``` 
+	```
 
 ### Compile features / use flags
 Different use flags are available for `ffsend` to toggle whether to include
@@ -630,7 +628,7 @@ For other questions regarding automation or feature requests, be sure to
 ## Security
 In short; the `ffsend` tool and the [Send][send] service can be considered
 secure, and may be used to share sensitive files. Note though that the
-created share link for an upload will allow anyone to download the file. 
+created share link for an upload will allow anyone to download the file.
 Make sure you don't share this link with unauthorized people.
 
 For more detailed information on encryption, please read the rest of the
@@ -726,7 +724,7 @@ This application is not affiliated with Mozilla, Firefox or Firefox Send.
 
 ## License
 This project is released under the GNU GPL-3.0 license.
-Check out the [LICENSE](LICENSE) file for more information. 
+Check out the [LICENSE](LICENSE) file for more information.
 
 [usage-demo-asciinema]: https://asciinema.org/a/182225
 [usage-demo-svg]: https://cdn.rawgit.com/timvisee/ffsend/6e8ef55b/res/demo.svg
@@ -744,7 +742,7 @@ Check out the [LICENSE](LICENSE) file for more information.
 [svg-term]: https://github.com/marionebl/svg-term-cli
 [github-releases]: https://github.com/timvisee/ffsend/releases
 [github-latest-release]: https://github.com/timvisee/ffsend/releases/latest
-[aur-ffsend]: https://aur.archlinux.org/packages/ffsend/
+[aur-ffsend-bin]: https://aur.archlinux.org/packages/ffsend-bin/
 [aur-ffsend-git]: https://aur.archlinux.org/packages/ffsend-git/
 [snapcraft-ffsend]: https://snapcraft.io/ffsend
 [homebrew]: https://brew.sh/
