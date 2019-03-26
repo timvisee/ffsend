@@ -188,7 +188,7 @@ ffsend --help
 yay -S ffsend-bin
 # or
 aurget -S ffsend-bin
-# or using any other AUR installer
+# or using any other AUR helper
 
 ffsend --help
 ```
