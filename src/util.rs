@@ -352,7 +352,7 @@ impl ClipboardType {
         }
     }
 
-    /// Set clipboar contents through the selected clipboard type.
+    /// Set clipboard contents through the selected clipboard type.
     pub fn set(&self, content: String) -> Result<(), ClipboardError> {
         match self {
             #[cfg(not(target_os = "linux"))]
