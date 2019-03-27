@@ -285,8 +285,8 @@ package-aur:
     - sed "s/^pkgver=.*\$/pkgver=$VERSION/" -i ffsend/PKGBUILD
     - sed "s/^pkgver=.*\$/pkgver=$VERSION/" -i ffsend-bin/PKGBUILD
     - sed "s/^pkgver=.*\$/pkgver=$VERSION.$CI_COMMIT_SHORT_SHA/" -i ffsend-git/PKGBUILD
-    - sed "s/^source=(\"\(.*\)::.*\").*\$/source=('\1::$(echo $URL_SOURCE | sed 's/\//\\\//g')')/" -i ffsend/PKGBUILD
-    - sed "s/^source=(\"\(.*\)::.*\").*\$/source=('\1::$(echo $URL_BIN | sed 's/\//\\\//g')')/" -i ffsend-bin/PKGBUILD
+    - sed "s/^source=(\"\(.*\)::.*\").*\$/source=(\"\1::$(echo $URL_SOURCE | sed 's/\//\\\//g')\")/" -i ffsend/PKGBUILD
+    - sed "s/^source=(\"\(.*\)::.*\").*\$/source=(\"\1::$(echo $URL_BIN | sed 's/\//\\\//g')\")/" -i ffsend-bin/PKGBUILD
     - sed "s/^sha256sums=.*\$/sha256sums=('$SHA_SOURCE')/" -i ffsend/PKGBUILD
     - sed "s/^sha256sums=.*\$/sha256sums=('$SHA_BIN')/" -i ffsend-bin/PKGBUILD
 
@@ -357,7 +357,7 @@ package-aur:
     # Only publish it if it is different than the remote
     - |
       if [ ! "$SHA_STRIP_LOCAL" == "$SHA_STRIP_REMOTE" ]; then
-        git clone ssh://aur@aur.archlinux.org/ffsend.git aur-ffsend-git
+        git clone ssh://aur@aur.archlinux.org/ffsend-git.git aur-ffsend-git
         cd aur-ffsend-git
         cp ../ffsend-git/{PKGBUILD,.SRCINFO} ./
         git add PKGBUILD .SRCINFO
