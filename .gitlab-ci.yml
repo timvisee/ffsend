@@ -291,8 +291,8 @@ package-aur:
     - sed "s/^sha256sums=.*\$/sha256sums=('$SHA_BIN')/" -i ffsend-bin/PKGBUILD
 
     # Get SHA hash for local and remote file w/o version, update if it has changed
-    - 'PKGBUILD_STRIP_LOCAL=$(cat ffsend-git/PKGBUILD | sed /^pkgver=.\*/d | sha256sum | cut -d" " -f1)'
-    - 'PKGBUILD_STRIP_REMOTE=$(curl -sSL "https://aur.archlinux.org/cgit/aur.git/plain/PKGBUILD?h=ffsend-git" | sed /^pkgver=.\*/d | sha256sum | cut -d" " -f1)'
+    - 'SHA_STRIP_LOCAL=$(cat ffsend-git/PKGBUILD | sed /^pkgver=.\*/d | sha256sum | cut -d" " -f1)'
+    - 'SHA_STRIP_REMOTE=$(curl -sSL "https://aur.archlinux.org/cgit/aur.git/plain/PKGBUILD?h=ffsend-git" | sed /^pkgver=.\*/d | sha256sum | cut -d" " -f1)'
 
     # Install dependencies
     - echo "Installing required build packages..."
@@ -311,7 +311,7 @@ package-aur:
     - sudo -u nobody makepkg --printsrcinfo > .SRCINFO
     # Make git package if different than the remote
     - |
-      if [ ! "$PKGBUILD_STRIP_LOCAL" == "$PKGBUILD_STRIP_REMOTE" ]; then
+      if [ ! "$SHA_STRIP_LOCAL" == "$SHA_STRIP_REMOTE" ]; then
         cd ../ffsend-git
         echo "Making git source package..."
         sudo -u nobody makepkg -c
@@ -356,7 +356,7 @@ package-aur:
     # Publish git package: clone AUR repo, commit update and push
     # Only publish it if it is different than the remote
     - |
-      if [ ! "$PKGBUILD_STRIP_LOCAL" == "$PKGBUILD_STRIP_REMOTE" ]; then
+      if [ ! "$SHA_STRIP_LOCAL" == "$SHA_STRIP_REMOTE" ]; then
         git clone ssh://aur@aur.archlinux.org/ffsend.git aur-ffsend-git
         cd aur-ffsend-git
         cp ../ffsend-git/{PKGBUILD,.SRCINFO} ./

@@ -20,5 +20,5 @@ depends=('ca-certificates')
 optdepends=('xclip: clipboard support')
 
 package() {
-    install -D "$srcdir/ffsend" "$pkgdir/usr/bin/ffsend"
+    install -Dm755 "$srcdir/ffsend" "$pkgdir/usr/bin/ffsend"
 }
