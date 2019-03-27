@@ -181,13 +181,13 @@ ffsend --help
 ```
 
 #### Linux: Arch AUR packages
-[» `ffsend-bin`][aur-ffsend-bin] (binary package)  
-[» `ffsend-git`][aur-ffsend-git] (compile from source package)
+[» `ffsend`][aur-ffsend] (compiles from source, latest stable release)  
+[» `ffsend-git`][aur-ffsend-git] (compiles from source, latest `master` commit)
 
 ```bash
-yay -S ffsend-bin
+yay -S ffsend
 # or
-aurget -S ffsend-bin
+aurget -S ffsend
 # or using any other AUR helper
 
 ffsend --help
@@ -742,6 +742,7 @@ Check out the [LICENSE](LICENSE) file for more information.
 [svg-term]: https://github.com/marionebl/svg-term-cli
 [github-releases]: https://github.com/timvisee/ffsend/releases
 [github-latest-release]: https://github.com/timvisee/ffsend/releases/latest
+[aur-ffsend]: https://aur.archlinux.org/packages/ffsend/
 [aur-ffsend-bin]: https://aur.archlinux.org/packages/ffsend-bin/
 [aur-ffsend-git]: https://aur.archlinux.org/packages/ffsend-git/
 [snapcraft-ffsend]: https://snapcraft.io/ffsend
