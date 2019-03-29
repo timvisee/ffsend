@@ -181,13 +181,14 @@ ffsend --help
 ```
 
 #### Linux: Arch AUR packages
-[» `ffsend`][aur-ffsend] (compiles from source, latest stable release)  
+[» `ffsend-bin`][aur-ffsend-bin] (precompiled binary, latest release, recommended)  
+[» `ffsend`][aur-ffsend] (compiles from source, latest release)  
 [» `ffsend-git`][aur-ffsend-git] (compiles from source, latest `master` commit)
 
 ```bash
 yay -S ffsend
 # or
-aurget -S ffsend
+aurget -S ffsend-bin
 # or using any other AUR helper
 
 ffsend --help
