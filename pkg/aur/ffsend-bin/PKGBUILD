@@ -11,7 +11,7 @@ pkgrel=1
 pkgdesc="Easily and securely share files from the command line. A Firefox Send client."
 url="https://gitlab.com/timvisee/ffsend"
 license=('GPL3')
-source=("ffsend::https://github.com/timvisee/ffsend/releases/download/v$pkgver/ffsend-v$pkgver-linux-x64-static") # automatically set in CI, see: /.gitlab-ci.yml
+source=("ffsend-v${pkgver}::https://github.com/timvisee/ffsend/releases/download/v$pkgver/ffsend-v$pkgver-linux-x64-static") # automatically set in CI, see: /.gitlab-ci.yml
 sha256sums=('SKIP') # automatically set in CI, see: /.gitlab-ci.yml
 arch=('x86_64')
 provides=('ffsend')
@@ -20,5 +20,5 @@ depends=('ca-certificates')
 optdepends=('xclip: clipboard support')
 
 package() {
-    install -Dm755 "$srcdir/ffsend" "$pkgdir/usr/bin/ffsend"
+    install -Dm755 "$srcdir/ffsend-v${pkgver}" "$pkgdir/usr/bin/ffsend"
 }
