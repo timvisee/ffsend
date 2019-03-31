@@ -1,4 +1,5 @@
 extern crate directories;
+extern crate fui;
 
 #[cfg(feature = "infer-command")]
 use std::ffi::OsString;
@@ -205,9 +206,20 @@ impl<'a: 'b, 'b> Handler<'a> {
         #[cfg(feature = "infer-command")]
         Self::infer_subcommand(&mut args);
 
+
+        let app = Handler::build();
+        if args.len() <= 1 {
+            //TODO::: fui needs to handle args_os too
+            let mut args: Vec<_> = ::std::env::args().collect();
+            args = fui::Fui::from(&app).get_cli_input();
+        }
+        let matches = app.get_matches_from(args);
+
         // Build the application CLI definition, get the matches
         Handler {
-            matches: Handler::build().get_matches_from(args),
+            // TODO::: rm it
+            // matches: Handler::build().get_matches_from(args),
+            matches: matches,
         }
     }
 
