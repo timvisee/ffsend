@@ -271,16 +271,16 @@ package-aur:
     - echo "Determining SHA checksums for remote files..."
     - URL_BIN=https://github.com/timvisee/ffsend/releases/download/v$VERSION/ffsend-v$VERSION-linux-x64-static
     - URL_SOURCE=https://gitlab.com/timvisee/ffsend/-/archive/v$VERSION/ffsend-v$VERSION.tar.gz
-    - BASH_COMPLETION="https://raw.githubusercontent.com/timvisee/ffsend/master/contrib/completions/ffsend.bash"
-    - FISH_COMPLETION="https://raw.githubusercontent.com/timvisee/ffsend/master/contrib/completions/ffsend.fish"
+    - BASH_COMPLETION="https://raw.githubusercontent.com/timvisee/ffsend/v$VERSION/contrib/completions/ffsend.bash"
+    - FISH_COMPLETION="https://raw.githubusercontent.com/timvisee/ffsend/v$VERSION/contrib/completions/ffsend.fish"
     - 'echo "Selected binary URL: $URL_BIN"'
     - 'echo "Selected source URL: $URL_SOURCE"'
     - echo "Determining sha256sum for remote binary..."
     - 'SHA_BIN=$(curl -sSL "$URL_BIN" | sha256sum | cut -d" " -f1)'
     - 'echo "Got sha256sum: $SHA_BIN"'
-    - 'SHA_BASH_COMPLETION=$(curl -sSL "BASH_COMPLETION" | sha256sum | cut -d" " -f1)'
+    - 'SHA_BASH_COMPLETION=$(curl -sSL "$BASH_COMPLETION" | sha256sum | cut -d" " -f1)'
     - 'echo "Got sha256sums of bash completion: $SHA_BASH_COMPLETION"'
-    - 'SHA_FISH_COMPLETION=$(curl -sSL "FISH_COMPLETION" | sha256sum | cut -d" " -f1)'
+    - 'SHA_FISH_COMPLETION=$(curl -sSL "$FISH_COMPLETION" | sha256sum | cut -d" " -f1)'
     - 'echo "Got sha256sums of fish completion: $SHA_FISH_COMPLETION"'
     - echo "Determining sha256sum for remote source..."
     - 'SHA_SOURCE=$(curl -sSL "$URL_SOURCE" | sha256sum | cut -d" " -f1)'

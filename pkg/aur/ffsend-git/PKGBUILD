@@ -26,13 +26,13 @@ build() {
 }
 
 package() {
-    cd "${srcdir}/ffsend"
+    cd "$srcdir/ffsend"
 
     # Install Binary
     install -Dm755 "./target/release/ffsend" "$pkgdir/usr/bin/ffsend"
 
     # Install completions
     cd "./contrib/completions"
-    install -Dm644 "ffsend.bash" "${pkgver}/usr/share/bash-completion/completions/ffsend"
-    install -Dm644 "ffsend.fish" "${pkgver}/usr/share/fish/vendor_completions.d/ffsend.fish"
+    install -Dm644 "ffsend.bash" "$pkgver/usr/share/bash-completion/completions/ffsend"
+    install -Dm644 "ffsend.fish" "$pkgver/usr/share/fish/vendor_completions.d/ffsend.fish"
 }
