@@ -16,7 +16,8 @@ arch=('x86_64' 'i686')
 provides=('ffsend')
 depends=('ca-certificates')
 makedepends=('openssl>=1.0' 'rust>=1.32' 'cargo' 'cmake')
-optdepends=('xclip: clipboard support')
+optdepends=('xclip: clipboard support'
+            'bash-completion: support auto completion for bash')
 
 build() {
     cd "ffsend-v$pkgver"
@@ -24,5 +25,13 @@ build() {
 }
 
 package() {
-    install -Dm755 "$srcdir/ffsend-v$pkgver/target/release/ffsend" "$pkgdir/usr/bin/ffsend"
+    cd "${srcdir}/ffsend-v${pkgver}"
+
+    # Install Binary
+    install -Dm755 "./target/release/ffsend" "$pkgdir/usr/bin/ffsend"
+
+    # Install completions
+    cd "./contrib/completions"
+    install -Dm644 "ffsend.bash" "${pkgver}/usr/share/bash-completion/completions/ffsend"
+    install -Dm644 "ffsend.fish" "${pkgver}/usr/share/fish/vendor_completions.d/ffsend.fish"
 }
