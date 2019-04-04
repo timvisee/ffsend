@@ -292,9 +292,9 @@ package-aur:
     - sed "s/^pkgver=.*\$/pkgver=$VERSION/" -i ffsend-bin/PKGBUILD
     - sed "s/^pkgver=.*\$/pkgver=$VERSION.$CI_COMMIT_SHORT_SHA/" -i ffsend-git/PKGBUILD
     - sed "s/^source=(\"\(.*\)::.*\").*\$/source=(\"\1::$(echo $URL_SOURCE | sed 's/\//\\\//g')\")/" -i ffsend/PKGBUILD
-    - sed "s/\(\"ffsend-v\$pkgver::\).*\"/\1$URL_BIN\"/" -i ffsend-bin/PKGBUILD
-    - sed "s/\(\"ffsend-v\$pkgver.bash::\).*\"/\1$URL_BASH_COMPLETION\"/" -i ffsend-bin/PKGBUILD
-    - sed "s/\(\"ffsend-v\$pkgver.fish::\).*\"/\1$URL_FISH_COMPLETION\"/" -i ffsend-bin/PKGBUILD
+    - sed "s/\(\"ffsend-v\$pkgver::\).*\"/\1$(echo $URL_BIN | sed 's/\//\\\//g')\")\"/" -i ffsend-bin/PKGBUILD
+    - sed "s/\(\"ffsend-v\$pkgver.bash::\).*\"/\1$(echo $URL_BASH_COMPLETION | sed 's/\//\\\//g')\"/" -i ffsend-bin/PKGBUILD
+    - sed "s/\(\"ffsend-v\$pkgver.fish::\).*\"/\1$(echo $URL_FISH_COMPLETION | sed 's/\//\\\//g')\"/" -i ffsend-bin/PKGBUILD
     - sed "s/^sha256sums=.*\$/sha256sums=('$SHA_SOURCE')/" -i ffsend/PKGBUILD
     - sed "s/^sha256sums=.*\$/sha256sums=('$SHA_BIN' '$SHA_BASH_COMPLETION' '$SHA_FISH_COMPLETION')/" -i ffsend-bin/PKGBUILD
 

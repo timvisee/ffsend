@@ -154,10 +154,10 @@ available right now.
 Make sure you meet and install the [requirements](#requirements).
 
 See the operating system specific instructions below:
-* [Linux](#linux-all-distributions)
-* [macOS](#macos)
-* [Windows](#windows)
-* [_Other OS or architecture_](#other-os-or-architecture)
+- [Linux](#linux-all-distributions)
+- [macOS](#macos)
+- [Windows](#windows)
+- [_Other OS or architecture_](#other-os-or-architecture)
 
 ### Linux (all distributions)
 Using the [snap](#linux-snap-package) package is recommended if supported.  
@@ -175,6 +175,7 @@ your home directory. Choose a different installation option if you don't want
 this limitation._
 
 [» `ffsend`][snapcraft-ffsend]
+
 ```bash
 snap install ffsend
 ffsend --help
@@ -531,18 +532,21 @@ ffget https://send.firefox.com/#sample-share-url
 ```
 
 This works for a predefined list of binary names:
-* `ffput` → `ffsend upload ...`
-* `ffget` → `ffsend download ...`
-* `ffdel` → `ffsend delete ...`
-* _This list is defined in [`src/config.rs`](./src/config.rs) as `INFER_COMMANDS`_
+
+- `ffput` → `ffsend upload ...`
+- `ffget` → `ffsend download ...`
+- `ffdel` → `ffsend delete ...`
+- _This list is defined in [`src/config.rs`](./src/config.rs) as `INFER_COMMANDS`_
 
 You can use the following methods to set up these single-command binaries:
-* Create a properly named symbolic link (recommended)
-* Create a properly named hard link
-* Clone the `ffsend` binary, and rename it
+
+- Create a properly named symbolic link (recommended)
+- Create a properly named hard link
+- Clone the `ffsend` binary, and rename it
 
 On Linux and macOS you can use the following command to set up symbolic links in
 the current directory:
+
 ```bash
 ln -s $(which ffsend) ./ffput
 ln -s $(which ffsend) ./ffget
