@@ -1,11 +1,11 @@
 #[cfg(all(feature = "clipboard", not(target_os = "linux")))]
-extern crate clipboard;
+extern crate clip;
 extern crate colored;
 extern crate directories;
 extern crate fs2;
 extern crate open;
 #[cfg(all(feature = "clipboard", target_os = "linux"))]
-extern crate quale;
+extern crate which;
 
 use std::borrow::Borrow;
 use std::env::{self, current_exe, var_os};
@@ -23,7 +23,7 @@ use std::process::{exit, ExitStatus};
 use std::process::{Command, Stdio};
 
 #[cfg(all(feature = "clipboard", not(target_os = "linux")))]
-use self::clipboard::{ClipboardContext, ClipboardProvider};
+use self::clip::{ClipboardContext, ClipboardProvider};
 use self::colored::*;
 #[cfg(feature = "history")]
 use self::directories::ProjectDirs;
@@ -39,6 +39,8 @@ use ffsend_api::{
     url::Url,
 };
 use rpassword::prompt_password_stderr;
+#[cfg(all(feature = "clipboard", target_os = "linux"))]
+use which::which;
 
 use crate::cmd::matcher::MainMatcher;
 
@@ -341,9 +343,9 @@ impl ClipboardType {
                 ClipboardType::Xclip(Some(path.to_owned()))
             } else if let Some(path) = option_env!("XSEL_PATH") {
                 ClipboardType::Xsel(Some(path.to_owned()))
-            } else if quale::which("xclip").is_some() {
+            } else if which("xclip").is_ok() {
                 ClipboardType::Xclip(None)
-            } else if quale::which("xsel").is_some() {
+            } else if which("xsel").is_ok() {
                 ClipboardType::Xsel(None)
             } else {
                 // TODO: should we error here instead, as no clipboard binary was found?
