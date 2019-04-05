@@ -68,46 +68,54 @@ impl<'a> Upload<'a> {
 
         // TODO: ensure the file exists and is accessible
 
-        // Determine the max file size
-        // TODO: set false parameter to authentication state
-        let max_size = upload_size_max(api_version, false);
+        // We do not authenticate for now
+        let auth = false;
 
-        // Get the file size to warn about large files
-        if let Ok(size) = File::open(&path)
-            .and_then(|f| f.metadata())
-            .map(|m| m.len())
+        // TODO: extract this into external function
         {
-            if size > max_size && !matcher_main.force() {
-                // The file is too large, show an error and quit
-                quit_error_msg(
-                    format!(
-                        "the file size is {}, bigger than the maximum allowed of {}",
-                        format_bytes(size),
-                        format_bytes(max_size),
-                    ),
-                    ErrorHintsBuilder::default()
-                        .force(true)
-                        .verbose(false)
-                        .build()
-                        .unwrap(),
-                );
-            } else if size > UPLOAD_SIZE_MAX_RECOMMENDED && !matcher_main.force() {
-                // The file is larger than the recommended maximum, warn
-                eprintln!(
-                    "The file size is {}, bigger than the recommended maximum of {}",
-                    format_bytes(size),
-                    format_bytes(UPLOAD_SIZE_MAX_RECOMMENDED),
-                );
+            // Determine the max file size
+            // TODO: set false parameter to authentication state
+            let max_size = upload_size_max(api_version, auth);
 
-                // Prompt the user to continue, quit if the user answered no
-                if !prompt_yes("Continue uploading?", Some(true), &matcher_main) {
-                    println!("Upload cancelled");
-                    quit();
+            // Get the file size to warn about large files
+            if let Ok(size) = File::open(&path)
+                .and_then(|f| f.metadata())
+                .map(|m| m.len())
+            {
+                if size > max_size && !matcher_main.force() {
+                    // The file is too large, show an error and quit
+                    quit_error_msg(
+                        format!(
+                            "the file size is {}, bigger than the maximum allowed of {}",
+                            format_bytes(size),
+                            format_bytes(max_size),
+                        ),
+                        ErrorHintsBuilder::default()
+                            .force(true)
+                            .verbose(false)
+                            .build()
+                            .unwrap(),
+                    );
+                } else if size > UPLOAD_SIZE_MAX_RECOMMENDED && !matcher_main.force() {
+                    // The file is larger than the recommended maximum, warn
+                    eprintln!(
+                        "The file size is {}, bigger than the recommended maximum of {}",
+                        format_bytes(size),
+                        format_bytes(UPLOAD_SIZE_MAX_RECOMMENDED),
+                    );
+
+                    // Prompt the user to continue, quit if the user answered no
+                    if !prompt_yes("Continue uploading?", Some(true), &matcher_main) {
+                        println!("Upload cancelled");
+                        quit();
+                    }
                 }
+            } else {
+                print_error_msg("failed to check the file size, ignoring");
             }
-        } else {
-            print_error_msg("failed to check the file size, ignoring");
         }
+
+        // TODO: assert max expiry time for file
 
         // Create a reqwest client capable for uploading files
         let transfer_client = client_config.client(true);
@@ -119,7 +127,11 @@ impl<'a> Upload<'a> {
         let params = {
             // Build the parameters data object
             let params = ParamsDataBuilder::default()
-                .download_limit(matcher_upload.download_limit())
+                .download_limit(
+                    matcher_upload
+                        .download_limit(&matcher_main, api_version, auth)
+                        .map(|d| d as u8),
+                )
                 .build()
                 .unwrap();
 

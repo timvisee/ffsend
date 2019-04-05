@@ -26,7 +26,7 @@ impl<'a: 'b, 'b> ParamsMatcher<'a> {
     }
 
     /// Get the download limit.
-    pub fn download_limit(&'a self) -> Option<u8> {
+    pub fn download_limit(&'a self) -> Option<usize> {
         ArgDownloadLimit::value(self.matches)
     }
 }

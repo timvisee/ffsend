@@ -44,7 +44,7 @@ impl<'a> Params<'a> {
 
         // Build the parameters data object
         let data = ParamsDataBuilder::default()
-            .download_limit(matcher_params.download_limit())
+            .download_limit(matcher_params.download_limit().map(|d| d as u8))
             .build()
             .unwrap();
 

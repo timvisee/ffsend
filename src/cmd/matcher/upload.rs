@@ -1,10 +1,12 @@
 use clap::ArgMatches;
 use ffsend_api::action::params::PARAMS_DEFAULT_DOWNLOAD as DOWNLOAD_DEFAULT;
+use ffsend_api::api::Version as ApiVersion;
 use ffsend_api::url::Url;
 
 use super::Matcher;
-use crate::cmd::arg::{
-    ArgDownloadLimit, ArgGenPassphrase, ArgHost, ArgPassword, CmdArgFlag, CmdArgOption,
+use crate::cmd::{
+    arg::{ArgDownloadLimit, ArgGenPassphrase, ArgHost, ArgPassword, CmdArgFlag, CmdArgOption},
+    matcher::MainMatcher,
 };
 use crate::util::{bin_name, env_var_present, quit_error_msg, ErrorHintsBuilder};
 
@@ -73,13 +75,21 @@ impl<'a: 'b, 'b> UploadMatcher<'a> {
     }
 
     /// Get the download limit.
+    ///
     /// If the download limit was the default, `None` is returned to not
     /// explicitly set it.
-    pub fn download_limit(&'a self) -> Option<u8> {
-        ArgDownloadLimit::value(self.matches).and_then(|d| match d {
-            DOWNLOAD_DEFAULT => None,
-            d => Some(d),
-        })
+    pub fn download_limit(
+        &'a self,
+        main_matcher: &MainMatcher,
+        api_version: ApiVersion,
+        auth: bool,
+    ) -> Option<usize> {
+        ArgDownloadLimit::value_checked(self.matches, main_matcher, api_version, auth).and_then(
+            |d| match d {
+                d if d == DOWNLOAD_DEFAULT as usize => None,
+                d => Some(d),
+            },
+        )
     }
 
     /// Check whether to archive the file to upload.
