@@ -1,8 +1,12 @@
 use clap::ArgMatches;
+use ffsend_api::api::Version as ApiVersion;
 use ffsend_api::url::Url;
 
 use super::Matcher;
-use crate::cmd::arg::{ArgDownloadLimit, ArgOwner, ArgUrl, CmdArgOption};
+use crate::cmd::{
+    arg::{ArgDownloadLimit, ArgOwner, ArgUrl, CmdArgOption},
+    matcher::MainMatcher,
+};
 
 /// The params command matcher.
 pub struct ParamsMatcher<'a> {
@@ -26,8 +30,16 @@ impl<'a: 'b, 'b> ParamsMatcher<'a> {
     }
 
     /// Get the download limit.
-    pub fn download_limit(&'a self) -> Option<usize> {
-        ArgDownloadLimit::value(self.matches)
+    ///
+    /// If the download limit was the default, `None` is returned to not
+    /// explicitly set it.
+    pub fn download_limit(
+        &'a self,
+        main_matcher: &MainMatcher,
+        api_version: ApiVersion,
+        auth: bool,
+    ) -> Option<usize> {
+        ArgDownloadLimit::value_checked(self.matches, main_matcher, api_version, auth)
     }
 }
 
