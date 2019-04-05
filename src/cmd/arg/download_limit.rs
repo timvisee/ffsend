@@ -4,9 +4,7 @@ use ffsend_api::config::downloads_max;
 
 use super::{CmdArg, CmdArgFlag, CmdArgOption};
 use crate::cmd::matcher::MainMatcher;
-use crate::util::{highlight, prompt_yes};
-
-use crate::util::{quit, ErrorHintsBuilder};
+use crate::util::{highlight, prompt_yes, quit};
 
 /// The download limit argument.
 pub struct ArgDownloadLimit {}
