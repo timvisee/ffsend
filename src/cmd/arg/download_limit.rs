@@ -19,9 +19,9 @@ impl ArgDownloadLimit {
         // Get the download value
         let mut downloads = Self::value(matches)?;
 
-        // Get number of allowed downloads, return if allowed
+        // Get number of allowed downloads, return if allowed or when forcing
         let allowed = downloads_max(api_version, auth);
-        if allowed.contains(&downloads) {
+        if allowed.contains(&downloads) || main_matcher.force() {
             return Some(downloads);
         }
 
