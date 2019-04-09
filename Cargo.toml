@@ -92,7 +92,7 @@ no-color = ["colored/no-color"]
 [dependencies]
 chbs = "0.0.8"
 chrono = "0.4"
-clap = "2.32"
+clap = "2.33"
 colored = "1.7"
 derive_builder = "0.7"
 directories = "1.0"
