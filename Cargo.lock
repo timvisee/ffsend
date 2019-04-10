@@ -599,7 +599,7 @@ dependencies = [
  "tempfile 3.0.7 (registry+https://github.com/rust-lang/crates.io-index)",
  "toml 0.5.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "urlshortener 0.10.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "version-compare 0.0.7 (registry+https://github.com/rust-lang/crates.io-index)",
+ "version-compare 0.0.8 (registry+https://github.com/rust-lang/crates.io-index)",
  "which 2.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -2098,7 +2098,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "version-compare"
-version = "0.0.7"
+version = "0.0.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
@@ -2443,7 +2443,7 @@ dependencies = [
 "checksum vcpkg 0.2.6 (registry+https://github.com/rust-lang/crates.io-index)" = "def296d3eb3b12371b2c7d0e83bfe1403e4db2d7a0bba324a12b21c4ee13143d"
 "checksum vec_map 0.8.1 (registry+https://github.com/rust-lang/crates.io-index)" = "05c78687fb1a80548ae3250346c3db86a80a7cdd77bda190189f2d0a0987c81a"
 "checksum version-compare 0.0.6 (registry+https://github.com/rust-lang/crates.io-index)" = "78068add8bf1e4d37d13fa5867182fe4c03f8e525c831053733f83aaba942d37"
-"checksum version-compare 0.0.7 (registry+https://github.com/rust-lang/crates.io-index)" = "6300a82eb21d67485944b1b1b163e5109026394dde12912edbc8eca6b44b1137"
+"checksum version-compare 0.0.8 (registry+https://github.com/rust-lang/crates.io-index)" = "16dc2b8f2d402e72b9074db40ceee7c020042561e6ea0e2d4bc0354b60457603"
 "checksum version_check 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)" = "914b1a6776c4c929a602fafd8bc742e06365d4bcbe48c30f9cca5824f70dc9dd"
 "checksum want 0.0.6 (registry+https://github.com/rust-lang/crates.io-index)" = "797464475f30ddb8830cc529aaaae648d581f99e2036a928877dfde027ddf6b3"
 "checksum websocket 0.22.3 (registry+https://github.com/rust-lang/crates.io-index)" = "7cc2d74d89f9df981ab41ae624e33cf302fdf456b93455c6a31911a99c9f0bb8"
