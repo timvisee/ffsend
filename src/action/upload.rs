@@ -1,4 +1,3 @@
-use std::fs::File;
 #[cfg(feature = "archive")]
 use std::io::Error as IoError;
 use std::path::Path;
@@ -77,11 +76,21 @@ impl<'a> Upload<'a> {
             // TODO: set false parameter to authentication state
             let max_size = upload_size_max(api_version, auth);
 
-            // Get the file size to warn about large files
-            if let Ok(size) = File::open(&path)
-                .and_then(|f| f.metadata())
-                .map(|m| m.len())
-            {
+            // Get the file size, fail on emtpy files, warn about large files
+            if let Ok(size) = path.metadata().map(|m| m.len()) {
+                // Enforce files not being 0 bytes
+                if size == 0 && !matcher_main.force() {
+                    quit_error_msg(
+                        "uploading a file with a size of 0 bytes is not supported",
+                        ErrorHintsBuilder::default()
+                            .force(true)
+                            .verbose(false)
+                            .build()
+                            .unwrap(),
+                    )
+                }
+
+                // Enforce maximum file size
                 if size > max_size && !matcher_main.force() {
                     // The file is too large, show an error and quit
                     quit_error_msg(
@@ -96,7 +105,10 @@ impl<'a> Upload<'a> {
                             .build()
                             .unwrap(),
                     );
-                } else if size > UPLOAD_SIZE_MAX_RECOMMENDED && !matcher_main.force() {
+                }
+
+                // Enforce maximum recommended size
+                if size > UPLOAD_SIZE_MAX_RECOMMENDED && !matcher_main.force() {
                     // The file is larger than the recommended maximum, warn
                     eprintln!(
                         "The file size is {}, bigger than the recommended maximum of {}",
