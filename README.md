@@ -135,10 +135,10 @@ all available subcommands.
 - Linux, Windows or macOS
 - A terminal :sunglasses:
 - Internet connection for uploading and downloading
-- Linux specific:
+- Linux and &ast;BSD specific:
   - OpenSSL & CA certificates:
     - Ubuntu, Debian and derivatives: `apt install openssl ca-certificates`
-  - Optional: `xclip` for clipboard support
+  - Optional: `xclip` or `xsel` for clipboard support
     - Ubuntu, Debian and derivatives: `apt install xclip`
     - CentOS/Red Hat/openSUSE/Fedora: `yum install xclip`
     - Arch: `pacman -S xclip`
@@ -514,10 +514,10 @@ empty.
 
 Some environment variables may be set at compile time to tweak some defaults.
 
-| Variable     | Description                            |
-| :----------- | :------------------------------------- |
-| `XCLIP_PATH` | Set fixed `xclip` binary path on Linux |
-| `XSEL_PATH`  | Set fixed `xsel` binary path on Linux  |
+| Variable     | Description                                                                |
+| :----------- | :------------------------------------------------------------------------- |
+| `XCLIP_PATH` | Set fixed `xclip` binary path when using `clipboard-bin` (Linux, &ast;BSD) |
+| `XSEL_PATH`  | Set fixed `xsel` binary path when using `clipboard-bin` (Linux, &ast;BSD)  |
 
 At this time, no configuration or _dotfile_ file support is available.
 This will be something added in a later release.
