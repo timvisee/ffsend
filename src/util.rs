@@ -572,13 +572,7 @@ impl ClipboardType {
     }
 }
 
-#[cfg(any(
-    target_os = "linux",
-    target_os = "freebsd",
-    target_os = "dragonfly",
-    target_os = "openbsd",
-    target_os = "netbsd",
-))]
+#[cfg(feature = "clipboard")]
 impl fmt::Display for ClipboardType {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
