@@ -33,7 +33,7 @@ Find out more about security [here](#security).
 - [Features](#features)
 - [Usage](#usage)
 - [Requirements](#requirements)
-- [Install](#install) ([Linux](#linux-all-distributions), [macOS](#macos), [Windows](#windows), [_Other OS/arch_](#other-os-or-architecture))
+- [Install](#install) ([FreeBSD](#freebsd), [Linux](#linux-all-distributions), [macOS](#macos), [Windows](#windows), [_Other OS/arch_](#other-os-or-architecture))
 - [Build](#build)
 - [Configuration and environment](#configuration-and-environment)
 - [Security](#security)
@@ -132,7 +132,7 @@ Use the `--help` flag, `help` subcommand, or see the [help](#help) section for
 all available subcommands.
 
 ## Requirements
-- Linux, Windows or macOS
+- FreeBSD, Linux, macOS or Windows
 - A terminal :sunglasses:
 - Internet connection for uploading and downloading
 - Linux specific:
@@ -146,6 +146,10 @@ all available subcommands.
   - OpenSSL v1.1.0j: [» Installer][openssl-windows-installer]
 - macOS specific:
   - OpenSSL: `brew install openssl@1.1`
+- FreeBSD specific:
+  - OpenSSL: `pkg install openssl`
+  - CA certificates: `pkg install ca_root_nss`
+  - Optional `xclip` & `xsel` for clipboard support: `pkg install xclip xsel-conrad`
 
 ## Install
 Because `ffsend` is still in alpha, only limited installation options are
@@ -154,10 +158,22 @@ available right now.
 Make sure you meet and install the [requirements](#requirements).
 
 See the operating system specific instructions below:
+- [FreeBSD](#freebsd)
 - [Linux](#linux-all-distributions)
 - [macOS](#macos)
 - [Windows](#windows)
 - [_Other OS or architecture_](#other-os-or-architecture)
+
+### FreeBSD
+
+[» `ffsend`][freshports-ffsend]
+
+```sh
+# Precompiled binary.
+pkg install ffsend
+# Compiles and installs from source.
+cd /usr/ports/www/ffsend && make install
+```
 
 ### Linux (all distributions)
 Using the [snap](#linux-snap-package) package is recommended if supported.  
@@ -385,6 +401,9 @@ before proceeding:
 - [`git`][git]
 - [`rust`][rust] `v1.32` or higher (install using [`rustup`][rustup])
 - [OpenSSL][openssl] or [LibreSSL][libressl] libraries and headers must be available
+	- FreeBSD:
+		- `pkg install rust gmake pkgconf python36 libxcb xclip ca_root_nss xsel-conrad`
+		- It is a better idea to use & modify the existing `ffsend` port, which manages dependencies for you.
 	- Linux:
 		- Ubuntu, Debian and derivatives: `apt install build-essential cmake pkg-config libssl-dev`
 		- CentOS/Red Hat/openSUSE: `yum install gcc gcc-c++ make cmake openssl-devel`
@@ -755,3 +774,4 @@ Check out the [LICENSE](LICENSE) file for more information.
 [wsl]: https://docs.microsoft.com/en-us/windows/wsl/install-win10
 [docker-hub-ffsend]: https://hub.docker.com/r/timvisee/ffsend
 [scoop-install]: https://scoop.sh/#installs-in-seconds
+[freshports-ffsend]: https://www.freshports.org/www/ffsend
