@@ -408,7 +408,7 @@ before proceeding:
 		- Ubuntu, Debian and derivatives: `apt install build-essential cmake pkg-config libssl-dev`
 		- CentOS/Red Hat/openSUSE: `yum install gcc gcc-c++ make cmake openssl-devel`
 		- Arch: `pacman -S openssl base-devel`
-    - Gentoo: `emerge -a dev-util/pkgconfig dev-util/cmake dev-libs/openssl`
+		- Gentoo: `emerge -a dev-util/pkgconfig dev-util/cmake dev-libs/openssl`
 		- Fedora: `dnf install gcc gcc-c++ make cmake openssl-devel`
 		- Or see instructions [here](https://github.com/sfackler/rust-openssl#linux)
 	- Windows:
