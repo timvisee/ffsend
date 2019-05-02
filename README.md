@@ -738,7 +738,7 @@ Check out the [LICENSE](LICENSE) file for more information.
 [libressl]: https://libressl.org/
 [mozilla]: https://mozilla.org/
 [openssl]: https://www.openssl.org/
-[openssl-windows-installer]: https://slproweb.com/download/Win64OpenSSL_Light-1_1_0j.exe
+[openssl-windows-installer]: https://u.visee.me/dl/openssl/Win64OpenSSL_Light-1_1_0j.exe
 [rust]: https://rust-lang.org/
 [rustup]: https://rustup.rs/
 [send]: https://send.firefox.com/
