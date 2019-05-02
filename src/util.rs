@@ -1,28 +1,10 @@
-#[cfg(all(
-    feature = "clipboard",
-    not(any(
-        target_os = "linux",
-        target_os = "freebsd",
-        target_os = "dragonfly",
-        target_os = "openbsd",
-        target_os = "netbsd",
-    ))
-))]
+#[cfg(feature = "clipboard-crate")]
 extern crate clip;
 extern crate colored;
 extern crate directories;
 extern crate fs2;
 extern crate open;
-#[cfg(all(
-    feature = "clipboard",
-    any(
-        target_os = "linux",
-        target_os = "freebsd",
-        target_os = "dragonfly",
-        target_os = "openbsd",
-        target_os = "netbsd",
-    )
-))]
+#[cfg(feature = "clipboard-bin")]
 extern crate which;
 
 use std::borrow::Borrow;
@@ -31,43 +13,16 @@ use std::ffi::OsStr;
 #[cfg(feature = "clipboard")]
 use std::fmt;
 use std::fmt::{Debug, Display};
-#[cfg(all(
-    feature = "clipboard",
-    any(
-        target_os = "linux",
-        target_os = "freebsd",
-        target_os = "dragonfly",
-        target_os = "openbsd",
-        target_os = "netbsd",
-    )
-))]
+#[cfg(feature = "clipboard-bin")]
 use std::io::ErrorKind as IoErrorKind;
 use std::io::{stderr, stdin, Error as IoError, Write};
 use std::path::Path;
 use std::path::PathBuf;
 use std::process::{exit, ExitStatus};
-#[cfg(all(
-    feature = "clipboard",
-    any(
-        target_os = "linux",
-        target_os = "freebsd",
-        target_os = "dragonfly",
-        target_os = "openbsd",
-        target_os = "netbsd",
-    )
-))]
+#[cfg(feature = "clipboard-bin")]
 use std::process::{Command, Stdio};
 
-#[cfg(all(
-    feature = "clipboard",
-    not(any(
-        target_os = "linux",
-        target_os = "freebsd",
-        target_os = "dragonfly",
-        target_os = "openbsd",
-        target_os = "netbsd",
-    ))
-))]
+#[cfg(feature = "clipboard-crate")]
 use self::clip::{ClipboardContext, ClipboardProvider};
 use self::colored::*;
 #[cfg(feature = "history")]
@@ -75,16 +30,7 @@ use self::directories::ProjectDirs;
 use self::fs2::available_space;
 use chrono::Duration;
 use failure::{err_msg, Fail};
-#[cfg(all(
-    feature = "clipboard",
-    not(any(
-        target_os = "linux",
-        target_os = "freebsd",
-        target_os = "dragonfly",
-        target_os = "openbsd",
-        target_os = "netbsd",
-    ))
-))]
+#[cfg(feature = "clipboard-crate")]
 use failure::{Compat, Error};
 use ffsend_api::{
     api::request::{ensure_success, ResponseError},
@@ -93,16 +39,7 @@ use ffsend_api::{
     url::Url,
 };
 use rpassword::prompt_password_stderr;
-#[cfg(all(
-    feature = "clipboard",
-    any(
-        target_os = "linux",
-        target_os = "freebsd",
-        target_os = "dragonfly",
-        target_os = "openbsd",
-        target_os = "netbsd",
-    )
-))]
+#[cfg(feature = "clipboard-bin")]
 use which::which;
 
 use crate::cmd::matcher::MainMatcher;
@@ -375,37 +312,19 @@ pub fn set_clipboard(content: String) -> Result<(), ClipboardError> {
 #[derive(Clone, Eq, PartialEq)]
 pub enum ClipboardType {
     /// Native operating system clipboard.
-    #[cfg(not(any(
-        target_os = "linux",
-        target_os = "freebsd",
-        target_os = "dragonfly",
-        target_os = "openbsd",
-        target_os = "netbsd",
-    )))]
+    #[cfg(feature = "clipboard-crate")]
     Native,
 
     /// Manage clipboard through `xclip` on Linux.
     ///
     /// May contain a binary path if specified at compile time through the `XCLIP_PATH` variable.
-    #[cfg(any(
-        target_os = "linux",
-        target_os = "freebsd",
-        target_os = "dragonfly",
-        target_os = "openbsd",
-        target_os = "netbsd",
-    ))]
+    #[cfg(feature = "clipboard-bin")]
     Xclip(Option<String>),
 
     /// Manage clipboard through `xsel` on Linux.
     ///
     /// May contain a binary path if specified at compile time through the `XSEL_PATH` variable.
-    #[cfg(any(
-        target_os = "linux",
-        target_os = "freebsd",
-        target_os = "dragonfly",
-        target_os = "openbsd",
-        target_os = "netbsd",
-    ))]
+    #[cfg(feature = "clipboard-bin")]
     Xsel(Option<String>),
 }
 
@@ -413,24 +332,12 @@ pub enum ClipboardType {
 impl ClipboardType {
     /// Select the clipboard type to use, depending on the runtime system.
     pub fn select() -> Self {
-        #[cfg(not(any(
-            target_os = "linux",
-            target_os = "freebsd",
-            target_os = "dragonfly",
-            target_os = "openbsd",
-            target_os = "netbsd",
-        )))]
+        #[cfg(feature = "clipboard-crate")]
         {
             ClipboardType::Native
         }
 
-        #[cfg(any(
-            target_os = "linux",
-            target_os = "freebsd",
-            target_os = "dragonfly",
-            target_os = "openbsd",
-            target_os = "netbsd",
-        ))]
+        #[cfg(feature = "clipboard-bin")]
         {
             if let Some(path) = option_env!("XCLIP_PATH") {
                 ClipboardType::Xclip(Some(path.to_owned()))
@@ -450,29 +357,11 @@ impl ClipboardType {
     /// Set clipboard contents through the selected clipboard type.
     pub fn set(&self, content: String) -> Result<(), ClipboardError> {
         match self {
-            #[cfg(not(any(
-                target_os = "linux",
-                target_os = "freebsd",
-                target_os = "dragonfly",
-                target_os = "openbsd",
-                target_os = "netbsd",
-            )))]
+            #[cfg(feature = "clipboard-crate")]
             ClipboardType::Native => Self::native_set(content),
-            #[cfg(any(
-                target_os = "linux",
-                target_os = "freebsd",
-                target_os = "dragonfly",
-                target_os = "openbsd",
-                target_os = "netbsd",
-            ))]
+            #[cfg(feature = "clipboard-bin")]
             ClipboardType::Xclip(path) => Self::xclip_set(path.clone(), content),
-            #[cfg(any(
-                target_os = "linux",
-                target_os = "freebsd",
-                target_os = "dragonfly",
-                target_os = "openbsd",
-                target_os = "netbsd",
-            ))]
+            #[cfg(feature = "clipboard-bin")]
             ClipboardType::Xsel(path) => Self::xsel_set(path.clone(), content),
         }
     }
@@ -480,13 +369,7 @@ impl ClipboardType {
     /// Set the clipboard through a native interface.
     ///
     /// This is used on non-Linux systems.
-    #[cfg(not(any(
-        target_os = "linux",
-        target_os = "freebsd",
-        target_os = "dragonfly",
-        target_os = "openbsd",
-        target_os = "netbsd",
-    )))]
+    #[cfg(feature = "clipboard-crate")]
     fn native_set(content: String) -> Result<(), ClipboardError> {
         ClipboardProvider::new()
             .and_then(|mut context: ClipboardContext| context.set_contents(content))
@@ -494,13 +377,7 @@ impl ClipboardType {
             .map_err(ClipboardError::Native)
     }
 
-    #[cfg(any(
-        target_os = "linux",
-        target_os = "freebsd",
-        target_os = "dragonfly",
-        target_os = "openbsd",
-        target_os = "netbsd",
-    ))]
+    #[cfg(feature = "clipboard-bin")]
     fn xclip_set(path: Option<String>, content: String) -> Result<(), ClipboardError> {
         Self::sys_cmd_set(
             "xclip",
@@ -511,13 +388,7 @@ impl ClipboardType {
         )
     }
 
-    #[cfg(any(
-        target_os = "linux",
-        target_os = "freebsd",
-        target_os = "dragonfly",
-        target_os = "openbsd",
-        target_os = "netbsd",
-    ))]
+    #[cfg(feature = "clipboard-bin")]
     fn xsel_set(path: Option<String>, content: String) -> Result<(), ClipboardError> {
         Self::sys_cmd_set(
             "xsel",
@@ -526,13 +397,7 @@ impl ClipboardType {
         )
     }
 
-    #[cfg(any(
-        target_os = "linux",
-        target_os = "freebsd",
-        target_os = "dragonfly",
-        target_os = "openbsd",
-        target_os = "netbsd",
-    ))]
+    #[cfg(feature = "clipboard-bin")]
     fn sys_cmd_set(
         bin: &'static str,
         command: &mut Command,
@@ -576,32 +441,14 @@ impl ClipboardType {
 impl fmt::Display for ClipboardType {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            #[cfg(not(any(
-                target_os = "linux",
-                target_os = "freebsd",
-                target_os = "dragonfly",
-                target_os = "openbsd",
-                target_os = "netbsd",
-            )))]
+            #[cfg(feature = "clipboard-crate")]
             ClipboardType::Native => write!(f, "native"),
-            #[cfg(any(
-                target_os = "linux",
-                target_os = "freebsd",
-                target_os = "dragonfly",
-                target_os = "openbsd",
-                target_os = "netbsd",
-            ))]
+            #[cfg(feature = "clipboard-bin")]
             ClipboardType::Xclip(path) => match path {
                 None => write!(f, "xclip"),
                 Some(path) => write!(f, "xclip ({})", path),
             },
-            #[cfg(any(
-                target_os = "linux",
-                target_os = "freebsd",
-                target_os = "dragonfly",
-                target_os = "openbsd",
-                target_os = "netbsd",
-            ))]
+            #[cfg(feature = "clipboard-bin")]
             ClipboardType::Xsel(path) => match path {
                 None => write!(f, "xsel"),
                 Some(path) => write!(f, "xsel ({})", path),
@@ -616,48 +463,24 @@ pub enum ClipboardError {
     /// A generic error occurred while setting the clipboard contents.
     ///
     /// This is for non-Linux systems, using a native clipboard interface.
-    #[cfg(not(any(
-        target_os = "linux",
-        target_os = "freebsd",
-        target_os = "dragonfly",
-        target_os = "openbsd",
-        target_os = "netbsd",
-    )))]
+    #[cfg(feature = "clipboard-crate")]
     #[fail(display = "failed to access clipboard")]
     Native(#[cause] Compat<Error>),
 
     /// The `xclip` or `xsel` binary could not be found on the system, required for clipboard support.
-    #[cfg(any(
-        target_os = "linux",
-        target_os = "freebsd",
-        target_os = "dragonfly",
-        target_os = "openbsd",
-        target_os = "netbsd",
-    ))]
+    #[cfg(feature = "clipboard-bin")]
     #[fail(display = "failed to access clipboard, xclip or xsel is not installed")]
     NoBinary,
 
     /// An error occurred while using `xclip` or `xsel` to set the clipboard contents.
     /// This problem probably occurred when starting, or while piping the clipboard contents to
     /// the process.
-    #[cfg(any(
-        target_os = "linux",
-        target_os = "freebsd",
-        target_os = "dragonfly",
-        target_os = "openbsd",
-        target_os = "netbsd",
-    ))]
+    #[cfg(feature = "clipboard-bin")]
     #[fail(display = "failed to access clipboard using {}", _0)]
     BinaryIo(&'static str, #[cause] IoError),
 
     /// `xclip` or `xsel` unexpectetly exited with a non-successful status code.
-    #[cfg(any(
-        target_os = "linux",
-        target_os = "freebsd",
-        target_os = "dragonfly",
-        target_os = "openbsd",
-        target_os = "netbsd",
-    ))]
+    #[cfg(feature = "clipboard-bin")]
     #[fail(
         display = "failed to use clipboard, {} exited with status code {}",
         _0, _1
@@ -1150,6 +973,10 @@ pub fn features_list() -> Vec<&'static str> {
     features.push("archive");
     #[cfg(feature = "clipboard")]
     features.push("clipboard");
+    #[cfg(feature = "clipboard-bin")]
+    features.push("clipboard-bin");
+    #[cfg(feature = "clipboard-crate")]
+    features.push("clipboard-crate");
     #[cfg(feature = "history")]
     features.push("history");
     #[cfg(feature = "qrcode")]

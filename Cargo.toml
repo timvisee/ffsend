@@ -89,6 +89,12 @@ infer-command = []
 # Compile without colored output support
 no-color = ["colored/no-color"]
 
+# Automatic using build.rs: use xclip/xsel binary method for clipboard support
+clipboard-bin = ["clipboard"]
+
+# Automatic using build.rs: use native clipboard crate for clipboard support
+clipboard-crate = ["clipboard"]
+
 [dependencies]
 chbs = "0.0.8"
 chrono = "0.4"
@@ -118,5 +124,5 @@ version-compare = "0.0.8"
 which = { version = "2.0", optional = true }
 
 [target.'cfg(not(any(target_os = "linux", target_os = "freebsd", target_os = "dragonfly", target_os = "openbsd", target_os = "netbsd")))'.dependencies]
-# Package is aliased to clip to prevent name collision with clipboard feature
+# Aliased to clip to prevent name collision with clipboard feature
 clip = { version = "0.5", optional = true, package = "clipboard" }
