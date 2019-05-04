@@ -33,7 +33,7 @@ Find out more about security [here](#security).
 - [Features](#features)
 - [Usage](#usage)
 - [Requirements](#requirements)
-- [Install](#install) ([FreeBSD](#freebsd), [Linux](#linux-all-distributions), [macOS](#macos), [Windows](#windows), [_Other OS/arch_](#other-os-or-architecture))
+- [Install](#install) ([Linux](#linux-all-distributions), [macOS](#macos), [Windows](#windows), [FreeBSD](#freebsd), [_Other OS/arch_](#other-os-or-architecture))
 - [Build](#build)
 - [Configuration and environment](#configuration-and-environment)
 - [Security](#security)
@@ -132,7 +132,7 @@ Use the `--help` flag, `help` subcommand, or see the [help](#help) section for
 all available subcommands.
 
 ## Requirements
-- FreeBSD, Linux, macOS or Windows
+- Linux, macOS, Windows or FreeBSD (other BSDs might work)
 - A terminal :sunglasses:
 - Internet connection for uploading and downloading
 - Linux specific:
@@ -158,22 +158,11 @@ available right now.
 Make sure you meet and install the [requirements](#requirements).
 
 See the operating system specific instructions below:
-- [FreeBSD](#freebsd)
 - [Linux](#linux-all-distributions)
 - [macOS](#macos)
 - [Windows](#windows)
+- [FreeBSD](#freebsd)
 - [_Other OS or architecture_](#other-os-or-architecture)
-
-### FreeBSD
-
-[» `ffsend`][freshports-ffsend]
-
-```sh
-# Precompiled binary.
-pkg install ffsend
-# Compiles and installs from source.
-cd /usr/ports/www/ffsend && make install
-```
 
 ### Linux (all distributions)
 Using the [snap](#linux-snap-package) package is recommended if supported.  
@@ -352,6 +341,18 @@ your systems `PATH`. The easiest solution is to move it into `System32`:
 move .\ffsend.exe C:\Windows\System32\ffsend.exe
 ```
 
+### FreeBSD
+
+[» `ffsend`][freshports-ffsend]
+
+```sh
+# Precompiled binary.
+pkg install ffsend
+
+# Compiles and installs from source.
+cd /usr/ports/www/ffsend && make install
+```
+
 ### Other OS or architecture
 If your system runs Docker, you can use the [docker image](#docker-image).
 There are currently no other binaries or packages available.
@@ -401,9 +402,6 @@ before proceeding:
 - [`git`][git]
 - [`rust`][rust] `v1.32` or higher (install using [`rustup`][rustup])
 - [OpenSSL][openssl] or [LibreSSL][libressl] libraries and headers must be available
-	- FreeBSD:
-		- `pkg install rust gmake pkgconf python36 libxcb xclip ca_root_nss xsel-conrad`
-		- It is a better idea to use & modify the existing `ffsend` port, which manages dependencies for you.
 	- Linux:
 		- Ubuntu, Debian and derivatives: `apt install build-essential cmake pkg-config libssl-dev`
 		- CentOS/Red Hat/openSUSE: `yum install gcc gcc-c++ make cmake openssl-devel`
@@ -416,6 +414,9 @@ before proceeding:
 	- macOS:
 		- Using `brew`: `brew install cmake pkg-config openssl`
 		- Or see instructions [here](https://github.com/sfackler/rust-openssl#osx)
+	- FreeBSD:
+		- `pkg install rust gmake pkgconf python36 libxcb xclip ca_root_nss xsel-conrad`
+		- It is a better idea to use & modify the existing `ffsend` port, which manages dependencies for you.
 
 ### Compile and install
 Then, walk through one of the following steps to compile and install `ffsend`:
