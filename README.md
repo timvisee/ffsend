@@ -33,7 +33,7 @@ Find out more about security [here](#security).
 - [Features](#features)
 - [Usage](#usage)
 - [Requirements](#requirements)
-- [Install](#install) ([Linux](#linux-all-distributions), [macOS](#macos), [Windows](#windows), [_Other OS/arch_](#other-os-or-architecture))
+- [Install](#install) ([Linux](#linux-all-distributions), [macOS](#macos), [Windows](#windows), [FreeBSD](#freebsd), [_Other OS/arch_](#other-os-or-architecture))
 - [Build](#build)
 - [Configuration and environment](#configuration-and-environment)
 - [Security](#security)
@@ -132,10 +132,10 @@ Use the `--help` flag, `help` subcommand, or see the [help](#help) section for
 all available subcommands.
 
 ## Requirements
-- Linux, Windows or macOS
+- Linux, macOS, Windows or FreeBSD (other BSDs might work)
 - A terminal :sunglasses:
 - Internet connection for uploading and downloading
-- Linux and &ast;BSD specific:
+- Linux:
   - OpenSSL & CA certificates:
     - Ubuntu, Debian and derivatives: `apt install openssl ca-certificates`
   - Optional: `xclip` or `xsel` for clipboard support
@@ -146,6 +146,10 @@ all available subcommands.
   - OpenSSL v1.1.0j: [» Installer][openssl-windows-installer]
 - macOS specific:
   - OpenSSL: `brew install openssl@1.1`
+- FreeBSD specific:
+  - OpenSSL: `pkg install openssl`
+  - CA certificates: `pkg install ca_root_nss`
+  - Optional `xclip` & `xsel` for clipboard support: `pkg install xclip xsel-conrad`
 
 ## Install
 Because `ffsend` is still in alpha, only limited installation options are
@@ -157,6 +161,7 @@ See the operating system specific instructions below:
 - [Linux](#linux-all-distributions)
 - [macOS](#macos)
 - [Windows](#windows)
+- [FreeBSD](#freebsd)
 - [_Other OS or architecture_](#other-os-or-architecture)
 
 ### Linux (all distributions)
@@ -336,6 +341,18 @@ your systems `PATH`. The easiest solution is to move it into `System32`:
 move .\ffsend.exe C:\Windows\System32\ffsend.exe
 ```
 
+### FreeBSD
+
+[» `ffsend`][freshports-ffsend]
+
+```sh
+# Precompiled binary.
+pkg install ffsend
+
+# Compiles and installs from source.
+cd /usr/ports/www/ffsend && make install
+```
+
 ### Other OS or architecture
 If your system runs Docker, you can use the [docker image](#docker-image).
 There are currently no other binaries or packages available.
@@ -385,62 +402,65 @@ before proceeding:
 - [`git`][git]
 - [`rust`][rust] `v1.32` or higher (install using [`rustup`][rustup])
 - [OpenSSL][openssl] or [LibreSSL][libressl] libraries and headers must be available
-	- Linux:
-		- Ubuntu, Debian and derivatives: `apt install build-essential cmake pkg-config libssl-dev`
-		- CentOS/Red Hat/openSUSE: `yum install gcc gcc-c++ make cmake openssl-devel`
-		- Arch: `pacman -S openssl base-devel`
+  - Linux:
+    - Ubuntu, Debian and derivatives: `apt install build-essential cmake pkg-config libssl-dev`
+    - CentOS/Red Hat/openSUSE: `yum install gcc gcc-c++ make cmake openssl-devel`
+    - Arch: `pacman -S openssl base-devel`
     - Gentoo: `emerge -a dev-util/pkgconfig dev-util/cmake dev-libs/openssl`
-		- Fedora: `dnf install gcc gcc-c++ make cmake openssl-devel`
-		- Or see instructions [here](https://github.com/sfackler/rust-openssl#linux)
-	- Windows:
-		- See instructions here [here](https://github.com/sfackler/rust-openssl#windows-msvc)
-	- macOS:
-		- Using `brew`: `brew install cmake pkg-config openssl`
-		- Or see instructions [here](https://github.com/sfackler/rust-openssl#osx)
+    - Fedora: `dnf install gcc gcc-c++ make cmake openssl-devel`
+    - Or see instructions [here](https://github.com/sfackler/rust-openssl#linux)
+  - Windows:
+    - See instructions here [here](https://github.com/sfackler/rust-openssl#windows-msvc)
+  - macOS:
+    - Using `brew`: `brew install cmake pkg-config openssl`
+    - Or see instructions [here](https://github.com/sfackler/rust-openssl#osx)
+  - FreeBSD:
+    - `pkg install rust gmake pkgconf python36 libxcb xclip ca_root_nss xsel-conrad`
+    - It is a better idea to use & modify the existing `ffsend` port, which manages dependencies for you.
 
 ### Compile and install
 Then, walk through one of the following steps to compile and install `ffsend`:
 
 - Compile and install it directly from cargo:
 
-	```bash
-	# Compile and install from cargo
-	cargo install ffsend -f
+  ```bash
+  # Compile and install from cargo
+  cargo install ffsend -f
 
-	# Start using ffsend
-	ffsend --help
-	```
+  # Start using ffsend
+  ffsend --help
+  ```
 
 - Or clone the repository and install it with `cargo`:
 
-	```bash
-	# Clone the project
-	git clone https://github.com/timvisee/ffsend.git
-	cd ffsend
+  ```bash
+  # Clone the project
+  git clone https://github.com/timvisee/ffsend.git
+  cd ffsend
 
-	# Compile and install
-	cargo install --path . -f
+  # Compile and install
+  cargo install --path . -f
 
-	# Start using ffsend
-	ffsend --help
+  # Start using ffsend
+  ffsend --help
 
-	# or run it directly from cargo
-	cargo run --release -- --help
-	```
+  # or run it directly from cargo
+  cargo run --release -- --help
+  ```
 
 - Or clone the repository and invoke the binary directly (Linux/macOS):
 
-	```bash
-	# Clone the project
-	git clone https://github.com/timvisee/ffsend.git
-	cd ffsend
+  ```bash
+  # Clone the project
+  git clone https://github.com/timvisee/ffsend.git
+  cd ffsend
 
-	# Build the project (release version)
-	cargo build --release
+  # Build the project (release version)
+  cargo build --release
 
-	# Start using ffsend
-	./target/release/ffsend --help
-	```
+  # Start using ffsend
+  ./target/release/ffsend --help
+  ```
 
 ### Compile features / use flags
 Different use flags are available for `ffsend` to toggle whether to include
@@ -755,3 +775,4 @@ Check out the [LICENSE](LICENSE) file for more information.
 [wsl]: https://docs.microsoft.com/en-us/windows/wsl/install-win10
 [docker-hub-ffsend]: https://hub.docker.com/r/timvisee/ffsend
 [scoop-install]: https://scoop.sh/#installs-in-seconds
+[freshports-ffsend]: https://www.freshports.org/www/ffsend
