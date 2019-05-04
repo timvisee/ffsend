@@ -6,7 +6,7 @@ use prettytable::{format::FormatBuilder, Cell, Row, Table};
 use crate::client::to_duration;
 use crate::cmd::matcher::{debug::DebugMatcher, main::MainMatcher, Matcher};
 use crate::error::ActionError;
-#[cfg(all(feature = "clipboard", target_os = "linux"))]
+#[cfg(feature = "clipboard-bin")]
 use crate::util::ClipboardType;
 use crate::util::{api_version_list, features_list, format_bool, format_duration};
 
@@ -99,7 +99,7 @@ impl<'a> Debug<'a> {
         ]));
 
         // Clipboard information
-        #[cfg(all(feature = "clipboard", target_os = "linux"))]
+        #[cfg(feature = "clipboard-bin")]
         table.add_row(Row::new(vec![
             Cell::new("Clipboard:"),
             Cell::new(&format!("{}", ClipboardType::select())),
