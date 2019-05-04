@@ -402,65 +402,65 @@ before proceeding:
 - [`git`][git]
 - [`rust`][rust] `v1.32` or higher (install using [`rustup`][rustup])
 - [OpenSSL][openssl] or [LibreSSL][libressl] libraries and headers must be available
-	- Linux:
-		- Ubuntu, Debian and derivatives: `apt install build-essential cmake pkg-config libssl-dev`
-		- CentOS/Red Hat/openSUSE: `yum install gcc gcc-c++ make cmake openssl-devel`
-		- Arch: `pacman -S openssl base-devel`
-		- Gentoo: `emerge -a dev-util/pkgconfig dev-util/cmake dev-libs/openssl`
-		- Fedora: `dnf install gcc gcc-c++ make cmake openssl-devel`
-		- Or see instructions [here](https://github.com/sfackler/rust-openssl#linux)
-	- Windows:
-		- See instructions here [here](https://github.com/sfackler/rust-openssl#windows-msvc)
-	- macOS:
-		- Using `brew`: `brew install cmake pkg-config openssl`
-		- Or see instructions [here](https://github.com/sfackler/rust-openssl#osx)
-	- FreeBSD:
-		- `pkg install rust gmake pkgconf python36 libxcb xclip ca_root_nss xsel-conrad`
-		- It is a better idea to use & modify the existing `ffsend` port, which manages dependencies for you.
+  - Linux:
+    - Ubuntu, Debian and derivatives: `apt install build-essential cmake pkg-config libssl-dev`
+    - CentOS/Red Hat/openSUSE: `yum install gcc gcc-c++ make cmake openssl-devel`
+    - Arch: `pacman -S openssl base-devel`
+    - Gentoo: `emerge -a dev-util/pkgconfig dev-util/cmake dev-libs/openssl`
+    - Fedora: `dnf install gcc gcc-c++ make cmake openssl-devel`
+    - Or see instructions [here](https://github.com/sfackler/rust-openssl#linux)
+  - Windows:
+    - See instructions here [here](https://github.com/sfackler/rust-openssl#windows-msvc)
+  - macOS:
+    - Using `brew`: `brew install cmake pkg-config openssl`
+    - Or see instructions [here](https://github.com/sfackler/rust-openssl#osx)
+  - FreeBSD:
+    - `pkg install rust gmake pkgconf python36 libxcb xclip ca_root_nss xsel-conrad`
+    - It is a better idea to use & modify the existing `ffsend` port, which manages dependencies for you.
 
 ### Compile and install
 Then, walk through one of the following steps to compile and install `ffsend`:
 
 - Compile and install it directly from cargo:
 
-	```bash
-	# Compile and install from cargo
-	cargo install ffsend -f
+  ```bash
+  # Compile and install from cargo
+  cargo install ffsend -f
 
-	# Start using ffsend
-	ffsend --help
-	```
+  # Start using ffsend
+  ffsend --help
+  ```
 
 - Or clone the repository and install it with `cargo`:
 
-	```bash
-	# Clone the project
-	git clone https://github.com/timvisee/ffsend.git
-	cd ffsend
+  ```bash
+  # Clone the project
+  git clone https://github.com/timvisee/ffsend.git
+  cd ffsend
 
-	# Compile and install
-	cargo install --path . -f
+  # Compile and install
+  cargo install --path . -f
 
-	# Start using ffsend
-	ffsend --help
+  # Start using ffsend
+  ffsend --help
 
-	# or run it directly from cargo
-	cargo run --release -- --help
-	```
+  # or run it directly from cargo
+  cargo run --release -- --help
+  ```
 
 - Or clone the repository and invoke the binary directly (Linux/macOS):
 
-	```bash
-	# Clone the project
-	git clone https://github.com/timvisee/ffsend.git
-	cd ffsend
+  ```bash
+  # Clone the project
+  git clone https://github.com/timvisee/ffsend.git
+  cd ffsend
 
-	# Build the project (release version)
-	cargo build --release
+  # Build the project (release version)
+  cargo build --release
 
-	# Start using ffsend
-	./target/release/ffsend --help
-	```
+  # Start using ffsend
+  ./target/release/ffsend --help
+  ```
 
 ### Compile features / use flags
 Different use flags are available for `ffsend` to toggle whether to include
