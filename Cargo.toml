@@ -1,7 +1,7 @@
 [package]
 name = "ffsend"
 version = "0.2.46"
-authors = ["Tim Visee <timvisee@gmail.com>"]
+authors = ["Tim Visee <3a4fb3964f@sinenomine.email>"]
 license = "GPL-3.0"
 readme = "README.md"
 homepage = "https://gitlab.com/timvisee/ffsend"

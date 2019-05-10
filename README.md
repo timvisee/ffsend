@@ -201,9 +201,8 @@ ffsend --help
 ```
 
 #### Linux: Nix package
-_Note: The Nix package is currently not automatically updated, therefore it
-might be slightly outdated. Open an issue if you believe an important update
-is missing._
+_Note: The Nix package is currently not automatically updated, and might be
+slightly outdated._
 
 ```bash
 nix-channel --update
@@ -261,9 +260,8 @@ ffsend --help
 ```
 
 #### macOS: Nix package
-_Note: The Nix package is currently not automatically updated, therefore it
-might be slightly outdated. Open an issue if you believe an important update
-is missing._
+_Note: The Nix package is currently not automatically updated, and might be
+slightly outdated._
 
 ```bash
 nix-channel --update
@@ -344,6 +342,9 @@ move .\ffsend.exe C:\Windows\System32\ffsend.exe
 ### FreeBSD
 
 [» `ffsend`][freshports-ffsend]
+
+_Note: The FreeBSD package is currently maintained by FreeBSD contributors,
+and might be slightly outdated._
 
 ```sh
 # Precompiled binary.

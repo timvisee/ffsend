@@ -46,7 +46,7 @@ variables:
 .check-base: &check-base
   stage: check
   script:
-    - cargo check --verbose
+    - cargo check --frozen --verbose
     - cargo check --no-default-features --features send2 --verbose
     - cargo check --no-default-features --features send3 --verbose
     - cargo check --no-default-features --features send2,send3 --verbose
