@@ -27,6 +27,8 @@ mod progress;
 mod urlshorten;
 mod util;
 
+use std::process;
+
 use crate::action::debug::Debug;
 use crate::action::delete::Delete;
 use crate::action::download::Download;
@@ -156,7 +158,7 @@ fn invoke_action(handler: &Handler) -> Result<(), Error> {
 }
 
 /// Print the main info, shown when no subcommands were supplied.
-pub fn print_main_info() {
+pub fn print_main_info() -> ! {
     // Get the name of the used executable
     let bin = bin_name();
 
@@ -172,4 +174,6 @@ pub fn print_main_info() {
     println!();
     println!("To show all subcommands, features and other help:");
     println!("    {}", highlight(&format!("{} help [SUBCOMMAND]", bin)));
+
+    process::exit(1)
 }
