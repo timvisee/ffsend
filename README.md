@@ -73,7 +73,7 @@ Easily upload and download:
 ```bash
 # Simple upload
 $ ffsend upload my-file.txt
-Share link: https://send.firefox.com/#sample-share-url
+https://send.firefox.com/#sample-share-url
 
 # Advanced upload
 # - Specify a download limit of 20
@@ -83,11 +83,11 @@ Share link: https://send.firefox.com/#sample-share-url
 # - Open the shareable link in your browser
 $ ffsend upload --downloads 20 --password --archive --copy --open my-file.txt
 Password: ******
-Share link: https://send.firefox.com/#sample-share-url
+https://send.firefox.com/#sample-share-url
 
 # Upload to your own host
 $ ffsend u -h https://example.com/ my-file.txt
-Share link: https://example.com/#sample-share-url
+https://example.com/#sample-share-url
 
 # Simple download
 $ ffsend download https://send.firefox.com/#sample-share-url
