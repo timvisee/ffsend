@@ -292,27 +292,35 @@ impl<'a> Upload<'a> {
                 }
             }
 
-            // Show the share URL
-            table.add_row(Row::new(vec![
-                Cell::new("Share link:"),
-                Cell::new(url.as_str()),
-            ]));
-
-            // Show a generate passphrase
-            if password_generated {
-                table.add_row(Row::new(vec![
-                    Cell::new("Passphrase:"),
-                    Cell::new(&password.unwrap_or("?".into())),
-                ]));
-            }
-
-            // Show the owner token
             if matcher_main.verbose() {
+                // Show the share URL
+                table.add_row(Row::new(vec![
+                    Cell::new("Share link:"),
+                    Cell::new(url.as_str()),
+                ]));
+
+                // Show a generate passphrase
+                if password_generated {
+                    table.add_row(Row::new(vec![
+                        Cell::new("Passphrase:"),
+                        Cell::new(&password.unwrap_or("?".into())),
+                    ]));
+                }
+
+                // Show the owner token
                 table.add_row(Row::new(vec![
                     Cell::new("Owner token:"),
                     Cell::new(file.owner_token().unwrap()),
                 ]));
+            } else {
+                table.add_row(Row::new(vec![Cell::new(url.as_str())]));
+
+                // Show a generate passphrase
+                if password_generated {
+                    table.add_row(Row::new(vec![Cell::new(&password.unwrap_or("?".into()))]));
+                }
             }
+
             table.printstd();
         } else {
             println!("{}", url);
