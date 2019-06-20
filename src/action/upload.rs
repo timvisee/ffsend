@@ -3,6 +3,8 @@ use std::env::current_dir;
 use std::io::Error as IoError;
 use std::path::Path;
 #[cfg(feature = "archive")]
+use std::path::PathBuf;
+#[cfg(feature = "archive")]
 use std::process::exit;
 use std::sync::{Arc, Mutex};
 
@@ -57,13 +59,28 @@ impl<'a> Upload<'a> {
 
         // Get API parameters
         #[allow(unused_mut)]
-        let mut paths = matcher_upload.files();
+        let mut paths: Vec<_> = matcher_upload
+            .files()
+            .into_iter()
+            .map(|p| Path::new(p).to_path_buf())
+            .collect();
         let mut path = Path::new(paths.first().unwrap()).to_path_buf();
         let host = matcher_upload.host();
 
         // The file name to use
         #[allow(unused_mut)]
         let mut file_name = matcher_upload.name().map(|s| s.to_owned());
+
+        // All paths must exist
+        // TODO: ensure the file exists and is accessible
+        for path in &paths {
+            if !path.exists() {
+                quit_error_msg(
+                    format!("the path '{}' does not exist", path.to_str().unwrap_or("?")),
+                    ErrorHintsBuilder::default().build().unwrap(),
+                );
+            }
+        }
 
         // A temporary archive file, only used when archiving
         // The temporary file is stored here, to ensure it's lifetime exceeds the upload process
@@ -148,37 +165,34 @@ impl<'a> Upload<'a> {
                         );
                     }
 
-                    // Get the current working directory, canonicalize it
-                    let mut working_dir =
+                    // Get the current working directory, including working directory as highest possible root, canonicalize it
+                    let working_dir =
                         current_dir().expect("failed to get current working directory");
-                    if let Ok(p) = working_dir.canonicalize() {
-                        working_dir = p;
-                    }
+                    let shared_dir = {
+                        let mut paths = paths.clone();
+                        paths.push(working_dir.clone());
+                        match shared_dir(paths) {
+                            Some(p) => p,
+                            None => quit_error_msg(
+                                "when archiving, all files must be within a same directory",
+                                ErrorHintsBuilder::default().verbose(false).build().unwrap(),
+                            ),
+                        }
+                    };
 
                     // Build an archiver, append each file
                     let mut archiver = Archiver::new(archive_file);
                     for path in &paths {
-                        // Find the relative path, get path name of file to add
+                        // Canonicalize the path
                         let mut path = Path::new(path).to_path_buf();
                         if let Ok(p) = path.canonicalize() {
                             path = p;
                         }
-                        let path = diff_paths(&path, &working_dir)
-                            .expect("failed to determine relative path of file to archive");
-                        let name = path.to_str().expect("failed to get file path");
 
-                        // Files must all be in this directory
-                        // TODO: find shared parent, and archive from there instead
-                        if !matcher_main.force() && name.contains("..") {
-                            quit_error_msg(
-                                "when archiving, all files must be within the current working directory",
-                                ErrorHintsBuilder::default()
-                                    .force(true)
-                                    .verbose(false)
-                                    .build()
-                                    .unwrap(),
-                            );
-                        }
+                        // Find relative name to share dir, used to derive name from
+                        let name = diff_paths(&path, &shared_dir)
+                            .expect("failed to determine relative path of file to archive");
+                        let name = name.to_str().expect("failed to get file path");
 
                         // Add file to archiver
                         archiver
@@ -230,8 +244,6 @@ impl<'a> Upload<'a> {
         let mut desired_version = matcher_main.api();
         select_api_version(&client, host.clone(), &mut desired_version)?;
         let api_version = desired_version.version().unwrap();
-
-        // TODO: ensure the file exists and is accessible
 
         // We do not authenticate for now
         let auth = false;
@@ -463,6 +475,74 @@ impl<'a> Upload<'a> {
 
         Ok(())
     }
+}
+
+/// Find the deepest directory all given paths share.
+///
+/// This function canonicalizes the paths, make sure the paths exist.
+///
+/// Returns `None` if paths are using a different root.
+///
+/// # Examples
+///
+/// If the following paths are given:
+///
+/// - `/home/user/git/ffsend/src`
+/// - `/home/user/git/ffsend/src/main.rs`
+/// - `/home/user/git/ffsend/Cargo.toml`
+///
+/// The following is returned:
+///
+/// `/home/user/git/ffsend`
+#[cfg(feature = "archive")]
+fn shared_dir(paths: Vec<PathBuf>) -> Option<PathBuf> {
+    // Any path must be given
+    if paths.is_empty() {
+        return None;
+    }
+
+    // Build vector
+    let c: Vec<Vec<PathBuf>> = paths
+        .into_iter()
+        .map(|p| p.canonicalize().expect("failed to canonicalize path"))
+        .map(|mut p| {
+            // Start with parent if current path is file
+            if p.is_file() {
+                p = match p.parent() {
+                    Some(p) => p.to_path_buf(),
+                    None => return vec![],
+                };
+            }
+
+            // Build list of path buffers for each path component
+            let mut items = vec![p];
+            #[allow(mutable_borrow_reservation_conflict)]
+            while let Some(item) = items.last().unwrap().parent() {
+                items.push(item.to_path_buf());
+            }
+
+            // Reverse as we built it in the wrong order
+            items.reverse();
+            items
+        })
+        .collect();
+
+    // Find the index at which the paths are last shared at by walking through indices
+    let i = (0..)
+        .take_while(|i| {
+            // Get path for first item, stop if none
+            let base = &c[0].get(*i);
+            if base.is_none() {
+                return false;
+            };
+
+            // All other paths must equal at this index
+            c.iter().skip(1).all(|p| &p.get(*i) == base)
+        })
+        .last();
+
+    // Find the shared path
+    i.map(|i| c[0][i].to_path_buf())
 }
 
 #[derive(Debug, Fail)]
