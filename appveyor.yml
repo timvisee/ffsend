@@ -23,7 +23,7 @@ environment:
   matrix:
     - TARGET: x86_64-pc-windows-msvc
       BITS: 64
-      OPENSSL_VERSION: 1_1_0j
+      OPENSSL_VERSION: 1_1_0k
       OPENSSL_DIR: C:\OpenSSL
 
 # Extract release binary artifacts
