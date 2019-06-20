@@ -123,8 +123,20 @@ impl<'a> Upload<'a> {
                         .map_err(ArchiveError::CloneHandle)?;
 
                     // Select the file name to use if not set
-                    // TODO: require user to define if multiple paths
                     if file_name.is_none() {
+                        // Require user to specify name if multiple files are given
+                        if paths.len() > 1 {
+                            quit_error_msg(
+                                "you must specify a file name for the archive",
+                                ErrorHintsBuilder::default()
+                                    .name(true)
+                                    .verbose(false)
+                                    .build()
+                                    .unwrap(),
+                            );
+                        }
+
+                        // Derive name from given file
                         file_name = Some(
                             path.canonicalize()
                                 .map_err(|err| ArchiveError::FileName(Some(err)))?
