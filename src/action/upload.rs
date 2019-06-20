@@ -147,9 +147,26 @@ impl<'a> Upload<'a> {
                     let mut archiver = Archiver::new(archive_file);
                     for path in &paths {
                         // Find the relative path, get path name of file to add
-                        let path = diff_paths(Path::new(path), &working_dir)
+                        let mut path = Path::new(path).to_path_buf();
+                        if let Ok(p) = path.canonicalize() {
+                            path = p;
+                        }
+                        let path = diff_paths(&path, &working_dir)
                             .expect("failed to determine relative path of file to archive");
                         let name = path.to_str().expect("failed to get file path");
+
+                        // Files must all be in this directory
+                        // TODO: find shared parent, and archive from there instead
+                        if !matcher_main.force() && name.contains("..") {
+                            quit_error_msg(
+                                "when archiving, all files must be within the current working directory",
+                                ErrorHintsBuilder::default()
+                                    .force(true)
+                                    .verbose(false)
+                                    .build()
+                                    .unwrap(),
+                            );
+                        }
 
                         // Add file to archiver
                         archiver
