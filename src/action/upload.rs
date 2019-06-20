@@ -1,6 +1,9 @@
+use std::env::current_dir;
 #[cfg(feature = "archive")]
 use std::io::Error as IoError;
 use std::path::Path;
+#[cfg(feature = "archive")]
+use std::process::exit;
 use std::sync::{Arc, Mutex};
 
 use clap::ArgMatches;
@@ -10,6 +13,7 @@ use ffsend_api::action::upload::{Error as UploadError, Upload as ApiUpload};
 use ffsend_api::action::version::Error as VersionError;
 use ffsend_api::config::{upload_size_max, UPLOAD_SIZE_MAX_RECOMMENDED};
 use ffsend_api::pipe::ProgressReporter;
+use pathdiff::diff_paths;
 use prettytable::{format::FormatBuilder, Cell, Row, Table};
 #[cfg(feature = "qrcode")]
 use qr2term::print_qr;
@@ -53,8 +57,141 @@ impl<'a> Upload<'a> {
 
         // Get API parameters
         #[allow(unused_mut)]
-        let mut path = Path::new(matcher_upload.file()).to_path_buf();
+        let mut paths = matcher_upload.files();
+        let mut path = Path::new(paths.first().unwrap()).to_path_buf();
         let host = matcher_upload.host();
+
+        // The file name to use
+        #[allow(unused_mut)]
+        let mut file_name = matcher_upload.name().map(|s| s.to_owned());
+
+        // A temporary archive file, only used when archiving
+        // The temporary file is stored here, to ensure it's lifetime exceeds the upload process
+        #[allow(unused_mut)]
+        #[cfg(feature = "archive")]
+        let mut tmp_archive: Option<NamedTempFile> = None;
+
+        #[cfg(feature = "archive")]
+        {
+            // Determine whether to archive, we must archive for multiple files/directory
+            let mut archive = matcher_upload.archive();
+            if !archive {
+                if paths.len() > 1 {
+                    if prompt_yes(
+                        "You've selected multiple files, only a single file may be uploaded.\n\
+                         Archive the files into a single file?",
+                        Some(true),
+                        &matcher_main,
+                    ) {
+                        archive = true;
+                    } else {
+                        exit(1);
+                    }
+                } else if path.is_dir() {
+                    if prompt_yes(
+                        "You've selected a directory, only a single file may be uploaded.\n\
+                         Archive the directory into a single file?",
+                        Some(true),
+                        &matcher_main,
+                    ) {
+                        archive = true;
+                    } else {
+                        exit(1);
+                    }
+                }
+            }
+
+            // Archive the selected file or directory
+            if archive {
+                eprintln!("Archiving...");
+                let archive_extention = ".tar";
+
+                // Create a new temporary file to write the archive to
+                tmp_archive = Some(
+                    TempBuilder::new()
+                        .prefix(&format!(".{}-archive-", crate_name!()))
+                        .suffix(archive_extention)
+                        .tempfile()
+                        .map_err(ArchiveError::TempFile)?,
+                );
+                if let Some(tmp_archive) = &tmp_archive {
+                    // Get the path, and the actual file
+                    let archive_path = tmp_archive.path().to_path_buf();
+                    let archive_file = tmp_archive
+                        .as_file()
+                        .try_clone()
+                        .map_err(ArchiveError::CloneHandle)?;
+
+                    // Select the file name to use if not set
+                    // TODO: require user to define if multiple paths
+                    if file_name.is_none() {
+                        file_name = Some(
+                            path.canonicalize()
+                                .map_err(|err| ArchiveError::FileName(Some(err)))?
+                                .file_name()
+                                .ok_or(ArchiveError::FileName(None))?
+                                .to_str()
+                                .map(|s| s.to_owned())
+                                .ok_or(ArchiveError::FileName(None))?,
+                        );
+                    }
+
+                    // Get the current working directory, canonicalize it
+                    let mut working_dir =
+                        current_dir().expect("failed to get current working directory");
+                    if let Ok(p) = working_dir.canonicalize() {
+                        working_dir = p;
+                    }
+
+                    // Build an archiver, append each file
+                    let mut archiver = Archiver::new(archive_file);
+                    for path in &paths {
+                        // Find the relative path, get path name of file to add
+                        let path = diff_paths(Path::new(path), &working_dir)
+                            .expect("failed to determine relative path of file to archive");
+                        let name = path.to_str().expect("failed to get file path");
+
+                        // Add file to archiver
+                        archiver
+                            .append_path(name, &path)
+                            .map_err(ArchiveError::AddFile)?;
+                    }
+
+                    // Finish the archival process, writes the archive file
+                    archiver.finish().map_err(ArchiveError::Write)?;
+
+                    // Append archive extention to name, set to upload archived file
+                    if let Some(ref mut file_name) = file_name {
+                        file_name.push_str(archive_extention);
+                    }
+                    path = archive_path;
+                    paths.clear();
+                }
+            }
+        }
+
+        // Quit with error when uploading multiple files or directory, if we cannot archive
+        #[cfg(not(feature = "archive"))]
+        {
+            if paths.len() > 1 {
+                quit_error_msg(
+                    "uploading multiple files is not supported, ffsend must be compiled with 'archive' feature for this",
+                    ErrorHintsBuilder::default()
+                        .verbose(false)
+                        .build()
+                        .unwrap(),
+                );
+            }
+            if path.is_dir() {
+                quit_error_msg(
+                    "uploading a directory is not supported, ffsend must be compiled with 'archive' feature for this",
+                    ErrorHintsBuilder::default()
+                        .verbose(false)
+                        .build()
+                        .unwrap(),
+                );
+            }
+        }
 
         // Create a reqwest client capable for uploading files
         let client_config = create_config(&matcher_main);
@@ -154,83 +291,6 @@ impl<'a> Upload<'a> {
                 Some(params)
             }
         };
-
-        // The file name to use
-        #[allow(unused_mut)]
-        let mut file_name = matcher_upload.name().map(|s| s.to_owned());
-
-        // A temporary archive file, only used when archiving
-        // The temporary file is stored here, to ensure it's lifetime exceeds the upload process
-        #[allow(unused_mut)]
-        #[cfg(feature = "archive")]
-        let mut tmp_archive: Option<NamedTempFile> = None;
-
-        #[cfg(feature = "archive")]
-        {
-            // Determine whether to archive, ask if a directory was selected
-            let mut archive = matcher_upload.archive();
-            if !archive && path.is_dir() {
-                if prompt_yes(
-                    "You've selected a directory, only a single file may be uploaded.\n\
-                     Archive the directory into a single file?",
-                    Some(true),
-                    &matcher_main,
-                ) {
-                    archive = true;
-                }
-            }
-
-            // Archive the selected file or directory
-            if archive {
-                eprintln!("Archiving...");
-                let archive_extention = ".tar";
-
-                // Create a new temporary file to write the archive to
-                tmp_archive = Some(
-                    TempBuilder::new()
-                        .prefix(&format!(".{}-archive-", crate_name!()))
-                        .suffix(archive_extention)
-                        .tempfile()
-                        .map_err(ArchiveError::TempFile)?,
-                );
-                if let Some(tmp_archive) = &tmp_archive {
-                    // Get the path, and the actual file
-                    let archive_path = tmp_archive.path().to_path_buf();
-                    let archive_file = tmp_archive
-                        .as_file()
-                        .try_clone()
-                        .map_err(ArchiveError::CloneHandle)?;
-
-                    // Select the file name to use if not set
-                    if file_name.is_none() {
-                        file_name = Some(
-                            path.canonicalize()
-                                .map_err(|err| ArchiveError::FileName(Some(err)))?
-                                .file_name()
-                                .ok_or(ArchiveError::FileName(None))?
-                                .to_str()
-                                .map(|s| s.to_owned())
-                                .ok_or(ArchiveError::FileName(None))?,
-                        );
-                    }
-
-                    // Build an archiver and append the file
-                    let mut archiver = Archiver::new(archive_file);
-                    archiver
-                        .append_path(file_name.as_ref().unwrap(), &path)
-                        .map_err(ArchiveError::AddFile)?;
-
-                    // Finish the archival process, writes the archive file
-                    archiver.finish().map_err(ArchiveError::Write)?;
-
-                    // Append archive extention to name, set to upload archived file
-                    if let Some(ref mut file_name) = file_name {
-                        file_name.push_str(archive_extention);
-                    }
-                    path = archive_path;
-                }
-            }
-        }
 
         // Build the progress reporter
         let progress_reporter: Arc<Mutex<ProgressReporter>> = progress_bar;

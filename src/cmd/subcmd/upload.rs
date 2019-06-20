@@ -16,9 +16,9 @@ impl CmdUpload {
             .visible_alias("up")
             .arg(
                 Arg::with_name("FILE")
-                    .help("The file to upload")
+                    .help("The file(s) to upload")
                     .required(true)
-                    .multiple(false),
+                    .multiple(true),
             )
             .arg(ArgPassword::build().help("Protect the file with a password"))
             .arg(ArgGenPassphrase::build())
