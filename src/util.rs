@@ -132,6 +132,9 @@ pub struct ErrorHints {
     /// A list of info messages to print along with the error.
     info: Vec<String>,
 
+    /// Show about the name option.
+    name: bool,
+
     /// Show about the password option.
     password: bool,
 
@@ -157,7 +160,8 @@ impl ErrorHints {
     pub fn any(&self) -> bool {
         // Determine the result
         #[allow(unused_mut)]
-        let mut result = self.password || self.owner || self.force || self.verbose || self.help;
+        let mut result =
+            self.name || self.password || self.owner || self.force || self.verbose || self.help;
 
         // Factor in the history hint when enabled
         #[cfg(feature = "history")]
@@ -187,6 +191,12 @@ impl ErrorHints {
             eprintln!(
                 "Use '{}' to select a server API version",
                 highlight("--api <VERSION>")
+            );
+        }
+        if self.name {
+            eprintln!(
+                "Use '{}' to specify a file name",
+                highlight("--name <NAME>")
             );
         }
         if self.password {
@@ -230,6 +240,7 @@ impl Default for ErrorHints {
         ErrorHints {
             api: false,
             info: Vec::new(),
+            name: false,
             password: false,
             owner: false,
             #[cfg(feature = "history")]

@@ -108,6 +108,7 @@ fs2 = "0.4"
 lazy_static = "1.0"
 open = "1"
 openssl-probe = "0.1"
+pathdiff = "0.1"
 pbr = "1"
 prettytable-rs = "0.8"
 qr2term = { version = "0.1", optional = true }

@@ -18,10 +18,11 @@ pub struct UploadMatcher<'a> {
 impl<'a: 'b, 'b> UploadMatcher<'a> {
     /// Get the selected file to upload.
     // TODO: maybe return a file or path instance here
-    pub fn file(&'a self) -> &'a str {
+    pub fn files(&'a self) -> Vec<&'a str> {
         self.matches
-            .value_of("FILE")
+            .values_of("FILE")
             .expect("no file specified to upload")
+            .collect()
     }
 
     /// The the name to use for the uploaded file.
