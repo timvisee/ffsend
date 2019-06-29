@@ -55,7 +55,7 @@ fn remove_error(matcher_main: &MainMatcher, file: &RemoteFile) -> Result<bool, H
 
     // Load the history, remove the file, and save
     let mut history = History::load_or_new(matcher_main.history())?;
-    let removed = history.remove(file);
+    let removed = history.remove(file.id());
     history.save()?;
     Ok(removed)
 }

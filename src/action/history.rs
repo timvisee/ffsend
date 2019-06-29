@@ -1,10 +1,11 @@
 use clap::ArgMatches;
+use failure::Fail;
 use prettytable::{format::FormatBuilder, Cell, Row, Table};
 
-use crate::cmd::matcher::{main::MainMatcher, Matcher};
+use crate::cmd::matcher::{history::HistoryMatcher, main::MainMatcher, Matcher};
 use crate::error::ActionError;
 use crate::history::{History as HistoryManager, LoadError as HistoryLoadError};
-use crate::util::format_duration;
+use crate::util::{format_duration, quit_error, quit_error_msg, ErrorHintsBuilder};
 
 /// A history action.
 pub struct History<'a> {
@@ -22,6 +23,7 @@ impl<'a> History<'a> {
     pub fn invoke(&self) -> Result<(), ActionError> {
         // Create the command matchers
         let matcher_main = MainMatcher::with(self.cmd_matches).unwrap();
+        let matcher_history = HistoryMatcher::with(self.cmd_matches).unwrap();
 
         // Get the history path, make sure it exists
         let history_path = matcher_main.history();
@@ -33,13 +35,56 @@ impl<'a> History<'a> {
         }
 
         // History
-        let history = HistoryManager::load(history_path)?;
+        let mut history = HistoryManager::load(history_path)?;
 
         // Do not report any files if there aren't any
         if history.files().is_empty() {
             if !matcher_main.quiet() {
                 eprintln!("No files in history");
             }
+            return Ok(());
+        }
+
+        // Clear all history
+        if matcher_history.clear() {
+            history.clear();
+
+            // Save history
+            if let Err(err) = history.save() {
+                quit_error(
+                    err,
+                    ErrorHintsBuilder::default().verbose(true).build().unwrap(),
+                );
+            }
+
+            eprintln!("History cleared");
+            return Ok(());
+        }
+
+        // Remove history item
+        if let Some(url) = matcher_history.rm() {
+            // Remove item, print error if no item with URL was foudn
+            match history.remove_url(url) {
+                Ok(removed) if !removed => quit_error_msg(
+                    "could not remove item from history, no item matches given URL",
+                    ErrorHintsBuilder::default().verbose(true).build().unwrap(),
+                ),
+                Err(err) => quit_error(
+                    err.context("could not remove item from history"),
+                    ErrorHintsBuilder::default().verbose(true).build().unwrap(),
+                ),
+                _ => {}
+            }
+
+            // Save history
+            if let Err(err) = history.save() {
+                quit_error(
+                    err,
+                    ErrorHintsBuilder::default().verbose(true).build().unwrap(),
+                );
+            }
+
+            eprintln!("Item removed from history");
             return Ok(());
         }
 
@@ -50,7 +95,7 @@ impl<'a> History<'a> {
         // Log a history table, or just the URLs in quiet mode
         if !matcher_main.quiet() {
             // Build the list of column names
-            let mut columns = vec!["#", "LINK", "EXPIRY"];
+            let mut columns = vec!["#", "LINK", "EXPIRE"];
             if matcher_main.verbose() {
                 columns.push("OWNER TOKEN");
             }

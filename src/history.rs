@@ -9,7 +9,8 @@ use self::toml::de::Error as DeError;
 use self::toml::ser::Error as SerError;
 use self::version_compare::{CompOp, VersionCompare};
 use failure::Fail;
-use ffsend_api::file::remote_file::RemoteFile;
+use ffsend_api::file::remote_file::{FileParseError, RemoteFile};
+use ffsend_api::url::Url;
 
 use crate::util::{print_error, print_warning};
 
@@ -167,16 +168,16 @@ impl History {
         self.changed = true;
     }
 
-    /// Remove the given remote file, matched by it's file ID.
+    /// Remove a file, matched by it's file ID.
     ///
     /// If any file was removed, true is returned.
-    pub fn remove(&mut self, file: &RemoteFile) -> bool {
+    pub fn remove(&mut self, id: &str) -> bool {
         // Get the indices of files that have expired
         let expired_indices: Vec<usize> = self
             .files
             .iter()
             .enumerate()
-            .filter(|&(_, f)| f.id() == file.id())
+            .filter(|&(_, f)| f.id() == id)
             .map(|(i, _)| i)
             .collect();
 
@@ -192,6 +193,13 @@ impl History {
         !expired_indices.is_empty()
     }
 
+    /// Remove a file by the given URL.
+    ///
+    /// If any file was removed, true is returned.
+    pub fn remove_url(&mut self, url: Url) -> Result<bool, FileParseError> {
+        Ok(self.remove(RemoteFile::parse_url(url, None)?.id()))
+    }
+
     /// Get all files.
     pub fn files(&self) -> &Vec<RemoteFile> {
         &self.files
@@ -205,6 +213,12 @@ impl History {
         self.files
             .iter()
             .find(|f| f.id() == file.id() && f.host() == file.host())
+    }
+
+    /// Clear all history.
+    pub fn clear(&mut self) {
+        self.changed = !self.files.is_empty();
+        self.files.clear();
     }
 
     /// Garbage collect (remove) all files that have been expired,
@@ -224,7 +238,7 @@ impl History {
 
         // Remove the files
         for f in &expired {
-            self.remove(f);
+            self.remove(f.id());
         }
 
         // Set the changed flag

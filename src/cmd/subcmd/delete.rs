@@ -10,6 +10,7 @@ impl CmdDelete {
         SubCommand::with_name("delete")
             .about("Delete a shared file")
             .visible_alias("del")
+            .visible_alias("rm")
             .arg(ArgUrl::build())
             .arg(ArgOwner::build())
     }
