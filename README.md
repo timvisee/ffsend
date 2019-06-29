@@ -115,10 +115,10 @@ Other commands include:
 ```bash
 # View your file history
 $ ffsend history
-#  LINK                                        EXPIRY  OWNER TOKEN
-1  https://send.firefox.com/#sample-share-url  23h57m  eea9f544f6d5df8a5afd
-2  https://send.firefox.com/#other-sample-url  17h38m  1e9fef63fee3baaf54ce
-3  https://example.com/#sample-share-url       37m30s  8eb28bc1bc85cfdab0e4
+#  LINK                                        EXPIRE
+1  https://send.firefox.com/#sample-share-url  23h57m
+2  https://send.firefox.com/#other-sample-url  17h38m
+3  https://example.com/#sample-share-url       37m30s
 
 # Change the password after uploading
 $ ffsend password https://send.firefox.com/#sample-share-url
@@ -698,7 +698,7 @@ documentation [here][send-encryption].
 ```
 $ ffsend help
 
-ffsend 0.2.48
+ffsend 0.2.49
 Tim Visee <3a4fb3964f@sinenomine.email>
 Easily and securely share files from the command line.
 A fully featured Firefox Send client.
@@ -727,7 +727,7 @@ SUBCOMMANDS:
     upload        Upload files [aliases: u, up]
     download      Download files [aliases: d, down]
     debug         View debug information [aliases: dbg]
-    delete        Delete a shared file [aliases: del]
+    delete        Delete a shared file [aliases: del, rm]
     exists        Check whether a remote file exists [aliases: e]
     generate      Generate assets [aliases: gen]
     help          Prints this message or the help of the given subcommand(s)
