@@ -19,7 +19,12 @@ categories = [
     "network-programming",
 ]
 exclude = [
-    "res/*",
+    "/contrib",
+    "/pkg",
+    "/res",
+    "/*.yml",
+    "/CONTRIBUTING.md",
+    "/SECURITY.md",
 ]
 edition = "2018"
 build = "build.rs"
