@@ -32,6 +32,7 @@ impl CmdArg for ArgGenPassphrase {
             .alias("generate-passphrase")
             .alias("generate-password")
             .short("P")
+            .conflicts_with("password")
             .help("Protect the file with a generated passphrase")
     }
 }
