@@ -657,7 +657,7 @@ dependencies = [
  "pathdiff 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "pbr 1.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "prettytable-rs 0.8.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "qr2term 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "qr2term 0.1.4 (registry+https://github.com/rust-lang/crates.io-index)",
  "rpassword 3.0.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde 1.0.98 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_derive 1.0.98 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1345,16 +1345,16 @@ dependencies = [
 
 [[package]]
 name = "qr2term"
-version = "0.1.3"
+version = "0.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "crossterm 0.10.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "qrcode 0.10.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "qrcode 0.11.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
 name = "qrcode"
-version = "0.10.1"
+version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "checked_int_cast 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -2473,8 +2473,8 @@ dependencies = [
 "checksum proc-macro2 0.3.8 (registry+https://github.com/rust-lang/crates.io-index)" = "1b06e2f335f48d24442b35a19df506a835fb3547bc3c06ef27340da9acf5cae7"
 "checksum proc-macro2 0.4.30 (registry+https://github.com/rust-lang/crates.io-index)" = "cf3d2011ab5c909338f7887f4fc896d35932e29146c12c8d01da6b22a80ba759"
 "checksum publicsuffix 1.5.2 (registry+https://github.com/rust-lang/crates.io-index)" = "5afecba86dcf1e4fd610246f89899d1924fe12e1e89f555eb7c7f710f3c5ad1d"
-"checksum qr2term 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)" = "158b0998e4965ae9eca3ba5f617fca1eb7614907ecee8c6c55f5411bb4722e7e"
-"checksum qrcode 0.10.1 (registry+https://github.com/rust-lang/crates.io-index)" = "db39274031636ba52d4758837447a5c8d895cc729f27a8ec183e50a477b625de"
+"checksum qr2term 0.1.4 (registry+https://github.com/rust-lang/crates.io-index)" = "45bbcc3ad0c36e10a4b37851fb64826e35238dda050d2a7cd6bdc73b8602944a"
+"checksum qrcode 0.11.0 (registry+https://github.com/rust-lang/crates.io-index)" = "a0015bbb688c03b1ccc0b236fe1a1696d6481a309ca70941efb5e9417ae33de7"
 "checksum quote 0.5.2 (registry+https://github.com/rust-lang/crates.io-index)" = "9949cfe66888ffe1d53e6ec9d9f3b70714083854be20fd5e271b232a017401e8"
 "checksum quote 0.6.13 (registry+https://github.com/rust-lang/crates.io-index)" = "6ce23b6b870e8f94f81fb0a363d65d86675884b34a09043c81e5562f11c1f8e1"
 "checksum rand 0.4.6 (registry+https://github.com/rust-lang/crates.io-index)" = "552840b97013b1a26992c11eac34bdd778e464601a4c2054b5f0bff7c6761293"
