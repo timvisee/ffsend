@@ -74,6 +74,7 @@ check-old:
 # Build using Rust stable
 build-x86_64-linux-gnu:
   stage: build
+  needs: check-stable
   script:
     - cargo build --target=$RUST_TARGET --release --verbose
     - mv target/$RUST_TARGET/release/ffsend ./ffsend-$RUST_TARGET
@@ -87,6 +88,7 @@ build-x86_64-linux-gnu:
 # Build a static version
 build-x86_64-linux-musl:
   stage: build
+  needs: check-stable
   variables:
     RUST_TARGET: x86_64-unknown-linux-musl
   script:
@@ -122,6 +124,7 @@ build-x86_64-linux-musl:
 # Run the unit tests through Cargo
 test-cargo:
   stage: test
+  needs: check-stable
   dependencies: []
   script:
     - cargo test --verbose
@@ -256,6 +259,7 @@ release-docker:
 package-aur:
   image: archlinux/base
   stage: package
+  needs: release-github
   dependencies: []
   only:
     - /^v(\d+\.)*\d+$/
