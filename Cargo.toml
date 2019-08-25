@@ -105,7 +105,7 @@ clipboard-crate = ["clipboard"]
 chbs = "0.0.8"
 chrono = "0.4"
 clap = "2.33"
-colored = "1.7"
+colored = "1.8"
 derive_builder = "0.7"
 directories = "2.0"
 failure = "0.1"
@@ -118,7 +118,7 @@ pathdiff = "0.1"
 pbr = "1"
 prettytable-rs = "0.8"
 qr2term = { version = "0.1", optional = true }
-rpassword = "3.0"
+rpassword = "4.0"
 serde = "1.0"
 serde_derive = "1.0"
 tar = { version = "0.4", optional = true }

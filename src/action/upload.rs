@@ -334,7 +334,7 @@ impl<'a> Upload<'a> {
         };
 
         // Build the progress reporter
-        let progress_reporter: Arc<Mutex<ProgressReporter>> = progress_bar;
+        let progress_reporter: Arc<Mutex<dyn ProgressReporter>> = progress_bar;
 
         // Get the password to use and whether it was generated
         let password = matcher_upload.password();

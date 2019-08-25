@@ -163,7 +163,7 @@ impl<'a> Download<'a> {
 
         // Create a progress bar reporter
         let progress_bar = Arc::new(Mutex::new(ProgressBar::new_download()));
-        let progress_reader: Arc<Mutex<ProgressReporter>> = progress_bar;
+        let progress_reader: Arc<Mutex<dyn ProgressReporter>> = progress_bar;
 
         // Create a transfer client
         let transfer_client = client_config.client(true);
