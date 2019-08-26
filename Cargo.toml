@@ -111,7 +111,7 @@ directories = "2.0"
 failure = "0.1"
 ffsend-api = { version = "0.3.2", default-features = false }
 fs2 = "0.4"
-lazy_static = "1.0"
+lazy_static = "1.4"
 open = "1"
 openssl-probe = "0.1"
 pathdiff = "0.1"
