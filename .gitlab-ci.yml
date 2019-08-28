@@ -280,7 +280,9 @@ package-aur:
     - URL_BIN=https://github.com/timvisee/ffsend/releases/download/v$VERSION/ffsend-v$VERSION-linux-x64-static
     - URL_SOURCE=https://gitlab.com/timvisee/ffsend/-/archive/v$VERSION/ffsend-v$VERSION.tar.gz
     - URL_BASH_COMPLETION=https://gitlab.com/timvisee/ffsend/raw/v$VERSION/contrib/completions/ffsend.bash
+    - URL_ZSH_COMPLETION=https://gitlab.com/timvisee/ffsend/raw/v$VERSION/contrib/completions/_ffsend
     - URL_FISH_COMPLETION=https://gitlab.com/timvisee/ffsend/raw/v$VERSION/contrib/completions/ffsend.fish
+    - URL_LICENSE=https://gitlab.com/timvisee/ffsend/raw/v$VERSION/LICENSE
     - 'echo "Selected binary URL: $URL_BIN"'
     - 'echo "Selected source URL: $URL_SOURCE"'
     - echo "Determining sha256sum for remote binary..."
@@ -288,8 +290,12 @@ package-aur:
     - 'echo "Got sha256sum: $SHA_BIN"'
     - 'SHA_BASH_COMPLETION=$(curl -sSL "$URL_BASH_COMPLETION" | sha256sum | cut -d" " -f1)'
     - 'echo "Got sha256sums of bash completion: $SHA_BASH_COMPLETION"'
+    - 'SHA_ZSH_COMPLETION=$(curl -sSL "$URL_ZSH_COMPLETION" | sha256sum | cut -d" " -f1)'
+    - 'echo "Got sha256sums of ZSH completion: $SHA_ZSH_COMPLETION"'
     - 'SHA_FISH_COMPLETION=$(curl -sSL "$URL_FISH_COMPLETION" | sha256sum | cut -d" " -f1)'
     - 'echo "Got sha256sums of fish completion: $SHA_FISH_COMPLETION"'
+    - 'SHA_LICENSE=$(curl -sSL "$URL_LICENSE" | sha256sum | cut -d" " -f1)'
+    - 'echo "Got sha256sums of LICENSE: $SHA_LICENSE"'
     - echo "Determining sha256sum for remote source..."
     - 'SHA_SOURCE=$(curl -sSL "$URL_SOURCE" | sha256sum | cut -d" " -f1)'
     - 'echo "Got sha256sum: $SHA_SOURCE"'
@@ -302,9 +308,11 @@ package-aur:
     - sed "s/^source=(\"\(.*\)::.*\").*\$/source=(\"\1::$(echo $URL_SOURCE | sed 's/\//\\\//g')\")/" -i ffsend/PKGBUILD
     - sed "s/\(\"ffsend-v\$pkgver::\).*\"/\1$(echo $URL_BIN | sed 's/\//\\\//g')\"/" -i ffsend-bin/PKGBUILD
     - sed "s/\(\"ffsend-v\$pkgver.bash::\).*\"/\1$(echo $URL_BASH_COMPLETION | sed 's/\//\\\//g')\"/" -i ffsend-bin/PKGBUILD
+    - sed "s/\(\"ffsend-v\$pkgver.zsh::\).*\"/\1$(echo $URL_ZSH_COMPLETION | sed 's/\//\\\//g')\"/" -i ffsend-bin/PKGBUILD
     - sed "s/\(\"ffsend-v\$pkgver.fish::\).*\"/\1$(echo $URL_FISH_COMPLETION | sed 's/\//\\\//g')\"/" -i ffsend-bin/PKGBUILD
+    - sed "s/\(\"LICENSE-v\$pkgver::\).*\"/\1$(echo $URL_LICENSE | sed 's/\//\\\//g')\"/" -i ffsend-bin/PKGBUILD
     - sed "s/^sha256sums=.*\$/sha256sums=('$SHA_SOURCE')/" -i ffsend/PKGBUILD
-    - sed "s/^sha256sums=.*\$/sha256sums=('$SHA_BIN' '$SHA_BASH_COMPLETION' '$SHA_FISH_COMPLETION')/" -i ffsend-bin/PKGBUILD
+    - sed "s/^sha256sums=.*\$/sha256sums=('$SHA_BIN' '$SHA_BASH_COMPLETION' '$SHA_ZSH_COMPLETION' '$SHA_FISH_COMPLETION' '$SHA_LICENSE')/" -i ffsend-bin/PKGBUILD
 
     # Get SHA hash for local and remote file w/o version, update if it has changed
     - 'SHA_STRIP_LOCAL=$(cat ffsend-git/PKGBUILD | sed /^pkgver=.\*/d | sha256sum | cut -d" " -f1)'

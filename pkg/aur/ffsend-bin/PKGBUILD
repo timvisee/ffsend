@@ -13,7 +13,9 @@ url="https://gitlab.com/timvisee/ffsend"
 license=('GPL3')
 source=("ffsend-v$pkgver::https://github.com/timvisee/ffsend/releases/download/v$pkgver/ffsend-v$pkgver-linux-x64-static"
         "ffsend-v$pkgver.bash::https://raw.githubusercontent.com/timvisee/ffsend/v$pkgver/contrib/completions/ffsend.bash"
-        "ffsend-v$pkgver.fish::https://raw.githubusercontent.com/timvisee/ffsend/v$pkgver/contrib/completions/ffsend.fish") # automatically set in CI, see: /.gitlab-ci.yml
+        "ffsend-v$pkgver.zsh::https://raw.githubusercontent.com/timvisee/ffsend/v$pkgver/contrib/completions/_ffsend"
+        "ffsend-v$pkgver.fish::https://raw.githubusercontent.com/timvisee/ffsend/v$pkgver/contrib/completions/ffsend.fish"
+        "LICENSE-v$pkgver::https://raw.githubusercontent.com/timvisee/ffsend/v$pkgver/LICENSE") # automatically set in CI, see: /.gitlab-ci.yml
 sha256sums=('SKIP')
 arch=('x86_64')
 provides=('ffsend')
@@ -28,7 +30,9 @@ package() {
     # Install Binary
     install -Dm755 "ffsend-v$pkgver" "$pkgdir/usr/bin/ffsend"
 
-    # Install completions
-    install -Dm644 "ffsend-v$pkgver.bash" "$pkgver/usr/share/bash-completion/completions/ffsend"
-    install -Dm644 "ffsend-v$pkgver.fish" "$pkgver/usr/share/fish/vendor_completions.d/ffsend.fish"
+    # Install shell completions and LICENSE file
+    install -Dm644 "ffsend-v$pkgver.bash" "$pkgdir/usr/share/bash-completion/completions/ffsend"
+    install -Dm644 "ffsend-v$pkgver.zsh" "$pkgdir/usr/share/zsh/site-functions/_ffsend"
+    install -Dm644 "ffsend-v$pkgver.fish" "$pkgdir/usr/share/fish/vendor_completions.d/ffsend.fish"
+    install -Dm644 "LICENSE-v$pkgver" "$pkgdir/usr/share/licenses/ffsend/LICENSE"
 }
