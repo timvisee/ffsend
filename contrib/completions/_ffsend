@@ -21,6 +21,7 @@ _ffsend() {
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
+'--basic-auth=[HTTP basic authentication credentials]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '-f[Force the action, ignore warnings]' \
@@ -58,6 +59,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
+'--basic-auth=[HTTP basic authentication credentials]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '--help[Prints help information]' \
@@ -87,6 +89,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
+'--basic-auth=[HTTP basic authentication credentials]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '--help[Prints help information]' \
@@ -116,6 +119,39 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
+'--basic-auth=[HTTP basic authentication credentials]' \
+'-H+[Use the specified history file]' \
+'--history=[Use the specified history file]' \
+'-h[Prints help information]' \
+'--help[Prints help information]' \
+'-V[Prints version information]' \
+'--version[Prints version information]' \
+'-f[Force the action, ignore warnings]' \
+'--force[Force the action, ignore warnings]' \
+'-I[Not interactive, do not prompt]' \
+'--no-interact[Not interactive, do not prompt]' \
+'-y[Assume yes for prompts]' \
+'--yes[Assume yes for prompts]' \
+'-q[Produce output suitable for logging and automation]' \
+'--quiet[Produce output suitable for logging and automation]' \
+'*-v[Enable verbose information and logging]' \
+'*--verbose[Enable verbose information and logging]' \
+'-i[Don'\''t update local history for actions]' \
+'--incognito[Don'\''t update local history for actions]' \
+':URL -- The share URL:_files' \
+&& ret=0
+;;
+(rm)
+_arguments "${_arguments_options[@]}" \
+'-o+[Specify the file owner token]' \
+'--owner=[Specify the file owner token]' \
+'-t+[Request timeout (0 to disable)]' \
+'--timeout=[Request timeout (0 to disable)]' \
+'-T+[Transfer timeout (0 to disable)]' \
+'--transfer-timeout=[Transfer timeout (0 to disable)]' \
+'-A+[Server API version to use, '\''-'\'' to lookup]' \
+'--api=[Server API version to use, '\''-'\'' to lookup]' \
+'--basic-auth=[HTTP basic authentication credentials]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '-h[Prints help information]' \
@@ -147,6 +183,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
+'--basic-auth=[HTTP basic authentication credentials]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '-h[Prints help information]' \
@@ -180,6 +217,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
+'--basic-auth=[HTTP basic authentication credentials]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '-e[Extract an archived file]' \
@@ -215,6 +253,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
+'--basic-auth=[HTTP basic authentication credentials]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '-e[Extract an archived file]' \
@@ -250,6 +289,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
+'--basic-auth=[HTTP basic authentication credentials]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '-e[Extract an archived file]' \
@@ -281,6 +321,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
+'--basic-auth=[HTTP basic authentication credentials]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '-h[Prints help information]' \
@@ -310,6 +351,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
+'--basic-auth=[HTTP basic authentication credentials]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '-h[Prints help information]' \
@@ -339,6 +381,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
+'--basic-auth=[HTTP basic authentication credentials]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '-h[Prints help information]' \
@@ -368,6 +411,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
+'--basic-auth=[HTTP basic authentication credentials]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '-h[Prints help information]' \
@@ -405,6 +449,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
+'--basic-auth=[HTTP basic authentication credentials]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '-h[Prints help information]' \
@@ -436,6 +481,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
+'--basic-auth=[HTTP basic authentication credentials]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '-h[Prints help information]' \
@@ -467,6 +513,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
+'--basic-auth=[HTTP basic authentication credentials]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '-h[Prints help information]' \
@@ -496,6 +543,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
+'--basic-auth=[HTTP basic authentication credentials]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '-h[Prints help information]' \
@@ -528,6 +576,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
+'--basic-auth=[HTTP basic authentication credentials]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '-h[Prints help information]' \
@@ -565,6 +614,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
+'--basic-auth=[HTTP basic authentication credentials]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '-h[Prints help information]' \
@@ -596,6 +646,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
+'--basic-auth=[HTTP basic authentication credentials]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '-h[Prints help information]' \
@@ -627,6 +678,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
+'--basic-auth=[HTTP basic authentication credentials]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '-h[Prints help information]' \
@@ -656,6 +708,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
+'--basic-auth=[HTTP basic authentication credentials]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '-h[Prints help information]' \
@@ -692,6 +745,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
+'--basic-auth=[HTTP basic authentication credentials]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '-h[Prints help information]' \
@@ -725,6 +779,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
+'--basic-auth=[HTTP basic authentication credentials]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '-h[Prints help information]' \
@@ -758,6 +813,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
+'--basic-auth=[HTTP basic authentication credentials]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '-h[Prints help information]' \
@@ -791,6 +847,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
+'--basic-auth=[HTTP basic authentication credentials]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '-h[Prints help information]' \
@@ -824,6 +881,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
+'--basic-auth=[HTTP basic authentication credentials]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '-h[Prints help information]' \
@@ -857,6 +915,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
+'--basic-auth=[HTTP basic authentication credentials]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '-h[Prints help information]' \
@@ -890,6 +949,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
+'--basic-auth=[HTTP basic authentication credentials]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '-h[Prints help information]' \
@@ -923,10 +983,11 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
+'--basic-auth=[HTTP basic authentication credentials]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
-'-P[Protect the file with a generated passphrase]' \
-'--gen-passphrase[Protect the file with a generated passphrase]' \
+'(-p --password)-P[Protect the file with a generated passphrase]' \
+'(-p --password)--gen-passphrase[Protect the file with a generated passphrase]' \
 '-h[Prints help information]' \
 '--help[Prints help information]' \
 '-V[Prints version information]' \
@@ -958,10 +1019,11 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
+'--basic-auth=[HTTP basic authentication credentials]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
-'-P[Protect the file with a generated passphrase]' \
-'--gen-passphrase[Protect the file with a generated passphrase]' \
+'(-p --password)-P[Protect the file with a generated passphrase]' \
+'(-p --password)--gen-passphrase[Protect the file with a generated passphrase]' \
 '-h[Prints help information]' \
 '--help[Prints help information]' \
 '-V[Prints version information]' \
@@ -993,10 +1055,11 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
+'--basic-auth=[HTTP basic authentication credentials]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
-'-P[Protect the file with a generated passphrase]' \
-'--gen-passphrase[Protect the file with a generated passphrase]' \
+'(-p --password)-P[Protect the file with a generated passphrase]' \
+'(-p --password)--gen-passphrase[Protect the file with a generated passphrase]' \
 '-h[Prints help information]' \
 '--help[Prints help information]' \
 '-V[Prints version information]' \
@@ -1032,10 +1095,11 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
+'--basic-auth=[HTTP basic authentication credentials]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
-'-P[Protect the file with a generated passphrase]' \
-'--gen-passphrase[Protect the file with a generated passphrase]' \
+'(-p --password)-P[Protect the file with a generated passphrase]' \
+'(-p --password)--gen-passphrase[Protect the file with a generated passphrase]' \
 '-o[Open the share link in your browser]' \
 '--open[Open the share link in your browser]' \
 '-a[Archive the upload in a single file]' \
@@ -1063,7 +1127,7 @@ _arguments "${_arguments_options[@]}" \
 '*--verbose[Enable verbose information and logging]' \
 '-i[Don'\''t update local history for actions]' \
 '--incognito[Don'\''t update local history for actions]' \
-':FILE -- The file to upload:_files' \
+':FILE -- The file(s) to upload:_files' \
 && ret=0
 ;;
 (up)
@@ -1082,10 +1146,11 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
+'--basic-auth=[HTTP basic authentication credentials]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
-'-P[Protect the file with a generated passphrase]' \
-'--gen-passphrase[Protect the file with a generated passphrase]' \
+'(-p --password)-P[Protect the file with a generated passphrase]' \
+'(-p --password)--gen-passphrase[Protect the file with a generated passphrase]' \
 '-o[Open the share link in your browser]' \
 '--open[Open the share link in your browser]' \
 '-a[Archive the upload in a single file]' \
@@ -1113,7 +1178,7 @@ _arguments "${_arguments_options[@]}" \
 '*--verbose[Enable verbose information and logging]' \
 '-i[Don'\''t update local history for actions]' \
 '--incognito[Don'\''t update local history for actions]' \
-':FILE -- The file to upload:_files' \
+':FILE -- The file(s) to upload:_files' \
 && ret=0
 ;;
 (upload)
@@ -1132,10 +1197,11 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
+'--basic-auth=[HTTP basic authentication credentials]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
-'-P[Protect the file with a generated passphrase]' \
-'--gen-passphrase[Protect the file with a generated passphrase]' \
+'(-p --password)-P[Protect the file with a generated passphrase]' \
+'(-p --password)--gen-passphrase[Protect the file with a generated passphrase]' \
 '-o[Open the share link in your browser]' \
 '--open[Open the share link in your browser]' \
 '-a[Archive the upload in a single file]' \
@@ -1163,7 +1229,7 @@ _arguments "${_arguments_options[@]}" \
 '*--verbose[Enable verbose information and logging]' \
 '-i[Don'\''t update local history for actions]' \
 '--incognito[Don'\''t update local history for actions]' \
-':FILE -- The file to upload:_files' \
+':FILE -- The file(s) to upload:_files' \
 && ret=0
 ;;
 (ver)
@@ -1176,6 +1242,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
+'--basic-auth=[HTTP basic authentication credentials]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '--help[Prints help information]' \
@@ -1205,6 +1272,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
+'--basic-auth=[HTTP basic authentication credentials]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '--help[Prints help information]' \
@@ -1234,6 +1302,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
+'--basic-auth=[HTTP basic authentication credentials]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '--help[Prints help information]' \
@@ -1255,14 +1324,19 @@ _arguments "${_arguments_options[@]}" \
 ;;
 (h)
 _arguments "${_arguments_options[@]}" \
+'-R+[Remove history entry]' \
+'--rm=[Remove history entry]' \
 '-t+[Request timeout (0 to disable)]' \
 '--timeout=[Request timeout (0 to disable)]' \
 '-T+[Transfer timeout (0 to disable)]' \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
+'--basic-auth=[HTTP basic authentication credentials]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
+'-C[Clear all history]' \
+'--clear[Clear all history]' \
 '-h[Prints help information]' \
 '--help[Prints help information]' \
 '-V[Prints version information]' \
@@ -1283,14 +1357,19 @@ _arguments "${_arguments_options[@]}" \
 ;;
 (ls)
 _arguments "${_arguments_options[@]}" \
+'-R+[Remove history entry]' \
+'--rm=[Remove history entry]' \
 '-t+[Request timeout (0 to disable)]' \
 '--timeout=[Request timeout (0 to disable)]' \
 '-T+[Transfer timeout (0 to disable)]' \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
+'--basic-auth=[HTTP basic authentication credentials]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
+'-C[Clear all history]' \
+'--clear[Clear all history]' \
 '-h[Prints help information]' \
 '--help[Prints help information]' \
 '-V[Prints version information]' \
@@ -1311,14 +1390,19 @@ _arguments "${_arguments_options[@]}" \
 ;;
 (history)
 _arguments "${_arguments_options[@]}" \
+'-R+[Remove history entry]' \
+'--rm=[Remove history entry]' \
 '-t+[Request timeout (0 to disable)]' \
 '--timeout=[Request timeout (0 to disable)]' \
 '-T+[Transfer timeout (0 to disable)]' \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
+'--basic-auth=[HTTP basic authentication credentials]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
+'-C[Clear all history]' \
+'--clear[Clear all history]' \
 '-h[Prints help information]' \
 '--help[Prints help information]' \
 '-V[Prints version information]' \
@@ -1345,6 +1429,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
+'--basic-auth=[HTTP basic authentication credentials]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '-h[Prints help information]' \
@@ -1377,6 +1462,7 @@ _ffsend_commands() {
 "dbg:View debug information" \
 "delete:Delete a shared file" \
 "del:Delete a shared file" \
+"rm:Delete a shared file" \
 "download:Download files" \
 "d:Download files" \
 "down:Download files" \
@@ -1732,6 +1818,20 @@ _ffsend__password_commands() {
         
     )
     _describe -t commands 'ffsend password commands' commands "$@"
+}
+(( $+functions[_ffsend__rm_commands] )) ||
+_ffsend__rm_commands() {
+    local commands; commands=(
+        
+    )
+    _describe -t commands 'ffsend rm commands' commands "$@"
+}
+(( $+functions[_rm_commands] )) ||
+_rm_commands() {
+    local commands; commands=(
+        
+    )
+    _describe -t commands 'rm commands' commands "$@"
 }
 (( $+functions[_ffsend__u_commands] )) ||
 _ffsend__u_commands() {
