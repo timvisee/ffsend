@@ -202,6 +202,8 @@ ffsend --help
 _Note: The Nix package is currently not automatically updated, and might be
 slightly outdated._
 
+[» ffsend][nix-ffsend]
+
 ```bash
 nix-channel --update
 nix-env --install ffsend
@@ -213,8 +215,22 @@ ffsend --help
 _Note: The Fedora package is maintained by contributors, it might be outdated.
 Choose a different installation method if an important update is missing._
 
+[» ffsend][fedora-ffsend]
+
 ```bash
 yum install ffsend
+
+ffsend --help
+```
+
+#### Linux: Alpine package
+_Note: The Alpine package is maintained by contributors, it might be outdated.
+Choose a different installation method if an important update is missing._
+
+[» ffsend][alpine-ffsend]
+
+```bash
+apk add ffsend --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing
 
 ffsend --help
 ```
@@ -766,9 +782,12 @@ Check out the [LICENSE](LICENSE) file for more information.
 [svg-term]: https://github.com/marionebl/svg-term-cli
 [github-releases]: https://github.com/timvisee/ffsend/releases
 [github-latest-release]: https://github.com/timvisee/ffsend/releases/latest
+[nix-ffsend]: https://nixos.org/nixos/packages.html?attr=ffsend&channel=nixos-unstable&query=ffsend
+[fedora-ffsend]: https://fedora.pkgs.org/rawhide/fedora-x86_64/ffsend-0.2.49-2.fc31.x86_64.rpm.html
 [aur-ffsend]: https://aur.archlinux.org/packages/ffsend/
 [aur-ffsend-bin]: https://aur.archlinux.org/packages/ffsend-bin/
 [aur-ffsend-git]: https://aur.archlinux.org/packages/ffsend-git/
+[alpine-ffsend]: https://pkgs.alpinelinux.org/packages?name=ffsend&branch=edge
 [snapcraft-ffsend]: https://snapcraft.io/ffsend
 [homebrew]: https://brew.sh/
 [wsl]: https://docs.microsoft.com/en-us/windows/wsl/install-win10
