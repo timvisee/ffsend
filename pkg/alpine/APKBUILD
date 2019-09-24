@@ -1,0 +1,65 @@
+# Contributor: Rasmus Thomsen <oss@cogitri.dev>
+# Maintainer: Rasmus Thomsen <oss@cogitri.dev>
+pkgname=ffsend
+pkgver=0.2.51
+pkgrel=0
+pkgdesc=" A fully featured Firefox Send client"
+url="https://gitlab.com/timvisee/ffsend"
+arch="x86_64 x86 armhf armv7 aarch64 ppc64le" # limited by cargo
+license="GPL-3.0-only"
+makedepends="cargo openssl-dev"
+subpackages="
+	$pkgname-zsh-completion:zshcomp:noarch
+	$pkgname-fish-completion:fishcomp:noarch
+	$pkgname-bash-completion:bashcomp:noarch
+	"
+source="https://gitlab.com/timvisee/ffsend/-/archive/v$pkgver/ffsend-v$pkgver.tar.gz"
+builddir="$srcdir/$pkgname-v$pkgver"
+
+case "$CARCH" in
+	x86)
+		export CFLAGS="$CFLAGS -fno-stack-protector"
+		;;
+esac
+
+build() {
+	cargo build --release
+}
+
+check() {
+	cargo test --release
+}
+
+package() {
+	cargo install --path . --root="$pkgdir/usr"
+	rm "$pkgdir"/usr/.crates.toml
+}
+
+bashcomp() {
+	depends=""
+	pkgdesc="Bash completions for $pkgname"
+	install_if="$pkgname=$pkgver-r$pkgrel bash-completion"
+
+	install -Dm644 "$builddir"/contrib/completions/ffsend.bash \
+			"$subpkgdir"/usr/share/bash-completion/completions/ffsend
+}
+
+zshcomp() {
+	depends=""
+	pkgdesc="Zsh compltions for $pkgname"
+	install_if="$pkgname=$pkgver-r$pkgrel zsh"
+
+	install -Dm644 "$builddir"/contrib/completions/_ffsend \
+			"$subpkgdir"/usr/share/zsh/site-functions/_ffsend
+}
+
+fishcomp() {
+	depends=""
+	pkgdesc="Fish completions for $pkgname"
+	install_if="$pkgname=$pkgver-r$pkgrel fish"
+
+	install -Dm644 "$builddir"/contrib/completions/ffsend.fish \
+			"$subpkgdir"/usr/share/fish/completions/ffsend.fish
+}
+
+sha512sums="97477f59a498f4805340647c50c139d70ddbabaebb49b4acbae595ed9987fa2941b8d4dfd2edf76264b2a500fa10ac10f8583938fb29013936d9c092fe7fe7f1  ffsend-v0.2.51.tar.gz"
