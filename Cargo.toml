@@ -109,7 +109,7 @@ colored = "1.8"
 derive_builder = "0.7"
 directories = "2.0"
 failure = "0.1"
-ffsend-api = { version = "0.3.2", default-features = false }
+ffsend-api = { version = "0.3.3", default-features = false }
 fs2 = "0.4"
 lazy_static = "1.0"
 open = "1"
