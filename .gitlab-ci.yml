@@ -168,7 +168,7 @@ release-crate:
 
 # Snap release
 release-snap:
-  image: snapcore/snapcraft:edge
+  image: snapcore/snapcraft:stable
   stage: release
   dependencies: []
   only:
@@ -177,6 +177,7 @@ release-snap:
   script:
     # Prepare the environment
     - apt-get update -y
+    - apt-get install python3 -yqq
     - cd pkg/snap
 
     # Update version number in snapcraft.yaml
