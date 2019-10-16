@@ -177,6 +177,11 @@ _Note: The `ffsend` `snap` package is isolated, and can only access files in
 your home directory. Choose a different installation option if you don't want
 this limitation._
 
+_Note: due to how `snap` is configured by default, you won't be able to use the
+package from some contexts such as through SSH without manual modifications. If
+you're experiencing problems, please refer to a different installation method
+such as the [prebuilt binaries](#linux-prebuilt-binaries), or open an issue._
+
 [» `ffsend`][snapcraft-ffsend]
 
 ```bash
