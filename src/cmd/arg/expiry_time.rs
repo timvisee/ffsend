@@ -1,10 +1,14 @@
+use chrono::Duration;
 use clap::{Arg, ArgMatches};
+use failure::Fail;
 use ffsend_api::api::Version as ApiVersion;
 use ffsend_api::config::expiry_max;
 
 use super::{CmdArg, CmdArgFlag, CmdArgOption};
 use crate::cmd::matcher::MainMatcher;
-use crate::util::{highlight, prompt_yes, quit};
+use crate::util::{
+    format_duration, highlight, parse_duration, prompt_yes, quit, quit_error, ErrorHints,
+};
 
 /// The download limit argument.
 pub struct ArgExpiryTime {}
@@ -25,10 +29,13 @@ impl ArgExpiryTime {
             return Some(expiry);
         }
 
+        // Define function to format seconds
+        let format_secs = |secs: usize| format_duration(Duration::seconds(secs as i64));
+
         // Prompt the user the specified expiry time is invalid
         let allowed_str = allowed
             .iter()
-            .map(|value| format!("{}", value))
+            .map(|secs| format_secs(*secs))
             .collect::<Vec<_>>()
             .join(", ");
         eprintln!("The expiry time must be one of: {}", allowed_str);
@@ -44,7 +51,10 @@ impl ArgExpiryTime {
         // Ask to use closest limit, quit if user cancelled
         let closest = closest(allowed, expiry);
         if !prompt_yes(
-            &format!("Would you like to set expiry time to {} instead?", closest),
+            &format!(
+                "Would you like to set expiry time to {} instead?",
+                format_secs(closest)
+            ),
             None,
             main_matcher,
         ) {
@@ -78,8 +88,13 @@ impl<'a> CmdArgOption<'a> for ArgExpiryTime {
     type Value = Option<usize>;
 
     fn value<'b: 'a>(matches: &'a ArgMatches<'b>) -> Self::Value {
-        // TODO: do not unwrap, report an error
-        Self::value_raw(matches).map(|d| d.parse::<usize>().expect("invalid expiry time"))
+        Self::value_raw(matches).map(|t| match parse_duration(t) {
+            Ok(seconds) => seconds,
+            Err(err) => quit_error(
+                err.context("specified invalid file expiry time"),
+                ErrorHints::default(),
+            ),
+        })
     }
 }
 
