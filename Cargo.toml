@@ -109,7 +109,7 @@ colored = "1.8"
 derive_builder = "0.7"
 directories = "2.0"
 failure = "0.1"
-ffsend-api = { version = "0.3.3", default-features = false }
+ffsend-api = { version = "0.4", default-features = false }
 fs2 = "0.4"
 lazy_static = "1.0"
 open = "1"
@@ -133,3 +133,8 @@ which = { version = "2.0", optional = true }
 [target.'cfg(not(any(target_os = "linux", target_os = "freebsd", target_os = "dragonfly", target_os = "openbsd", target_os = "netbsd")))'.dependencies]
 # Aliased to clip to prevent name collision with clipboard feature
 clip = { version = "0.5", optional = true, package = "clipboard" }
+
+# TODO: remove before merging to master, when ffsend-api v0.4.0 is published
+[patch.crates-io.ffsend-api]
+git = "https://github.com/timvisee/ffsend-api.git"
+tag = "v0.4.0"

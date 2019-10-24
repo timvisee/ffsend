@@ -1,6 +1,7 @@
 pub mod api;
 pub mod basic_auth;
 pub mod download_limit;
+pub mod expiry_time;
 pub mod gen_passphrase;
 pub mod host;
 pub mod owner;
@@ -11,6 +12,7 @@ pub mod url;
 pub use self::api::ArgApi;
 pub use self::basic_auth::ArgBasicAuth;
 pub use self::download_limit::ArgDownloadLimit;
+pub use self::expiry_time::ArgExpiryTime;
 pub use self::gen_passphrase::ArgGenPassphrase;
 pub use self::host::ArgHost;
 pub use self::owner::ArgOwner;

@@ -1,37 +1,37 @@
 use clap::{Arg, ArgMatches};
 use ffsend_api::api::Version as ApiVersion;
-use ffsend_api::config::downloads_max;
+use ffsend_api::config::expiry_max;
 
 use super::{CmdArg, CmdArgFlag, CmdArgOption};
 use crate::cmd::matcher::MainMatcher;
 use crate::util::{highlight, prompt_yes, quit};
 
 /// The download limit argument.
-pub struct ArgDownloadLimit {}
+pub struct ArgExpiryTime {}
 
-impl ArgDownloadLimit {
+impl ArgExpiryTime {
     pub fn value_checked<'a>(
         matches: &ArgMatches<'a>,
         main_matcher: &MainMatcher,
         api_version: ApiVersion,
         auth: bool,
     ) -> Option<usize> {
-        // Get the download value
-        let mut downloads = Self::value(matches)?;
+        // Get the expiry time value
+        let mut expiry = Self::value(matches)?;
 
-        // Get number of allowed downloads, return if allowed or when forcing
-        let allowed = downloads_max(api_version, auth);
-        if allowed.contains(&downloads) || main_matcher.force() {
-            return Some(downloads);
+        // Get expiry time, return if allowed or when forcing
+        let allowed = expiry_max(api_version, auth);
+        if allowed.contains(&expiry) || main_matcher.force() {
+            return Some(expiry);
         }
 
-        // Prompt the user the specified downloads limit is invalid
+        // Prompt the user the specified expiry time is invalid
         let allowed_str = allowed
             .iter()
             .map(|value| format!("{}", value))
             .collect::<Vec<_>>()
             .join(", ");
-        eprintln!("The downloads limit must be one of: {}", allowed_str);
+        eprintln!("The expiry time must be one of: {}", allowed_str);
         if auth {
             eprintln!("Use '{}' to force", highlight("--force"));
         } else {
@@ -42,44 +42,44 @@ impl ArgDownloadLimit {
         }
 
         // Ask to use closest limit, quit if user cancelled
-        let closest = closest(allowed, downloads);
+        let closest = closest(allowed, expiry);
         if !prompt_yes(
-            &format!("Would you like to limit downloads to {} instead?", closest),
+            &format!("Would you like to set expiry time to {} instead?", closest),
             None,
             main_matcher,
         ) {
             quit();
         }
-        downloads = closest;
+        expiry = closest;
 
-        Some(downloads)
+        Some(expiry)
     }
 }
 
-impl CmdArg for ArgDownloadLimit {
+impl CmdArg for ArgExpiryTime {
     fn name() -> &'static str {
-        "download-limit"
+        "expiry-time"
     }
 
     fn build<'b, 'c>() -> Arg<'b, 'c> {
-        Arg::with_name("download-limit")
-            .long("download-limit")
-            .short("d")
-            .alias("downloads")
-            .alias("download")
-            .value_name("COUNT")
-            .help("The file download limit")
+        Arg::with_name("expiry-time")
+            .long("expiry-time")
+            .short("e")
+            .alias("expire")
+            .alias("expiry")
+            .value_name("TIME")
+            .help("The file expiry time")
     }
 }
 
-impl CmdArgFlag for ArgDownloadLimit {}
+impl CmdArgFlag for ArgExpiryTime {}
 
-impl<'a> CmdArgOption<'a> for ArgDownloadLimit {
+impl<'a> CmdArgOption<'a> for ArgExpiryTime {
     type Value = Option<usize>;
 
     fn value<'b: 'a>(matches: &'a ArgMatches<'b>) -> Self::Value {
         // TODO: do not unwrap, report an error
-        Self::value_raw(matches).map(|d| d.parse::<usize>().expect("invalid download limit"))
+        Self::value_raw(matches).map(|d| d.parse::<usize>().expect("invalid expiry time"))
     }
 }
 
