@@ -1,4 +1,4 @@
-[![Build status on GitLab CI][gitlab-ci-master-badge]][gitlab-ci-link]
+> [![Build status on GitLab CI][gitlab-ci-master-badge]][gitlab-ci-link]
 [![Newest release on crates.io][crate-version-badge]][crate-link]
 [![Project license][crate-license-badge]](LICENSE)
 
@@ -717,7 +717,7 @@ documentation [here][send-encryption].
 ```
 $ ffsend help
 
-ffsend 0.2.52
+ffsend 0.2.53
 Tim Visee <3a4fb3964f@sinenomine.email>
 Easily and securely share files from the command line.
 A fully featured Firefox Send client.
