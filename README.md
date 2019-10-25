@@ -74,12 +74,13 @@ $ ffsend upload my-file.txt
 https://send.firefox.com/#sample-share-url
 
 # Advanced upload
-# - Specify a download limit of 20
+# - Specify a download limit of 1
+# - Specify upload expiry time of 5 minutes
 # - Enter a password to encrypt the file
 # - Archive the file before uploading
 # - Copy the shareable link to your clipboard
 # - Open the shareable link in your browser
-$ ffsend upload --downloads 20 --password --archive --copy --open my-file.txt
+$ ffsend upload --downloads 1 --expiry 5m --password --archive --copy --open my-file.txt
 Password: ******
 https://send.firefox.com/#sample-share-url
 

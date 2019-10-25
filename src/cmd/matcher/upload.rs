@@ -5,7 +5,10 @@ use ffsend_api::url::Url;
 
 use super::Matcher;
 use crate::cmd::{
-    arg::{ArgDownloadLimit, ArgGenPassphrase, ArgHost, ArgPassword, CmdArgFlag, CmdArgOption},
+    arg::{
+        ArgDownloadLimit, ArgExpiryTime, ArgGenPassphrase, ArgHost, ArgPassword, CmdArgFlag,
+        CmdArgOption,
+    },
     matcher::MainMatcher,
 };
 use crate::util::{bin_name, env_var_present, quit_error_msg, ErrorHintsBuilder};
@@ -91,6 +94,18 @@ impl<'a: 'b, 'b> UploadMatcher<'a> {
                 d => Some(d),
             },
         )
+    }
+
+    /// Get the expiry time in seconds.
+    ///
+    /// If the expiry time was not set, `None` is returned.
+    pub fn expiry_time(
+        &'a self,
+        main_matcher: &MainMatcher,
+        api_version: ApiVersion,
+        auth: bool,
+    ) -> Option<usize> {
+        ArgExpiryTime::value_checked(self.matches, main_matcher, api_version, auth)
     }
 
     /// Check whether to archive the file to upload.

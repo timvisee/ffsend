@@ -1,7 +1,8 @@
 use clap::{App, Arg, SubCommand};
-use ffsend_api::action::params::PARAMS_DEFAULT_DOWNLOAD_STR as DOWNLOAD_DEFAULT;
 
-use crate::cmd::arg::{ArgDownloadLimit, ArgGenPassphrase, ArgHost, ArgPassword, CmdArg};
+use crate::cmd::arg::{
+    ArgDownloadLimit, ArgExpiryTime, ArgGenPassphrase, ArgHost, ArgPassword, CmdArg,
+};
 
 /// The upload command definition.
 pub struct CmdUpload;
@@ -22,7 +23,8 @@ impl CmdUpload {
             )
             .arg(ArgPassword::build().help("Protect the file with a password"))
             .arg(ArgGenPassphrase::build())
-            .arg(ArgDownloadLimit::build().default_value(DOWNLOAD_DEFAULT))
+            .arg(ArgDownloadLimit::build())
+            .arg(ArgExpiryTime::build())
             .arg(ArgHost::build())
             .arg(
                 Arg::with_name("name")

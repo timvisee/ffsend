@@ -31,7 +31,7 @@ impl ArgDownloadLimit {
             .map(|value| format!("{}", value))
             .collect::<Vec<_>>()
             .join(", ");
-        eprintln!("The downloads limit must be one of: {}", allowed_str,);
+        eprintln!("The downloads limit must be one of: {}", allowed_str);
         if auth {
             eprintln!("Use '{}' to force", highlight("--force"));
         } else {

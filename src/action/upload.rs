@@ -322,6 +322,7 @@ impl<'a> Upload<'a> {
                         .download_limit(&matcher_main, api_version, auth)
                         .map(|d| d as u8),
                 )
+                .expiry_time(matcher_upload.expiry_time(&matcher_main, api_version, auth))
                 .build()
                 .unwrap();
 
