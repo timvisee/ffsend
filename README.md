@@ -142,7 +142,7 @@ all available subcommands.
     - CentOS/Red Hat/openSUSE/Fedora: `yum install xclip`
     - Arch: `pacman -S xclip`
 - Windows specific:
-  - OpenSSL v0.1.0j (or above): [» Installer][openssl-windows-installer]
+  - OpenSSL v1.1.0j (or above): [» Installer][openssl-windows-installer]
 - macOS specific:
   - OpenSSL: `brew install openssl@1.1`
 - FreeBSD specific:
