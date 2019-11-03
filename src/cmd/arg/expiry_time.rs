@@ -24,8 +24,8 @@ impl ArgExpiryTime {
         let mut expiry = Self::value(matches)?;
 
         // Get expiry time, return if allowed or when forcing
-        let allowed = expiry_max(api_version, auth);
-        if allowed.contains(&expiry) || main_matcher.force() {
+        let max = *expiry_max(api_version, auth).into_iter().max().unwrap();
+        if expiry <= max || main_matcher.force() {
             return Some(expiry);
         }
 
@@ -33,12 +33,10 @@ impl ArgExpiryTime {
         let format_secs = |secs: usize| format_duration(Duration::seconds(secs as i64));
 
         // Prompt the user the specified expiry time is invalid
-        let allowed_str = allowed
-            .iter()
-            .map(|secs| format_secs(*secs))
-            .collect::<Vec<_>>()
-            .join(", ");
-        eprintln!("The expiry time must be one of: {}", allowed_str);
+        eprintln!(
+            "The expiry time must equal to or less than: {}",
+            format_secs(max),
+        );
         if auth {
             eprintln!("Use '{}' to force", highlight("--force"));
         } else {
@@ -48,19 +46,18 @@ impl ArgExpiryTime {
             );
         }
 
-        // Ask to use closest limit, quit if user cancelled
-        let closest = closest(allowed, expiry);
+        // Ask to use maximum expiry time instead, quit if user cancelled
         if !prompt_yes(
             &format!(
                 "Would you like to set expiry time to {} instead?",
-                format_secs(closest)
+                format_secs(max),
             ),
             None,
             main_matcher,
         ) {
             quit();
         }
-        expiry = closest;
+        expiry = max;
 
         Some(expiry)
     }
@@ -96,20 +93,4 @@ impl<'a> CmdArgOption<'a> for ArgExpiryTime {
             ),
         })
     }
-}
-
-/// Find the closest value to `current` in the given `values` range.
-fn closest(values: &[usize], current: usize) -> usize {
-    // Own the values, sort and reverse, start with biggest first
-    let mut values = values.to_vec();
-    values.sort_unstable();
-
-    // Find the closest value, return it
-    *values
-        .iter()
-        .rev()
-        .map(|value| (value, (current as i64 - *value as i64).abs()))
-        .min_by_key(|value| value.1)
-        .expect("failed to find closest value, none given")
-        .0
 }
