@@ -6,7 +6,7 @@ use ffsend_api::api::DesiredVersion;
 
 use super::Matcher;
 use crate::cmd::arg::{ArgApi, ArgBasicAuth, CmdArgOption};
-use crate::util::env_var_present;
+use crate::util::{env_var_present, parse_duration};
 #[cfg(feature = "history")]
 use crate::util::{quit_error_msg, ErrorHintsBuilder};
 
@@ -65,16 +65,16 @@ impl<'a: 'b, 'b> MainMatcher<'a> {
     pub fn timeout(&self) -> u64 {
         self.matches
             .value_of("timeout")
-            .and_then(|arg| arg.parse().ok())
-            .expect("invalid timeout value")
+            .and_then(|arg| parse_duration(arg).ok())
+            .expect("invalid timeout value") as u64
     }
 
     /// Get the transfer timeout in seconds
     pub fn transfer_timeout(&self) -> u64 {
         self.matches
             .value_of("transfer-timeout")
-            .and_then(|arg| arg.parse().ok())
-            .expect("invalid transfer-timeout value")
+            .and_then(|arg| parse_duration(arg).ok())
+            .expect("invalid transfer-timeout value") as u64
     }
 
     /// Check whether we are incognito from the file history.

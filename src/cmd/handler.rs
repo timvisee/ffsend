@@ -25,6 +25,7 @@ use crate::config::{CLIENT_TIMEOUT, CLIENT_TRANSFER_TIMEOUT};
 use crate::util::app_history_file_path_string;
 #[cfg(feature = "infer-command")]
 use crate::util::bin_name;
+use crate::util::parse_duration;
 
 #[cfg(feature = "history")]
 lazy_static! {
@@ -100,13 +101,13 @@ impl<'a: 'b, 'b> Handler<'a> {
                     .hide_default_value(true)
                     .env("FFSEND_TIMEOUT")
                     .hide_env_values(true)
-                    .validator(|arg| arg
-                        .parse::<u64>()
-                        .map(|_| ())
-                        .map_err(|_| String::from(
-                                "Timeout time must be a positive number of seconds, or 0 to disable."
-                        ))
-                    ),
+                    .validator(|arg| {
+                        parse_duration(&arg).map(drop).map_err(|_| {
+                            String::from(
+                            "Timeout time must be a positive number of seconds, or 0 to disable."
+                        )
+                        })
+                    }),
             )
             .arg(
                 Arg::with_name("transfer-timeout")
@@ -125,13 +126,13 @@ impl<'a: 'b, 'b> Handler<'a> {
                     .hide_default_value(true)
                     .env("FFSEND_TRANSFER_TIMEOUT")
                     .hide_env_values(true)
-                    .validator(|arg| arg
-                        .parse::<u64>()
-                        .map(|_| ())
-                        .map_err(|_| String::from(
-                                "Timeout time must be a positive number of seconds, or 0 to disable."
-                        ))
-                    ),
+                    .validator(|arg| {
+                        parse_duration(&arg).map(drop).map_err(|_| {
+                            String::from(
+                            "Timeout time must be a positive number of seconds, or 0 to disable."
+                        )
+                        })
+                    }),
             )
             .arg(
                 Arg::with_name("quiet")
