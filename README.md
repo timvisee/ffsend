@@ -421,7 +421,7 @@ before proceeding:
 ### Build requirements
 - Regular [requirements](#requirements)
 - [`git`][git]
-- [`rust`][rust] `v1.34` or higher (install using [`rustup`][rustup])
+- [`rust`][rust] `v1.37` or higher (install using [`rustup`][rustup])
 - [OpenSSL][openssl] or [LibreSSL][libressl] libraries and headers must be available
   - Linux:
     - Ubuntu, Debian and derivatives: `apt install build-essential cmake pkg-config libssl-dev`
