@@ -31,7 +31,7 @@ Find out more about security [here](#security).
 - [Features](#features)
 - [Usage](#usage)
 - [Requirements](#requirements)
-- [Install](#install) ([Linux](#linux-all-distributions), [macOS](#macos), [Windows](#windows), [FreeBSD](#freebsd), [_Other OS/arch_](#other-os-or-architecture))
+- [Install](#install) ([Linux](#linux-all-distributions), [macOS](#macos), [Windows](#windows), [FreeBSD](#freebsd), [Android](#android), [_Other OS/arch_](#other-os-or-architecture))
 - [Build](#build)
 - [Configuration and environment](#configuration-and-environment)
 - [Security](#security)
@@ -149,6 +149,8 @@ all available subcommands.
   - OpenSSL: `pkg install openssl`
   - CA certificates: `pkg install ca_root_nss`
   - Optional `xclip` & `xsel` for clipboard support: `pkg install xclip xsel-conrad`
+- Android specific:
+  - Termux: [» Termux][termux]
 
 ## Install
 Because `ffsend` is still in alpha, only limited installation options are
@@ -161,6 +163,7 @@ See the operating system specific instructions below:
 - [macOS](#macos)
 - [Windows](#windows)
 - [FreeBSD](#freebsd)
+- [Android](#android)
 - [_Other OS or architecture_](#other-os-or-architecture)
 
 ### Linux (all distributions)
@@ -372,6 +375,20 @@ pkg install ffsend
 
 # Compiles and installs from source.
 cd /usr/ports/www/ffsend && make install
+```
+
+### Android
+`ffsend` can be used on Android through Termux, install it first:
+[» Termux][termux]
+
+_Note: The Android package is currently maintained by Termux contributors,
+and might be slightly outdated._
+
+```sh
+# Install package.
+pkg install ffsend
+
+ffsend help
 ```
 
 ### Other OS or architecture
@@ -780,6 +797,7 @@ Check out the [LICENSE](LICENSE) file for more information.
 [mozilla]: https://mozilla.org/
 [openssl]: https://www.openssl.org/
 [openssl-windows-installer]: https://u.visee.me/dl/openssl/Win64OpenSSL_Light-1_1_0j.exe
+[termux]: https://termux.com/
 [rust]: https://rust-lang.org/
 [rustup]: https://rustup.rs/
 [send]: https://send.firefox.com/
