@@ -201,7 +201,8 @@ ffsend --help
 ```bash
 yay -S ffsend
 # or
-aurget -S ffsend-bin
+aurto add ffsend
+sudo pacman -S ffsend
 # or using any other AUR helper
 
 ffsend --help
