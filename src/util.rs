@@ -395,6 +395,7 @@ impl ClipboardType {
         Self::sys_cmd_set(
             "xclip",
             Command::new(path.unwrap_or_else(|| "xclip".into()))
+                .arg("-f")
                 .arg("-sel")
                 .arg("clip"),
             content,
