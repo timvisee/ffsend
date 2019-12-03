@@ -418,7 +418,7 @@ impl ClipboardType {
         content: String,
     ) -> Result<(), ClipboardError> {
         // Spawn the command process for setting the clipboard
-        let mut process = match command.stdin(Stdio::piped()).spawn() {
+        let mut process = match command.stdin(Stdio::piped()).stdout(Stdio::null()).spawn() {
             Ok(process) => process,
             Err(err) => {
                 return Err(match err.kind() {
