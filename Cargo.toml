@@ -20,6 +20,7 @@ categories = [
 ]
 exclude = [
     "/.github",
+    "/contrib",
     "/pkg",
     "/res",
     "/*.yml",
