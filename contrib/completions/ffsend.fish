@@ -170,6 +170,7 @@ complete -c ffsend -n "__fish_seen_subcommand_from password" -s v -l verbose -d 
 complete -c ffsend -n "__fish_seen_subcommand_from password" -s i -l incognito -d 'Don\'t update local history for actions'
 complete -c ffsend -n "__fish_seen_subcommand_from upload" -s p -l password -d 'Protect the file with a password'
 complete -c ffsend -n "__fish_seen_subcommand_from upload" -s d -l download-limit -d 'The file download limit'
+complete -c ffsend -n "__fish_seen_subcommand_from upload" -s e -l expiry-time -d 'The file expiry time'
 complete -c ffsend -n "__fish_seen_subcommand_from upload" -s h -l host -d 'The remote host to upload to'
 complete -c ffsend -n "__fish_seen_subcommand_from upload" -s n -l name -d 'Rename the file being uploaded'
 complete -c ffsend -n "__fish_seen_subcommand_from upload" -s t -l timeout -d 'Request timeout (0 to disable)'

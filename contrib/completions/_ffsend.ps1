@@ -371,6 +371,8 @@ Register-ArgumentCompleter -Native -CommandName 'ffsend' -ScriptBlock {
             [CompletionResult]::new('--password', 'password', [CompletionResultType]::ParameterName, 'Protect the file with a password')
             [CompletionResult]::new('-d', 'd', [CompletionResultType]::ParameterName, 'The file download limit')
             [CompletionResult]::new('--download-limit', 'download-limit', [CompletionResultType]::ParameterName, 'The file download limit')
+            [CompletionResult]::new('-e', 'e', [CompletionResultType]::ParameterName, 'The file expiry time')
+            [CompletionResult]::new('--expiry-time', 'expiry-time', [CompletionResultType]::ParameterName, 'The file expiry time')
             [CompletionResult]::new('-h', 'h', [CompletionResultType]::ParameterName, 'The remote host to upload to')
             [CompletionResult]::new('--host', 'host', [CompletionResultType]::ParameterName, 'The remote host to upload to')
             [CompletionResult]::new('-n', 'n', [CompletionResultType]::ParameterName, 'Rename the file being uploaded')

@@ -355,6 +355,8 @@ edit:completion:arg-completer[ffsend] = [@words]{
             cand --password 'Protect the file with a password'
             cand -d 'The file download limit'
             cand --download-limit 'The file download limit'
+            cand -e 'The file expiry time'
+            cand --expiry-time 'The file expiry time'
             cand -h 'The remote host to upload to'
             cand --host 'The remote host to upload to'
             cand -n 'Rename the file being uploaded'

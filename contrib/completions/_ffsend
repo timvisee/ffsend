@@ -1085,6 +1085,8 @@ _arguments "${_arguments_options[@]}" \
 '--password=[Protect the file with a password]' \
 '-d+[The file download limit]' \
 '--download-limit=[The file download limit]' \
+'-e+[The file expiry time]' \
+'--expiry-time=[The file expiry time]' \
 '-h+[The remote host to upload to]' \
 '--host=[The remote host to upload to]' \
 '-n+[Rename the file being uploaded]' \
@@ -1136,6 +1138,8 @@ _arguments "${_arguments_options[@]}" \
 '--password=[Protect the file with a password]' \
 '-d+[The file download limit]' \
 '--download-limit=[The file download limit]' \
+'-e+[The file expiry time]' \
+'--expiry-time=[The file expiry time]' \
 '-h+[The remote host to upload to]' \
 '--host=[The remote host to upload to]' \
 '-n+[Rename the file being uploaded]' \
@@ -1187,6 +1191,8 @@ _arguments "${_arguments_options[@]}" \
 '--password=[Protect the file with a password]' \
 '-d+[The file download limit]' \
 '--download-limit=[The file download limit]' \
+'-e+[The file expiry time]' \
+'--expiry-time=[The file expiry time]' \
 '-h+[The remote host to upload to]' \
 '--host=[The remote host to upload to]' \
 '-n+[Rename the file being uploaded]' \
