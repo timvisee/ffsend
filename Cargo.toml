@@ -20,6 +20,7 @@ categories = [
 ]
 exclude = [
     "/.github",
+    "/contrib",
     "/pkg",
     "/res",
     "/*.yml",
@@ -101,7 +102,7 @@ clipboard-bin = ["clipboard"]
 clipboard-crate = ["clipboard"]
 
 [dependencies]
-chbs = "0.0.8"
+chbs = "0.0.9"
 chrono = "0.4"
 clap = "2.33"
 colored = "1.9"
