@@ -80,7 +80,7 @@ https://send.firefox.com/#sample-share-url
 # - Archive the file before uploading
 # - Copy the shareable link to your clipboard
 # - Open the shareable link in your browser
-$ ffsend upload --downloads 1 --expiry 5m --password --archive --copy --open my-file.txt
+$ ffsend upload --downloads 1 --expiry-time 5m --password --archive --copy --open my-file.txt
 Password: ******
 https://send.firefox.com/#sample-share-url
 
