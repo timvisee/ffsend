@@ -119,6 +119,11 @@ impl<'a: 'b, 'b> UploadMatcher<'a> {
         self.matches.is_present("open") || env_var_present("FFSEND_OPEN")
     }
 
+    /// Check whether to to delete local files after uploading.
+    pub fn delete(&self) -> bool {
+        self.matches.is_present("delete")
+    }
+
     /// Check whether to copy the file URL in the user's clipboard, get the copy mode.
     #[cfg(feature = "clipboard")]
     pub fn copy(&self) -> Option<CopyMode> {

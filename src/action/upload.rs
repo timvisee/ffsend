@@ -1,4 +1,5 @@
 use std::env::current_dir;
+use std::fs;
 #[cfg(feature = "archive")]
 use std::io::Error as IoError;
 use std::path::Path;
@@ -474,6 +475,29 @@ impl<'a> Upload<'a> {
             }
         }
 
+        // Delete local files after uploading
+        if matcher_upload.delete() {
+            for path in &paths {
+                if path.is_file() {
+                    if let Err(err) = fs::remove_file(path) {
+                        print_error(
+                            Error::Delete(err)
+                                .context("failed to delete local file after upload, ignoring")
+                                .compat(),
+                        );
+                    }
+                } else {
+                    if let Err(err) = fs::remove_dir_all(path) {
+                        print_error(
+                            Error::Delete(err)
+                                .context("failed to delete local directory after upload, ignoring")
+                                .compat(),
+                        );
+                    }
+                }
+            }
+        }
+
         Ok(())
     }
 }
@@ -561,6 +585,10 @@ pub enum Error {
     /// An error occurred while uploading the file.
     #[fail(display = "")]
     Upload(#[cause] UploadError),
+
+    /// An error occurred while deleting a local file after upload.
+    #[fail(display = "failed to delete local file")]
+    Delete(#[cause] IoError),
 }
 
 impl From<VersionError> for Error {

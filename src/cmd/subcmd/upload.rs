@@ -40,6 +40,13 @@ impl CmdUpload {
                     .long("open")
                     .short("o")
                     .help("Open the share link in your browser"),
+            )
+            .arg(
+                Arg::with_name("delete")
+                    .long("delete")
+                    .alias("rm")
+                    .short("D")
+                    .help("Delete local file after upload"),
             );
 
         // Optional archive support
