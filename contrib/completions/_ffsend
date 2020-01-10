@@ -1104,6 +1104,8 @@ _arguments "${_arguments_options[@]}" \
 '(-p --password)--gen-passphrase[Protect the file with a generated passphrase]' \
 '-o[Open the share link in your browser]' \
 '--open[Open the share link in your browser]' \
+'-D[Delete local file after upload]' \
+'--delete[Delete local file after upload]' \
 '-a[Archive the upload in a single file]' \
 '--archive[Archive the upload in a single file]' \
 '(-C --copy-cmd)-c[Copy the share link to your clipboard]' \
@@ -1157,6 +1159,8 @@ _arguments "${_arguments_options[@]}" \
 '(-p --password)--gen-passphrase[Protect the file with a generated passphrase]' \
 '-o[Open the share link in your browser]' \
 '--open[Open the share link in your browser]' \
+'-D[Delete local file after upload]' \
+'--delete[Delete local file after upload]' \
 '-a[Archive the upload in a single file]' \
 '--archive[Archive the upload in a single file]' \
 '(-C --copy-cmd)-c[Copy the share link to your clipboard]' \
@@ -1210,6 +1214,8 @@ _arguments "${_arguments_options[@]}" \
 '(-p --password)--gen-passphrase[Protect the file with a generated passphrase]' \
 '-o[Open the share link in your browser]' \
 '--open[Open the share link in your browser]' \
+'-D[Delete local file after upload]' \
+'--delete[Delete local file after upload]' \
 '-a[Archive the upload in a single file]' \
 '--archive[Archive the upload in a single file]' \
 '(-C --copy-cmd)-c[Copy the share link to your clipboard]' \

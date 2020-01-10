@@ -390,6 +390,8 @@ Register-ArgumentCompleter -Native -CommandName 'ffsend' -ScriptBlock {
             [CompletionResult]::new('--gen-passphrase', 'gen-passphrase', [CompletionResultType]::ParameterName, 'Protect the file with a generated passphrase')
             [CompletionResult]::new('-o', 'o', [CompletionResultType]::ParameterName, 'Open the share link in your browser')
             [CompletionResult]::new('--open', 'open', [CompletionResultType]::ParameterName, 'Open the share link in your browser')
+            [CompletionResult]::new('-D', 'D', [CompletionResultType]::ParameterName, 'Delete local file after upload')
+            [CompletionResult]::new('--delete', 'delete', [CompletionResultType]::ParameterName, 'Delete local file after upload')
             [CompletionResult]::new('-a', 'a', [CompletionResultType]::ParameterName, 'Archive the upload in a single file')
             [CompletionResult]::new('--archive', 'archive', [CompletionResultType]::ParameterName, 'Archive the upload in a single file')
             [CompletionResult]::new('-c', 'c', [CompletionResultType]::ParameterName, 'Copy the share link to your clipboard')

@@ -374,6 +374,8 @@ edit:completion:arg-completer[ffsend] = [@words]{
             cand --gen-passphrase 'Protect the file with a generated passphrase'
             cand -o 'Open the share link in your browser'
             cand --open 'Open the share link in your browser'
+            cand -D 'Delete local file after upload'
+            cand --delete 'Delete local file after upload'
             cand -a 'Archive the upload in a single file'
             cand --archive 'Archive the upload in a single file'
             cand -c 'Copy the share link to your clipboard'

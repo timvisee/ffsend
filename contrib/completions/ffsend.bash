@@ -2057,7 +2057,7 @@ _ffsend() {
             return 0
             ;;
         ffsend__u)
-            opts=" -P -o -a -c -C -S -Q -V -f -I -y -q -v -i -p -d -e -h -n -t -T -A -H  --gen-passphrase --open --archive --copy --copy-cmd --shorten --qrcode --help --version --force --no-interact --yes --quiet --verbose --incognito --password --download-limit --expiry-time --host --name --timeout --transfer-timeout --api --basic-auth --history  <FILE>... "
+            opts=" -P -o -D -a -c -C -S -Q -V -f -I -y -q -v -i -p -d -e -h -n -t -T -A -H  --gen-passphrase --open --delete --archive --copy --copy-cmd --shorten --qrcode --help --version --force --no-interact --yes --quiet --verbose --incognito --password --download-limit --expiry-time --host --name --timeout --transfer-timeout --api --basic-auth --history  <FILE>... "
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
                 return 0
@@ -2148,7 +2148,7 @@ _ffsend() {
             return 0
             ;;
         ffsend__up)
-            opts=" -P -o -a -c -C -S -Q -V -f -I -y -q -v -i -p -d -e -h -n -t -T -A -H  --gen-passphrase --open --archive --copy --copy-cmd --shorten --qrcode --help --version --force --no-interact --yes --quiet --verbose --incognito --password --download-limit --expiry-time --host --name --timeout --transfer-timeout --api --basic-auth --history  <FILE>... "
+            opts=" -P -o -D -a -c -C -S -Q -V -f -I -y -q -v -i -p -d -e -h -n -t -T -A -H  --gen-passphrase --open --delete --archive --copy --copy-cmd --shorten --qrcode --help --version --force --no-interact --yes --quiet --verbose --incognito --password --download-limit --expiry-time --host --name --timeout --transfer-timeout --api --basic-auth --history  <FILE>... "
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
                 return 0
@@ -2239,7 +2239,7 @@ _ffsend() {
             return 0
             ;;
         ffsend__upload)
-            opts=" -P -o -a -c -C -S -Q -V -f -I -y -q -v -i -p -d -e -h -n -t -T -A -H  --gen-passphrase --open --archive --copy --copy-cmd --shorten --qrcode --help --version --force --no-interact --yes --quiet --verbose --incognito --password --download-limit --expiry-time --host --name --timeout --transfer-timeout --api --basic-auth --history  <FILE>... "
+            opts=" -P -o -D -a -c -C -S -Q -V -f -I -y -q -v -i -p -d -e -h -n -t -T -A -H  --gen-passphrase --open --delete --archive --copy --copy-cmd --shorten --qrcode --help --version --force --no-interact --yes --quiet --verbose --incognito --password --download-limit --expiry-time --host --name --timeout --transfer-timeout --api --basic-auth --history  <FILE>... "
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
                 return 0
