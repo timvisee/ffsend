@@ -1,6 +1,5 @@
 use std::env::current_dir;
 use std::fs;
-#[cfg(feature = "archive")]
 use std::io::Error as IoError;
 use std::path::Path;
 #[cfg(feature = "archive")]
