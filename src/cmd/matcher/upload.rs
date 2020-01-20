@@ -1,7 +1,5 @@
 use clap::ArgMatches;
-use ffsend_api::action::params::PARAMS_DEFAULT_DOWNLOAD as DOWNLOAD_DEFAULT;
-use ffsend_api::api::Version as ApiVersion;
-use ffsend_api::url::Url;
+use ffsend_api::{api::Version as ApiVersion, config, url::Url};
 
 use super::Matcher;
 use crate::cmd::{
@@ -90,7 +88,7 @@ impl<'a: 'b, 'b> UploadMatcher<'a> {
     ) -> Option<usize> {
         ArgDownloadLimit::value_checked(self.matches, main_matcher, api_version, auth).and_then(
             |d| match d {
-                d if d == DOWNLOAD_DEFAULT as usize => None,
+                d if d == config::downloads_default(api_version, auth) => None,
                 d => Some(d),
             },
         )

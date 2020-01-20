@@ -69,7 +69,7 @@ check-nightly:
 check-old:
   <<: *check-base
   variables:
-    RUST_VERSION: "1.37.0"
+    RUST_VERSION: "1.39.0"
 
 # Build using Rust stable
 build-x86_64-linux-gnu:

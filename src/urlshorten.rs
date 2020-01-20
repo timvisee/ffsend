@@ -58,7 +58,7 @@ fn request(client: &Client, req: Request) -> Result<String> {
     }
 
     // Send the request, ensure success
-    let mut response = builder.send().map_err(Error::Request)?;
+    let response = builder.send().map_err(Error::Request)?;
     ensure_success(&response)?;
 
     // Respond with the body text
