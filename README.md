@@ -8,7 +8,8 @@
 [gitlab-ci-link]: https://gitlab.com/timvisee/ffsend/pipelines
 [gitlab-ci-master-badge]: https://gitlab.com/timvisee/ffsend/badges/master/pipeline.svg
 
-# ffsend [WIP]
+# ffsend
+
 > Easily and securely share files from the command line.
 > A fully featured [Firefox Send][send] client.
 
@@ -44,23 +45,21 @@ The public [Send][send] service that is used as default host is provided by
 This application is not affiliated with [Mozilla][mozilla], [Firefox][firefox]
 or [Firefox Send][send] in any way.
 
-_Note: this tool is currently in alpha_
+_Note: this tool is currently in beta, as some extra desired features are yet to be implemented_
 
 ## Features
 - Fully featured and friendly command line tool
-- Upload and download files and directories securely
-- Always encrypted on the client
+- Upload and download files and directories securely, always encrypted on the client
 - Additional password protection, generation and configurable download limits
 - File and directory archiving and extraction
 - Built-in share URL shortener and QR code generator
-- Supports old and new Firefox Send server versions
+- Supports Firefox Send v3 (current) and v2
 - History tracking your files for easy management
-- Ability to use custom Send hosts
+- Ability to use your own Send hosts
 - Inspect or delete shared files
 - Accurate error reporting
 - Streaming encryption and uploading/downloading, very low memory footprint
 - Intended for use in [scripts](#scriptability) without interaction
-- Upcoming: Firefox Account integration (higher download counts, longer expiry times)
 
 For a list of upcoming features and ideas, take a look at the
 current [open issues](https://gitlab.com/timvisee/ffsend/issues) over on GitLab.
@@ -131,9 +130,9 @@ Use the `--help` flag, `help` subcommand, or see the [help](#help) section for
 all available subcommands.
 
 ## Requirements
-- Linux, macOS, Windows or FreeBSD (other BSDs might work)
+- Linux, macOS, Windows, FreeBSD, Android (other BSDs might work)
 - A terminal :sunglasses:
-- Internet connection for uploading and downloading
+- Internet connection
 - Linux:
   - OpenSSL & CA certificates:
     - Ubuntu, Debian and derivatives: `apt install openssl ca-certificates`
@@ -153,8 +152,8 @@ all available subcommands.
   - Termux: [» Termux][termux]
 
 ## Install
-Because `ffsend` is still in alpha, only limited installation options are
-available right now.
+Because `ffsend` is still in early stages, only limited installation options are
+available right now. Feel free to contribute additional packages.
 
 Make sure you meet and install the [requirements](#requirements).
 
@@ -437,7 +436,7 @@ To build and install `ffsend` yourself, you meet the following requirements
 before proceeding:
 
 ### Build requirements
-- Regular [requirements](#requirements)
+- Runtime [requirements](#requirements)
 - [`git`][git]
 - [`rust`][rust] `v1.39` or higher (install using [`rustup`][rustup])
 - [OpenSSL][openssl] or [LibreSSL][libressl] libraries and headers must be available
