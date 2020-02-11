@@ -14,8 +14,10 @@ stages:
   - release
   - package
 
+# Variable defaults
 variables:
   RUST_VERSION: stable
+  RUST_TARGET: x86_64-unknown-linux-gnu
 
 # Cache rust/cargo/build artifacts
 cache:
@@ -36,11 +38,6 @@ before_script:
   - |
     rustc --version
     cargo --version
-
-# Variable defaults
-variables:
-  RUST_VERSION: stable
-  RUST_TARGET: x86_64-unknown-linux-gnu
 
 # Check on stable, beta and nightly 
 .check-base: &check-base
@@ -98,7 +95,7 @@ build-x86_64-linux-musl:
     - rustup target add $RUST_TARGET
 
     # Build OpenSSL statically
-    - apt install -y build-essential wget musl-tools
+    - apt-get install -y build-essential wget musl-tools
     - wget https://www.openssl.org/source/openssl-1.0.2o.tar.gz
     - tar xzvf openssl-1.0.2o.tar.gz
     - cd openssl-1.0.2o

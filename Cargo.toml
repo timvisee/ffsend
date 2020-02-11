@@ -4,7 +4,7 @@ version = "0.2.58"
 authors = ["Tim Visee <3a4fb3964f@sinenomine.email>"]
 license = "GPL-3.0"
 readme = "README.md"
-homepage = "https://gitlab.com/timvisee/ffsend"
+homepage = "https://timvisee.com/projects/ffsend"
 repository = "https://gitlab.com/timvisee/ffsend"
 description = """\
     Easily and securely share files from the command line.\n\

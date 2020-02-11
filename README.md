@@ -779,6 +779,7 @@ This application is not affiliated with Mozilla, Firefox or Firefox Send.
 ```
 
 ## Special thanks
+- to all `ffsend` source/package contributors
 - to [Mozilla][mozilla] for building and hosting the amazing
   [Firefox Send][send] service
 - to everyone involved with [asciinema][asciinema] and [svg-term][svg-term] for
