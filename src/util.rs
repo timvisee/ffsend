@@ -373,9 +373,9 @@ impl ClipboardType {
             #[cfg(feature = "clipboard-crate")]
             ClipboardType::Native => Self::native_set(content),
             #[cfg(feature = "clipboard-bin")]
-            ClipboardType::Xclip(path) => Self::xclip_set(path.clone(), content),
+            ClipboardType::Xclip(path) => Self::xclip_set(path.clone(), &content),
             #[cfg(feature = "clipboard-bin")]
-            ClipboardType::Xsel(path) => Self::xsel_set(path.clone(), content),
+            ClipboardType::Xsel(path) => Self::xsel_set(path.clone(), &content),
         }
     }
 
@@ -391,7 +391,7 @@ impl ClipboardType {
     }
 
     #[cfg(feature = "clipboard-bin")]
-    fn xclip_set(path: Option<String>, content: String) -> Result<(), ClipboardError> {
+    fn xclip_set(path: Option<String>, content: &str) -> Result<(), ClipboardError> {
         Self::sys_cmd_set(
             "xclip",
             Command::new(path.unwrap_or_else(|| "xclip".into()))
@@ -402,7 +402,7 @@ impl ClipboardType {
     }
 
     #[cfg(feature = "clipboard-bin")]
-    fn xsel_set(path: Option<String>, content: String) -> Result<(), ClipboardError> {
+    fn xsel_set(path: Option<String>, content: &str) -> Result<(), ClipboardError> {
         Self::sys_cmd_set(
             "xsel",
             Command::new(path.unwrap_or_else(|| "xsel".into())).arg("--clipboard"),
@@ -414,7 +414,7 @@ impl ClipboardType {
     fn sys_cmd_set(
         bin: &'static str,
         command: &mut Command,
-        content: String,
+        content: &str,
     ) -> Result<(), ClipboardError> {
         // Spawn the command process for setting the clipboard
         let mut process = match command.stdin(Stdio::piped()).stdout(Stdio::null()).spawn() {
