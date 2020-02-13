@@ -127,6 +127,7 @@ test-cargo:
     - check-stable
   dependencies: []
   script:
+    - apt-get install -y --no-install-recommends libx11-xcb-dev libgl1-mesa-dev
     - cargo test --verbose
 
 # Run integration test with the public Send service
