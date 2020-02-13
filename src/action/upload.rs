@@ -444,10 +444,9 @@ impl<'a> Upload<'a> {
         {
             if let Some(copy_mode) = matcher_upload.copy() {
                 if let Err(err) = set_clipboard(copy_mode.build(url.as_str())) {
-                    print_error_msg(format!(
-                        "failed to copy the share link to the clipboard, ignoring: {}",
-                        err,
-                    ));
+                    print_error(
+                        err.context("failed to copy the share link to the clipboard, ignoring"),
+                    );
                 }
             }
         }

@@ -28,6 +28,7 @@ exclude = [
     "/SECURITY.md",
 ]
 edition = "2018"
+build = "build.rs"
 
 [package.metadata.deb]
 section = "utility"
@@ -71,7 +72,7 @@ default = [
 archive = ["tar"]
 
 # Support for putting share URLs in clipboard
-clipboard = ["clipboard-ext"]
+clipboard = ["clip", "which"]
 
 # Compile with file history support
 history = []
@@ -94,11 +95,16 @@ infer-command = []
 # Compile without colored output support
 no-color = ["colored/no-color"]
 
+# Automatic using build.rs: use xclip/xsel binary method for clipboard support
+clipboard-bin = ["clipboard"]
+
+# Automatic using build.rs: use native clipboard crate for clipboard support
+clipboard-crate = ["clipboard"]
+
 [dependencies]
 chbs = "0.0.9"
 chrono = "0.4"
 clap = "2.33"
-clipboard-ext = { version = "0.1", optional = true }
 colored = "1.9"
 derive_builder = "0.9"
 directories = "2.0"
@@ -121,3 +127,10 @@ tempfile = "3"
 toml = "0.5"
 urlshortener = { version = "2", optional = true }
 version-compare = "0.0.10"
+
+[target.'cfg(any(target_os = "linux", target_os = "freebsd", target_os = "dragonfly", target_os = "openbsd", target_os = "netbsd"))'.dependencies]
+which = { version = "3.1", optional = true }
+
+[target.'cfg(not(any(target_os = "linux", target_os = "freebsd", target_os = "dragonfly", target_os = "openbsd", target_os = "netbsd")))'.dependencies]
+# Aliased to clip to prevent name collision with clipboard feature
+clip = { version = "0.5", optional = true, package = "clipboard" }

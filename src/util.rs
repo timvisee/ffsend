@@ -1,28 +1,38 @@
+#[cfg(feature = "clipboard-crate")]
+extern crate clip;
 extern crate colored;
 extern crate directories;
 extern crate fs2;
 extern crate open;
 extern crate regex;
+#[cfg(feature = "clipboard-bin")]
+extern crate which;
 
 use std::borrow::Borrow;
 use std::env::{self, current_exe, var_os};
-#[cfg(feature = "clipboard")]
-use std::error::Error as StdError;
 use std::ffi::OsStr;
+#[cfg(feature = "clipboard")]
+use std::fmt;
 use std::fmt::{Debug, Display};
+#[cfg(feature = "clipboard-bin")]
+use std::io::ErrorKind as IoErrorKind;
 use std::io::{stderr, stdin, Error as IoError, Write};
 use std::path::Path;
 use std::path::PathBuf;
 use std::process::{exit, ExitStatus};
+#[cfg(feature = "clipboard-bin")]
+use std::process::{Command, Stdio};
 
+#[cfg(feature = "clipboard-crate")]
+use self::clip::{ClipboardContext, ClipboardProvider};
 use self::colored::*;
 #[cfg(feature = "history")]
 use self::directories::ProjectDirs;
 use self::fs2::available_space;
 use chrono::Duration;
-#[cfg(feature = "clipboard")]
-use clipboard_ext::{prelude::*, x11_bin::ClipboardContext};
 use failure::{err_msg, Fail};
+#[cfg(feature = "clipboard-crate")]
+use failure::{Compat, Error};
 use ffsend_api::{
     api::request::{ensure_success, ResponseError},
     client::Client,
@@ -31,6 +41,8 @@ use ffsend_api::{
 };
 use regex::Regex;
 use rpassword::prompt_password_stderr;
+#[cfg(feature = "clipboard-bin")]
+use which::which;
 
 use crate::cmd::matcher::MainMatcher;
 
@@ -291,10 +303,202 @@ pub fn open_path(path: &str) -> Result<ExitStatus, IoError> {
     open::that(path)
 }
 
-/// Set the clipboard of the user to the given `contents` string.
+/// Set the clipboard of the user to the given `content` string.
 #[cfg(feature = "clipboard")]
-pub fn set_clipboard(contents: String) -> Result<(), Box<dyn StdError>> {
-    Ok(ClipboardContext::new()?.set_contents(contents)?)
+pub fn set_clipboard(content: String) -> Result<(), ClipboardError> {
+    ClipboardType::select().set(content)
+}
+
+/// Clipboard management enum.
+///
+/// Defines which method of setting the clipboard is used.
+/// Invoke `ClipboardType::select()` to select the best variant to use determined at runtime.
+///
+/// Usually, the `Native` variant is used. However, on Linux system a different variant will be
+/// selected which will call a system binary to set the clipboard. This must be done because the
+/// native clipboard interface only has a lifetime of the application. This means that the
+/// clipboard is instantly cleared as soon as this application quits, which is always immediately.
+/// This limitation is due to security reasons as defined by X11. The alternative binaries we set
+/// the clipboard with spawn a daemon in the background to keep the clipboad alive until it's
+/// flushed.
+#[cfg(feature = "clipboard")]
+#[derive(Clone, Eq, PartialEq)]
+pub enum ClipboardType {
+    /// Native operating system clipboard.
+    #[cfg(feature = "clipboard-crate")]
+    Native,
+
+    /// Manage clipboard through `xclip` on Linux.
+    ///
+    /// May contain a binary path if specified at compile time through the `XCLIP_PATH` variable.
+    #[cfg(feature = "clipboard-bin")]
+    Xclip(Option<String>),
+
+    /// Manage clipboard through `xsel` on Linux.
+    ///
+    /// May contain a binary path if specified at compile time through the `XSEL_PATH` variable.
+    #[cfg(feature = "clipboard-bin")]
+    Xsel(Option<String>),
+}
+
+#[cfg(feature = "clipboard")]
+impl ClipboardType {
+    /// Select the clipboard type to use, depending on the runtime system.
+    pub fn select() -> Self {
+        #[cfg(feature = "clipboard-crate")]
+        {
+            ClipboardType::Native
+        }
+
+        #[cfg(feature = "clipboard-bin")]
+        {
+            if let Some(path) = option_env!("XCLIP_PATH") {
+                ClipboardType::Xclip(Some(path.to_owned()))
+            } else if let Some(path) = option_env!("XSEL_PATH") {
+                ClipboardType::Xsel(Some(path.to_owned()))
+            } else if which("xclip").is_ok() {
+                ClipboardType::Xclip(None)
+            } else if which("xsel").is_ok() {
+                ClipboardType::Xsel(None)
+            } else {
+                // TODO: should we error here instead, as no clipboard binary was found?
+                ClipboardType::Xclip(None)
+            }
+        }
+    }
+
+    /// Set clipboard contents through the selected clipboard type.
+    pub fn set(&self, content: String) -> Result<(), ClipboardError> {
+        match self {
+            #[cfg(feature = "clipboard-crate")]
+            ClipboardType::Native => Self::native_set(content),
+            #[cfg(feature = "clipboard-bin")]
+            ClipboardType::Xclip(path) => Self::xclip_set(path.clone(), &content),
+            #[cfg(feature = "clipboard-bin")]
+            ClipboardType::Xsel(path) => Self::xsel_set(path.clone(), &content),
+        }
+    }
+
+    /// Set the clipboard through a native interface.
+    ///
+    /// This is used on non-Linux systems.
+    #[cfg(feature = "clipboard-crate")]
+    fn native_set(content: String) -> Result<(), ClipboardError> {
+        ClipboardProvider::new()
+            .and_then(|mut context: ClipboardContext| context.set_contents(content))
+            .map_err(|err| format_err!("{}", err).compat())
+            .map_err(ClipboardError::Native)
+    }
+
+    #[cfg(feature = "clipboard-bin")]
+    fn xclip_set(path: Option<String>, content: &str) -> Result<(), ClipboardError> {
+        Self::sys_cmd_set(
+            "xclip",
+            Command::new(path.unwrap_or_else(|| "xclip".into()))
+                .arg("-sel")
+                .arg("clip"),
+            content,
+        )
+    }
+
+    #[cfg(feature = "clipboard-bin")]
+    fn xsel_set(path: Option<String>, content: &str) -> Result<(), ClipboardError> {
+        Self::sys_cmd_set(
+            "xsel",
+            Command::new(path.unwrap_or_else(|| "xsel".into())).arg("--clipboard"),
+            content,
+        )
+    }
+
+    #[cfg(feature = "clipboard-bin")]
+    fn sys_cmd_set(
+        bin: &'static str,
+        command: &mut Command,
+        content: &str,
+    ) -> Result<(), ClipboardError> {
+        // Spawn the command process for setting the clipboard
+        let mut process = match command.stdin(Stdio::piped()).stdout(Stdio::null()).spawn() {
+            Ok(process) => process,
+            Err(err) => {
+                return Err(match err.kind() {
+                    IoErrorKind::NotFound => ClipboardError::NoBinary,
+                    _ => ClipboardError::BinaryIo(bin, err),
+                });
+            }
+        };
+
+        // Write the contents to the xclip process
+        process
+            .stdin
+            .as_mut()
+            .unwrap()
+            .write_all(content.as_bytes())
+            .map_err(|err| ClipboardError::BinaryIo(bin, err))?;
+
+        // Wait for xclip to exit
+        let status = process
+            .wait()
+            .map_err(|err| ClipboardError::BinaryIo(bin, err))?;
+        if !status.success() {
+            return Err(ClipboardError::BinaryStatus(
+                bin,
+                status.code().unwrap_or(0),
+            ));
+        }
+
+        Ok(())
+    }
+}
+
+#[cfg(feature = "clipboard")]
+impl fmt::Display for ClipboardType {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            #[cfg(feature = "clipboard-crate")]
+            ClipboardType::Native => write!(f, "native"),
+            #[cfg(feature = "clipboard-bin")]
+            ClipboardType::Xclip(path) => match path {
+                None => write!(f, "xclip"),
+                Some(path) => write!(f, "xclip ({})", path),
+            },
+            #[cfg(feature = "clipboard-bin")]
+            ClipboardType::Xsel(path) => match path {
+                None => write!(f, "xsel"),
+                Some(path) => write!(f, "xsel ({})", path),
+            },
+        }
+    }
+}
+
+#[cfg(feature = "clipboard")]
+#[derive(Debug, Fail)]
+pub enum ClipboardError {
+    /// A generic error occurred while setting the clipboard contents.
+    ///
+    /// This is for non-Linux systems, using a native clipboard interface.
+    #[cfg(feature = "clipboard-crate")]
+    #[fail(display = "failed to access clipboard")]
+    Native(#[cause] Compat<Error>),
+
+    /// The `xclip` or `xsel` binary could not be found on the system, required for clipboard support.
+    #[cfg(feature = "clipboard-bin")]
+    #[fail(display = "failed to access clipboard, xclip or xsel is not installed")]
+    NoBinary,
+
+    /// An error occurred while using `xclip` or `xsel` to set the clipboard contents.
+    /// This problem probably occurred when starting, or while piping the clipboard contents to
+    /// the process.
+    #[cfg(feature = "clipboard-bin")]
+    #[fail(display = "failed to access clipboard using {}", _0)]
+    BinaryIo(&'static str, #[cause] IoError),
+
+    /// `xclip` or `xsel` unexpectetly exited with a non-successful status code.
+    #[cfg(feature = "clipboard-bin")]
+    #[fail(
+        display = "failed to use clipboard, {} exited with status code {}",
+        _0, _1
+    )]
+    BinaryStatus(&'static str, i32),
 }
 
 /// Check for an emtpy password in the given `password`.
@@ -845,6 +1049,10 @@ pub fn features_list() -> Vec<&'static str> {
     features.push("archive");
     #[cfg(feature = "clipboard")]
     features.push("clipboard");
+    #[cfg(feature = "clipboard-bin")]
+    features.push("clipboard-bin");
+    #[cfg(feature = "clipboard-crate")]
+    features.push("clipboard-crate");
     #[cfg(feature = "history")]
     features.push("history");
     #[cfg(feature = "qrcode")]
