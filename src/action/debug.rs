@@ -6,8 +6,6 @@ use prettytable::{format::FormatBuilder, Cell, Row, Table};
 use crate::client::to_duration;
 use crate::cmd::matcher::{debug::DebugMatcher, main::MainMatcher, Matcher};
 use crate::error::ActionError;
-#[cfg(feature = "clipboard-bin")]
-use crate::util::ClipboardType;
 use crate::util::{api_version_list, features_list, format_bool, format_duration};
 
 /// A file debug action.
@@ -96,13 +94,6 @@ impl<'a> Debug<'a> {
         table.add_row(Row::new(vec![
             Cell::new("API support:"),
             Cell::new(&api_version_list().join(", ")),
-        ]));
-
-        // Clipboard information
-        #[cfg(feature = "clipboard-bin")]
-        table.add_row(Row::new(vec![
-            Cell::new("Clipboard:"),
-            Cell::new(&format!("{}", ClipboardType::select())),
         ]));
 
         // Show whether quiet is used
