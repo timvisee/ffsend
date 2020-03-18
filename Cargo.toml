@@ -134,3 +134,6 @@ which = { version = "3.1", optional = true }
 [target.'cfg(not(any(target_os = "linux", target_os = "freebsd", target_os = "dragonfly", target_os = "openbsd", target_os = "netbsd")))'.dependencies]
 # Aliased to clip to prevent name collision with clipboard feature
 clip = { version = "0.5", optional = true, package = "clipboard" }
+
+[package.metadata.docs.rs]
+targets = ["x86_64-unknown-linux-gnu"]
