@@ -36,7 +36,7 @@ use crate::urlshorten;
 use crate::util::set_clipboard;
 use crate::util::{
     format_bytes, open_url, print_error, print_error_msg, prompt_yes, quit, quit_error_msg,
-    ErrorHintsBuilder,
+    rand_alphanum_string, ErrorHintsBuilder,
 };
 
 /// A file upload action.
@@ -141,28 +141,21 @@ impl<'a> Upload<'a> {
 
                     // Select the file name to use if not set
                     if file_name.is_none() {
-                        // Require user to specify name if multiple files are given
-                        if paths.len() > 1 {
-                            quit_error_msg(
-                                "you must specify a file name for the archive",
-                                ErrorHintsBuilder::default()
-                                    .name(true)
-                                    .verbose(false)
-                                    .build()
-                                    .unwrap(),
-                            );
-                        }
-
                         // Derive name from given file
-                        file_name = Some(
-                            path.canonicalize()
-                                .map_err(|err| ArchiveError::FileName(Some(err)))?
-                                .file_name()
-                                .ok_or(ArchiveError::FileName(None))?
-                                .to_str()
-                                .map(|s| s.to_owned())
-                                .ok_or(ArchiveError::FileName(None))?,
-                        );
+                        if paths.len() == 1 {
+                            file_name = Some(
+                                path.canonicalize()
+                                    .map_err(|err| ArchiveError::FileName(Some(err)))?
+                                    .file_name()
+                                    .ok_or(ArchiveError::FileName(None))?
+                                    .to_str()
+                                    .map(|s| s.to_owned())
+                                    .ok_or(ArchiveError::FileName(None))?,
+                            );
+                        } else {
+                            // Unable to derive file name from paths, generate random
+                            file_name = Some(format!("ffsend-archive-{}", rand_alphanum_string(8)));
+                        }
                     }
 
                     // Get the current working directory, including working directory as highest possible root, canonicalize it

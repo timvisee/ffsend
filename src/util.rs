@@ -17,6 +17,7 @@ use std::fmt::{Debug, Display};
 #[cfg(feature = "clipboard-bin")]
 use std::io::ErrorKind as IoErrorKind;
 use std::io::{stderr, stdin, Error as IoError, Write};
+use std::iter;
 use std::path::Path;
 use std::path::PathBuf;
 use std::process::{exit, ExitStatus};
@@ -39,6 +40,8 @@ use ffsend_api::{
     reqwest,
     url::Url,
 };
+use rand::distributions::Alphanumeric;
+use rand::{thread_rng, Rng};
 use regex::Regex;
 use rpassword::prompt_password_stderr;
 #[cfg(feature = "clipboard-bin")]
@@ -1119,4 +1122,13 @@ impl From<ResponseError> for FollowError {
     fn from(err: ResponseError) -> Self {
         FollowError::Response(err)
     }
+}
+
+/// Generate a random alphanumeric string with the given length.
+pub fn rand_alphanum_string(len: usize) -> String {
+    let mut rng = thread_rng();
+    iter::repeat(())
+        .map(|()| rng.sample(Alphanumeric))
+        .take(len)
+        .collect()
 }

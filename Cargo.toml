@@ -118,6 +118,7 @@ pathdiff = "0.1"
 pbr = "1"
 prettytable-rs = "0.8"
 qr2term = { version = "0.1", optional = true }
+rand = "0.7"
 regex = "1.3"
 rpassword = "4"
 serde = "1"
