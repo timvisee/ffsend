@@ -96,9 +96,9 @@ build-x86_64-linux-musl:
 
     # Build OpenSSL statically
     - apt-get install -y build-essential wget musl-tools
-    - wget https://www.openssl.org/source/old/1.0.2/openssl-1.0.2u.tar.gz
-    - tar xzvf openssl-1.0.2u.tar.gz
-    - cd openssl-1.0.2u
+    - wget https://www.openssl.org/source/old/1.0.2/openssl-1.0.2o.tar.gz
+    - tar xzvf openssl-1.0.2o.tar.gz
+    - cd openssl-1.0.2o
     - ./config -fPIC --openssldir=/usr/local/ssl --prefix=/usr/local
     - make
     - make install
