@@ -12,7 +12,6 @@ branches:
 # Build for the x86_64 Windows target
 platform: x64
 environment:
-  SSL_CERT_FILE: "C:\\OpenSSL\\cacert.pem"
   RUSTUP_USE_HYPER: 1
   CARGO_HTTP_CHECK_REVOKE: false
   GITHUB_TOKEN:
@@ -23,23 +22,14 @@ environment:
   matrix:
     - TARGET: x86_64-pc-windows-msvc
       BITS: 64
-      OPENSSL_VERSION: 1_1_0L
-      OPENSSL_DIR: C:\OpenSSL
 
 # Extract release binary artifacts
 artifacts:
 - path: .\ffsend*.exe
 - path: .\ffsend.*.nupkg
 
-# Install dependencies: Rust and OpenSSL
+# Install dependencies: Rust
 install:
-  # Install OpenSSL
-  - mkdir C:\OpenSSL
-  - ps: if (Test-Path env:OPENSSL_VERSION) { Start-FileDownload "http://slproweb.com/download/Win${env:BITS}OpenSSL-${env:OPENSSL_VERSION}.exe" }
-  - if defined OPENSSL_VERSION Win%BITS%OpenSSL-%OPENSSL_VERSION%.exe /SILENT /VERYSILENT /SP- /DIR="C:\OpenSSL"
-  - appveyor DownloadFile https://curl.haxx.se/ca/cacert.pem -FileName C:\OpenSSL\cacert.pem
-  - choco install openssl.light --version 1.1.0.80000000 -y -f
-
   # Install Rust
   - appveyor-retry appveyor DownloadFile https://win.rustup.rs/ -FileName rustup-init.exe
   - rustup-init.exe -y --default-host x86_64-pc-windows-msvc --default-toolchain stable
