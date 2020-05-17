@@ -98,6 +98,15 @@ impl<'a> Debug<'a> {
             Cell::new(&api_version_list().join(", ")),
         ]));
 
+        // Show used crypto backend
+        table.add_row(Row::new(vec![
+            Cell::new("Crypto backend:"),
+            #[cfg(feature = "crypto-ring")]
+            Cell::new("ring"),
+            #[cfg(feature = "crypto-openssl")]
+            Cell::new("OpenSSL"),
+        ]));
+
         // Clipboard information
         #[cfg(feature = "clipboard-bin")]
         table.add_row(Row::new(vec![
