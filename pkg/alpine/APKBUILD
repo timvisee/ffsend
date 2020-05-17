@@ -1,13 +1,13 @@
 # Contributor: Rasmus Thomsen <oss@cogitri.dev>
 # Maintainer: Rasmus Thomsen <oss@cogitri.dev>
 pkgname=ffsend
-pkgver=0.2.51
+pkgver=0.2.62
 pkgrel=0
 pkgdesc=" A fully featured Firefox Send client"
 url="https://gitlab.com/timvisee/ffsend"
 arch="x86_64 x86 armhf armv7 aarch64 ppc64le" # limited by cargo
 license="GPL-3.0-only"
-makedepends="cargo openssl-dev"
+makedepends="cargo"
 subpackages="
 	$pkgname-zsh-completion:zshcomp:noarch
 	$pkgname-fish-completion:fishcomp:noarch

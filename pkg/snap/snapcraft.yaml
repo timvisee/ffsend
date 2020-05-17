@@ -32,4 +32,4 @@ parts:
     plugin: rust
     build-attributes: [no-system-libraries]
     build-packages: [make, cmake, pkg-config, libssl-dev]
-    stage-packages: [libssl1.0.0, xclip]
+    stage-packages: [xclip]
