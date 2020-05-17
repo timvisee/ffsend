@@ -221,13 +221,13 @@ ffsend --help
 ```
 
 #### Linux: Fedora package
-_Note: The Fedora package is maintained by contributors, it might be outdated.
-Choose a different installation method if an important update is missing._
+_Note: The Fedora package is maintained by contributors, and might be
+slightly outdated._
 
 [» ffsend][fedora-ffsend]
 
 ```bash
-yum install ffsend
+sudo dnf install ffsend
 
 ffsend --help
 ```
@@ -800,7 +800,7 @@ Check out the [LICENSE](LICENSE) file for more information.
 [github-releases]: https://github.com/timvisee/ffsend/releases
 [github-latest-release]: https://github.com/timvisee/ffsend/releases/latest
 [nix-ffsend]: https://nixos.org/nixos/packages.html?attr=ffsend&channel=nixos-unstable&query=ffsend
-[fedora-ffsend]: https://fedora.pkgs.org/rawhide/fedora-x86_64/ffsend-0.2.49-2.fc31.x86_64.rpm.html
+[fedora-ffsend]: https://src.fedoraproject.org/rpms/rust-ffsend
 [aur-ffsend]: https://aur.archlinux.org/packages/ffsend/
 [aur-ffsend-bin]: https://aur.archlinux.org/packages/ffsend-bin/
 [aur-ffsend-git]: https://aur.archlinux.org/packages/ffsend-git/
