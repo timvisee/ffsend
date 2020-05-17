@@ -44,14 +44,15 @@ before_script:
   stage: check
   script:
     - cargo check --verbose
-    - cargo check --no-default-features --features send2 --verbose
-    - cargo check --no-default-features --features send3 --verbose
-    - cargo check --no-default-features --features send2,send3 --verbose
-    - cargo check --no-default-features --features send2,send3,archive --verbose
-    - cargo check --no-default-features --features send2,send3,history --verbose
-    - cargo check --no-default-features --features send2,send3,qrcode --verbose
-    - cargo check --no-default-features --features send2,send3,urlshorten --verbose
-    - cargo check --no-default-features --features send2,send3,infer-command --verbose
+    - cargo check --no-default-features --features send3,crypto-ring --verbose
+    - cargo check --no-default-features --features send2,crypto-openssl --verbose
+    - cargo check --no-default-features --features send3,crypto-openssl --verbose
+    - cargo check --no-default-features --features send2,send3,crypto-openssl --verbose
+    - cargo check --no-default-features --features send3,crypto-ring,archive --verbose
+    - cargo check --no-default-features --features send3,crypto-ring,history --verbose
+    - cargo check --no-default-features --features send3,crypto-ring,qrcode --verbose
+    - cargo check --no-default-features --features send3,crypto-ring,urlshorten --verbose
+    - cargo check --no-default-features --features send3,crypto-ring,infer-command --verbose
     - cargo check --features no-color --verbose
 check-stable:
   <<: *check-base
