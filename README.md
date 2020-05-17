@@ -134,20 +134,22 @@ all available subcommands.
 - A terminal :sunglasses:
 - Internet connection
 - Linux:
-  - OpenSSL & CA certificates:
-    - Ubuntu, Debian and derivatives: `apt install openssl ca-certificates`
+  - CA certificates:
+    - Ubuntu, Debian and derivatives: `apt install ca-certificates`
   - Optional: `xclip` or `xsel` for clipboard support
     - Ubuntu, Debian and derivatives: `apt install xclip`
     - CentOS/Red Hat/openSUSE/Fedora: `yum install xclip`
     - Arch: `pacman -S xclip`
+  - Optional: OpenSSL with `crypto-openssl` feature
+    - Ubuntu, Debian and derivatives: `apt install openssl`
 - Windows specific:
-  - OpenSSL v1.1.0j (or above): [» Installer][openssl-windows-installer]
+  - Optional OpenSSL with `crypto-openssl` feature: [» Installer][openssl-windows-installer] (`v1.1.0j` or above)
 - macOS specific:
-  - OpenSSL: `brew install openssl@1.1`
+  - Optional OpenSSL with `crypto-openssl` feature: `brew install openssl@1.1`
 - FreeBSD specific:
-  - OpenSSL: `pkg install openssl`
   - CA certificates: `pkg install ca_root_nss`
   - Optional `xclip` & `xsel` for clipboard support: `pkg install xclip xsel-conrad`
+  - Optional OpenSSL with `crypto-openssl` feature: `pkg install openssl`
 - Android specific:
   - Termux: [» Termux][termux]
 
@@ -298,17 +300,11 @@ Check out the [latest release][github-latest-release] assets for a macOS binary.
 If it isn't available yet, you may use an artifact from a
 [previous version][github-releases] instead, until it is available.
 
-You must install `openssl` through [`homebrew`][homebrew] which `ffsend` depends
-on.
-
 Then, mark the downloaded binary as an executable.
 You then may want to move it into `/usr/local/bin/` to make the `ffsend` command
 globally available:
 
 ```bash
-# Install openssl dependency
-brew install openssl@1.1
-
 # Rename file to ffsend
 mv ./ffsend-* ./ffsend
 
@@ -347,9 +343,6 @@ Check out the [latest release][github-latest-release] assets for Windows binarie
 Use the `ffsend-v*-windows-x64-static` binary, to minimize the chance for issues.
 If it isn't available yet, you may use an artifact from a
 [previous version][github-releases] instead, until it is available.
-
-You must install OpenSSL 1.1.0j which `ffsend` depends on. The installer for
-this can be found here: [» Installer][openssl-windows-installer]
 
 You can use `ffsend` from the command line in the same directory:
 ```cmd
@@ -439,7 +432,7 @@ before proceeding:
 - Runtime [requirements](#requirements)
 - [`git`][git]
 - [`rust`][rust] `v1.39` or higher (install using [`rustup`][rustup])
-- [OpenSSL][openssl] or [LibreSSL][libressl] libraries and headers must be available
+- Optional for `crypto-openssl` feature: [OpenSSL][openssl] or [LibreSSL][libressl] libraries and headers must be available
   - Linux:
     - Ubuntu, Debian and derivatives: `apt install build-essential cmake pkg-config libssl-dev`
     - CentOS/Red Hat/openSUSE: `yum install gcc gcc-c++ make cmake openssl-devel`
@@ -505,17 +498,19 @@ Different use flags are available for `ffsend` to toggle whether to include
 various features.
 The following features are available, some of which are enabled by default:
 
-| Feature        | Enabled | Description                                                |
-| :------------: | :-----: | :--------------------------------------------------------- |
-| `send2`        | Default | Support for Firefox Send v2 servers                        |
-| `send3`        | Default | Support for Firefox Send v3 servers                        |
-| `clipboard`    | Default | Support for copying links to the clipboard                 |
-| `history`      | Default | Support for tracking files in history                      |
-| `archive`      | Default | Support for archiving and extracting uploads and downloads |
-| `qrcode`       | Default | Support for rendering a QR code for a share URL            |
-| `urlshorten`   | Default | Support for shortening share URLs                          |
-| `infer-command`| Default | Support for inferring subcommand based on binary name      |
-| `no-color`     |         | Compile without color support in error and help messages   |
+| Feature         | Enabled | Description                                                |
+| :-------------: | :-----: | :--------------------------------------------------------- |
+| `send2`         | Default | Support for Firefox Send v2 servers                        |
+| `send3`         | Default | Support for Firefox Send v3 servers                        |
+| `crypto-ring`   | Default | Use ring as cryptography backend                           |
+| `crypto-openssl`|         | Use OpenSSL as cryptography backend                        |
+| `clipboard`     | Default | Support for copying links to the clipboard                 |
+| `history`       | Default | Support for tracking files in history                      |
+| `archive`       | Default | Support for archiving and extracting uploads and downloads |
+| `qrcode`        | Default | Support for rendering a QR code for a share URL            |
+| `urlshorten`    | Default | Support for shortening share URLs                          |
+| `infer-command` | Default | Support for inferring subcommand based on binary name      |
+| `no-color`      |         | Compile without color support in error and help messages   |
 
 To enable features during building or installation, specify them with
 `--features <features...>` when using `cargo`.

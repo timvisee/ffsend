@@ -9,7 +9,6 @@
             "hash": "297f1405bacdc34948cd94ba785336c48e1ac862984268d66a8928abd3e322e1"
         }
     },
-    "depends": "openssl",
     "bin": "ffsend.exe",
     "checkver": "github",
     "autoupdate": {

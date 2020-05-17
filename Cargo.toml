@@ -60,12 +60,12 @@ path = "src/main.rs"
 default = [
     "archive",
     "clipboard",
+    "crypto-ring",
     "history",
     "infer-command",
     "qrcode",
-    "send2",
     "send3",
-    "urlshorten"
+    "urlshorten",
 ]
 
 # Compile with file archiving support
@@ -82,6 +82,12 @@ send2 = ["ffsend-api/send2"]
 
 # Support for Firefox Send v3
 send3 = ["ffsend-api/send3"]
+
+# Use OpenSSL as cryptography backend
+crypto-openssl = ["ffsend-api/crypto-openssl"]
+
+# Use ring as cryptography backend
+crypto-ring = ["ffsend-api/crypto-ring"]
 
 # Support for generating QR codes for share URLs
 qrcode = ["qr2term"]
@@ -109,7 +115,7 @@ colored = "1.9"
 derive_builder = "0.9"
 directories = "2.0"
 failure = "0.1"
-ffsend-api = { version = "0.5.1", default-features = false }
+ffsend-api = { version = "0.6", default-features = false }
 fs2 = "0.4"
 lazy_static = "1.4"
 open = "1"

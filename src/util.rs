@@ -1070,6 +1070,10 @@ pub fn features_list() -> Vec<&'static str> {
     features.push("send2");
     #[cfg(feature = "send3")]
     features.push("send3");
+    #[cfg(feature = "crypto-ring")]
+    features.push("crypto-ring");
+    #[cfg(feature = "crypto-openssl")]
+    features.push("crypto-openssl");
 
     features
 }

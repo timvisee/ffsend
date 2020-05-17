@@ -10,13 +10,6 @@ stages:
   - name: release
     if: tag =~ ^v(\d+\.)*\d+$
 
-# Explicitly install and update OpenSSL dependencies
-addons:
-  homebrew:
-    packages:
-    - openssl@1.1
-    update: true
-
 jobs:
   include:
     - stage: release
