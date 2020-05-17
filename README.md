@@ -134,22 +134,20 @@ all available subcommands.
 - A terminal :sunglasses:
 - Internet connection
 - Linux:
-  - CA certificates:
-    - Ubuntu, Debian and derivatives: `apt install ca-certificates`
+  - OpenSSL & CA certificates:
+    - Ubuntu, Debian and derivatives: `apt install openssl ca-certificates`
   - Optional: `xclip` or `xsel` for clipboard support
     - Ubuntu, Debian and derivatives: `apt install xclip`
     - CentOS/Red Hat/openSUSE/Fedora: `yum install xclip`
     - Arch: `pacman -S xclip`
-  - Optional: OpenSSL with `crypto-openssl` feature
-    - Ubuntu, Debian and derivatives: `apt install openssl`
 - Windows specific:
   - Optional OpenSSL with `crypto-openssl` feature: [» Installer][openssl-windows-installer] (`v1.1.0j` or above)
 - macOS specific:
   - Optional OpenSSL with `crypto-openssl` feature: `brew install openssl@1.1`
 - FreeBSD specific:
+  - OpenSSL: `pkg install openssl`
   - CA certificates: `pkg install ca_root_nss`
   - Optional `xclip` & `xsel` for clipboard support: `pkg install xclip xsel-conrad`
-  - Optional OpenSSL with `crypto-openssl` feature: `pkg install openssl`
 - Android specific:
   - Termux: [» Termux][termux]
 
@@ -432,7 +430,7 @@ before proceeding:
 - Runtime [requirements](#requirements)
 - [`git`][git]
 - [`rust`][rust] `v1.39` or higher (install using [`rustup`][rustup])
-- Optional for `crypto-openssl` feature: [OpenSSL][openssl] or [LibreSSL][libressl] libraries and headers must be available
+- [OpenSSL][openssl] or [LibreSSL][libressl] libraries/headers:
   - Linux:
     - Ubuntu, Debian and derivatives: `apt install build-essential cmake pkg-config libssl-dev`
     - CentOS/Red Hat/openSUSE: `yum install gcc gcc-c++ make cmake openssl-devel`
@@ -441,10 +439,9 @@ before proceeding:
     - Fedora: `dnf install gcc gcc-c++ make cmake openssl-devel`
     - Or see instructions [here](https://github.com/sfackler/rust-openssl#linux)
   - Windows:
-    - See instructions here [here](https://github.com/sfackler/rust-openssl#windows-msvc)
+    - Optional with `crypto-openssl` feature: See instructions here [here](https://github.com/sfackler/rust-openssl#windows-msvc)
   - macOS:
-    - Using `brew`: `brew install cmake pkg-config openssl`
-    - Or see instructions [here](https://github.com/sfackler/rust-openssl#osx)
+    - Optional with `crypto-openssl` feature: `brew install cmake pkg-config openssl` or see instructions [here](https://github.com/sfackler/rust-openssl#osx)
   - FreeBSD:
     - `pkg install rust gmake pkgconf python36 libxcb xclip ca_root_nss xsel-conrad`
     - It is a better idea to use & modify the existing `ffsend` port, which manages dependencies for you.

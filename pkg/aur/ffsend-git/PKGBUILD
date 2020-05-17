@@ -16,7 +16,7 @@ arch=('x86_64' 'i686')
 provides=('ffsend')
 conflicts=('ffsend')
 depends=('ca-certificates')
-makedepends=('rust>=1.39' 'cargo' 'cmake')
+makedepends=('openssl>=1.0 rust>=1.39' 'cargo' 'cmake')
 optdepends=('xclip: clipboard support'
             'bash-completion: support auto completion for bash')
 
