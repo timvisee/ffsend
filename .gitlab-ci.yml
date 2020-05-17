@@ -28,10 +28,10 @@ cache:
     - /usr/local/rustup/update-hashes/
     - target/
 
-# Install compiler dependencies
+# Install compiler and OpenSSL dependencies
 before_script:
   - apt-get update
-  - apt-get install -y --no-install-recommends build-essential pkg-config
+  - apt-get install -y --no-install-recommends build-essential pkg-config libssl-dev
   - |
     rustup install $RUST_VERSION
     rustup default $RUST_VERSION
