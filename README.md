@@ -528,11 +528,11 @@ Here are some examples:
 cargo install --features no-color
 cargo build --release --features no-color
 
-# None of the features
-cargo install --no-default-features
+# No default features, except required
+cargo install --no-default-features --features send3,crypto-ring
 
-# Only history and clipboard support
-cargo install --no-default--features --features history,clipboard
+# With history and clipboard support
+cargo install --no-default--features --features send3,crypto-ring,history,clipboard
 ```
 
 For Windows systems it is recommended to provide the `no-color` flag, as color
