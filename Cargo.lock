@@ -532,7 +532,7 @@ dependencies = [
  "toml 0.5.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "urlshortener 3.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "version-compare 0.0.10 (registry+https://github.com/rust-lang/crates.io-index)",
- "which 3.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "which 4.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -1909,6 +1909,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "thiserror"
+version = "1.0.19"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+dependencies = [
+ "thiserror-impl 1.0.19 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "thiserror-impl"
+version = "1.0.19"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+dependencies = [
+ "proc-macro2 1.0.17 (registry+https://github.com/rust-lang/crates.io-index)",
+ "quote 1.0.6 (registry+https://github.com/rust-lang/crates.io-index)",
+ "syn 1.0.29 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
 name = "thread_local"
 version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2367,11 +2385,11 @@ dependencies = [
 
 [[package]]
 name = "which"
-version = "3.1.1"
+version = "4.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
- "failure 0.1.8 (registry+https://github.com/rust-lang/crates.io-index)",
  "libc 0.2.71 (registry+https://github.com/rust-lang/crates.io-index)",
+ "thiserror 1.0.19 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -2662,6 +2680,8 @@ dependencies = [
 "checksum tempfile 3.1.0 (registry+https://github.com/rust-lang/crates.io-index)" = "7a6e24d9338a0a5be79593e2fa15a648add6138caa803e2d5bc782c371732ca9"
 "checksum term 0.5.2 (registry+https://github.com/rust-lang/crates.io-index)" = "edd106a334b7657c10b7c540a0106114feadeb4dc314513e97df481d5d966f42"
 "checksum textwrap 0.11.0 (registry+https://github.com/rust-lang/crates.io-index)" = "d326610f408c7a4eb6f51c37c330e496b08506c9457c9d34287ecc38809fb060"
+"checksum thiserror 1.0.19 (registry+https://github.com/rust-lang/crates.io-index)" = "b13f926965ad00595dd129fa12823b04bbf866e9085ab0a5f2b05b850fbfc344"
+"checksum thiserror-impl 1.0.19 (registry+https://github.com/rust-lang/crates.io-index)" = "893582086c2f98cde18f906265a65b5030a074b1046c674ae898be6519a7f479"
 "checksum thread_local 1.0.1 (registry+https://github.com/rust-lang/crates.io-index)" = "d40c6d1b69745a6ec6fb1ca717914848da4b44ae29d9b3080cbee91d72a69b14"
 "checksum time 0.1.43 (registry+https://github.com/rust-lang/crates.io-index)" = "ca8a50ef2360fbd1eeb0ecd46795a87a19024eb4b53c5dc916ca1fd95fe62438"
 "checksum time 0.2.16 (registry+https://github.com/rust-lang/crates.io-index)" = "3a51cadc5b1eec673a685ff7c33192ff7b7603d0b75446fb354939ee615acb15"
@@ -2712,7 +2732,7 @@ dependencies = [
 "checksum webpki-roots 0.19.0 (registry+https://github.com/rust-lang/crates.io-index)" = "f8eff4b7516a57307f9349c64bf34caa34b940b66fed4b2fb3136cb7386e5739"
 "checksum websocket 0.24.0 (registry+https://github.com/rust-lang/crates.io-index)" = "413b37840b9e27b340ce91b319ede10731de8c72f5bc4cb0206ec1ca4ce581d0"
 "checksum websocket-base 0.24.0 (registry+https://github.com/rust-lang/crates.io-index)" = "5e3810f0d00c4dccb54c30a4eee815e703232819dec7b007db115791c42aa374"
-"checksum which 3.1.1 (registry+https://github.com/rust-lang/crates.io-index)" = "d011071ae14a2f6671d0b74080ae0cd8ebf3a6f8c9589a2cd45f23126fe29724"
+"checksum which 4.0.0 (registry+https://github.com/rust-lang/crates.io-index)" = "bd3edc3cf5458851a4d6a2329232bd5f42c7f9bbe4c4782c4ef9ce37e5d101b2"
 "checksum winapi 0.2.8 (registry+https://github.com/rust-lang/crates.io-index)" = "167dc9d6949a9b857f3451275e911c3f44255842c1f7a76f33c55103a909087a"
 "checksum winapi 0.3.8 (registry+https://github.com/rust-lang/crates.io-index)" = "8093091eeb260906a183e6ae1abdba2ef5ef2257a21801128899c3fc699229c6"
 "checksum winapi-build 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)" = "2d315eee3b34aca4797b2da6b13ed88266e6d612562a0c46390af8299fc699bc"
