@@ -11,12 +11,12 @@
 # ffsend
 
 > Easily and securely share files from the command line.
-> A fully featured [Firefox Send][send] client.
+> [Firefox Send][send] client ([annonymous only][issue116] at the moment).
 
 Easily and securely share files and directories from the command line through a
 safe, private and encrypted link using a single simple command.
 Files are shared using the [Send][send] service and may be up
-to 1GB (2.5GB authenticated). Others are able to download these files with this tool, or through
+to 1GB. Others are able to download these files with this tool, or through
 their web browser.
 
 [![ffsend usage demo][usage-demo-svg]][usage-demo-asciinema]  
@@ -747,7 +747,7 @@ FLAGS:
 
 OPTIONS:
     -A, --api <VERSION>                 Server API version to use, '-' to lookup [env: FFSEND_API]
-        --basic-auth <USER:PASSWORD>    HTTP basic authentication credentials [env: FFSEND_BASIC_AUTH]
+        --basic-auth <USER:PASSWORD>    Protected proxy HTTP basic authentication credentials (not FxA) [env: FFSEND_BASIC_AUTH]
     -H, --history <FILE>                Use the specified history file [env: FFSEND_HISTORY]
     -t, --timeout <SECONDS>             Request timeout (0 to disable) [env: FFSEND_TIMEOUT]
     -T, --transfer-timeout <SECONDS>    Transfer timeout (0 to disable) [env: FFSEND_TRANSFER_TIMEOUT]
@@ -811,3 +811,4 @@ Check out the [LICENSE](LICENSE) file for more information.
 [docker-hub-ffsend]: https://hub.docker.com/r/timvisee/ffsend
 [scoop-install]: https://scoop.sh/#installs-in-seconds
 [freshports-ffsend]: https://www.freshports.org/www/ffsend
+[issue116]: https://github.com/timvisee/ffsend/issues/116
