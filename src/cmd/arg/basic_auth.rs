@@ -20,7 +20,7 @@ impl CmdArg for ArgBasicAuth {
             .env("FFSEND_BASIC_AUTH")
             .hide_env_values(true)
             .global(true)
-            .help("HTTP basic authentication credentials")
+            .help("Protected proxy HTTP basic authentication credentials (not FxA)")
     }
 }
 

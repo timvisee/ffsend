@@ -21,7 +21,7 @@ _ffsend() {
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
-'--basic-auth=[HTTP basic authentication credentials]' \
+'--basic-auth=[Protected proxy HTTP basic authentication credentials (not FxA)]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '-f[Force the action, ignore warnings]' \
@@ -59,7 +59,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
-'--basic-auth=[HTTP basic authentication credentials]' \
+'--basic-auth=[Protected proxy HTTP basic authentication credentials (not FxA)]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '--help[Prints help information]' \
@@ -89,7 +89,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
-'--basic-auth=[HTTP basic authentication credentials]' \
+'--basic-auth=[Protected proxy HTTP basic authentication credentials (not FxA)]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '--help[Prints help information]' \
@@ -119,7 +119,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
-'--basic-auth=[HTTP basic authentication credentials]' \
+'--basic-auth=[Protected proxy HTTP basic authentication credentials (not FxA)]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '-h[Prints help information]' \
@@ -151,7 +151,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
-'--basic-auth=[HTTP basic authentication credentials]' \
+'--basic-auth=[Protected proxy HTTP basic authentication credentials (not FxA)]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '-h[Prints help information]' \
@@ -183,7 +183,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
-'--basic-auth=[HTTP basic authentication credentials]' \
+'--basic-auth=[Protected proxy HTTP basic authentication credentials (not FxA)]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '-h[Prints help information]' \
@@ -217,7 +217,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
-'--basic-auth=[HTTP basic authentication credentials]' \
+'--basic-auth=[Protected proxy HTTP basic authentication credentials (not FxA)]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '-e[Extract an archived file]' \
@@ -253,7 +253,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
-'--basic-auth=[HTTP basic authentication credentials]' \
+'--basic-auth=[Protected proxy HTTP basic authentication credentials (not FxA)]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '-e[Extract an archived file]' \
@@ -289,7 +289,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
-'--basic-auth=[HTTP basic authentication credentials]' \
+'--basic-auth=[Protected proxy HTTP basic authentication credentials (not FxA)]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '-e[Extract an archived file]' \
@@ -321,7 +321,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
-'--basic-auth=[HTTP basic authentication credentials]' \
+'--basic-auth=[Protected proxy HTTP basic authentication credentials (not FxA)]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '-h[Prints help information]' \
@@ -351,7 +351,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
-'--basic-auth=[HTTP basic authentication credentials]' \
+'--basic-auth=[Protected proxy HTTP basic authentication credentials (not FxA)]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '-h[Prints help information]' \
@@ -381,7 +381,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
-'--basic-auth=[HTTP basic authentication credentials]' \
+'--basic-auth=[Protected proxy HTTP basic authentication credentials (not FxA)]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '-h[Prints help information]' \
@@ -411,7 +411,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
-'--basic-auth=[HTTP basic authentication credentials]' \
+'--basic-auth=[Protected proxy HTTP basic authentication credentials (not FxA)]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '-h[Prints help information]' \
@@ -449,7 +449,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
-'--basic-auth=[HTTP basic authentication credentials]' \
+'--basic-auth=[Protected proxy HTTP basic authentication credentials (not FxA)]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '-h[Prints help information]' \
@@ -481,7 +481,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
-'--basic-auth=[HTTP basic authentication credentials]' \
+'--basic-auth=[Protected proxy HTTP basic authentication credentials (not FxA)]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '-h[Prints help information]' \
@@ -513,7 +513,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
-'--basic-auth=[HTTP basic authentication credentials]' \
+'--basic-auth=[Protected proxy HTTP basic authentication credentials (not FxA)]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '-h[Prints help information]' \
@@ -543,7 +543,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
-'--basic-auth=[HTTP basic authentication credentials]' \
+'--basic-auth=[Protected proxy HTTP basic authentication credentials (not FxA)]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '-h[Prints help information]' \
@@ -576,7 +576,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
-'--basic-auth=[HTTP basic authentication credentials]' \
+'--basic-auth=[Protected proxy HTTP basic authentication credentials (not FxA)]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '-h[Prints help information]' \
@@ -614,7 +614,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
-'--basic-auth=[HTTP basic authentication credentials]' \
+'--basic-auth=[Protected proxy HTTP basic authentication credentials (not FxA)]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '-h[Prints help information]' \
@@ -646,7 +646,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
-'--basic-auth=[HTTP basic authentication credentials]' \
+'--basic-auth=[Protected proxy HTTP basic authentication credentials (not FxA)]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '-h[Prints help information]' \
@@ -678,7 +678,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
-'--basic-auth=[HTTP basic authentication credentials]' \
+'--basic-auth=[Protected proxy HTTP basic authentication credentials (not FxA)]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '-h[Prints help information]' \
@@ -708,7 +708,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
-'--basic-auth=[HTTP basic authentication credentials]' \
+'--basic-auth=[Protected proxy HTTP basic authentication credentials (not FxA)]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '-h[Prints help information]' \
@@ -745,7 +745,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
-'--basic-auth=[HTTP basic authentication credentials]' \
+'--basic-auth=[Protected proxy HTTP basic authentication credentials (not FxA)]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '-h[Prints help information]' \
@@ -779,7 +779,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
-'--basic-auth=[HTTP basic authentication credentials]' \
+'--basic-auth=[Protected proxy HTTP basic authentication credentials (not FxA)]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '-h[Prints help information]' \
@@ -813,7 +813,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
-'--basic-auth=[HTTP basic authentication credentials]' \
+'--basic-auth=[Protected proxy HTTP basic authentication credentials (not FxA)]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '-h[Prints help information]' \
@@ -847,7 +847,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
-'--basic-auth=[HTTP basic authentication credentials]' \
+'--basic-auth=[Protected proxy HTTP basic authentication credentials (not FxA)]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '-h[Prints help information]' \
@@ -881,7 +881,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
-'--basic-auth=[HTTP basic authentication credentials]' \
+'--basic-auth=[Protected proxy HTTP basic authentication credentials (not FxA)]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '-h[Prints help information]' \
@@ -915,7 +915,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
-'--basic-auth=[HTTP basic authentication credentials]' \
+'--basic-auth=[Protected proxy HTTP basic authentication credentials (not FxA)]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '-h[Prints help information]' \
@@ -949,7 +949,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
-'--basic-auth=[HTTP basic authentication credentials]' \
+'--basic-auth=[Protected proxy HTTP basic authentication credentials (not FxA)]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '-h[Prints help information]' \
@@ -983,7 +983,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
-'--basic-auth=[HTTP basic authentication credentials]' \
+'--basic-auth=[Protected proxy HTTP basic authentication credentials (not FxA)]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '(-p --password)-P[Protect the file with a generated passphrase]' \
@@ -1019,7 +1019,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
-'--basic-auth=[HTTP basic authentication credentials]' \
+'--basic-auth=[Protected proxy HTTP basic authentication credentials (not FxA)]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '(-p --password)-P[Protect the file with a generated passphrase]' \
@@ -1055,7 +1055,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
-'--basic-auth=[HTTP basic authentication credentials]' \
+'--basic-auth=[Protected proxy HTTP basic authentication credentials (not FxA)]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '(-p --password)-P[Protect the file with a generated passphrase]' \
@@ -1097,7 +1097,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
-'--basic-auth=[HTTP basic authentication credentials]' \
+'--basic-auth=[Protected proxy HTTP basic authentication credentials (not FxA)]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '(-p --password)-P[Protect the file with a generated passphrase]' \
@@ -1152,7 +1152,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
-'--basic-auth=[HTTP basic authentication credentials]' \
+'--basic-auth=[Protected proxy HTTP basic authentication credentials (not FxA)]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '(-p --password)-P[Protect the file with a generated passphrase]' \
@@ -1207,7 +1207,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
-'--basic-auth=[HTTP basic authentication credentials]' \
+'--basic-auth=[Protected proxy HTTP basic authentication credentials (not FxA)]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '(-p --password)-P[Protect the file with a generated passphrase]' \
@@ -1254,7 +1254,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
-'--basic-auth=[HTTP basic authentication credentials]' \
+'--basic-auth=[Protected proxy HTTP basic authentication credentials (not FxA)]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '--help[Prints help information]' \
@@ -1284,7 +1284,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
-'--basic-auth=[HTTP basic authentication credentials]' \
+'--basic-auth=[Protected proxy HTTP basic authentication credentials (not FxA)]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '--help[Prints help information]' \
@@ -1314,7 +1314,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
-'--basic-auth=[HTTP basic authentication credentials]' \
+'--basic-auth=[Protected proxy HTTP basic authentication credentials (not FxA)]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '--help[Prints help information]' \
@@ -1344,7 +1344,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
-'--basic-auth=[HTTP basic authentication credentials]' \
+'--basic-auth=[Protected proxy HTTP basic authentication credentials (not FxA)]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '-C[Clear all history]' \
@@ -1377,7 +1377,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
-'--basic-auth=[HTTP basic authentication credentials]' \
+'--basic-auth=[Protected proxy HTTP basic authentication credentials (not FxA)]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '-C[Clear all history]' \
@@ -1410,7 +1410,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
-'--basic-auth=[HTTP basic authentication credentials]' \
+'--basic-auth=[Protected proxy HTTP basic authentication credentials (not FxA)]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '-C[Clear all history]' \
@@ -1441,7 +1441,7 @@ _arguments "${_arguments_options[@]}" \
 '--transfer-timeout=[Transfer timeout (0 to disable)]' \
 '-A+[Server API version to use, '\''-'\'' to lookup]' \
 '--api=[Server API version to use, '\''-'\'' to lookup]' \
-'--basic-auth=[HTTP basic authentication credentials]' \
+'--basic-auth=[Protected proxy HTTP basic authentication credentials (not FxA)]' \
 '-H+[Use the specified history file]' \
 '--history=[Use the specified history file]' \
 '-h[Prints help information]' \
