@@ -8,6 +8,9 @@
 [gitlab-ci-link]: https://gitlab.com/timvisee/ffsend/pipelines
 [gitlab-ci-master-badge]: https://gitlab.com/timvisee/ffsend/badges/master/pipeline.svg
 
+*Important: temporarily unavailable because Mozilla put Send into maintenance
+mode, see [this issue](https://gitlab.com/timvisee/ffsend/-/issues/100).*
+
 # ffsend
 
 > Easily and securely share files from the command line.
