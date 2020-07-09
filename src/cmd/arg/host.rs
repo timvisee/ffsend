@@ -1,6 +1,5 @@
 use clap::{Arg, ArgMatches};
 use failure::Fail;
-use ffsend_api::config::SEND_DEFAULT_HOST;
 use ffsend_api::url::Url;
 
 use super::{CmdArg, CmdArgOption};
@@ -20,7 +19,7 @@ impl CmdArg for ArgHost {
             .long("host")
             .short("h")
             .value_name("URL")
-            .default_value(SEND_DEFAULT_HOST)
+            .default_value("https://send.vis.ee/")
             .env("FFSEND_HOST")
             .hide_env_values(true)
             .help("The remote host to upload to")
