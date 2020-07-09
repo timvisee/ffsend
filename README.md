@@ -8,8 +8,10 @@
 [gitlab-ci-link]: https://gitlab.com/timvisee/ffsend/pipelines
 [gitlab-ci-master-badge]: https://gitlab.com/timvisee/ffsend/badges/master/pipeline.svg
 
-**Important: temporarily unavailable because Mozilla put Send into maintenance
-mode, see [this issue](https://gitlab.com/timvisee/ffsend/-/issues/100).**
+**Important: temporarily using a Send instance hosted by
+[@timvisee](https://timvisee.com) as default host, because Mozilla put the
+public Send instance into maintenance mode, see
+[this issue](https://gitlab.com/timvisee/ffsend/-/issues/101).**
 
 # ffsend
 
