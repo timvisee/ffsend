@@ -518,7 +518,7 @@ dependencies = [
  "derive_builder 0.9.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "directories 2.0.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "failure 0.1.8 (registry+https://github.com/rust-lang/crates.io-index)",
- "ffsend-api 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "ffsend-api 0.6.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "fs2 0.4.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "lazy_static 1.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "open 1.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -542,7 +542,7 @@ dependencies = [
 
 [[package]]
 name = "ffsend-api"
-version = "0.6.0"
+version = "0.6.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "arrayref 0.3.6 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -2611,7 +2611,7 @@ dependencies = [
 "checksum failure 0.1.8 (registry+https://github.com/rust-lang/crates.io-index)" = "d32e9bd16cc02eae7db7ef620b392808b89f6a5e16bb3497d159c6b92a0f4f86"
 "checksum failure_derive 0.1.8 (registry+https://github.com/rust-lang/crates.io-index)" = "aa4da3c766cd7a0db8242e326e9e4e081edd567072893ed320008189715366a4"
 "checksum fake-simd 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)" = "e88a8acf291dafb59c2d96e8f59828f3838bb1a70398823ade51a84de6a6deed"
-"checksum ffsend-api 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)" = "7c81d7bf24dc23e394a8692ef208c26c20411c01f398e354ac4d268c34196fc5"
+"checksum ffsend-api 0.6.2 (registry+https://github.com/rust-lang/crates.io-index)" = "7613d471bb9e748567e9dad286c9bb1eeacc5ac59840f6ee8cf8f5e1118336cf"
 "checksum filetime 0.2.11 (registry+https://github.com/rust-lang/crates.io-index)" = "e500da2fab70bdc43f8f0e0b350a227f31c72311c56aba48f01d5cd62bb0345b"
 "checksum fnv 1.0.7 (registry+https://github.com/rust-lang/crates.io-index)" = "3f9eec918d3f24069decb9af1554cad7c880e2da24a9afd88aca000531ab82c1"
 "checksum foreign-types 0.3.2 (registry+https://github.com/rust-lang/crates.io-index)" = "f6f339eb8adc052cd2ca78910fda869aefa38d22d5cb648e6485e4d3fc06f3b1"
