@@ -8,10 +8,11 @@
 [gitlab-ci-link]: https://gitlab.com/timvisee/ffsend/pipelines
 [gitlab-ci-master-badge]: https://gitlab.com/timvisee/ffsend/badges/master/pipeline.svg
 
-*Important: temporarily using a Send instance hosted by
-[@timvisee](https://timvisee.com) as default host, because Mozilla put their
-public Send instance into maintenance mode, see
-[this issue](https://gitlab.com/timvisee/ffsend/-/issues/101).*
+*Important: temporarily defaulting to a Send instance hosted by
+[@timvisee](https://timvisee.com), as Mozilla put their
+Send instance into maintenance mode, see
+[this issue](https://gitlab.com/timvisee/ffsend/-/issues/101). Please consider
+to [donate].*
 
 # ffsend
 
@@ -817,3 +818,4 @@ Check out the [LICENSE](LICENSE) file for more information.
 [scoop-install]: https://scoop.sh/#installs-in-seconds
 [freshports-ffsend]: https://www.freshports.org/www/ffsend
 [issue116]: https://github.com/timvisee/ffsend/issues/116
+[donate]: https://timvisee.com/donate
