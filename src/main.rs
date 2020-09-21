@@ -174,6 +174,9 @@ pub fn print_main_info() -> ! {
     println!();
     println!("To show all subcommands, features and other help:");
     println!("    {}", highlight(&format!("{} help [SUBCOMMAND]", bin)));
+    println!();
+    println!("The default public Send host is provided by Tim Visee.");
+    println!("Please consider to donate and help keep it running: https://vis.ee/donate");
 
     process::exit(1)
 }

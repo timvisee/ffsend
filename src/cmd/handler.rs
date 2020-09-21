@@ -39,6 +39,15 @@ lazy_static! {
 
     /// The default client transfer timeout in seconds as a string
     static ref DEFAULT_TRANSFER_TIMEOUT: String = format!("{}", CLIENT_TRANSFER_TIMEOUT);
+
+    /// The about notice in command output.
+    static ref APP_ABOUT: String = format!(
+        "{}\n\n\
+            The default public Send host is provided by Tim Visee, @timvisee.\n\
+            Please consider to donate and help keep it running: https://vis.ee/donate\
+            ",
+        crate_description!(),
+    );
 }
 
 /// CLI argument handler.
@@ -54,13 +63,8 @@ impl<'a: 'b, 'b> Handler<'a> {
         let app = App::new(crate_name!())
             .version(crate_version!())
             .author(crate_authors!())
-            .about(crate_description!())
-            .after_help(
-                "\
-                 The public Send service that is used as default host is provided by Mozilla.\n\
-                 This application is not affiliated with Mozilla, Firefox or Firefox Send.\
-                 ",
-            )
+            .about(APP_ABOUT.as_ref())
+            .after_help("This application is not affiliated with Firefox or Firefox Send.")
             .global_setting(AppSettings::GlobalVersion)
             .global_setting(AppSettings::VersionlessSubcommands)
             // TODO: enable below command when it doesn't break `p` anymore.
