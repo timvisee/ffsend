@@ -8,11 +8,9 @@
 [gitlab-ci-link]: https://gitlab.com/timvisee/ffsend/pipelines
 [gitlab-ci-master-badge]: https://gitlab.com/timvisee/ffsend/badges/master/pipeline.svg
 
-*Important: temporarily defaulting to a Send instance hosted by
-[@timvisee](https://timvisee.com), as Mozilla put their
-Send instance into maintenance mode, see
-[this issue](https://gitlab.com/timvisee/ffsend/-/issues/101). Please consider
-to [donate].*
+*Notice: the default Send host is provided by [@timvisee][timvisee],
+[info](https://gitlab.com/timvisee/ffsend/-/issues/101).
+Please consider to [donate] and help keep it running.*
 
 # ffsend
 
@@ -47,9 +45,9 @@ Find out more about security [here](#security).
 - [License](#license)
 
 The public [Send][send] service that is used as default host is provided by
-[Mozilla][mozilla].  
-This application is not affiliated with [Mozilla][mozilla], [Firefox][firefox]
-or [Firefox Send][send] in any way.
+[@timvisee][timvisee].  
+This application is not affiliated with [Firefox][firefox] or
+[Firefox Send][send] in any way.
 
 _Note: this tool is currently in beta, as some extra desired features are yet to be implemented_
 
@@ -738,6 +736,9 @@ Tim Visee <3a4fb3964f@sinenomine.email>
 Easily and securely share files from the command line.
 A fully featured Firefox Send client.
 
+The default public Send host is provided by Tim Visee, @timvisee.
+Please consider to donate and help keep it running: https://vis.ee/donate
+
 USAGE:
     ffsend [FLAGS] [OPTIONS] [SUBCOMMAND]
 
@@ -772,14 +773,12 @@ SUBCOMMANDS:
     password      Change the password of a shared file [aliases: pass, p]
     version       Determine the Send server version [aliases: v]
 
-The public Send service that is used as default host is provided by Mozilla.
-This application is not affiliated with Mozilla, Firefox or Firefox Send.
+This application is not affiliated with Firefox or Firefox Send.
 ```
 
 ## Special thanks
 - to all `ffsend` source/package contributors
-- to [Mozilla][mozilla] for building and hosting the amazing
-  [Firefox Send][send] service
+- to [Mozilla][mozilla] for building the amazing [Firefox Send][send] service
 - to everyone involved with [asciinema][asciinema] and [svg-term][svg-term] for
   providing tools to make great visual demos
 - to everyone involved in all crate dependencies used
@@ -818,4 +817,5 @@ Check out the [LICENSE](LICENSE) file for more information.
 [scoop-install]: https://scoop.sh/#installs-in-seconds
 [freshports-ffsend]: https://www.freshports.org/www/ffsend
 [issue116]: https://github.com/timvisee/ffsend/issues/116
+[timvisee]: https://timvisee.com/
 [donate]: https://timvisee.com/donate
