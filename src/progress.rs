@@ -67,6 +67,9 @@ impl<'a> ProgressReporter for ProgressBar<'a> {
         #[cfg(not(target_os = "windows"))]
         progress_bar.finish_print(self.msg_finish);
         #[cfg(target_os = "windows")]
-        progress_bar.finish_println(self.msg_finish);
+        {
+            progress_bar.finish_println(self.msg_finish);
+            eprintln!();
+        }
     }
 }
