@@ -59,9 +59,17 @@ impl<'a> ProgressReporter for ProgressBar<'a> {
 
     /// Finish the progress.
     fn finish(&mut self) {
-        self.progress_bar
+        let progress_bar = self
+            .progress_bar
             .as_mut()
-            .expect("progress bar not yet instantiated")
-            .finish_print(self.msg_finish);
+            .expect("progress bar not yet instantiated");
+
+        #[cfg(not(target_os = "windows"))]
+        progress_bar.finish_print(self.msg_finish);
+        #[cfg(target_os = "windows")]
+        {
+            progress_bar.finish_println(self.msg_finish);
+            eprintln!();
+        }
     }
 }
