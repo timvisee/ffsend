@@ -1,7 +1,7 @@
 use std::io::{Error as IoError, Read};
 use std::path::Path;
 
-use super::tar::Archive as TarArchive;
+use tar::Archive as TarArchive;
 
 pub type Result<T> = ::std::result::Result<T, IoError>;
 

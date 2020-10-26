@@ -1,5 +1,3 @@
-extern crate directories;
-
 #[cfg(feature = "infer-command")]
 use std::ffi::OsString;
 

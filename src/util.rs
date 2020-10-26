@@ -1,10 +1,5 @@
 #[cfg(feature = "clipboard-crate")]
 extern crate clip;
-extern crate colored;
-extern crate directories;
-extern crate fs2;
-extern crate open;
-extern crate regex;
 #[cfg(feature = "clipboard-bin")]
 extern crate which;
 
@@ -26,11 +21,10 @@ use std::process::{Command, Stdio};
 
 #[cfg(feature = "clipboard-crate")]
 use self::clip::{ClipboardContext, ClipboardProvider};
-use self::colored::*;
-#[cfg(feature = "history")]
-use self::directories::ProjectDirs;
-use self::fs2::available_space;
 use chrono::Duration;
+use colored::*;
+#[cfg(feature = "history")]
+use directories::ProjectDirs;
 use failure::{err_msg, Fail};
 #[cfg(feature = "clipboard-crate")]
 use failure::{Compat, Error};
@@ -40,6 +34,7 @@ use ffsend_api::{
     reqwest,
     url::Url,
 };
+use fs2::available_space;
 use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};
 use regex::Regex;

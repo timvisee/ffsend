@@ -289,7 +289,7 @@ impl<'a> Upload<'a> {
 
                     // Prompt the user to continue, quit if the user answered no
                     if !prompt_yes("Continue uploading?", Some(true), &matcher_main) {
-                        println!("Upload cancelled");
+                        eprintln!("Upload cancelled");
                         quit();
                     }
                 }

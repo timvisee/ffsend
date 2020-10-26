@@ -1,16 +1,14 @@
-extern crate toml;
-extern crate version_compare;
-
 use std::fs;
 use std::io::Error as IoError;
 use std::path::PathBuf;
 
-use self::toml::de::Error as DeError;
-use self::toml::ser::Error as SerError;
-use self::version_compare::{CompOp, VersionCompare};
 use failure::Fail;
-use ffsend_api::file::remote_file::{FileParseError, RemoteFile};
-use ffsend_api::url::Url;
+use ffsend_api::{
+    file::remote_file::{FileParseError, RemoteFile},
+    url::Url,
+};
+use toml::{de::Error as DeError, ser::Error as SerError};
+use version_compare::{CompOp, VersionCompare};
 
 use crate::util::{print_error, print_warning};
 

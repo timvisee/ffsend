@@ -1,10 +1,8 @@
-extern crate pbr;
-
 use std::io::{stderr, Stderr};
 use std::time::Duration;
 
-use self::pbr::{ProgressBar as Pbr, Units};
 use ffsend_api::pipe::ProgressReporter;
+use pbr::{ProgressBar as Pbr, Units};
 
 /// The refresh rate of the progress bar, in milliseconds.
 const PROGRESS_BAR_FPS_MILLIS: u64 = 200;

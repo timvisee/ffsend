@@ -2,7 +2,7 @@ use std::fs::File;
 use std::io::{Error as IoError, Write};
 use std::path::Path;
 
-use super::tar::Builder as TarBuilder;
+use tar::Builder as TarBuilder;
 
 pub type Result<T> = ::std::result::Result<T, IoError>;
 
