@@ -1127,7 +1127,7 @@ impl From<ResponseError> for FollowError {
 pub fn rand_alphanum_string(len: usize) -> String {
     let mut rng = thread_rng();
     iter::repeat(())
-        .map(|()| rng.sample(Alphanumeric))
+        .map(|()| rng.sample(Alphanumeric) as char)
         .take(len)
         .collect()
 }
