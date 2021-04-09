@@ -275,7 +275,7 @@ ffsend --help
 
 ### macOS
 Using the [`homebrew` package](#macos-homebrew-package) is recommended.  
-Alternatively you may install it manually using the
+Alternatively you may install it via [MacPorts](#macos-macports), or manually using the
 [prebuilt binaries](#macos-prebuilt-binaries).
 
 #### macOS: homebrew package
@@ -284,6 +284,17 @@ Make sure you've [`homebrew`][homebrew] installed, and run:
 ```bash
 brew install ffsend
 ffsend --help
+```
+
+#### macOS: MacPorts
+_Note: ffsend in MacPorts is currently not automatically updated, and might be
+slightly outdated._
+
+Once you have [MacPorts](https://www.macports.org) installed, you can run:
+
+```bash
+sudo port selfupdate
+sudo port install ffsend
 ```
 
 #### macOS: Nix package
