@@ -19,7 +19,6 @@ use pathdiff::diff_paths;
 use prettytable::{format::FormatBuilder, Cell, Row, Table};
 #[cfg(feature = "qrcode")]
 use qr2term::print_qr;
-#[cfg(feature = "archive")]
 use tempfile::{Builder as TempBuilder, NamedTempFile};
 
 use super::select_api_version;
