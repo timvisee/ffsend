@@ -11,6 +11,7 @@ use std::fmt;
 use std::fmt::{Debug, Display};
 #[cfg(feature = "clipboard-bin")]
 use std::io::ErrorKind as IoErrorKind;
+use std::io::{self, Read};
 use std::io::{stderr, stdin, Error as IoError, Write};
 use std::iter;
 use std::path::Path;
@@ -1130,4 +1131,28 @@ pub fn rand_alphanum_string(len: usize) -> String {
         .map(|()| rng.sample(Alphanumeric) as char)
         .take(len)
         .collect()
+}
+
+/// Read file from stdin.
+pub fn stdin_read_file(prompt: bool) -> Result<Vec<u8>, StdinErr> {
+    if prompt {
+        #[cfg(not(windows))]
+        eprintln!("Enter input. Use [CTRL+D] to stop:");
+        #[cfg(windows)]
+        eprintln!("Enter input. Use [CTRL+Z] to stop:");
+    }
+
+    let mut data = vec![];
+    io::stdin()
+        .lock()
+        .read_to_end(&mut data)
+        .map_err(StdinErr::Stdin)?;
+    Ok(data)
+}
+
+/// URL following error.
+#[derive(Debug, Fail)]
+pub enum StdinErr {
+    #[fail(display = "failed to read from stdin")]
+    Stdin(#[cause] io::Error),
 }

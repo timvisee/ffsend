@@ -1,6 +1,6 @@
 use std::env::current_dir;
 use std::fs;
-use std::io::Error as IoError;
+use std::io::{Error as IoError, Write};
 use std::path::Path;
 #[cfg(feature = "archive")]
 use std::path::PathBuf;
@@ -36,7 +36,7 @@ use crate::urlshorten;
 use crate::util::set_clipboard;
 use crate::util::{
     format_bytes, open_url, print_error, print_error_msg, prompt_yes, quit, quit_error_msg,
-    rand_alphanum_string, ErrorHintsBuilder,
+    rand_alphanum_string, stdin_read_file, ErrorHintsBuilder, StdinErr,
 };
 
 /// A file upload action.
@@ -57,19 +57,48 @@ impl<'a> Upload<'a> {
         let matcher_main = MainMatcher::with(self.cmd_matches).unwrap();
         let matcher_upload = UploadMatcher::with(self.cmd_matches).unwrap();
 
+        // The file name to use
+        #[allow(unused_mut)]
+        let mut file_name = matcher_upload.name().map(|s| s.to_owned());
+
+        // The selected files
+        let mut files = matcher_upload.files();
+
+        // If file is `-`, upload from stdin
+        // TODO: write stdin directly to file, or directly to upload buffer
+        let mut tmp_stdin: Option<NamedTempFile> = None;
+        if files.len() == 1 && files[0] == "-" {
+            // Obtain data from stdin
+            let data = stdin_read_file(!matcher_main.quiet()).map_err(Error::Stdin)?;
+
+            // Create temporary stdin buffer file
+            tmp_stdin = Some(
+                TempBuilder::new()
+                    .prefix(&format!(".{}-stdin-", crate_name!()))
+                    .tempfile()
+                    .map_err(Error::StdinTempFile)?,
+            );
+            let file = tmp_stdin.as_ref().unwrap();
+
+            // Fill temporary file with data, update list of files we upload, suggest name
+            file.as_file()
+                .write_all(&data)
+                .map_err(Error::StdinTempFile)?;
+            files = vec![file
+                .path()
+                .to_str()
+                .expect("failed to obtain file name for stdin buffer file")];
+            file_name = file_name.or_else(|| Some("stdin.txt".into()));
+        }
+
         // Get API parameters
         #[allow(unused_mut)]
-        let mut paths: Vec<_> = matcher_upload
-            .files()
+        let mut paths: Vec<_> = files
             .into_iter()
             .map(|p| Path::new(p).to_path_buf())
             .collect();
         let mut path = Path::new(paths.first().unwrap()).to_path_buf();
         let host = matcher_upload.host();
-
-        // The file name to use
-        #[allow(unused_mut)]
-        let mut file_name = matcher_upload.name().map(|s| s.to_owned());
 
         // All paths must exist
         // TODO: ensure the file exists and is accessible
@@ -454,6 +483,16 @@ impl<'a> Upload<'a> {
             }
         }
 
+        // Close the temporary stdin buffer file, to ensure it's removed
+        if let Some(tmp_stdin) = tmp_stdin.take() {
+            if let Err(err) = tmp_stdin.close() {
+                print_error(
+                    err.context("failed to clean up temporary stdin buffer file, ignoring")
+                        .compat(),
+                );
+            }
+        }
+
         #[cfg(feature = "archive")]
         {
             // Close the temporary zip file, to ensure it's removed
@@ -581,6 +620,14 @@ pub enum Error {
     /// An error occurred while deleting a local file after upload.
     #[fail(display = "failed to delete local file")]
     Delete(#[cause] IoError),
+
+    /// An error occurred while reading data from stdin.
+    #[fail(display = "failed to read data from stdin")]
+    Stdin(#[cause] StdinErr),
+
+    /// An error occurred while creating the temporary stdin file.
+    #[fail(display = "failed to create temporary stdin buffer file")]
+    StdinTempFile(#[cause] IoError),
 }
 
 impl From<VersionError> for Error {
