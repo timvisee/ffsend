@@ -75,6 +75,7 @@ impl CmdArg for ArgExpiryTime {
             .alias("expire")
             .alias("expiry")
             .value_name("TIME")
+            .env("FFSEND_EXPIRY_TIME")
             .help("The file expiry time")
     }
 }
