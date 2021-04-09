@@ -112,10 +112,10 @@ chbs = "0.1.0"
 chrono = "0.4"
 clap = "2.33"
 colored = "2.0"
-derive_builder = "0.9"
+derive_builder = "0.10"
 directories = "3.0"
 failure = "0.1"
-ffsend-api = { version = "0.6.3", default-features = false }
+ffsend-api = { version = "0.7.2", default-features = false }
 fs2 = "0.4"
 lazy_static = "1.4"
 open = "1"
