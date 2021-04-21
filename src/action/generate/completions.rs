@@ -38,14 +38,14 @@ impl<'a> Completions<'a> {
         // Generate completions
         for shell in shells {
             if !quiet {
-                print!(
+                eprint!(
                     "Generating completions for {}...",
                     format!("{}", shell).to_lowercase()
                 );
             }
             app.gen_completions(crate_name!(), shell, &dir);
             if !quiet {
-                println!(" done.");
+                eprintln!(" done.");
             }
         }
 
