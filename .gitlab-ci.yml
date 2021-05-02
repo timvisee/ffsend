@@ -256,7 +256,7 @@ release-docker:
 
 # AUR packages release
 package-aur:
-  image: archlinux/base
+  image: archlinux
   stage: package
   needs:
     - release-github
