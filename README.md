@@ -74,7 +74,7 @@ Easily upload and download:
 ```bash
 # Simple upload
 $ ffsend upload my-file.txt
-https://send.firefox.com/#sample-share-url
+https://send.vis.ee/#sample-share-url
 
 # Advanced upload
 # - Specify a download limit of 1
@@ -85,25 +85,25 @@ https://send.firefox.com/#sample-share-url
 # - Open the shareable link in your browser
 $ ffsend upload --downloads 1 --expiry-time 5m --password --archive --copy --open my-file.txt
 Password: ******
-https://send.firefox.com/#sample-share-url
+https://send.vis.ee/#sample-share-url
 
 # Upload to your own host
 $ ffsend u -h https://example.com/ my-file.txt
 https://example.com/#sample-share-url
 
 # Simple download
-$ ffsend download https://send.firefox.com/#sample-share-url
+$ ffsend download https://send.vis.ee/#sample-share-url
 ```
 
 Inspect remote files:
 
 ```bash
 # Check if a file exists
-$ ffsend exists https://send.firefox.com/#sample-share-url
+$ ffsend exists https://send.vis.ee/#sample-share-url
 Exists: yes
 
 # Fetch remote file info
-$ ffsend info https://send.firefox.com/#sample-share-url
+$ ffsend info https://send.vis.ee/#sample-share-url
 ID:         b087066715
 Name:       my-file.txt
 Size:       12 KiB
@@ -118,16 +118,16 @@ Other commands include:
 # View your file history
 $ ffsend history
 #  LINK                                        EXPIRE
-1  https://send.firefox.com/#sample-share-url  23h57m
-2  https://send.firefox.com/#other-sample-url  17h38m
+1  https://send.vis.ee/#sample-share-url  23h57m
+2  https://send.vis.ee/#other-sample-url  17h38m
 3  https://example.com/#sample-share-url       37m30s
 
 # Change the password after uploading
-$ ffsend password https://send.firefox.com/#sample-share-url
+$ ffsend password https://send.vis.ee/#sample-share-url
 Password: ******
 
 # Delete a file
-$ ffsend delete https://send.firefox.com/#sample-share-url
+$ ffsend delete https://send.vis.ee/#sample-share-url
 ```
 
 Use the `--help` flag, `help` subcommand, or see the [help](#help) section for
@@ -418,7 +418,7 @@ docker run --rm -it -v $(pwd):/data timvisee/ffsend
 docker run --rm -it -v $(pwd):/data timvisee/ffsend upload my-file.txt
 
 # Download from specified link
-docker run --rm -it -v $(pwd):/data timvisee/ffsend download https://send.firefox.com/#sample-share-url
+docker run --rm -it -v $(pwd):/data timvisee/ffsend download https://send.vis.ee/#sample-share-url
 
 # Show help
 docker run --rm -it -v $(pwd):/data timvisee/ffsend help
@@ -594,7 +594,7 @@ having `ffput` and `ffget` just for to upload and download using `ffsend`.
 This allows simple and direct commands like:
 ```bash
 ffput my-file.txt
-ffget https://send.firefox.com/#sample-share-url
+ffget https://send.vis.ee/#sample-share-url
 ```
 
 This works for a predefined list of binary names:
@@ -810,8 +810,8 @@ Check out the [LICENSE](LICENSE) file for more information.
 [termux]: https://termux.com/
 [rust]: https://rust-lang.org/
 [rustup]: https://rustup.rs/
-[send]: https://send.firefox.com/
-[send-encryption]: https://github.com/mozilla/send/blob/master/docs/encryption.md
+[send]: https://send.vis.ee/
+[send-encryption]: https://github.com/timvisee/send/blob/master/docs/encryption.md
 [asciinema]: https://asciinema.org/
 [svg-term]: https://github.com/marionebl/svg-term-cli
 [github-releases]: https://github.com/timvisee/ffsend/releases
