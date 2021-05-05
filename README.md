@@ -15,7 +15,7 @@ Please consider to [donate] and help keep it running.*
 # ffsend
 
 > Easily and securely share files from the command line.
-> [Firefox Send][send] client ([annonymous only][issue116] at the moment).
+> [Send][send] client ([annonymous only][issue116] at the moment).
 
 Easily and securely share files and directories from the command line through a
 safe, private and encrypted link using a single simple command.
@@ -47,7 +47,7 @@ Find out more about security [here](#security).
 The public [Send][send] service that is used as default host is provided by
 [@timvisee][timvisee].  
 This application is not affiliated with [Firefox][firefox] or
-[Firefox Send][send] in any way.
+[Mozilla][mozilla] in any way.
 
 _Note: this tool is currently in beta, as some extra desired features are yet to be implemented_
 
@@ -57,7 +57,7 @@ _Note: this tool is currently in beta, as some extra desired features are yet to
 - Additional password protection, generation and configurable download limits
 - File and directory archiving and extraction
 - Built-in share URL shortener and QR code generator
-- Supports Firefox Send v3 (current) and v2
+- Supports Send v3 (current) and v2
 - History tracking your files for easy management
 - Ability to use your own Send hosts
 - Inspect or delete shared files
@@ -512,8 +512,8 @@ The following features are available, some of which are enabled by default:
 
 | Feature         | Enabled | Description                                                |
 | :-------------: | :-----: | :--------------------------------------------------------- |
-| `send2`         | Default | Support for Firefox Send v2 servers                        |
-| `send3`         | Default | Support for Firefox Send v3 servers                        |
+| `send2`         | Default | Support for Send v2 servers                                |
+| `send3`         | Default | Support for Send v3 servers                                |
 | `crypto-ring`   | Default | Use ring as cryptography backend                           |
 | `crypto-openssl`|         | Use OpenSSL as cryptography backend                        |
 | `clipboard`     | Default | Support for copying links to the clipboard                 |
@@ -746,7 +746,7 @@ $ ffsend help
 ffsend 0.2.71
 Tim Visee <3a4fb3964f@sinenomine.email>
 Easily and securely share files from the command line.
-A fully featured Firefox Send client.
+A fully featured Send client.
 
 The default public Send host is provided by Tim Visee, @timvisee.
 Please consider to donate and help keep it running: https://vis.ee/donate
@@ -785,12 +785,12 @@ SUBCOMMANDS:
     password      Change the password of a shared file [aliases: pass, p]
     version       Determine the Send server version [aliases: v]
 
-This application is not affiliated with Firefox or Firefox Send.
+This application is not affiliated with Firefox or Mozilla.
 ```
 
 ## Special thanks
 - to all `ffsend` source/package contributors
-- to [Mozilla][mozilla] for building the amazing [Firefox Send][send] service
+- to [Mozilla][mozilla] for building the amazing [Firefox Send][mozilla-send] service ([fork][timvisee-send])
 - to everyone involved with [asciinema][asciinema] and [svg-term][svg-term] for
   providing tools to make great visual demos
 - to everyone involved in all crate dependencies used
@@ -811,6 +811,8 @@ Check out the [LICENSE](LICENSE) file for more information.
 [rust]: https://rust-lang.org/
 [rustup]: https://rustup.rs/
 [send]: https://send.vis.ee/
+[mozilla-send]: https://github.com/mozilla/send
+[timvisee-send]: https://github.com/timvisee/send
 [send-encryption]: https://github.com/timvisee/send/blob/master/docs/encryption.md
 [asciinema]: https://asciinema.org/
 [svg-term]: https://github.com/marionebl/svg-term-cli

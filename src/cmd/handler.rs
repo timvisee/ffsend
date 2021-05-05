@@ -62,7 +62,7 @@ impl<'a: 'b, 'b> Handler<'a> {
             .version(crate_version!())
             .author(crate_authors!())
             .about(APP_ABOUT.as_ref())
-            .after_help("This application is not affiliated with Firefox or Firefox Send.")
+            .after_help("This application is not affiliated with Firefox or Mozilla.")
             .global_setting(AppSettings::GlobalVersion)
             .global_setting(AppSettings::VersionlessSubcommands)
             // TODO: enable below command when it doesn't break `p` anymore.

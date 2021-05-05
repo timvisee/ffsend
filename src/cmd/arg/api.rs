@@ -24,7 +24,7 @@ impl CmdArg for ArgApi {
             .help("Server API version to use, '-' to lookup")
             .long_help(
                 "Server API version to use, one of:\n\
-                 2, 3: Firefox Send API versions\n\
+                 2, 3: Send API versions\n\
                  auto, -: probe server to determine\
                  ",
             )

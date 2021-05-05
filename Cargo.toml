@@ -8,7 +8,7 @@ homepage = "https://timvisee.com/projects/ffsend"
 repository = "https://gitlab.com/timvisee/ffsend"
 description = """\
     Easily and securely share files from the command line.\n\
-    A fully featured Firefox Send client.\
+    A fully featured Send client.\
 """
 keywords = ["send", "firefox", "cli"]
 categories = [
@@ -77,10 +77,10 @@ clipboard = ["clip", "which"]
 # Compile with file history support
 history = []
 
-# Support for Firefox Send v2
+# Support for Send v2
 send2 = ["ffsend-api/send2"]
 
-# Support for Firefox Send v3
+# Support for Send v3
 send3 = ["ffsend-api/send3"]
 
 # Use OpenSSL as cryptography backend

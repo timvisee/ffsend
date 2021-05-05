@@ -7,7 +7,7 @@
 pkgname=ffsend
 pkgver=0.0.0 # automatically set in CI, see: /.gitlab-ci.yml
 pkgrel=1
-pkgdesc="Easily and securely share files from the command line. A Firefox Send client."
+pkgdesc="Easily and securely share files from the command line. A Send client."
 url="https://gitlab.com/timvisee/ffsend"
 license=('GPL3')
 source=("ffsend-v$pkgver.tar.gz::$url/-/archive/v$pkgver/ffsend-v$pkgver.tar.gz") # automatically set in CI, see: /.gitlab-ci.yml

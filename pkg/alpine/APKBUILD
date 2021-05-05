@@ -3,7 +3,7 @@
 pkgname=ffsend
 pkgver=0.2.62
 pkgrel=0
-pkgdesc=" A fully featured Firefox Send client"
+pkgdesc=" A fully featured Send client"
 url="https://gitlab.com/timvisee/ffsend"
 arch="x86_64 x86 armhf armv7 aarch64 ppc64le" # limited by cargo
 license="GPL-3.0-only"

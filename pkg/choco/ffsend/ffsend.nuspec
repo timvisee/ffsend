@@ -45,8 +45,8 @@ This is a nuspec. It mostly adheres to https://docs.nuget.org/create/Nuspec-Refe
     <docsUrl>https://github.com/timvisee/ffsend</docsUrl>
     <bugTrackerUrl>https://gitlab.com/timvisee/ffsend/issues</bugTrackerUrl>
     <tags>ffsend firefox-send cli file-sharing file-upload encryption rust</tags>
-    <summary>Easily and securely share files from the command line. A fully featured Firefox Send client.</summary>
-    <description>Easily and securely share files from the command line. A fully featured Firefox Send client.</description>
+    <summary>Easily and securely share files from the command line. A fully featured Send client.</summary>
+    <description>Easily and securely share files from the command line. A fully featured Send client.</description>
     <!-- =============================== -->      
 
     <!-- Specifying dependencies and version ranges? https://docs.nuget.org/create/versioning#specifying-version-ranges-in-.nuspec-files -->
