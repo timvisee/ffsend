@@ -744,7 +744,7 @@ documentation [here][send-encryption].
 ```
 $ ffsend help
 
-ffsend 0.2.71
+ffsend 0.2.72
 Tim Visee <3a4fb3964f@sinenomine.email>
 Easily and securely share files from the command line.
 A fully featured Send client.
