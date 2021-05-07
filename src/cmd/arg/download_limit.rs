@@ -68,6 +68,7 @@ impl CmdArg for ArgDownloadLimit {
             .alias("downloads")
             .alias("download")
             .value_name("COUNT")
+            .env("FFSEND_DOWNLOAD_LIMIT")
             .help("The file download limit")
     }
 }

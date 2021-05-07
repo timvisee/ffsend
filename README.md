@@ -557,6 +557,7 @@ to command line arguments:
 | `FFSEND_TIMEOUT`          | `--timeout <SECONDS>`          | Request timeout (0 to disable)                |
 | `FFSEND_TRANSFER_TIMEOUT` | `--transfer-timeout <SECONDS>` | Transfer timeout (0 to disable)               |
 | `FFSEND_EXPIRY_TIME`      | `--expiry-time <SECONDS>`      | Default upload expiry time                    |
+| `FFSEND_DOWNLOAD_LIMIT`   | `--download-limit <DOWNLOADS>` | Default download limit                        |
 | `FFSEND_API`              | `--api <VERSION>`              | Server API version, `-` to lookup             |
 | `FFSEND_BASIC_AUTH`       | `--basic-auth <USER:PASSWORD>` | Basic HTTP authentication credentials to use. |
 
