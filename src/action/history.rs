@@ -120,11 +120,8 @@ impl<'a> History<'a> {
                 };
 
                 // Define the cell values
-                let mut cells: Vec<String> = vec![
-                    format!("{}", i + 1),
-                    file.download_url(true).into_string(),
-                    expiry,
-                ];
+                let mut cells: Vec<String> =
+                    vec![format!("{}", i + 1), file.download_url(true).into(), expiry];
                 if matcher_main.verbose() {
                     cells.push(owner_token);
                 }
