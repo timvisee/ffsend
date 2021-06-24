@@ -8,14 +8,14 @@
 [gitlab-ci-link]: https://gitlab.com/timvisee/ffsend/pipelines
 [gitlab-ci-master-badge]: https://gitlab.com/timvisee/ffsend/badges/master/pipeline.svg
 
-*Notice: the default Send host is provided by [@timvisee][timvisee],
-[info](https://gitlab.com/timvisee/ffsend/-/issues/101).
+*Notice: the default Send host is provided by [@timvisee][timvisee]
+([info](https://gitlab.com/timvisee/ffsend/-/issues/111)).
 Please consider to [donate] and help keep it running.*
 
 # ffsend
 
 > Easily and securely share files from the command line.
-> [Send][send] client ([annonymous only][issue116] at the moment).
+> A [Send][send] client.
 
 Easily and securely share files and directories from the command line through a
 safe, private and encrypted link using a single simple command.
@@ -45,7 +45,7 @@ Find out more about security [here](#security).
 - [License](#license)
 
 The public [Send][send] service that is used as default host is provided by
-[@timvisee][timvisee].  
+[@timvisee][timvisee] ([info](https://gitlab.com/timvisee/ffsend/-/issues/111)).  
 This application is not affiliated with [Firefox][firefox] or
 [Mozilla][mozilla] in any way.
 
@@ -831,6 +831,5 @@ Check out the [LICENSE](LICENSE) file for more information.
 [docker-hub-ffsend]: https://hub.docker.com/r/timvisee/ffsend
 [scoop-install]: https://scoop.sh/#installs-in-seconds
 [freshports-ffsend]: https://www.freshports.org/www/ffsend
-[issue116]: https://github.com/timvisee/ffsend/issues/116
 [timvisee]: https://timvisee.com/
 [donate]: https://timvisee.com/donate
