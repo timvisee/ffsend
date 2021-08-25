@@ -115,7 +115,7 @@ members of the project's leadership.
 
 ### Attribution
 This Code of Conduct is adapted from the [Contributor Covenant][coc-homepage], version 1.4,
-available at [http://contributor-covenant.org/version/1/4][coc-version]
+available at [https://contributor-covenant.org/version/1/4][coc-version]
 
 ## License
 This project is released under the GNU GPL-3.0 license.
@@ -128,5 +128,5 @@ Check out the [LICENSE](LICENSE) file for more information.
 [github]: https://github.com/timvisee/ffsend
 [github-issues]: https://github.com/timvisee/ffsend/issues
 [github-pr]: https://github.com/timvisee/ffsend/pulls
-[coc-homepage]: http://contributor-covenant.org
-[coc-version]: http://contributor-covenant.org/version/1/4/
+[coc-homepage]: https://contributor-covenant.org
+[coc-version]: https://contributor-covenant.org/version/1/4/
