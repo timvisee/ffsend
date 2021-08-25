@@ -18,7 +18,7 @@ Contributions to the `ffsend` project are welcome!
 When contributing new features, alternative implementations or bigger
 improvements, please first discuss the change you wish to make via an issue
 or email.
-Small changes such as fixed commands, fixed spelling or dependency updates 
+Small changes such as fixed commands, fixed spelling or dependency updates
 are always welcome without discussion.
 
 The `ffsend` repository is primarily hosted on [GitLab][gitlab].
@@ -119,7 +119,7 @@ available at [https://contributor-covenant.org/version/1/4][coc-version]
 
 ## License
 This project is released under the GNU GPL-3.0 license.
-Check out the [LICENSE](LICENSE) file for more information. 
+Check out the [LICENSE](LICENSE) file for more information.
 
 [branch-master]: https://gitlab.com/timvisee/ffsend/tree/master
 [gitlab]: https://gitlab.com/timvisee/ffsend
