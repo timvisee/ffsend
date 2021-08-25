@@ -21,7 +21,7 @@ const VERSION_MAX: &str = crate_version!();
 #[derive(Serialize, Deserialize)]
 pub struct History {
     /// The application version the history file was built with.
-    /// Used for compatability checking.
+    /// Used for compatibility checking.
     version: Option<String>,
 
     /// The file history.
@@ -224,7 +224,7 @@ impl History {
     ///
     /// If the expiry property is None (thus unknown), the file will be kept.
     ///
-    /// The number of exired files is returned.
+    /// The number of expired files is returned.
     pub fn gc(&mut self) -> usize {
         // Get a list of expired files
         let expired: Vec<RemoteFile> = self

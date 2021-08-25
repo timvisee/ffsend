@@ -8,7 +8,7 @@ pub mod owner;
 pub mod password;
 pub mod url;
 
-// Re-eexport to arg module
+// Re-export to arg module
 pub use self::api::ArgApi;
 pub use self::basic_auth::ArgBasicAuth;
 pub use self::download_limit::ArgDownloadLimit;

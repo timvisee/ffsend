@@ -63,7 +63,7 @@ impl<'a> History<'a> {
 
         // Remove history item
         if let Some(url) = matcher_history.rm() {
-            // Remove item, print error if no item with URL was foudn
+            // Remove item, print error if no item with URL was found
             match history.remove_url(url) {
                 Ok(removed) if !removed => quit_error_msg(
                     "could not remove item from history, no item matches given URL",

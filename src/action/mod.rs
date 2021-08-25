@@ -50,7 +50,7 @@ fn select_api_version(
             ));
         }
 
-        // Propegate other errors
+        // Propagate other errors
         Err(e) => return Err(e),
     }
 

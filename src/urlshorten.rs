@@ -76,7 +76,7 @@ pub enum Error {
     #[fail(display = "failed to shorten URL, got bad response")]
     Response(#[cause] ResponseError),
 
-    /// The server resonded with a malformed repsonse.
+    /// The server responded with a malformed response.
     #[fail(display = "failed to shorten URL, got malformed response")]
     Malformed(#[cause] reqwest::Error),
 
