@@ -2,7 +2,7 @@
 
 # Unlink the ffs alias if it links to ffsend
 if [[ -L /usr/bin/ffs ]] \
-    && [[ $(ls -l /usr/bin/ffs | sed -e 's/.* -> //') == "/usr/bin/ffsend" ]]; \
+    && [[ $(realpath /usr/bin/ffs) == "/usr/bin/ffsend" ]]; \
 then
     echo "Removing ffs alias for ffsend..."
     unlink /usr/bin/ffs
