@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Ensure svg-term is installed
 if ! [ -x "$(command -v svg-term)" ]; then
