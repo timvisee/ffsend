@@ -35,7 +35,7 @@ impl<'a: 'b, 'b> UploadMatcher<'a> {
         let name = self.matches.value_of("name")?;
 
         // The file name must not be empty
-        // TODO: allow to force an empty name here, and process emtpy names on downloading
+        // TODO: allow to force an empty name here, and process empty names on downloading
         if name.trim().is_empty() {
             quit_error_msg(
                 "the file name must not be empty",
@@ -171,7 +171,7 @@ pub enum CopyMode {
 }
 
 impl CopyMode {
-    /// Build the string to copy, based on the given `url` and currend mode.
+    /// Build the string to copy, based on the given `url` and current mode.
     pub fn build(&self, url: &str) -> String {
         match self {
             CopyMode::Url => url.into(),

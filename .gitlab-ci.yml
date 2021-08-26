@@ -39,7 +39,7 @@ before_script:
     rustc --version
     cargo --version
 
-# Check on stable, beta and nightly 
+# Check on stable, beta and nightly
 .check-base: &check-base
   stage: check
   script:

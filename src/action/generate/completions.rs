@@ -24,7 +24,7 @@ impl<'a> Completions<'a> {
         let matcher_main = MainMatcher::with(self.cmd_matches).unwrap();
         let matcher_completions = CompletionsMatcher::with(self.cmd_matches).unwrap();
 
-        // Obtian shells to generate completions for, build application definition
+        // Obtain shells to generate completions for, build application definition
         let shells = matcher_completions.shells();
         let dir = matcher_completions.output();
         let quiet = matcher_main.quiet();

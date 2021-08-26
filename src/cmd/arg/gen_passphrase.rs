@@ -11,7 +11,7 @@ pub struct ArgGenPassphrase {}
 
 impl ArgGenPassphrase {
     /// Generate a cryptographically secure passphrase that is easily
-    /// rememberable using diceware.
+    /// remembered using diceware.
     pub fn gen_passphrase() -> String {
         let mut config = BasicConfig::default();
         config.words = PASSPHRASE_WORDS;

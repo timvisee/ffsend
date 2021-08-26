@@ -139,7 +139,7 @@ impl<'a> Download<'a> {
         {
             // Allocate an archive file, and update the download and target paths
             if extract {
-                // TODO: select the extention dynamically
+                // TODO: select the extension dynamically
                 let archive_extention = ".tar";
 
                 // Allocate a temporary file to download the archive to
@@ -210,7 +210,7 @@ impl<'a> Download<'a> {
     ///
     /// The full path including the name is returned.
     ///
-    /// This method will check whether a file is overwitten, and whether
+    /// This method will check whether a file is overwritten, and whether
     /// parent directories must be created.
     ///
     /// The program will quit with an error message if a problem occurs.
@@ -313,7 +313,7 @@ impl<'a> Download<'a> {
         // Get the path string
         let path = target.to_str();
 
-        // If the path is emtpy, use the working directory with the name hint
+        // If the path is empty, use the working directory with the name hint
         let use_workdir = path.map(|path| path.trim().is_empty()).unwrap_or(true);
         if use_workdir {
             match current_dir() {

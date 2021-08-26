@@ -291,13 +291,13 @@ pub fn highlight_info(msg: &str) -> ColoredString {
 }
 
 /// Open the given URL in the users default browser.
-/// The browsers exit statis is returned.
+/// The browsers exit status is returned.
 pub fn open_url(url: impl Borrow<Url>) -> Result<ExitStatus, IoError> {
     open_path(url.borrow().as_str())
 }
 
 /// Open the given path or URL using the program configured on the system.
-/// The program exit statis is returned.
+/// The program exit status is returned.
 pub fn open_path(path: &str) -> Result<ExitStatus, IoError> {
     open::that(path)
 }
@@ -318,7 +318,7 @@ pub fn set_clipboard(content: String) -> Result<(), ClipboardError> {
 /// native clipboard interface only has a lifetime of the application. This means that the
 /// clipboard is instantly cleared as soon as this application quits, which is always immediately.
 /// This limitation is due to security reasons as defined by X11. The alternative binaries we set
-/// the clipboard with spawn a daemon in the background to keep the clipboad alive until it's
+/// the clipboard with spawn a daemon in the background to keep the clipboard alive until it's
 /// flushed.
 #[cfg(feature = "clipboard")]
 #[derive(Clone, Eq, PartialEq)]
@@ -491,7 +491,7 @@ pub enum ClipboardError {
     #[fail(display = "failed to access clipboard using {}", _0)]
     BinaryIo(&'static str, #[cause] IoError),
 
-    /// `xclip` or `xsel` unexpectetly exited with a non-successful status code.
+    /// `xclip` or `xsel` unexpectedly exited with a non-successful status code.
     #[cfg(feature = "clipboard-bin")]
     #[fail(
         display = "failed to use clipboard, {} exited with status code {}",
@@ -500,8 +500,8 @@ pub enum ClipboardError {
     BinaryStatus(&'static str, i32),
 }
 
-/// Check for an emtpy password in the given `password`.
-/// If the password is emtpy the program will quit with an error unless
+/// Check for an empty password in the given `password`.
+/// If the password is empty the program will quit with an error unless
 /// forced.
 // TODO: move this to a better module
 pub fn check_empty_password(password: &str, matcher_main: &MainMatcher) {
@@ -519,7 +519,7 @@ pub fn check_empty_password(password: &str, matcher_main: &MainMatcher) {
 
 /// Prompt the user to enter a password.
 ///
-/// If `empty` is `false`, emtpy passwords aren't allowed unless forced.
+/// If `empty` is `false`, empty passwords aren't allowed unless forced.
 pub fn prompt_password(main_matcher: &MainMatcher, optional: bool) -> Option<String> {
     // Quit with an error if we may not interact
     if !optional && main_matcher.no_interact() {
@@ -549,7 +549,7 @@ pub fn prompt_password(main_matcher: &MainMatcher, optional: bool) -> Option<Str
             }
         }
 
-        // On input error, propegate the error or don't use a password if optional
+        // On input error, propagate the error or don't use a password if optional
         Err(err) => {
             if !optional {
                 quit_error(
@@ -592,7 +592,7 @@ pub fn ensure_password(
         return false;
     }
 
-    // Check whehter we allow interaction
+    // Check whether we allow interaction
     let interact = !main_matcher.no_interact();
 
     loop {
@@ -761,7 +761,7 @@ pub fn ensure_owner_token(
     main_matcher: &MainMatcher,
     optional: bool,
 ) -> bool {
-    // Check whehter we allow interaction
+    // Check whether we allow interaction
     let interact = !main_matcher.no_interact();
 
     // Notify that an owner token is required
@@ -984,7 +984,7 @@ pub fn ensure_enough_space<P: AsRef<Path>>(path: P, size: u64) {
         }
     };
 
-    // Return if enough disk space is avaiable
+    // Return if enough disk space is available
     if space >= size {
         return;
     }

@@ -18,7 +18,7 @@ Contributions to the `ffsend` project are welcome!
 When contributing new features, alternative implementations or bigger
 improvements, please first discuss the change you wish to make via an issue
 or email.
-Small changes such as fixed commands, fixed spelling or dependency updates 
+Small changes such as fixed commands, fixed spelling or dependency updates
 are always welcome without discussion.
 
 The `ffsend` repository is primarily hosted on [GitLab][gitlab].
@@ -115,11 +115,11 @@ members of the project's leadership.
 
 ### Attribution
 This Code of Conduct is adapted from the [Contributor Covenant][coc-homepage], version 1.4,
-available at [http://contributor-covenant.org/version/1/4][coc-version]
+available at [https://contributor-covenant.org/version/1/4][coc-version]
 
 ## License
 This project is released under the GNU GPL-3.0 license.
-Check out the [LICENSE](LICENSE) file for more information. 
+Check out the [LICENSE](LICENSE) file for more information.
 
 [branch-master]: https://gitlab.com/timvisee/ffsend/tree/master
 [gitlab]: https://gitlab.com/timvisee/ffsend
@@ -128,5 +128,5 @@ Check out the [LICENSE](LICENSE) file for more information.
 [github]: https://github.com/timvisee/ffsend
 [github-issues]: https://github.com/timvisee/ffsend/issues
 [github-pr]: https://github.com/timvisee/ffsend/pulls
-[coc-homepage]: http://contributor-covenant.org
-[coc-version]: http://contributor-covenant.org/version/1/4/
+[coc-homepage]: https://contributor-covenant.org
+[coc-version]: https://contributor-covenant.org/version/1/4/

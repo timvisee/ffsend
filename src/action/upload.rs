@@ -224,7 +224,7 @@ impl<'a> Upload<'a> {
                     // Finish the archival process, writes the archive file
                     archiver.finish().map_err(ArchiveError::Write)?;
 
-                    // Append archive extention to name, set to upload archived file
+                    // Append archive extension to name, set to upload archived file
                     if let Some(ref mut file_name) = file_name {
                         file_name.push_str(archive_extention);
                     }
@@ -275,7 +275,7 @@ impl<'a> Upload<'a> {
             // TODO: set false parameter to authentication state
             let max_size = upload_size_max(api_version, auth);
 
-            // Get the file size, fail on emtpy files, warn about large files
+            // Get the file size, fail on empty files, warn about large files
             if let Ok(size) = path.metadata().map(|m| m.len()) {
                 // Enforce files not being 0 bytes
                 if size == 0 && !matcher_main.force() {
