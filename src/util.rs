@@ -16,7 +16,7 @@ use std::io::{stderr, stdin, Error as IoError, Write};
 use std::iter;
 use std::path::Path;
 use std::path::PathBuf;
-use std::process::{exit, ExitStatus};
+use std::process::exit;
 #[cfg(feature = "clipboard-bin")]
 use std::process::{Command, Stdio};
 
@@ -292,13 +292,13 @@ pub fn highlight_info(msg: &str) -> ColoredString {
 
 /// Open the given URL in the users default browser.
 /// The browsers exit status is returned.
-pub fn open_url(url: impl Borrow<Url>) -> Result<ExitStatus, IoError> {
+pub fn open_url(url: impl Borrow<Url>) -> Result<(), IoError> {
     open_path(url.borrow().as_str())
 }
 
 /// Open the given path or URL using the program configured on the system.
 /// The program exit status is returned.
-pub fn open_path(path: &str) -> Result<ExitStatus, IoError> {
+pub fn open_path(path: &str) -> Result<(), IoError> {
     open::that(path)
 }
 
