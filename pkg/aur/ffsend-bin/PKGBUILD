@@ -27,10 +27,9 @@ optdepends=('xclip: clipboard support'
 package() {
     cd "$srcdir"
 
-    # Install Binary
     install -Dm755 "ffsend-v$pkgver" "$pkgdir/usr/bin/ffsend"
 
-    # Install shell completions and LICENSE file
+    # Shell completions and LICENSE file
     install -Dm644 "ffsend-v$pkgver.bash" "$pkgdir/usr/share/bash-completion/completions/ffsend"
     install -Dm644 "ffsend-v$pkgver.zsh" "$pkgdir/usr/share/zsh/site-functions/_ffsend"
     install -Dm644 "ffsend-v$pkgver.fish" "$pkgdir/usr/share/fish/vendor_completions.d/ffsend.fish"

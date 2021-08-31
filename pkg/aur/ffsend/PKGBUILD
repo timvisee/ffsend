@@ -10,22 +10,21 @@ pkgrel=1
 pkgdesc="Easily and securely share files from the command line. A Send client."
 url="https://gitlab.com/timvisee/ffsend"
 license=('GPL3')
-source=("ffsend-v$pkgver.tar.gz::$url/-/archive/v$pkgver/ffsend-v$pkgver.tar.gz") # automatically set in CI, see: /.gitlab-ci.yml
+source=("$url/-/archive/v$pkgver/ffsend-v$pkgver.tar.gz") # automatically set in CI, see: /.gitlab-ci.yml
 sha256sums=('SKIP') # automatically set in CI, see: /.gitlab-ci.yml
-arch=('any')
-provides=('ffsend')
+arch=('x86_64' 'i686')
 depends=('ca-certificates')
 makedepends=('cargo' 'cmake' 'openssl>=1.0')
 optdepends=('xclip: clipboard support')
 
 prepare() {
-    cd "$srcdir/ffsend-v$pkgver"
+    cd "$pkgname-v$pkgver"
 
     cargo fetch --locked --target "$CARCH-unknown-linux-gnu"
 }
 
 build() {
-    cd "$srcdir/ffsend-v$pkgver"
+    cd "$pkgname-v$pkgver"
 
     export RUSTUP_TOOLCHAIN=stable
     export CARGO_TARGET_DIR=target
@@ -33,19 +32,18 @@ build() {
 }
 
 check() {
-    cd "$srcdir/ffsend-v$pkgver"
+    cd "$pkgname-v$pkgver"
 
     export RUSTUP_TOOLCHAIN=stable
     cargo test --frozen
 }
 
 package() {
-    cd "$srcdir/ffsend-v$pkgver"
+    cd "$pkgname-v$pkgver"
 
-    # Install Binary
     install -Dm0755 -t "$pkgdir/usr/bin/" "target/release/$pkgname"
 
-    # Install shell completions and LICENSE file
+    # Shell completions and LICENSE file
     install -Dm644 "contrib/completions/ffsend.bash" \
         "$pkgdir/etc/bash_completion.d/ffsend"
 	install -Dm644 "contrib/completions/_ffsend" \
