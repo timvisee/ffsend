@@ -12,24 +12,39 @@ url="https://gitlab.com/timvisee/ffsend"
 license=('GPL3')
 source=("ffsend::git+$url.git")
 sha256sums=('SKIP')
-arch=('x86_64' 'i686')
+arch=('any')
 provides=('ffsend')
 conflicts=('ffsend')
 depends=('ca-certificates')
-makedepends=('openssl>=1.0' 'rust>=1.39' 'cargo' 'cmake')
-optdepends=('xclip: clipboard support'
-            'bash-completion: support auto completion for bash')
+makedepends=('cargo' 'cmake' 'openssl>=1.0')
+optdepends=('xclip: clipboard support')
+
+prepare() {
+    cd "$srcdir/ffsend"
+
+    cargo fetch --locked --target "$CARCH-unknown-linux-gnu"
+}
 
 build() {
-    cd ffsend
-    env CARGO_INCREMENTAL=0 cargo build --release
+    cd "$srcdir/ffsend"
+
+    export RUSTUP_TOOLCHAIN=stable
+    export CARGO_TARGET_DIR=target
+    cargo build --frozen --release
+}
+
+check() {
+    cd "$srcdir/ffsend"
+
+    export RUSTUP_TOOLCHAIN=stable
+    cargo test --frozen
 }
 
 package() {
     cd "$srcdir/ffsend"
 
     # Install Binary
-    install -Dm755 "./target/release/ffsend" "$pkgdir/usr/bin/ffsend"
+    install -Dm0755 -t "$pkgdir/usr/bin/" "target/release/ffsend"
 
     # Install shell completions and LICENSE file
     install -Dm644 "contrib/completions/ffsend.bash" \
