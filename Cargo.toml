@@ -113,7 +113,7 @@ chrono = "0.4"
 clap = "2.33"
 colored = "2.0"
 derive_builder = "0.10"
-directories = "3.0"
+directories = "4.0"
 failure = "0.1"
 ffsend-api = { version = "0.7.3", default-features = false }
 fs2 = "0.4"
@@ -133,7 +133,7 @@ tar = { version = "0.4", optional = true }
 tempfile = "3"
 toml = "0.5"
 urlshortener = { version = "3", optional = true }
-version-compare = "0.0.11"
+version-compare = "0.0.13"
 
 [target.'cfg(any(target_os = "linux", target_os = "freebsd", target_os = "dragonfly", target_os = "openbsd", target_os = "netbsd"))'.dependencies]
 which = { version = "4.0", optional = true }
