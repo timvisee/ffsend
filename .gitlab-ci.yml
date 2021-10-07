@@ -98,7 +98,7 @@ build-x86_64-linux-musl:
     - wget https://www.openssl.org/source/old/1.1.1/openssl-1.1.1k.tar.gz
     - tar xzvf openssl-1.1.1k.tar.gz
     - cd openssl-1.1.1k
-    - ./config -fPIC --openssldir=/usr/local/ssl --prefix=/usr/local
+    - ./config no-async -fPIC --openssldir=/usr/local/ssl --prefix=/usr/local
     - make
     - make install
     - cd ..
