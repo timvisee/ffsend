@@ -136,8 +136,7 @@ test-public:
   variables:
     GIT_STRATEGY: none
     RUST_TARGET: x86_64-unknown-linux-musl
-  before_script:
-    - apk add ca-certificates
+  before_script: []
   script:
     # Prepare ffsend binary, create random file
     - mv ./ffsend-$RUST_TARGET ./ffsend
