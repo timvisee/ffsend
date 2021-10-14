@@ -8,7 +8,7 @@ use ffsend_api::{
     url::Url,
 };
 use toml::{de::Error as DeError, ser::Error as SerError};
-use version_compare::{CompOp, VersionCompare};
+use version_compare::Cmp;
 
 use crate::util::{print_error, print_warning};
 
@@ -62,9 +62,9 @@ impl History {
             // Get the version number from the file
             let version = history.version.as_ref().unwrap();
 
-            if let Ok(true) = VersionCompare::compare_to(version, VERSION_MIN, &CompOp::Lt) {
+            if let Ok(true) = version_compare::compare_to(version, VERSION_MIN, Cmp::Lt) {
                 print_warning("history file version is too old, ignoring");
-            } else if let Ok(true) = VersionCompare::compare_to(version, VERSION_MAX, &CompOp::Gt) {
+            } else if let Ok(true) = version_compare::compare_to(version, VERSION_MAX, Cmp::Gt) {
                 print_warning("history file has an unknown version, ignoring");
             }
         }

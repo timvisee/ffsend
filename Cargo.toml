@@ -133,7 +133,7 @@ tar = { version = "0.4", optional = true }
 tempfile = "3"
 toml = "0.5"
 urlshortener = { version = "3", optional = true }
-version-compare = "0.0.13"
+version-compare = "0.1"
 
 [target.'cfg(any(target_os = "linux", target_os = "freebsd", target_os = "dragonfly", target_os = "openbsd", target_os = "netbsd"))'.dependencies]
 which = { version = "4.0", optional = true }
