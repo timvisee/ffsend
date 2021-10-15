@@ -49,9 +49,6 @@ license-file = ["LICENSE", "3"]
 depends = "$auto, libssl1.1, ca-certificates, xclip"
 maintainer-scripts = "pkg/deb"
 
-[badges]
-gitlab = { repository = "timvisee/ffsend", branch = "master" }
-
 [[bin]]
 name = "ffsend"
 path = "src/main.rs"
