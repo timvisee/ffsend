@@ -1,3 +1,4 @@
+Good
 [![Build status on GitLab CI][gitlab-ci-master-badge]][gitlab-ci-link]
 [![Newest release on crates.io][crate-version-badge]][crate-link]
 [![Project license][crate-license-badge]](LICENSE)
