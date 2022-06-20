@@ -702,7 +702,7 @@ dependencies = [
 
 [[package]]
 name = "ffsend"
-version = "0.2.75"
+version = "0.2.76"
 dependencies = [
  "chbs",
  "chrono",
