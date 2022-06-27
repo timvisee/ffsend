@@ -1,0 +1,46 @@
+#!/bin/bash
+
+
+#CONSTANTS
+#FILEPATH=`echo $NAUTILUS_SCRIPT_SELECTED_URIS | sed 's@file://@@g'`
+# Quote the paths
+IFS=$'\n' read -d '' -r -a FILEPATH <<< "$NAUTILUS_SCRIPT_SELECTED_FILE_PATHS"
+FFSEND_BIN='/usr/bin/ffsend'
+FFSEND_BIN_OPTS="upload --open --copy"
+ZENITY='/usr/bin/zenity '
+ZENITY_PROGRESS_OPTIONS='--auto-close --auto-kill' #you can remove this if you like
+
+#sanity checks
+for sanity_check in $FFSEND_BIN "${FILEPATH[@]}"
+do
+   ZENITY_ERROR_SANITY="There is an error, it involved $sanity_check.\n Probably binary or file missing" 
+   if [ ! -e $sanity_check ]
+     then 
+      #zenity --error --text="$(eval "echo \"$ZENITY_ERROR_SANITY\"")"
+      zenity --error --text="$ZENITY_ERROR_SANITY"
+     exit 
+  fi
+done
+
+# Use the following flags automatically from now on
+# -I: no interaction
+# -f: force
+# -y: yes
+# -q: quiet
+export FFSEND_NO_INTERACT=1 FFSEND_FORCE=1 FFSEND_YES=1 FFSEND_QUIET=1
+export FFSEND_HOST=https://send.boblorange.net
+export FFSEND_EXPIRY_TIME=604800
+export FFSEND_DOWNLOAD_LIMIT=5
+
+#check whether copying file or directory
+if [ ! -f "${FILEPATH[@]}" ]; then
+    FFSEND_BIN_OPTS="$FFSEND_BIN_OPTS --archive"
+fi
+  
+# Upload a file
+#zenity --info --text="Ready to send: $FFSEND_BIN $FFSEND_BIN_OPTS ${FILEPATH[@]}"
+$FFSEND_BIN $FFSEND_BIN_OPTS "${FILEPATH[@]}" | $($ZENITY --progress --text="sending $(basename $FILEPATH)" --pulsate   $ZENITY_PROGRESS_OPTIONS) 
+#echo -e "$FILEPATH" | xargs -i $FFSEND_BIN $FFSEND_BIN_OPTS {} | $($ZENITY --progress --text="sending $(basename $FILEPATH)" --pulsate   $ZENITY_PROGRESS_OPTIONS) 
+
+# Upload a file
+#echo -e "$NAUTILUS_SCRIPT_SELECTED_FILE_PATHS" | xargs -i ffsend upload --open --copy {}
