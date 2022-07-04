@@ -811,7 +811,7 @@ Check out the [LICENSE](LICENSE) file for more information.
 [termux]: https://termux.com/
 [rust]: https://rust-lang.org/
 [rustup]: https://rustup.rs/
-[send]: https://send.vis.ee/
+[send]: https://github.com/timvisee/send
 [mozilla-send]: https://github.com/mozilla/send
 [timvisee-send]: https://github.com/timvisee/send
 [send-encryption]: https://github.com/timvisee/send/blob/master/docs/encryption.md
