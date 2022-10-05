@@ -362,7 +362,7 @@ You can use `ffsend` from the command line in the same directory:
 .\ffsend.exe --help
 ```
 
-To make it globally invokable as `ffsend`, you must make the binary available in
+To make it globally invocable as `ffsend`, you must make the binary available in
 your systems `PATH`. The easiest solution is to move it into `System32`:
 ```cmd
 move .\ffsend.exe C:\Windows\System32\ffsend.exe
@@ -428,7 +428,7 @@ docker pull timvisee/ffsend
 ```
 
 On Linux or macOS you might define a alias in your shell configuration, to make
-it invokable as `ffsend`:
+it invocable as `ffsend`:
 
 ```bash
 alias ffsend='docker run --rm -it -v "$(pwd):/data" timvisee/ffsend'
