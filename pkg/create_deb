@@ -28,7 +28,7 @@ fi
 mkdir -p "$DIR/ffsend-$VERSION"
 cp -- "$DIR/../ffsend" "$DIR/ffsend-$VERSION/ffsend"
 
-# Create an application tarbal
+# Create an application tarball
 cd -- "$DIR/.."
 git archive --format tar.gz -o "$DIR/ffsend-$VERSION/ffsend-$VERSION.tar.gz" "$TRAVIS_TAG"
 
