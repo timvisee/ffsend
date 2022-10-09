@@ -119,7 +119,7 @@ open = "2"
 openssl-probe = "0.1"
 pathdiff = "0.2"
 pbr = "1"
-prettytable-rs = "0.8"
+prettytable-rs = { version = "0.8", default-features = false }
 qr2term = { version = "0.2", optional = true }
 rand = "0.8"
 regex = "1.5"
