@@ -64,10 +64,10 @@ check-nightly:
   <<: *check-base
   variables:
     RUST_VERSION: nightly
-check-old:
+check-msrv:
   <<: *check-base
   variables:
-    RUST_VERSION: "1.56.1"
+    RUST_VERSION: "1.60.0"
 
 # Build using Rust stable
 build-x86_64-linux-gnu:
