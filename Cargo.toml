@@ -54,16 +54,7 @@ name = "ffsend"
 path = "src/main.rs"
 
 [features]
-default = [
-    "archive",
-    "clipboard",
-    "crypto-ring",
-    "history",
-    "infer-command",
-    "qrcode",
-    "send3",
-    "urlshorten",
-]
+default = ["archive", "clipboard", "crypto-ring", "history", "infer-command", "qrcode", "send3", "urlshorten"]
 
 # Compile with file archiving support
 archive = ["tar"]
@@ -119,7 +110,7 @@ open = "2"
 openssl-probe = "0.1"
 pathdiff = "0.2"
 pbr = "1"
-prettytable-rs = { version = "0.8", default-features = false }
+prettytable-rs = { version = "0.10.0", default-features = false }
 qr2term = { version = "0.2", optional = true }
 rand = "0.8"
 regex = "1.5"
