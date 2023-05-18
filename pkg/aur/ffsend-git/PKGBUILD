@@ -16,7 +16,7 @@ arch=('x86_64' 'i686')
 provides=('ffsend')
 conflicts=('ffsend')
 depends=('ca-certificates')
-makedepends=('cargo' 'cmake' 'openssl>=1.0')
+makedepends=('cargo' 'cmake' 'openssl')
 optdepends=('xclip: clipboard support')
 
 prepare() {
