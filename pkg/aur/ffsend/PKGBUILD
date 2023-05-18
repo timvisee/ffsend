@@ -14,7 +14,7 @@ source=("$url/-/archive/v$pkgver/ffsend-v$pkgver.tar.gz") # automatically set in
 sha256sums=('SKIP') # automatically set in CI, see: /.gitlab-ci.yml
 arch=('x86_64' 'i686')
 depends=('ca-certificates')
-makedepends=('cargo' 'cmake' 'openssl')
+makedepends=('cargo' 'cmake' 'openssl>=1.0')
 optdepends=('xclip: clipboard support')
 
 prepare() {
