@@ -5,7 +5,7 @@
 # - export a build artifact from the new job
 # - manually upload artifact to GitHub in the 'github-release' job
 
-image: "rust:slim"
+image: "rust:slim-bookworm"
 
 stages:
   - check
