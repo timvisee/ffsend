@@ -105,7 +105,7 @@ build-x86_64-linux-musl:
 
     # Statically build ffsend
     - export OPENSSL_STATIC=1
-    - export OPENSSL_LIB_DIR=/usr/local/lib
+    - export OPENSSL_LIB_DIR=/usr/local/lib64
     - export OPENSSL_INCLUDE_DIR=/usr/local/include
     - cargo build --target=$RUST_TARGET --release --verbose
 
