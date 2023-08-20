@@ -67,7 +67,7 @@ check-nightly:
 check-msrv:
   <<: *check-base
   variables:
-    RUST_VERSION: "1.60.0"
+    RUST_VERSION: "1.63.0"
 
 # Build using Rust stable
 build-x86_64-linux-gnu:
