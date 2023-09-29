@@ -1,7 +1,7 @@
 use std::env::current_dir;
-use std::fs::create_dir_all;
-#[cfg(feature = "archive")]
+use std::fs::{create_dir_all, File};
 use std::io::Error as IoError;
+use std::io::{self, BufReader, Read};
 use std::path::{self, PathBuf};
 use std::sync::{Arc, Mutex};
 
@@ -11,10 +11,10 @@ use ffsend_api::action::download::{Download as ApiDownload, Error as DownloadErr
 use ffsend_api::action::exists::{Error as ExistsError, Exists as ApiExists};
 use ffsend_api::action::metadata::{Error as MetadataError, Metadata as ApiMetadata};
 use ffsend_api::action::version::Error as VersionError;
+use ffsend_api::file::metadata::{ManifestFile, Metadata};
 use ffsend_api::file::remote_file::{FileParseError, RemoteFile};
 use ffsend_api::pipe::ProgressReporter;
-#[cfg(feature = "archive")]
-use tempfile::{Builder as TempBuilder, NamedTempFile};
+use tempfile::Builder as TempBuilder;
 
 use super::select_api_version;
 #[cfg(feature = "archive")]
@@ -32,6 +32,71 @@ use crate::util::{
 /// A file download action.
 pub struct Download<'a> {
     cmd_matches: &'a ArgMatches<'a>,
+}
+
+/// Strategy after the download action
+enum InvokeStrategy {
+    /// Just download the single normal file
+    Normal,
+    /// Download multiple files at once
+    Multi { files: Vec<ManifestFile> },
+    /// Download a single archive and extract it
+    #[cfg(feature = "archive")]
+    Extract,
+}
+
+impl InvokeStrategy {
+    /// Determine strategy from metadata and CLI input
+    pub fn build(
+        metadata: &Metadata,
+        matcher_download: &DownloadMatcher,
+        matcher_main: &MainMatcher,
+    ) -> InvokeStrategy {
+        // Check whether to extract
+        #[cfg(feature = "archive")]
+        {
+            if matcher_download.extract() {
+                return InvokeStrategy::Extract;
+            }
+            if metadata.is_archive() {
+                if prompt_yes(
+                    "You're downloading an archive, extract it into the selected directory?",
+                    Some(true),
+                    &matcher_main,
+                ) {
+                    return InvokeStrategy::Extract;
+                }
+            }
+        }
+
+        // Check whether multiple files or not
+        if metadata.mime() == "send-archive" {
+            if let Some(manifest) = metadata.manifest() {
+                InvokeStrategy::Multi {
+                    files: manifest.files().clone(),
+                }
+                // `files` will be used after the action, but `ApiDownload::new` consumes metadata.
+                // Therefore, we should clone in advance.
+            } else {
+                quit_error_msg(
+                    "invalid metadata for downloading multiple files, manifest unknown",
+                    ErrorHints::default(),
+                )
+            }
+        } else {
+            InvokeStrategy::Normal
+        }
+    }
+
+    /// Whether the strategy will finally output multiple files
+    pub fn has_multi_outs(&self) -> bool {
+        match self {
+            InvokeStrategy::Normal => false,
+            InvokeStrategy::Multi { .. } => true,
+            #[cfg(feature = "archive")]
+            InvokeStrategy::Extract => true,
+        }
+    }
 }
 
 impl<'a> Download<'a> {
@@ -97,63 +162,46 @@ impl<'a> Download<'a> {
         // Fetch the file metadata
         let metadata = ApiMetadata::new(&file, password.clone(), false).invoke(&client)?;
 
-        // A temporary archive file, only used when archiving
-        // The temporary file is stored here, to ensure it's lifetime exceeds the upload process
-        #[cfg(feature = "archive")]
-        let mut tmp_archive: Option<NamedTempFile> = None;
-
-        // Check whether to extract
-        #[cfg(feature = "archive")]
-        let mut extract = matcher_download.extract();
-
-        #[cfg(feature = "archive")]
-        {
-            // Ask to extract if downloading an archive
-            if !extract && metadata.metadata().is_archive() {
-                if prompt_yes(
-                    "You're downloading an archive, extract it into the selected directory?",
-                    Some(true),
-                    &matcher_main,
-                ) {
-                    extract = true;
-                }
-            }
-        }
+        // Determine strategy
+        let strategy = InvokeStrategy::build(metadata.metadata(), &matcher_download, &matcher_main);
 
         // Prepare the download target and output path to use
-        #[cfg(feature = "archive")]
-        let output_dir = !extract;
-        #[cfg(not(feature = "archive"))]
-        let output_dir = false;
         #[allow(unused_mut)]
         let mut target = Self::prepare_path(
             &target,
             metadata.metadata().name(),
             &matcher_main,
-            output_dir,
+            &strategy,
         );
         #[cfg(feature = "archive")]
         let output_path = target.clone();
 
-        #[cfg(feature = "archive")]
-        {
-            // Allocate an archive file, and update the download and target paths
-            if extract {
+        // Allocate an archive file if there will be multiple outputs…
+        let tmp_archive = match &strategy {
+            InvokeStrategy::Normal => None,
+            InvokeStrategy::Multi { .. } => Some(
+                TempBuilder::new()
+                    .prefix(&format!(".{}-archive-", crate_name!()))
+                    .tempfile()
+                    .map_err(SplitError::TempFile)?,
+            ),
+            #[cfg(feature = "archive")]
+            InvokeStrategy::Extract => {
                 // TODO: select the extension dynamically
-                let archive_extention = ".tar";
+                let archive_extension = ".tar";
 
-                // Allocate a temporary file to download the archive to
-                tmp_archive = Some(
+                Some(
                     TempBuilder::new()
                         .prefix(&format!(".{}-archive-", crate_name!()))
-                        .suffix(archive_extention)
+                        .suffix(archive_extension)
                         .tempfile()
                         .map_err(ExtractError::TempFile)?,
-                );
-                if let Some(tmp_archive) = &tmp_archive {
-                    target = tmp_archive.path().to_path_buf();
-                }
+                )
             }
+        };
+        // …and update the download and target paths
+        if let Some(tmp_archive) = &tmp_archive {
+            target = tmp_archive.path().to_path_buf();
         }
 
         // Ensure there is enough disk space available when not being forced
@@ -177,10 +225,18 @@ impl<'a> Download<'a> {
         ApiDownload::new(api_version, &file, target, password, false, Some(metadata))
             .invoke(&transfer_client, progress)?;
 
-        // Extract the downloaded file if working with an archive
-        #[cfg(feature = "archive")]
-        {
-            if extract {
+        // Post process
+        match strategy {
+            InvokeStrategy::Multi { files } => {
+                eprintln!("Splitting...");
+
+                Self::split(tmp_archive.unwrap().into_file(), files).map_err(SplitError::Split)?;
+            }
+            InvokeStrategy::Normal => {
+                // No need to post process
+            }
+            #[cfg(feature = "archive")]
+            InvokeStrategy::Extract => {
                 eprintln!("Extracting...");
 
                 // Extract the downloaded file
@@ -203,8 +259,8 @@ impl<'a> Download<'a> {
     /// This methods prepares a full file path to use for the file to
     /// download, based on the current directory, the original file name,
     /// and the user input.
-    /// If `file` is set to false, no file name is included and the path
-    /// will point to a directory.
+    /// If `strategy` will generate multiple outputs, no file name is included
+    /// and the path will point to a directory.
     ///
     /// If no file name was given, the original file name is used.
     ///
@@ -218,31 +274,53 @@ impl<'a> Download<'a> {
         target: &PathBuf,
         name_hint: &str,
         main_matcher: &MainMatcher,
-        file: bool,
+        strategy: &InvokeStrategy,
     ) -> PathBuf {
         // Select the path to use
         let mut target = Self::select_path(&target, name_hint);
 
-        // Use the parent directory, if we don't want a file
-        if !file {
+        // Use the parent directory, if there will be multiple outputs
+        if strategy.has_multi_outs() {
             target = target.parent().unwrap().to_path_buf();
         }
 
-        // Ask to overwrite
-        if file && target.exists() && !main_matcher.force() {
-            eprintln!(
-                "The path '{}' already exists",
-                target.to_str().unwrap_or("?"),
-            );
-            if !prompt_yes("Overwrite?", None, main_matcher) {
-                println!("Download cancelled");
-                quit();
+        // Ask to overwrite if any file already exists
+        if !main_matcher.force() {
+            match strategy {
+                InvokeStrategy::Normal => {
+                    if target.exists() {
+                        eprintln!(
+                            "The path '{}' already exists",
+                            target.to_str().unwrap_or("?"),
+                        );
+                        if !prompt_yes("Overwrite?", None, main_matcher) {
+                            println!("Download cancelled");
+                            quit();
+                        }
+                    }
+                }
+                InvokeStrategy::Multi { files } => {
+                    for ManifestFile { name, .. } in files {
+                        let path = Self::select_path(&target, name);
+                        if path.exists() {
+                            eprintln!("The path '{}' already exists", path.to_str().unwrap_or("?"),);
+                            if !prompt_yes("Overwrite?", None, main_matcher) {
+                                println!("Download cancelled");
+                                quit();
+                            }
+                        }
+                    }
+                }
+                InvokeStrategy::Extract => {
+                    // We can't determine what will be extracted now,
+                    // so let it go.
+                }
             }
         }
 
         {
             // Get the deepest directory, as we have to ensure it exists
-            let dir = if file {
+            let dir = if !strategy.has_multi_outs() {
                 match target.parent() {
                     Some(parent) => parent,
                     None => quit_error_msg("invalid output file path", ErrorHints::default()),
@@ -347,6 +425,18 @@ impl<'a> Download<'a> {
 
         target
     }
+
+    /// Split the downloaded send-archive into multiple files
+    fn split(archive: File, files: Vec<ManifestFile>) -> Result<(), IoError> {
+        let mut reader = BufReader::new(archive);
+
+        for ManifestFile { name, size, .. } in files {
+            let mut writer = File::create(name)?;
+            io::copy(&mut reader.by_ref().take(size), &mut writer)?;
+        }
+
+        Ok(())
+    }
 }
 
 #[derive(Debug, Fail)]
@@ -377,6 +467,10 @@ pub enum Error {
     #[cfg(feature = "archive")]
     #[fail(display = "failed the extraction procedure")]
     Extract(#[cause] ExtractError),
+
+    /// An error occurred while splitting send-archive into multiple files.
+    #[fail(display = "failed the split procedure")]
+    Split(#[cause] SplitError),
 
     /// The given Send file has expired, or did never exist in the first place.
     #[fail(display = "the file has expired or did never exist")]
@@ -420,6 +514,12 @@ impl From<ExtractError> for Error {
     }
 }
 
+impl From<SplitError> for Error {
+    fn from(err: SplitError) -> Error {
+        Error::Split(err)
+    }
+}
+
 #[cfg(feature = "archive")]
 #[derive(Debug, Fail)]
 pub enum ExtractError {
@@ -430,4 +530,15 @@ pub enum ExtractError {
     /// Failed to extract the file contents to the target directory.
     #[fail(display = "failed to extract archive contents to target directory")]
     Extract(#[cause] IoError),
+}
+
+#[derive(Debug, Fail)]
+pub enum SplitError {
+    /// An error occurred while creating the temporary file.
+    #[fail(display = "failed to create temporary file")]
+    TempFile(#[cause] IoError),
+
+    /// Failed to split send-archive into multiple files.
+    #[fail(display = "failed to split the file into multiple files")]
+    Split(#[cause] IoError),
 }
