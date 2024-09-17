@@ -95,9 +95,9 @@ build-x86_64-linux-musl:
 
     # Build OpenSSL statically
     - apt-get install -y build-essential wget musl-tools
-    - wget https://www.openssl.org/source/openssl-3.0.14.tar.gz
-    - tar xzvf openssl-3.0.14.tar.gz
-    - cd openssl-3.0.14
+    - wget https://github.com/openssl/openssl/releases/download/openssl-3.0.15/openssl-3.0.15.tar.gz
+    - tar xzvf openssl-3.0.15.tar.gz
+    - cd openssl-3.0.15
     - ./config no-async -fPIC --openssldir=/usr/local/ssl --prefix=/usr/local
     - make
     - make install
