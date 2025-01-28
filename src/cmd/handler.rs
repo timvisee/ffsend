@@ -61,7 +61,7 @@ impl<'a: 'b, 'b> Handler<'a> {
         let app = App::new(crate_name!())
             .version(crate_version!())
             .author(crate_authors!())
-            .about(APP_ABOUT.as_ref())
+            .about(APP_ABOUT.as_str())
             .after_help("This application is not affiliated with Firefox or Mozilla.")
             .global_setting(AppSettings::GlobalVersion)
             .global_setting(AppSettings::VersionlessSubcommands)
