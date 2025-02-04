@@ -188,7 +188,7 @@ _Note: due to how `snap` is configured by default, you won't be able to use the
 package from some contexts such as through SSH without manual modifications. If
 you're experiencing problems, please refer to a different installation method
 such as the [prebuilt binaries](#linux-prebuilt-binaries), or open an issue._
-_Note: if you want to read/write to a flash drive run `https://send.monks.tools/`
+_Note: if you want to read/write to a flash drive run `snap connect ffsend:removable-media`
 
 [» `ffsend`][snapcraft-ffsend]
 
