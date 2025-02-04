@@ -187,7 +187,6 @@ release-snap:
 
     # Publish snap package
     - echo "Publishing snap package..."
-    - echo "$SNAPCRAFT_LOGIN" | base64 -d > snapcraft.login
     - snapcraft whoami
     - snapcraft push --release=stable ffsend_*_amd64.snap
   artifacts:
