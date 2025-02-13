@@ -699,7 +699,7 @@ checksum = "6999dc1837253364c2ebb0704ba97994bd874e8f195d665c50b7548f6ea92764"
 
 [[package]]
 name = "ffsend"
-version = "0.2.76"
+version = "0.2.77"
 dependencies = [
  "chbs",
  "chrono",

@@ -2,3 +2,4 @@
 target/
 **/*.rs.bk
 .idea/
+snapcraft.login
