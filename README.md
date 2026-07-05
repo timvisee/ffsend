@@ -66,7 +66,7 @@ _Note: this tool is currently in beta, as some extra desired features are yet to
 - Intended for use in [scripts](#scriptability) without interaction
 
 For a list of upcoming features and ideas, take a look at the
-current [open issues](https://gitlab.com/timvisee/ffsend/issues) over on GitLab.
+current [open issues](https://github.com/timvisee/ffsend/issues) on GitHub.
 
 ## Usage
 Easily upload and download:

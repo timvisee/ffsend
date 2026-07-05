@@ -5,8 +5,7 @@
 - _Mirror: [GitHub repository][github]_
 
 **Issues:** (bug reporting, feature requests, enhancements, etc.)
-- [GitLab issue board][gitlab-issues]
-- _Alternatively: [GitHub issue board][github-issues]_
+- [GitHub issue board][github-issues]
 
 **Pull/merge requests:** (fixes, implemented features, etc.)
 - [GitLab merge requests][gitlab-mr]
@@ -23,9 +22,10 @@ are always welcome without discussion.
 
 The `ffsend` repository is primarily hosted on [GitLab][gitlab].
 [GitHub][github] hosts a mirror, for publicity and findability.
-Please open any issues or pull requests on the [GitLab][gitlab] pages if possible.
-Otherwise opening these on [GitHub][github] is fine, though they might be
-manually moved over to [GitLab][gitlab].
+Please use the [GitHub issue board][github-issues] for issues.
+Please open pull requests on the [GitLab][gitlab] pages if possible.
+Otherwise opening pull requests on [GitHub][github] is fine, though they might
+be manually moved over to [GitLab][gitlab].
 
 Please note we have a code of conduct, please follow it in all your interactions
 with the project.
@@ -123,7 +123,6 @@ Check out the [LICENSE](LICENSE) file for more information.
 
 [branch-master]: https://gitlab.com/timvisee/ffsend/tree/master
 [gitlab]: https://gitlab.com/timvisee/ffsend
-[gitlab-issues]: https://gitlab.com/timvisee/ffsend/issues
 [gitlab-mr]: https://gitlab.com/timvisee/ffsend/merge_requests
 [github]: https://github.com/timvisee/ffsend
 [github-issues]: https://github.com/timvisee/ffsend/issues
